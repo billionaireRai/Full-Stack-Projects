@@ -1,0 +1,678 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    scrollbar-color: rgb(127, 127, 127);
+    scroll-behavior:smooth;
+}
+#BackGround{
+    width:2100px ;
+    height: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    background-color: rgb(246, 255, 252);
+}
+.fix{
+    position: relative;
+    top: 1cm;
+}
+.ll{
+    margin-top: -1cm;
+}
+.NavBar{
+    position:sticky;
+    top: 0;
+    width: 34vw;
+    height: 99.8vh;
+    background-color: black;
+    color:white;
+    overflow: hidden;
+}
+.First{
+    display: flex;
+    flex-direction: row;
+}
+.Interface{
+    position: relative;
+    height: auto;
+    width:80vw ;
+    bottom:22.1px;
+    opacity: 1;
+    display: block;
+
+}
+
+#Logo{
+    background-color: rgb(119, 118, 118);
+    width:3cm;
+    height:3cm;
+    border-radius: 2cm;
+    position: relative;
+    left: 2.2cm;
+    top: 0.5cm;
+}
+#Logo:hover{
+    cursor: pointer;
+}
+#Logo img{
+    height: 2.9cm ;
+    width: 2.9cm ;
+    border-radius: 2cm;
+    position: relative;
+    left:2px;
+    top: 2px;
+
+}
+.Name{
+    font-size: 24px;
+    position: relative;
+    left: 2.1cm;
+    top:0.5cm;
+}
+.Name:hover{
+    font-size:26px;
+    cursor:pointer;
+    transition: all ease-in-out 0.8s ;
+}
+
+.SocialMedia_Info img{
+    width:1cm ;
+    height: 1cm;
+    border-radius: 2cm;
+}
+.SocialMedia_Info div{
+    background-color: white;
+    width: 1cm;
+    height:1cm ;
+    border-radius: 2cm;
+}
+.SocialMedia_Info{
+    margin-top: 1cm;
+    margin-left: 0.9cm;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5cm;
+}
+.SocialMedia_Info img:hover{
+    cursor: pointer;
+    height:1.1cm ;
+    width: 1.1cm;
+    transition: all ease-in-out 0.3s;
+}
+.Controller{
+    color: rgb(124, 124, 124);
+}
+.Controller ul{
+    margin-top: 1cm;
+    margin-left:0.2cm;
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    gap:0.7cm;
+}
+.Filterr{
+    filter:invert(1)
+}
+.Controller img{
+    position: relative;
+    top: -4px;
+    width:0.8cm ;
+    padding-right: 0.5cm;
+    height:0.8cm ;
+    border-radius: 3cm;
+}
+.Controller li:hover{
+    cursor: pointer;
+    color: white;
+    transition: all ease-in-out 0.3s;
+}
+.Authority{
+    position: relative;
+    top: 2.5cm;
+    color:white;
+    text-align: center;
+}
+.Authority b{
+    color:rgb(72, 72, 185);
+}
+h1{
+    font-weight: 600;
+    position:relative;
+    bottom: -0.3cm;
+    color:rgb(72, 72, 185);
+    text-decoration-color: rgb(125, 125, 125);
+    display: inline;
+    left: 0.7cm;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+}
+p{
+    position: relative;
+    left: 0.7cm;
+    top: 0.5cm;
+    width: 75vw;
+    padding-bottom: 1.5cm;
+}
+.About{
+    position: relative;
+    top: -0.4cm;
+    width: 80vw;
+}
+#Typer{
+    color: rgb(210, 140, 210);
+    z-index: 1000;
+    width: 6cm;
+    height: 1cm;
+}
+
+.General{
+    color: white;
+    position: relative;
+    bottom: 10cm;
+    left: 13cm;
+    font-size: 30px;
+    font-weight: 600;
+}
+.General b{
+    color: rgb(210, 140, 210);
+}
+
+.Section{
+    display: flex;
+    flex-direction: row;
+    margin-top: 0.5cm;
+}
+
+#skills{
+    text-decoration: none;
+    text-decoration-color: white;
+}
+.sec_1{
+    position: relative;
+    right:0.5cm;
+}
+.Logo_2{
+    width: 1cm;
+    height: auto;
+}
+.Logo_2 img{
+    border-radius: 2cm;
+}
+.fix{
+    width: 20cm;
+}
+.sec_2{
+    margin-top:2.1cm;
+}
+.info ul li{
+    margin-bottom: 1cm;
+    list-style-type:circle;
+}
+.info{
+    display: flex;
+    flex-direction: row;
+    margin-left: 1.2cm;
+    gap:3cm;
+    font-family: 'Times New Roman', Times, serif;
+
+}
+.left{
+    width: 10cm;
+}
+.lower{
+    margin-top: 2cm;
+}
+.Facts{
+    margin-top: 3cm;
+}
+.Data ul{
+    position: relative;
+    left: 2cm;
+    font-weight: 500;
+    list-style-type: none;
+    gap: 2cm;
+    padding-bottom: 2cm;
+}
+.First li{
+    display: flex;
+    flex-direction: row;
+}
+.Data img{
+    border-radius: 10cm;
+    width:2cm;
+    height:auto ;
+}
+.skills{
+    margin-top: 3cm;
+}
+.Progress li{
+    width: 13cm;
+    height: 1.5cm;
+    margin-left: 0.7cm;
+    margin-bottom:1cm ;
+}
+.Progress span{
+    font-weight: 600;
+    position: relative;
+    left: 7.5cm;
+}
+
+#Blue{
+    width: 9.5cm;
+    height:0.2cm;
+    position: relative;
+    left: -2cm;
+    top: 1cm;
+    border-radius: 0.2cm;
+    background-color: rgb(181, 181, 255);
+}
+#Variable_Scale_1{
+    z-index: 1;
+    height:0.2cm ;
+    border-radius: 0.2cm;
+    width: 8.5cm ;
+    background-color: blue;
+}
+#dot_blinker{
+    margin-left: 1.15cm;
+}
+/* Do add styling to the div variable_scale of rest of the 
+ the technologies and give color to it According to 
+ your skill level in that Technology.*/
+.p2{
+    margin-left: 0.4cm;
+}
+.p3{
+    margin-left: -1.3cm;
+}
+.p4{
+    margin-left: -0.6cm;
+}
+.p5{
+    margin-left:-1cm;
+}
+.p6{
+    margin-left: -1.1cm;
+}
+.p7{
+    margin-left: -0.65cm;
+}
+.p8{
+    margin-left: -0.5cm;
+}
+.Progress{
+    margin-bottom: 1cm;
+}
+.Resume{
+    margin-top: 3cm;
+}
+.Timeline{
+    margin-left: 0.7cm;
+    gap: 2.5cm;
+}
+.LST{
+    width: 25px;
+    height:auto;
+    position: relative;
+    margin-right: 0.2cm;
+    top: 4px;
+}
+.White{
+    background-color:rgb(200, 243, 255);
+    width: 35vw;
+    margin-top: 0.5cm;
+    color: black;
+    filter: brightness(2);
+    font-family: 'Times New Roman', Times, serif;
+    height: 900px;
+    border-radius: 0.2cm;
+    border: 1px solid  rgb(246, 255, 252) ;
+}
+.White #Image{
+    font-size: 23px;
+    position: relative;
+    font-weight: 700;
+    font-family: 'Times New Roman', Times, serif;
+}
+#Image:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+.White img{
+    width:40px ; 
+    /* 40px is basically 1.06cm */
+    position: relative;
+    padding-right: 0.5cm;
+    bottom: -0.3cm;
+    height:40px ;
+}
+.White p1{
+    position: relative;
+    top: 0.5cm;
+}
+.MY li{
+    margin-bottom: 0.5cm;
+    font-weight: 550;
+}
+.MY{
+    margin-top: 1.5cm;
+}
+.MY img{
+    position: relative;
+    top: 2px;
+    width:20px ;
+    height: 20px;
+}
+.White span{
+    font-family: 'Times New Roman', Times, serif;
+    position: relative;
+    top: 0.7cm;
+    font-weight: 550;
+    font-size: 20px;
+}
+#Location{
+    font-size: 20px;
+    font-weight: 550;
+}
+#Year{
+    margin-left: 3cm;
+    padding:0.2cm 0.5cm;
+    border-radius: 0.2cm;
+    border: 1px solid  rgb(96, 194, 255);
+    background-color: rgb(96, 194, 255);
+}
+.Year_2{
+    position: relative;
+    top: 0.5cm;
+    right: 4.3cm;
+}
+#HS{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+}
+#E{
+    margin-top: 1cm;
+    margin-right: 6cm;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+}
+.Second{
+    margin-top: 1.2cm;
+}
+.Professional{
+    position: relative;
+    left: 17cm;
+    bottom: 25.2cm;
+}
+#after_resume{
+    position: relative;
+    bottom: 21.5cm;
+}
+
+#PTFL{
+    position: relative;
+    bottom: 20cm;
+}
+.PTFL_Para{
+    margin-top: -20cm;
+}
+.Made_Projects li{
+    margin-bottom: 2cm;
+}
+.Made_Projects{
+    font-weight: 600;
+    margin-top:2cm ;
+    margin-left:0.9cm;
+    gap: 8cm;
+}
+.Made_Projects img{
+    position: relative;
+    right: 0.2cm;
+    bottom: 0.25cm;
+    border-radius: 2cm;
+    width: 40px;
+    height: 40px;
+}
+#after_portfolio{
+    position: sticky;
+    top: 2cm;
+}
+#Serv{
+    position: relative;
+    top: 3.8cm;
+}
+#Current_services{
+    margin-top:5cm ;
+    margin-left: 0.7cm;
+}
+#Current_services li{
+    padding-bottom: 0.3cm;
+    display: flex;
+    height: auto;
+    margin-bottom: 1cm;
+    border: 1px solid rgb(195, 195, 255);
+    border-radius: 0.1cm;
+    flex-direction: column;
+}
+#Current_services b{
+    padding-bottom: 0.5cm;
+}
+#Con{
+    position: relative;
+    top: 2.5cm;
+}
+#After_ser{
+    position: relative;
+    top: 1.8cm;
+}
+#Con_Para{
+    margin-top: 2.5cm;
+}
+.Lower{
+    border-radius: 0.2cm;
+    margin-left: 1.2cm;
+    margin-top: 0cm;
+    width: 75vw;
+    padding-bottom: 3cm;
+    height:88vh;
+    background-color: rgb(229, 249, 255);
+    margin-bottom: 1cm;
+}
+.L_eft{
+    position: relative;
+    border-radius: 0.2cm;
+    width: 30vw;
+    top:1cm;
+    z-index: 100;
+    height: 88vh;
+    background-color: white;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Adds shadow */
+}
+.R_ight{
+    position: relative;
+    border-radius: 0.2cm;
+    width: 42.8vw;
+    top: 1cm;
+    left: 0.86cm;
+    height: 88vh;
+    z-index: 100;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Adds shadow */
+    background-color: white;
+}
+
+
+/* These are the new concepts I learnt today.. */
+/* Target the entire scrollbar */
+::-webkit-scrollbar {
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+}
+
+/* Target the scrollbar track (background) */
+::-webkit-scrollbar-track {
+    background-color: rgb(219, 219, 219); /* Change the background color of the track */
+    opacity: 0.1;
+}
+
+/* Target the scrollbar thumb (handle) */
+::-webkit-scrollbar-thumb {
+    background-color: #a3a3a3; /* Change the color of the thumb */
+    filter: brightness(100%);  
+    border-radius: 0.1cm; /* Optional: Add rounded corners to the thumb */
+    border: 2px solid  #a3a3a3; /* Optional: Add a border around the thumb to create padding effect */
+    z-index: 100;
+}
+
+/* Change the thumb color on hover */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #989898; /* Change the thumb color on hover */
+    border:1px solid  #cccccc ;
+}
+.L_eft ul{
+    margin-left: 0.5cm;
+    margin-top: 0.5cm;
+    display: flex;
+    gap:1.2cm;
+    flex-direction: column;
+
+}
+#THR{
+    width: 35px;
+    margin-left: 0.12cm;
+}
+.L_eft img{
+    width: 45px;
+    height: auto;
+    border-radius: 2cm;
+}
+.L_eft img:hover{
+    width: 47px;
+    height:auto;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all ease-in-out 0.3s;
+}
+.L_eft section{
+    width:8cm;
+}
+.L_eft li div{
+    font-size: 25px;
+    font-weight: 600;
+    margin-top: -12px;
+    margin-left: 5px;
+}
+.L_eft li section{
+    font-weight:550 ;
+    color: #474747;
+    font-size: 13px;
+    position: relative;
+    top: 0.5cm;
+    right: 1.2cm;
+}
+.L_eft li section:hover{
+    cursor: pointer;
+    color: #000000;
+}
+#Add{
+    position: relative;
+    right: 2.7cm;   
+}
+#gmail{
+    right: 1.7cm;
+}
+.Map{
+    background-color: #ffffff;
+    border-radius: 0.2cm;
+    width:25vw;
+    margin-top: 1cm;
+    margin-left: 1cm;
+    height:50vh;
+    box-shadow: 0px 8px 16px rgb(118, 118, 118);
+}
+.Map a{
+    text-align: center;
+    z-index: 100;
+    position: relative;
+    bottom:0.65cm;
+}
+.Map a:hover{
+    color: #2f9eff;
+}
+.Map img:hover{
+    width: 25vw;
+    height: 50vh;
+}
+.Map img{
+    border-radius: 0cm;
+    width: 25vw;
+    opacity: 0.9;
+    height: 50vh;
+}
+.R_ight ul{
+    margin-left: 0.5cm;
+    margin-top: 0.5cm;
+}
+.R_ight li{
+    margin-bottom: 1cm;
+}
+.R_ight label{
+    font-weight: 600;
+    margin-top: 0.3cm;
+    margin-right: 1cm;
+}
+.R_ight input{
+    padding: 0.3cm 4cm;
+    border-radius: 0.1cm;
+    border:1px solid rgb(186, 186, 186);
+}
+.TTT{
+    margin-left: 0.65cm;
+}
+.TTTT{
+    margin-left: 0.55cm;
+    height: 7cm;
+}
+.Buttons{
+    display: flex;
+    flex-direction: row;
+    gap: 11.5cm;
+}
+button{
+    margin-left: 0.5cm;
+    border: 1px solid white;
+}
+#B1{
+    position: relative;
+    bottom: 0.9cm;
+    right: 0.5cm;
+    padding: 10px 15px;
+    border: 1px solid rgb(92, 92, 255);
+    background-color: rgb(92, 92, 255);
+    color: white;
+    font-weight: 600;
+    border-radius: 0.1cm;
+}
+.Buttons button:hover{
+    cursor: pointer;
+}
+.Buttons img{
+    height:40px ;
+    z-index: 1000;
+    margin-top: 2px;
+    box-shadow: 0px 8px 16px rgb(118, 118, 118) ;
+    width: 40px;
+    border-radius: 2cm;
+}
+.sticky-button {
+        position: fixed;
+        bottom: 1cm;
+        left: 95%;
+        transform: translateX(-50%);
+        background-color: #ffffff;
+        color: white;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 2cm;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000; /* Ensure it sits above other elements */
+}
