@@ -1,0 +1,281 @@
+:root{
+    --Def_opacity:0.2;
+  }
+  /* Target the entire scrollbar */
+  ::-webkit-scrollbar {
+    /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+    /* display: none;  */
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: rgb(219, 219, 219); /* Change the background color of the track */
+    opacity: 0.1;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #a3a3a3; /* Change the color of the thumb */
+    filter: brightness(100%);  
+    border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+    border: 2px solid  #a3a3a3; /* Optional: Add a border around the thumb to create padding effect */
+    z-index: 100;
+    color: #c5c5c5;
+  }
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #989898; /* Change the thumb color on hover */
+    border:1px solid  #989898 ;
+  }
+  *{
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .Full{
+    width: 100vw ;
+    height: 92.5vh;
+    background-image: url('/public/images/vecteezy_ai-generated-close-up-of-map-with-pin_41877416.jpeg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 0.9;
+  }
+  .main{
+    width: 30vw;
+    height: 70vh;
+    position: absolute;
+    left: 14cm;
+    opacity: 0.6;
+    overflow-y: hidden;
+    color: white;
+    top: 4cm;
+    background-color: rgb(0, 0, 0);
+    border: none;
+    box-shadow: 0px 0px 5px 5px rgba(0, 255, 38, 0.8);
+    border-radius: 0.2cm;
+  }
+  .main h1{
+    text-align: center;
+    padding: 0.1cm 0.1cm;
+  }
+  #SectionOne{
+    display: flex;
+    justify-items:center ;
+    margin: 0.2cm 0cm ;
+    flex-direction: column;
+  }
+  #SectionOne input{
+    border-radius: 0.2cm;
+    padding: 0.4cm 0.4cm;
+    color:black;
+    border: 1px solid white;
+    margin: 0.4cm 0.1cm;
+  }
+  #SectionOne input:focus {
+    outline: none;  /* Remove default focus outline */
+    border-color: rgb(0, 255, 38); /* Blue border on focus */
+    box-shadow: 0px 0px 15px rgba(0, 255, 38, 0.8); /*Optional: Adding a subtle shadow */
+    transition: all 0.3s ease-in-out;
+  }
+  #SectionOne input::placeholder{
+    font-size:15px ;
+    font-weight:600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  }
+  #SectionOne button{
+    width:250px ;
+    height: 45px;
+    text-align: center;
+    justify-content: center;
+    font-size: 20px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    position: relative ;
+    left: 2.8cm;
+    top: 0.8cm;
+    border: none;
+    border-radius: 0.2cm;
+    font-weight: 600;
+    background-color: rgb(0, 255, 38) ;
+  }
+  #SectionOne button:hover{
+    cursor:pointer ;
+    outline: none;
+    box-shadow: 0px 0px 10px rgba(0, 255, 38, 0.8); 
+    transition: all 0.3s ease-in-out;
+  }
+  .main ul li:hover{
+    cursor: pointer;
+  } 
+  .main ul li strong{
+    color: white;
+    text-align: center;
+    justify-content: center;
+    text-decoration: underline;
+    text-decoration-color: black;
+  }
+  .main ul{
+    display: flex;
+    padding: 0cm 0.4cm;
+    gap: 2cm;
+    font-weight: 700;
+    flex-direction: row;
+    color: rgb(255, 255, 255);
+    list-style-type: none;
+    position: relative;
+    top: 2cm;
+  }
+  .ForgetedProccess{
+    margin: 0.2cm 0.2cm ;
+    width: 29vw;
+    border: none;
+    border-radius: 0.2cm;
+    height: 500px;
+    position: relative;
+    top: 5cm;
+  }
+  .ForgetedProccess select{
+    width: 26vw;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.2cm;
+    font-weight: 600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 15px;
+    padding: 0.4cm 0.4cm;
+    color:black;
+    border: 1px solid white;
+    margin: 0.6cm 0.5cm;
+  }
+  .ForgetedProccess select:focus {
+    outline: none;  /* Remove default focus outline */
+    border-color: rgb(0, 255, 38); /* Blue border on focus */
+    box-shadow: 0px 0px 19px rgb(0, 255, 38,0.8); /*Optional: Adding a subtle shadow */
+    transition: all 0.3s ease-in-out;
+  }
+  .ForgetedProccess select option{
+    padding: 0.3cm 0.1cm;
+    font-weight: 650;
+    border: none;
+    border-radius: 0.1cm;
+    background-color: whitesmoke;
+  }
+  .ForgetedProccess select option:hover{
+    padding: 0.3cm 0.1cm;
+    font-weight: 650;
+    background-color: aliceblue;
+  }
+  #Sendotp{
+    width: 150px;
+    height: 35px;
+    padding: 0.1cm 0.1cm ;
+    margin: 0.2cm 1cm;
+    border-radius: 0.2cm ;
+    border: none;
+    background-color:rgb(0, 255, 38);
+    font-size: 18px;
+    font-weight: 650;
+  }
+  #Sendotp:hover{
+    cursor:pointer;
+    outline:none;
+    box-shadow: 0px 0px 10px rgb(0, 255, 38,0.8) ;
+    transition: all 0.3s ease-in-out;
+  }
+  .buttons{
+    display: flex;
+    flex-direction:row;
+    margin: 0.2cm 3cm;
+    justify-items: center;
+    align-items: center;
+  }
+  #Time{
+    display: none;
+    position: absolute;
+    bottom: 0.5cm;
+    right: 0;
+  }
+  .ForgetedProccess input{
+    width: 24vw;
+    border-radius: 0.2cm;
+    padding: 0.4cm 0.4cm;
+    color:black;
+    border: 1px solid white;
+    margin: 0.4cm 0.5cm;
+  }
+  .ForgetedProccess input:focus {
+    outline: none;  /* Remove default focus outline */
+    border-color:rgb(0, 255, 38); /* Blue border on focus */
+    box-shadow: 0px 0px 15px rgb(0, 255, 38,0.8); /*Optional: Adding a subtle shadow */
+    transition: all 0.3s ease-in-out;
+  }
+  .ForgetedProccess input::placeholder{
+    font-size:15px ;
+    font-weight:600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  }
+  #Enter{
+    width: 150px;
+    height: 35px;
+    padding: 0.1cm 0.1cm ;
+    margin: 0.2cm 3.8cm;
+    border-radius: 0.2cm ;
+    border: none;
+    background-color: rgb(0, 255, 38);
+    font-size: 18px;
+    font-weight: 650;
+  }
+  #Enter:hover{
+    cursor:pointer;
+    outline:none;
+    box-shadow: 0px 0px 10px rgb(0, 255, 38,0.8) ;
+    transition: all 0.3s ease-in-out;
+  }
+  #Formatting{
+    margin: 0cm 0.2cm ;
+    width: 29vw;
+    border: none;
+    border-radius: 0.2cm;
+    height: 64vh;
+    position: relative;
+    top: 5.5cm;
+  }
+  #Formatting input{
+    width: 24vw;
+    border-radius: 0.2cm;
+    padding: 0.4cm 0.4cm;
+    color:black;
+    border: 1px solid white;
+    margin: 0.5cm 0.5cm;
+  }
+  #Formatting input:focus {
+    outline: none;  /* Remove default focus outline */
+    border-color:rgb(0, 255, 38); /* Blue border on focus */
+    box-shadow: 0px 0px 15px rgb(0, 255, 38,0.8); /*Optional: Adding a subtle shadow */
+    transition: all 0.3s ease-in-out;
+  }
+  #Formatting input::placeholder{
+    font-size:15px ;
+    font-weight:600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  }
+  #Reset{
+    width: 150px;
+    height: 35px;
+    padding: 0.1cm 0.1cm ;
+    margin: 0.2cm 3.8cm;
+    border-radius: 0.2cm ;
+    border: none;
+    background-color: rgb(0, 255, 38);
+    font-size: 18px;
+    font-weight: 650;
+  }
+  #Reset:hover{
+    cursor:pointer;
+    outline:none;
+    box-shadow: 0px 0px 10px rgb(0, 255, 38,0.8) ;
+    transition: all 0.3s ease-in-out;
+  }

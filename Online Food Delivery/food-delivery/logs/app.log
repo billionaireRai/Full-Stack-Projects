@@ -1,0 +1,8 @@
+[2024-09-22T06:02:49.696Z] [PAYTM] INFO [NODE-SDK1.0.0] <MerchantProperties>: initialize called
+[2024-09-22T06:02:49.702Z] [PAYTM] CRITICAL [NODE-SDK1.0.0] <SDKException>: SDKException's msg Mid can not be null or empty
+[2024-09-22T06:08:56.128Z] [PAYTM] INFO [NODE-SDK1.0.0] <MerchantProperties>: initialize called
+[2024-09-22T06:08:56.128Z] [PAYTM] CRITICAL [NODE-SDK1.0.0] <SDKException>: SDKException's msg Mid can not be null or empty
+[2024-09-22T06:31:55.289Z] [PAYTM] INFO [NODE-SDK1.0.0] <MerchantProperties>: initialize called
+[2024-09-22T06:31:55.290Z] [PAYTM] CRITICAL [NODE-SDK1.0.0] <SDKException>: SDKException's msg Mid can not be null or empty
+[2024-09-22T07:34:40.403Z] [PAYTM] INFO [NODE-SDK1.0.0] <MerchantProperties>: initialize called
+[2024-09-22T07:34:40.404Z] [PAYTM] CRITICAL [NODE-SDK1.0.0] <SDKException>: SDKException's msg Mid can not be null or empty

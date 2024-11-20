@@ -1,0 +1,335 @@
+:root{
+    --Def_opacity_1:0;
+    --Def_opacity_2:1;
+  }
+  /* Target the entire scrollbar */
+  ::-webkit-scrollbar {
+    /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+    /* display: none;  */
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: #c3c3c3; /* Change the background color of the track */
+    opacity: 0.1;
+    border-radius: 10cm;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #303030; /* Change the color of the thumb */
+    filter: brightness(100%);  
+    border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+    border: 1px solid  #303030; /* Optional: Add a border around the thumb to create padding effect */
+    z-index: 100;
+    color: #c5c5c5;
+  }
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #6f6f6f; /* Change the thumb color on hover */
+    border:1px solid  #6f6f6f ;
+    cursor: pointer;
+  }
+  *{
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .Wrapper{
+    height: 90.8vh;
+    width: 99.7vw;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+  }
+  #Box{
+    width: 40vw;
+    height: 40vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+  }
+  #Top{
+    font-size: 35px;
+    font-weight: 550;
+    font-variant:small-caps ;  /* New Concept ---> makes the first letter of all words "capital" and "strong"  */
+    color: white;
+  }
+  #Low{
+    color: #a3a3a3;
+    font-variant: small-caps;
+  }
+  .main_body{
+    width: 99.9vw ;
+    height: 91vh;
+    border: 1px solid #ffffff;
+    border-radius: 10px;
+    display: flex ;
+    flex-direction: row ;
+    overflow: hidden hidden;
+    align-items: center;
+    border: none;
+    outline: none;
+  }
+  .LEFT {
+    height: 88vh; /* Setting a fixed height */
+    width: 63vw;
+    margin: 3cm 0.3cm;
+    border: 1px solid #ffffff;
+    border: none;
+    overflow:hidden scroll; /* Set overflow-y to scroll */
+    outline: none;
+    background-color: #101010;
+    border-radius: 10px;
+  }
+  .Right{
+    height: 88vh;
+    width: 35vw;
+    border: 1px solid white;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: none;
+    outline: none;
+  }
+  .right_top{
+    width: 34vw;
+    height: 20vh;
+    border: 1px solid white;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background-color: #101010;
+  }
+  .right_bottom{
+    width: 34vw;
+    height: 35vh;
+    border: 1px solid white;
+    border-radius: 10px;
+    margin: 0.3cm 0cm ;
+    border: none;
+    outline: none;
+    background-color: #101010;
+  }
+  .LEFT nav ul{
+    background:none;
+    font-size: 20px;
+    border-radius: 10px;
+    list-style-type:none;
+    display: flex;
+    flex-direction: row;
+    background-color: black;
+    justify-content: space-between;
+    letter-spacing: 1.5px;
+    z-index: 1;
+    box-shadow: none;
+    border-bottom-left-radius:5px ;
+    border-bottom-right-radius:5px ;
+    box-shadow: 0px 0px 10px 2px rgb(255, 255, 255,0.5);
+    border-bottom: 1px solid #414141;
+    font-variant: small-caps;
+  }
+  .LEFT ul li:first-child{
+    font-size: 25px;
+  }
+  .LEFT ul li:last-child{
+    font-size: 15px;
+  }
+  .product{
+    height: 30vh;
+    width: 62vw;
+    margin: 0.8cm 0.2cm;
+    border-radius: 10px;
+    border: 1px solid white;
+    border: none;
+    display: flex;
+    flex-direction: row;
+  }
+  .product img{
+    width: 25vw;
+    height: 30vh;
+    border-radius: 10px;
+    filter:brightness(100%);
+  }
+  .details{
+    border:none ;
+    width: 70vw;
+    height: 30vh;
+    border-top-left-radius: 0px ;
+    border-bottom-left-radius: 0px ;
+    border-radius: 10px;
+  }
+  .details ul{
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    position: sticky;
+    top: 0;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0.1cm 0.2cm;
+  }
+  .details ul li:first-child span{
+    font-weight: 600;
+    font-size:25px ;
+  }
+  .details ul li:last-child span{
+    font-weight: 600;
+    font-size:18px ;
+    color:#ffffff;
+  }
+
+  .my_grid{
+    border: none;
+    border-radius: 10px;
+    width:auto ;
+    height:20vh;
+    margin:5px 10px ;
+    display: grid;
+    grid-template-columns:repeat(3,1fr) ;
+    grid-template-rows:repeat(2,1fr) ;
+    column-gap: 5px;
+  }
+  .my_grid div{
+    font-size: 15px;
+    font-weight: 600;
+    align-items: center;
+    justify-content: center;
+  }
+  .my_grid div button{
+    background-color: white;
+    color: black;
+    border: none;
+    outline:none;
+    width: 50px;
+    font-size: 17px;
+    font-weight: 650;
+    border-radius: 5px;
+    text-align: center;
+    justify-content: center;
+    &:hover{
+      cursor:pointer ;
+      box-shadow: 0px 0px 5px 1px rgb(255, 255, 255,0.5);
+    }
+
+  }
+  #btns{
+    display: flex;
+    flex-direction: row;
+    list-style-type:none ;
+    align-items: center;
+    justify-content: space-around;
+    gap: 1cm;
+  }
+  #btns li button{
+    width: 200px;
+    height:25px ;
+    border:none;
+    outline:none;
+    color: black;
+    border-radius: 5px;
+    &:hover{
+      cursor:pointer ;
+      box-shadow: 0px 0px 5px 1px rgb(255, 255, 255,0.5);
+
+    }
+  }
+  .right_top h3{
+    text-align: center ;
+    justify-content: center;
+    align-items: center;
+  }
+  .right_top input{
+    width: 300px;
+    padding: 8px 8px;
+    margin: 10px 0cm ;
+    border:  none;
+    outline: none;
+    color: black;
+    border-radius: 5px;
+  }
+  .right_top input::placeholder{
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .right_top input:focus{
+    box-shadow: 0px 0px 10px 5px rgb(255, 165, 0,0.4);
+    transition: all 0.3s ease-in-out;
+  }
+  #btns_2{
+    display: flex;
+    flex-direction: row;
+    list-style-type:none ;
+    align-items: center;
+    justify-content: space-around;
+    margin: 12px 0px;
+    gap: 1cm;
+  }
+  #btns_2 li button{
+    width: 200px;
+    height:25px ;
+    border:none;
+    font-weight: 700;
+    outline:none;
+    text-align: center;
+    justify-content: center;
+    color: black;
+    border-radius: 5px;
+    &:hover{
+      cursor:pointer ;
+      box-shadow: 0px 0px 10px 5px rgba(255, 166, 0, 0.5);
+
+    }
+  }
+  /* Same next arrow animation as on  home page... */
+  #IMG{
+    margin: 0px 10px;
+    animation: ImgAnimation 0.8s ease-in-out 0s infinite ;
+  }
+  @keyframes ImgAnimation {
+    from{
+      transform: scale(0.2) ;
+      opacity: var(--Def_opacity_1);
+    }
+    to{
+      transform: scale(2.5) ;
+      opacity: var(--Def_opacity_2);
+    }  
+  }
+  #RRR svg{
+    position: relative;
+    top: 5px;
+    left: 2px;
+  }
+  .Red{
+    color: red;
+  }
+  #org{
+    color: orange;
+    font-weight: 600;
+  }
+  .right_bottom h3{
+    text-align: center;
+    padding: 5px 10px;
+  }
+  .right_bottom ul{
+    display: flex;
+    flex-direction: column;
+    list-style-type: none;
+    margin: 5px 5px;
+    text-align: center;
+    justify-content: center;
+    font-weight: 600;
+    gap: 20px;
+  }
+  .right_bottom ul li:hover{
+    cursor: pointer;
+    color: #c3c3c3;
+  }

@@ -1,0 +1,600 @@
+:root{
+    --Def_opacity_1:0;
+    --Def_opacity_2:1;
+  }
+  /* Target the entire scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: black;
+    opacity: 0.1;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #33CCFF; /* neon blue-green */
+    border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+    border: none;
+    width: 1px;
+    color: #c5c5c5;
+  }
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #66FFFF; /* lighter neon blue-green */
+    border: 1px solid #66FFFF;
+  }
+  body{
+    background-color: black;
+    position: relative;
+    color: white;
+    height: 50vh;
+    z-index: -1;
+    width:99vw;
+  }
+  .Bg-Img{
+    width: 99vw;
+    height: 99.5vh;
+    border-radius: 10px;
+    background: url(/public/Images/HomePage.Bg_Img.jpg) no-repeat left center ;
+    background-size: cover;
+    backdrop-filter: var(--Def_opacity_2);
+    background-blend-mode: difference;
+    backface-visibility: visible;
+    outline: none;
+    border-width:2px;
+    border-style:solid ;
+    border: none;
+    opacity: 0.8;
+    /* border-bottom-color:white ; */
+  }
+  nav {
+    width: 99.8%;
+    height: auto; /* or a larger percentage/fixed height */
+    min-height: 60px; /* Ensures a minimum height */
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    border: 1px solid white;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border: none;
+  }
+  
+  nav > * {
+    display: flex;
+    align-items: center;
+  }
+  nav ul {
+    list-style-type: none;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+  }
+  nav ul li button{
+    font-size: 15px;
+    font-variant: small-caps;
+    padding: 5px 15px;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    background-color: white;
+    color: black;
+    transform: scale(1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Add box-shadow to transition */
+    &:hover{
+      cursor: pointer;
+      transform:scale(1.1);
+      box-shadow:-5px 3px 5px 0px rgba(255, 255, 255, 0.6) ;
+    }
+  }
+  
+  nav > span{
+    font-size: 20px;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-variant: small-caps;
+  }
+  #SI {
+    position: relative;
+    right: 35px;
+    top: 4px;
+    background-color: rgb(255, 255, 255); /* Light pink background */
+    border-radius: 30px; /* Rounded corners */
+    border: none; /* No border */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+    &:hover{
+     animation: microphoneAnimation 0.8s ease-in-out infinite; /* Animation for microphone effect */
+    }
+  }
+  
+  @keyframes microphoneAnimation {
+    0% {
+      background-color: white; /* Start with white */
+      transform: scale(0.8);
+    }
+    100% {
+      background-color: rgb(223, 223, 223);   /* End color */
+      transform: scale(1);
+    }
+  }
+  #SI img{
+    width: 20px;
+    height: 20px;
+    background-color: rgb(255, 255, 255);
+    border:none ;
+    border-radius: 10px;
+    background: none;
+    transition: all 0.3s ease-in-out ;
+    &:hover{
+      cursor: pointer;
+    }
+  }
+
+  nav > span input{
+    width: 500px;
+    height: 30px;
+    font-size:15px ;
+    padding: 5px 10px;
+    font-variant: small-caps;
+    border: none;
+    outline: none;
+    border-radius:5px ;
+    &:focus{
+      box-shadow: 0px 0px 5px 5px rgba(255, 255, 255, 0.6) ;
+      transition: box-shadow 0.5s ease-in-out;
+    }
+  }
+  
+  #Logo_Img{
+    width: 57px;
+    height: 57px;
+    filter: invert(1) ;
+    &:hover{
+      cursor: pointer;
+    }
+  }
+  #Profile{
+    background-color: white;
+    width: 50px;
+    height: 50px;
+    background: url(/public/Images/GeneralPic.Profile.png) no-repeat center center ;
+    background-size: cover;
+    backdrop-filter: var(--Def_opacity_2);
+    background-blend-mode: difference;
+    backface-visibility: visible;
+  }
+  #Profile img{
+    filter: invert(1);
+    margin: 8px 0px;
+    width: 35px;
+    height: 35px;
+    border-radius: 20px;
+    &:hover{
+      cursor: pointer;
+      transform: scale(1.1);
+      transition: all 0.3s ease-in-out;
+    }
+  }
+  #UpArrow{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    border-radius: 20px;
+    border: none;
+    outline:none;
+    background:none;
+    &:hover{
+      cursor: pointer;
+      transform: scale(1.1);
+      transition: all 0.1s ease-in-out;
+    }
+  }
+  #UpArrow img{
+    width:30px;
+    height: 30px;
+    padding: 5px 5px;
+    z-index: 1;
+    border-radius: 20px;
+    background-color: white;
+  }
+  .Text{
+    position: absolute;
+    left: 130px;
+    top: 170px;
+    width: 500px;
+    height: 400px;
+    color: white;
+    border: 1px solid white;
+    border: none;
+    box-shadow:-15px 10px 15px 0px rgba(56, 56, 56, 0.6) ;
+    border-radius: 10px;
+  }
+  .Text span{
+    display: block;
+    text-align: left;
+    justify-content: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 10px 30px;
+    font-size: 30px;
+    font-weight: 650;
+  }
+  .Text div{
+    padding:5px 30px ;
+    color: grey;
+    filter:brightness(100%) ;
+  }
+  #typed{
+    color:#66FFFF;
+    font-variant: small-caps;
+    font-feature-settings: "abvs";
+    font-variant-numeric: lining-nums;
+  }
+  .right{
+    position: absolute;
+    right: 130px;
+    top: 150px;
+    width: 400px;
+    align-items: center;
+    justify-content: center;
+    font-variant: small-caps;
+    height: 500px;
+    border: none;
+    color: white;
+    /* border: 1px solid white; */
+    border-radius: 10px;
+  }
+  .right video{
+    width: 100%;
+    height: 45%;
+    background: none;
+    border-radius: 10px;
+  }
+  .right span sup{
+    border: 1px solid white;
+    padding :3px 5px ;
+    font-size: 10px;
+    border-radius: 20px;
+  }
+  .Centre{
+    display: block;
+    text-align: center;
+  }
+  #top{
+    position: relative;
+    padding: 5px 20px;
+    border-radius: 20px;
+    left : 10px;
+    top: 15px; 
+    font-variant: small-caps;
+    color:#33CCFF;
+    border: 1px solid #66FFFF;
+  }
+  .TEX{
+    padding: 10px 10px; 
+  }
+  .para{
+    padding: 0px 15px; 
+    color: grey;
+    border: 1px solid white;
+    border: none;
+    width: 30vw;
+  }
+  .GridSystem{
+    margin: 40px 0px;
+    height: auto;
+    border-radius: 5px;
+    border: 1px solid white;
+    border: none;
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+  }
+  .GridItem{
+    width: 350px ;
+    height: 280px;
+    margin: 0px 10px;
+    border-radius: 10px;
+    border: 1px solid white;
+    border: none;
+    background-color: rgb(0, 0, 0);
+  }
+  .GridItem div{
+    border-radius: 10px;
+  }
+  .GridItem div img{
+    filter: invert(1);
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    border: 1px solid white;
+    margin: 15px 10px;
+  }
+  .GridItem span{
+    font-size: 20px;
+    font-weight: 650;
+    margin: 15px 10px;
+    font-variant:small-caps;
+  }
+  .GridItem p{
+    padding: 0px 10px;
+    font-size: 14px;
+    color:grey;
+    text-align: left;
+    text-wrap:balance;
+  }
+  #FAQ{
+    font-variant: small-caps;
+    text-align: left;
+    padding: 5px 20px;
+  }
+  #mainbox{
+    width:93vw;
+    height: 65vh;
+    margin: 0px 20px;
+    border: 1px solid white;
+    border-radius: 10px;
+    border: none;
+  }
+  #mainbox p{
+    font-size: 15px;
+    color:grey;
+    text-align: left;
+    text-wrap:balance;
+  }
+  #mainbox div {
+    height: 60px; 
+    overflow: hidden; /* Prevent overflow */
+    border-radius: 10px;
+    margin: 2px 0px;
+    font-variant: small-caps;
+    border: 1px solid white;
+    border: none;
+    transition: height 0.5s ease-in-out;
+  }
+  #mainbox div ul{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    list-style-type: none;
+  }
+  #mainbox div ul li img{
+    width: 20px;
+    height: 20px;
+    filter: invert(1);
+    &:hover{
+      cursor: pointer;
+    }
+  }
+  .rotate {
+    transition: transform 0.5s ease;
+    transform: rotate(180deg); /* Rotate the arrow 180 degrees */
+  }
+  
+  #mainbox div p{
+    margin: 5px 40px;
+    text-align: left;
+  }
+  
+  .Lower_section {
+    width: 90vw;
+    height: 20vh;
+    margin: 40px 55px; /* Center horizontally */
+    border-radius: 10px;
+    background-color: #060606;
+    border: none;
+    outline: none;
+    padding: 10px; /* Add padding for better spacing */
+  }
+  
+  .Lower_section ul {
+    list-style-type: none;
+    display: flex;
+    align-items: center; /* Center items vertically */
+    justify-content: space-between; /* Space items evenly */
+    padding: 0; /* Reset padding */
+    margin: 0; /* Reset margin */
+  }
+  
+  .Lower_section ul li:first-child {
+    font-size: 30px;
+    font-weight: 650;
+    margin-right: 10px; /* Spacing between text and buttons */
+  }
+  
+  .Lower_section ul li a img {
+    width: 250px;
+    height: auto;
+    border-radius: 10px;
+    margin: 0 5px; /* Spacing between images */
+    transition: transform 0.3s ease-in-out; /* Smooth scaling effect */
+  }
+  
+  .Lower_section ul li a img:hover {
+    transform: scale(1.05);
+  }
+  
+  .Lower_Sec {
+    width: 90vw;
+    height: auto; /* Allow height to adjust based on content */
+    margin: 15px 55px; /* Center horizontally */
+    border-radius: 10px;
+    background-color: #060606;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px; /* Space between grid items */
+    padding: 0px; /* Add padding for better spacing */
+  }
+  
+  .Lower_Sec ul {
+    display: flex;
+    flex-direction: column;
+    list-style-type: none;
+    align-items: center; /* Center items */
+    row-gap: 15px;
+  }
+  
+  .Lower_Sec svg {
+    vertical-align: middle; /* Align SVG with text */
+    padding: 0 5px;
+    fill: white;
+  }
+  
+  .Lower_Sec ul li:first-child {
+    width: 100%; /* Full width */
+    font-size: 25px;
+    font-weight: 650;
+    text-align: center;
+  }
+  
+  .Lower_Sec ul ol {
+    display: flex;
+    flex-direction: column;
+    list-style-type: none;
+    align-items: center; /* Center items */
+    row-gap: 15px;
+  }
+  
+  .Lower_Sec li h5 {
+    color: white;
+  }
+  
+  .corporation {
+    color: #a3a3a3;
+  }
+  
+  .corporation:hover {
+    color: #cfcfcf;
+    text-decoration: underline;
+    cursor: default;
+  }
+  
+  /* code related to Responsiveness of the page...  */
+  @media (max-width: 1398px) {
+    .Bg-Img .right{
+      left: 40%;
+    }
+    .Bg-Img .Text{
+      top: 130%;
+      left:40%;
+      border-radius: 10px;
+    }
+    #mainbox{
+      width: 100%;
+    }
+    .Lower_section , .Lower_Sec{
+      width: 100%;
+    }
+  }
+  @media (max-width: 1316px) {
+    .Lower_section , .Lower_Sec{
+      width: 90%;
+    }
+  }
+  @media (max-width: 1200px) {
+    .Lower_section , .Lower_Sec{
+      width: 100%;
+    }
+  }
+  @media (max-width: 1080px) {
+    .GridSystem{
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+    }
+    .Lower_Sec ul{
+      column-gap: 8px;
+    }
+    .Bg-Img{
+      width: 100vw;
+    }
+    .Bg-Img .right{
+      left: 35%;
+    }
+    .Bg-Img .Text{
+      top: 130%;
+      left: 33%;
+      border-radius: 10px;
+    }
+    .Lower_section , .Lower_Sec{
+      margin-left:10px;
+    }
+  
+  }
+  @media (max-width: 973px) {
+    .Bg-Img .right{
+      left: 30%;
+      top: 30%;
+    }
+    .Bg-Img .Text{
+      top: 130%;
+      left: 30%;
+      border-radius: 10px;
+    }
+    #Adsd{
+      font-size: 20px;
+    }
+  }
+  /* Designing for the hamberger... */
+  .HMB{
+    display:none;
+    width: 30px;
+    height: 30px;
+    padding: 0px 10px;
+    filter: invert(1) ;
+    &:hover{
+      cursor: pointer;
+    }
+  }
+  .Top_0{
+    position: relative;
+    top:-45px;
+    transition: all 0.5s ease-in-out;
+  }
+  @media (max-width:950px){
+    .Bg-Img , .para{
+      width: 1000px;
+    }
+    nav{
+      position: relative;
+      left: 80px;
+      top:-192px;  /* -190px*/
+      display: flex;
+      flex-direction: column;
+    }
+    nav ul{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .Lower_section , .Lower_Sec , #mainbox{
+      width: 1000px;
+    }
+    .HMB{
+      display: block;
+      margin: 10px 10px;
+    }
+  }
+  @media (max-width:700px){
+    nav{
+      width: 900px;
+    }
+    .Bg-Img .right{
+      left: 50%;
+    }
+    .Bg-Img .Text{
+      top: 130%;
+      left: 50%;
+      border-radius: 10px;
+    }
+  }

@@ -1,0 +1,112 @@
+.card {
+  width: 79vw;
+  height: 35vh;
+  display: flex;
+  flex-direction: row;
+  border-radius: 0.1cm;
+  padding: 0.1cm;
+  margin: 0.15cm 0cm;
+  background-color: rgb(255, 255, 255);
+  border: 0.1px solid rgb(255, 255, 255);
+  position: relative; /* Ensure relative positioning for absolute child elements */
+}
+
+.card ul {
+  list-style-type: none;
+  display: flex;
+  position: absolute;
+  left: 25cm;
+  flex-direction: column;
+  margin: 0; 
+  padding: 0;
+}
+
+.card button:hover {
+  cursor: pointer;
+}
+
+.card button {
+  text-align: center;
+  border-radius: 0.2cm;
+  padding: 0.2cm 1cm;
+  color: rgb(255, 255, 255);
+  font-weight: 700;
+  margin: 0.2cm 0.1cm;
+  font-size: 20px;
+}
+
+.card img {
+  width: 20vw;
+  height: 35vh;
+  background-color: rgb(255, 255, 255);
+  border: 0.1px solid white;
+  border-radius: 0.2cm;
+}
+.card img:hover{
+  transform: scale(1.03);
+  transition-duration: 0.5s;
+  transition-property: all;
+  transition-timing-function: ease-in-out;
+  cursor: pointer;
+}
+
+.buy-button {
+  background-color: rgb(60, 255, 0);
+  border: 0.1px solid rgb(60, 255, 0);
+}
+
+.cart-button {
+  background-color: yellow;
+  border: 0.1px solid yellow;
+}
+
+.card > div {
+  flex: 1; /* Let each section take equal space */
+  margin: 0 0.1cm; /* Adjust margin */
+  border-radius: 0.2cm;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensure content is evenly distributed */
+}
+
+.card > div li {
+  padding: 6px 3px;
+  list-style-type: none;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card div p {
+  color: #444444;
+  font-size: 14px;
+  text-align: left;
+  justify-content: center; /* Ensure text alignment */
+}
+
+.quantity {
+  border-radius: 0.2cm;
+  border: 0.1px solid rgb(255, 255, 255);
+  height: 9vh;
+  margin: 0.1cm 0cm;
+  width: 4.8cm;
+}
+
+.quantity h4 {
+  text-align: center;
+  justify-content: center;
+  align-content: center;
+}
+
+.quantity button {
+  width: 3vw;
+  height: auto;
+  position: relative;
+  bottom: 0.15cm;
+  text-align: center;
+  justify-content: center;
+  align-content: center;
+  border: 0.1px solid white;
+  background-color: #e0e0e0;
+  color: black;
+}

@@ -1,0 +1,30 @@
+:root{
+  --Def_opacity_1:0;
+  --Def_opacity_2:1;
+}
+/* Target the entire scrollbar */
+::-webkit-scrollbar {
+  width: 12px; /* Change the width of the scrollbar */
+  height: 12px; /* Change the height for horizontal scrollbar */
+}
+
+/* Target the scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background-color: black;
+  opacity: 0.1;
+}
+
+/* Target the scrollbar thumb (handle) */
+::-webkit-scrollbar-thumb {
+  background-color: #33CCFF; /* neon blue-green */
+  border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+  border: none;
+  width: 1px;
+  color: #c5c5c5;
+}
+
+/* Change the thumb color on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #66FFFF; /* lighter neon blue-green */
+  border: 1px solid #66FFFF;
+}

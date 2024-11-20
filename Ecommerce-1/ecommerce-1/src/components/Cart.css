@@ -1,0 +1,126 @@
+/* This is the stylesheet of Cart.jsx */
+.Main h2{
+    text-align: center;
+    justify-content: center;
+    background-color: rgb(199, 199, 199);
+    font-size: 30px;
+    position:relative;
+    top: 0;
+    border: 0.1px solid rgb(199, 199, 199);
+    border-radius: 0.2cm;
+}
+
+.card {
+    width: 100vw;
+    height: 35vh;
+    display: flex;
+    flex-direction: row;
+    border-radius: 0.2cm;
+    padding: 0.1cm;
+    margin: 0.15cm 0cm;
+    background-color: rgb(255, 255, 255);
+    border: 0.1px solid rgb(255, 255, 255);
+    position: relative; /* Ensure relative positioning for absolute child elements */
+  }
+
+  .card img {
+    width: 20vw;
+    height: 35vh;
+    background-color: rgb(255, 255, 255);
+    border: 0.1px solid white;
+    border-radius: 0.2cm;
+  }
+  .card img:hover{
+    transform: scale(1.05);
+    transition-duration: 0.5s;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    cursor: pointer;
+  }
+  
+  .card > div {
+    flex: 1;
+    margin: 0 0.1cm;
+    border-radius: 0.2cm;
+    background-color: rgb(255, 255, 255);
+    display: flex;
+    flex-direction: column; /* Ensure vertical stacking of child elements */
+  }
+  
+  .card > div ul {
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    position: relative;
+    left: 0cm;
+  }
+  
+  .card > div li {
+    padding: 11px 3px;
+    list-style-type: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: black;
+  }
+
+.Each h2{
+  border: 1px solid black;
+  position: relative;
+  background-color: rgb(255, 255, 255);
+  border: 0.1px solid white;
+  right: 0.5cm;
+  border-radius: 0.2cm;
+  text-align: left;
+}
+.Each span h2{
+  padding: 0.15cm 0.1cm ;
+}
+.Final_cost h2{
+  border-radius: 0.2cm;
+  background-color: rgb(255, 255, 155);
+}
+
+.Each button:hover{
+  cursor: pointer;
+}
+.Each button{
+  color: rgb(23, 73, 255);
+  width: 20vw;
+  position: absolute;
+  top: 5.6cm;
+  background-color: bisque;
+  border: 0.1px solid bisque;
+}
+.Payment{
+  padding: 0.4cm 1cm;
+  border-radius: 0.2cm;
+  position: absolute;
+  right: 0.5cm;
+  background-color: aquamarine;
+  border: 0.1px solid white;
+  font-size: 20px;
+  font-weight: 500;
+}
+.Payment:hover{
+  cursor: pointer;
+  transform: scale(1.05);
+  transition-duration: 0.5s;
+  transition-property: all;
+  transition-timing-function: ease-in-out;
+}
+#lastdiv{
+  position: relative;
+  top: 1.5cm;
+  height: 55px;
+  justify-content: center;
+  align-content: center;
+  background-color: bisque;
+  font-size: 20px;
+  font-weight: 650;
+}
+#cartext{
+  font-size: 30px;
+  font-weight: 600;
+  position: absolute;
+  top:8cm ;
+  left:14cm; 
+}

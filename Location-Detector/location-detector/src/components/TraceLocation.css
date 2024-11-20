@@ -1,0 +1,162 @@
+:root{
+    --Def_opacity:0.2;
+  }
+  /* Target the entire scrollbar */
+  ::-webkit-scrollbar {
+    /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+    /* display: none;  */
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: rgb(219, 219, 219); /* Change the background color of the track */
+    opacity: 0.1;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #a3a3a3; /* Change the color of the thumb */
+    filter: brightness(100%);  
+    border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+    border: 2px solid  #a3a3a3; /* Optional: Add a border around the thumb to create padding effect */
+    z-index: 100;
+    color: #c5c5c5;
+  }
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #989898; /* Change the thumb color on hover */
+    border:1px solid  #989898 ;
+  }
+  *{
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .MainSection{
+    width: 99.9vw;
+    height: 92.1vh;
+    border-radius: 0.1cm;
+    border: 1px solid black;
+    display: flex;
+    flex-direction: row;
+  }
+  .Left{
+    width:40vw ;
+    height:91.8vh ;
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0.1cm;
+    border: none;
+  }
+  .Right{
+    width:59.7vw ;
+    height:91.8vh ;
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0.1cm;
+    border: none;
+  }
+  .Right video{
+    width:59.7vw;
+    border-radius: 0.1cm;
+    position: relative;
+    left: 0.1cm;
+  }
+  .lower ul{
+    display: flex;
+    flex-direction: column;
+    flex: 1 ;
+    list-style-type: none;
+  }
+  .lower ul div{
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0.1cm 0.1cm;
+  }
+  .lower form label{
+    font-weight: 500;
+    font-size: 18px;
+  }
+  .lower form {
+    display: flex;
+    flex-direction: column;
+  }
+  .lower form li{
+    padding: 0.15cm 0cm;
+    margin: 0.1cm 0.1cm ;
+  }
+  .lower form input {
+    width: 200px; 
+    padding:0.1cm 0.1cm; 
+    border: 1px solid grey; 
+    border-radius: 0.1cm; 
+    transition: border-color 0.3s ease;  /* Smooth transition for focus */
+  }
+  
+  .lower form input:focus {
+    outline: none;  /* Remove default focus outline */
+    border-color: rgb(0, 26, 255); /* Blue border on focus */
+    /* box-shadow: h-offset v-offset blur spread color inset ; */
+    box-shadow: 0 0 5px rgba(0, 174, 255, 0.5); /* Optional: Adding a subtle shadow */
+    transition: all 0.3s ease-in-out;
+  }
+
+  .lower form button{
+    width: 200px;
+    justify-content: center;
+    align-items: center;
+    border:0.1px solid rgb(27, 255, 46);
+    background-color: rgb(27, 255, 46);
+    font-size: 20px;
+    position: relative;
+    bottom: 0.2cm;
+    font-weight: 700;
+    border-radius: 0.2cm;
+    padding: 0.2cm 0.1cm;
+  }
+  .lower form button:hover{
+    cursor:pointer;
+    box-shadow: 0 0 10px rgb(27, 255, 46);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+  .Left h2{
+    align-items: center;
+    justify-content: center;
+    margin:0.1cm 0.1cm;
+  }
+  #TM{
+    align-items: center;
+    justify-content: center;
+    margin:0.2cm 0.1cm;
+  }
+  #Map{
+    width: 39vw ;
+    height: 50vh;
+    border-radius: 0.2cm;
+    border: 1px solid black;
+    border: none;
+    position: absolute;
+    left:0.6vw;
+    bottom: 0.2cm;
+    background-color: #ffffff;
+  }
+  #Map:hover{
+    cursor: pointer;
+    box-shadow: 0px 0px 5px rgb(151, 151, 151);
+  }
+  .TrackedInfo div{
+    margin: 0.05cm 0.2cm ;
+    padding: 0.1cm 0.2cm;
+    overflow-x:scroll;
+    border-radius: 0.1cm;
+    border: 0.1px solid black;
+  }
+  .TrackedInfo div:hover{
+    cursor: pointer;
+  }
+  .error{
+    color: rgb(255, 0, 0);
+    position: relative;
+    right: 0cm;
+  }

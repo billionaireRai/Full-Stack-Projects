@@ -1,0 +1,278 @@
+:root{
+    --Def_opacity_1:0;
+    --Def_opacity_2:1;
+  }
+  /* Target the entire scrollbar */
+  ::-webkit-scrollbar {
+    /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+    /* display: none;  */
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: rgb(219, 219, 219); /* Change the background color of the track */
+    opacity: 0.1;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #a3a3a3; /* Change the color of the thumb */
+    filter: brightness(100%);  
+    border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+    border: 2px solid  #a3a3a3; /* Optional: Add a border around the thumb to create padding effect */
+    z-index: 100;
+    color: #c5c5c5;
+  }
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #989898; /* Change the thumb color on hover */
+    border:1px solid  #989898 ;
+  }
+  *{
+    margin: 0;
+    padding: 0;
+    color: white;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
+  }
+  .lower{
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    align-items: center;
+    justify-content: center;
+    margin: 1.5cm 0cm ;
+    gap: 4cm;
+  }
+  .lower li:hover{
+    cursor: pointer;
+    color: #e4e4e4;
+  }
+  .main{
+    width: 99.9vw;
+    height: 91.1vh;
+    position: relative;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction:row ;
+    border-radius:0.1cm ;
+    border: 1px solid white;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background-color: #0e0e0e;
+  }
+  .left{
+    height: 30vh;
+    width: 30vw;
+  }
+  .left p{
+    margin:0.2cm 0cm ;
+  }
+  .right {
+    position: relative;
+    height: 70vh;
+    width: 35vw;
+    border: 1px solid orange;
+    border-radius: 0.1cm;
+    border-top-left-radius: 0.8cm;
+    border-bottom-right-radius: 0.8cm;
+    text-align: center;
+    overflow-y: hidden; /* Ensure the pseudo-element doesn't overflow */
+    box-shadow: 0px 0px 10px 1px rgba(255, 144, 40, 0.8);
+  }
+  .org{
+    color: orange ;
+  }
+  .right form{
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+  }
+  .right h2{
+    text-align: center;
+    justify-content: center;
+  }
+  .right form input{
+    margin: 0.4cm 0.5cm;
+    padding: 0.25cm 0.4cm;
+    border-width:1px ;
+    outline: none;
+    opacity: 0.8;
+    color: black;
+    border-radius: 0.2cm;
+  }
+  form input::placeholder{
+    font-size: 15px;
+    font-weight: 600;
+    color:grey;
+  }
+  form input:focus{
+    border-color:blue ;
+    transition: all 0.3s ease-in-out;
+  }
+  .SubmitBTN{
+    background-color: orange ;
+    padding: 0.2cm 0.5cm;
+    margin: 0.4cm 2cm ;
+    border: 0.1px solid orange;
+    border-radius: 0.2cm;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .SubmitBTN:hover{
+    outline: none;
+    cursor:pointer ;
+    box-shadow: 0px 0px 10px 1px rgba(255, 126, 5, 0.8);
+    transition: all 1s ease-in-out linear ;
+  }
+
+  /*  Code from here onwards was replicated from previous project... */
+  .ForgetedProccess{
+    margin: 0.2cm 0.2cm ;
+    width: 34vw;
+    border: none;
+    border-radius: 0.2cm;
+    height: 500px;
+    position: relative;
+    top: 5cm;
+  }
+  .ForgetedProccess select{
+    width: 32vw;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.2cm;
+    font-weight: 600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 15px;
+    padding: 0.3cm 0.4cm;
+    color:black;
+    border: 1px solid white;
+    margin: 0.6cm 0.5cm;
+  }
+  .ForgetedProccess select:focus {
+    outline: none;  /* Remove default focus outline */
+    border-color: rgb(0, 255, 38); /* Blue border on focus */
+    box-shadow: 0px 0px 5px 2px rgb(0, 255, 38,0.8); /*Optional: Adding a subtle shadow */
+    transition: all 0.3s ease-in-out;
+  }
+  .ForgetedProccess select option{
+    padding: 0.3cm 0.1cm;
+    font-weight: 650;
+    border: none;
+    color: #0e0e0e;
+    border-radius: 0.1cm;
+    background-color: whitesmoke;
+  }
+  .ForgetedProccess select option:hover{
+    padding: 0.3cm 0.1cm;
+    font-weight: 650;
+    background-color: aliceblue;
+  }
+  #Sendotp{
+    width: 150px;
+    height: 35px;
+    padding: 0.1cm 0.1cm ;
+    margin: 0.4cm 4.5cm;
+    border-radius: 0.2cm ;
+    border: none;
+    background-color:rgb(0, 255, 38);
+    font-size: 18px;
+    font-weight: 650;
+  }
+  #Sendotp:hover{
+    cursor:pointer;
+    outline:none;
+    box-shadow: 0px 0px 10px 2px rgb(0, 255, 38,0.8) ;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .ForgetedProccess input{
+    width: 30vw;
+    border-radius: 0.2cm;
+    padding: 0.4cm 0.4cm;
+    color:black;
+    border: 1px solid white;
+    margin: 0.4cm 0.5cm;
+  }
+  .ForgetedProccess input:focus {
+    outline: none;  /* Remove default focus outline */
+    border-color:rgb(0, 255, 38); /* Blue border on focus */
+    box-shadow: 0px 0px 5px 2px rgb(0, 255, 38,0.8); /*Optional: Adding a subtle shadow */
+    transition: all 0.3s ease-in-out;
+  }
+  .ForgetedProccess input::placeholder{
+    font-size:15px ;
+    font-weight:600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  }
+  #Enter{
+    width: 150px;
+    height: 35px;
+    padding: 0.1cm 0.1cm ;
+    margin: 0.2cm 4.5cm;
+    border-radius: 0.2cm ;
+    border: none;
+    background-color: rgb(0, 255, 38);
+    font-size: 18px;
+    font-weight: 650;
+  }
+  #Enter:hover{
+    cursor:pointer;
+    outline:none;
+    box-shadow: 0px 0px 10px rgb(0, 255, 38,0.8) ;
+    transition: all 0.3s ease-in-out;
+  }
+  #Formatting{
+    margin: 3cm 0.2cm ;
+    width: 29vw;
+    border: none;
+    border-radius: 0.2cm;
+    height: 64vh;
+    position: relative;
+    top: 2cm;
+  }
+  #Formatting input{
+    width: 30vw;
+    border-radius: 0.2cm;
+    padding: 0.3cm 0.4cm;
+    color:black;
+    border: 1px solid white;
+    margin: 1cm 0.5cm;
+
+  }
+  #Formatting input:focus {
+    outline: none;  /* Remove default focus outline */
+    border-color:rgb(0, 255, 38); /* Blue border on focus */
+    box-shadow: 0px 0px 5px 2px rgb(0, 255, 38,0.8); /*Optional: Adding a subtle shadow */
+    transition: all 0.3s ease-in-out;
+  }
+  #Formatting input::placeholder{
+    font-size:15px ;
+    font-weight:600;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  }
+  #Reset{
+    width: 150px;
+    height: 35px;
+    padding: 0.1cm 0.1cm ;
+    margin: 0.2cm 4.5cm;
+    border-radius: 0.2cm ;
+    border: none;
+    background-color: rgb(0, 255, 38);
+    font-size: 18px;
+    font-weight: 650;
+  }
+  #Reset:hover{
+    cursor:pointer;
+    outline:none;
+    box-shadow: 0px 0px 10px 2px rgb(0, 255, 38,0.8) ;
+    transition: all 0.3s ease-in-out;
+  }
+  .error{
+    color: red;
+    text-align: center;
+  }

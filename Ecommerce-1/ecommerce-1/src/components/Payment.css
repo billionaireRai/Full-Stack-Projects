@@ -1,0 +1,202 @@
+::-webkit-scrollbar {
+    /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+    /* display: none;  */
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: rgb(219, 219, 219); /* Change the background color of the track */
+    opacity: 0.1;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #a3a3a3; /* Change the color of the thumb */
+    filter: brightness(100%);  
+    border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+    border: 2px solid  #a3a3a3; /* Optional: Add a border around the thumb to create padding effect */
+    z-index: 100;
+    color: #c5c5c5;
+  }
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #989898; /* Change the thumb color on hover */
+    border:1px solid  #989898 ;
+  }
+/* Main css code starts from here... */
+.main_card {
+    width: 99.9vw;
+    min-height: 93vh;
+    height: auto;
+    border: none;
+    display: flex;
+    flex-direction: row;
+  }
+  
+.main_card .upper img{
+    margin: 0.2cm 0.3cm;
+    border-radius: 0.2cm;
+    width: 30vh;
+    height: 20vh;
+}
+.upper ul{
+    list-style-type: none;
+    font-weight: 500;
+    font-size: 20px;
+}
+.upper li{
+    margin: 0.15cm 0.2cm;
+}
+
+  .upper {
+    width: 40vw;
+    border: none;
+    border-radius: 0.2cm;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    border: none;
+  }
+  
+.upper h3{
+    position: absolute;
+    left: 9.5cm;
+    top: 2cm ;
+}
+.upper div{
+    border: 0.1px solid rgb(255, 255, 255);
+    width: 38vw;
+    display: flex;
+    flex-direction: row;
+    background-color: white;
+    height: 27vh;
+    margin: 0.3cm 0.35cm;
+    border-radius: 0.2cm;
+    box-shadow: 2px 3px 1px 1px rgb(171, 171, 171);
+}
+.upper ul{
+   padding: 0.2cm 0.5cm ;
+}
+.upper li{
+    margin: 0.6cm 0.2cm;
+}
+.upper div:hover{
+    cursor: pointer;
+    transform: scale(1.03);
+    transition-duration: 0.5s;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+}
+
+.lower{
+    height: auto;
+    width: 60vw;
+    border-radius: 0.2cm;
+    border: none;
+}
+.lower form{
+    width:50vw;
+    height: 85vh;
+    position: absolute;
+    left: 46%;
+    top: 8.5%;
+    border-radius: 0.2cm;
+    background-color: white;
+    border: 0.1px solid rgb(255, 255, 255);
+    box-shadow: 2px 3px 1px 1px rgb(171, 171, 171);
+}
+.Head{
+    font-size: 30px;
+    font-weight: 700;
+    border-radius: 0.2cm;
+    margin-bottom: 0.1cm;
+    background-color: rgb(233, 233, 233);
+    padding: 0.1cm 0.3cm;
+}
+.lower .main_sec{
+    border: 0.1px solid black;
+    border-radius: 0.2cm;
+    border: none;
+    width: 50vw;
+    height: 78vh ;
+}
+.main_sec ul{
+    list-style-type: none;
+}
+
+.main_sec ul li{
+    list-style-type: none;
+    padding: 0.2cm 0.3cm;
+}
+.main_sec p{
+    color: #6e6e6e;
+}
+
+.Information{
+    align-items: center;
+    padding-top: 0.3cm;
+    display: flex;
+    gap: 0.5cm;
+    flex-direction: column;
+}
+.Information input{
+    width:40vw;
+    padding: 0.15cm 0.2cm ;
+    height: 4vh;
+    font-size: 20px;
+    border-radius: 0.1cm;
+    border:2px solid rgb(198, 198, 198);
+}
+.Information button{
+    width:40vw;
+    /* padding: 0.1cm 0.2cm ; */
+    height: 7vh;
+    position: relative;
+    bottom: 0.5cm;
+    font-size: 22px;
+    font-weight: 600;
+    border-radius: 0.1cm;
+    background-color:  rgb(166, 166, 166) ;
+    border:2px solid rgb(198, 198, 198);
+}
+.Information button:hover{
+  transform: scale(1.03);
+  transition-duration: 0.5s;
+  transition-property: all;
+  transition-timing-function: ease-in-out;
+  cursor: pointer;
+}
+#Last_btn{
+    position: absolute;
+    bottom: 0.1cm;
+    right:1.6cm;
+    font-weight: 650;
+    font-size: 20px;
+    border:none;
+    border-radius: 0.1cm;
+    background-color: rgb(60, 60, 255);
+    padding: 0.15cm 7.9cm;
+}
+#Last_btn:hover{
+    transform: scale(1.01);
+    transition-duration: 0.5s;
+    transition-property: all;
+    transition-timing-function: ease-in-out;
+    cursor: pointer;
+}
+.products_name{
+    font-weight: bold;
+  }
+.red{
+    color: red;
+    text-align: left;
+    justify-content: center;
+  }
+  
+#SUBMIT_BTN{
+    position: relative;
+    top:0.6cm;
+}

@@ -1,0 +1,136 @@
+/* This our main CSS file for this project... */
+:root{
+  --Def_opacity:0.2;
+}
+/* Target the entire scrollbar */
+::-webkit-scrollbar {
+  /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+  /* display: none;  */
+  width: 12px; /* Change the width of the scrollbar */
+  height: 12px; /* Change the height for horizontal scrollbar */
+}
+
+/* Target the scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background-color: rgb(219, 219, 219); /* Change the background color of the track */
+  opacity: 0.1;
+}
+
+/* Target the scrollbar thumb (handle) */
+::-webkit-scrollbar-thumb {
+  background-color: #a3a3a3; /* Change the color of the thumb */
+  filter: brightness(100%);  
+  border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+  border: 2px solid  #a3a3a3; /* Optional: Add a border around the thumb to create padding effect */
+  z-index: 100;
+  color: #c5c5c5;
+}
+
+/* Change the thumb color on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #989898; /* Change the thumb color on hover */
+  border:1px solid  #989898 ;
+}
+*{
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#Logo{
+  color: white;
+  padding: 0.5cm 0.5cm;
+  font-size: 25px;
+  font-weight: 650;
+  font-style: normal;
+}
+#Logo:hover{
+  cursor: pointer;
+  color: rgb(206, 206, 206);
+  transition: color 0.5s ease-in-out;
+}
+Nav ul{
+  position: sticky;
+  top: 0;
+  background-color: black;
+  height:50px;
+  list-style-type: none;
+  align-items: center;
+  gap: 1cm;
+  display: flex;
+  flex-direction: row;
+  box-shadow: 1px 1px 5px 5px rgb(137, 137, 137);
+
+}
+video {
+  width: 30px; /* Adjust width as necessary */
+  height: 30px; /* Adjust height as necessary */
+  border-radius: 0.2cm; /* Adjust border radius if needed */
+  position: relative; /* Keep relative positioning if required */
+  right: 0.9cm; /* Adjust positioning if necessary */
+  background-color: #c5c5c5;
+}
+
+/* video{
+  width: 30px;
+  height: 30px;
+  border-radius:0.2cm ;
+  z-index: 2;
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  position: relative;
+  right: 0.9cm;
+} */
+video:hover{
+  cursor: pointer;
+}
+Nav li input:focus{
+  border:2px solid rgb(255, 255, 255);
+}
+nav li input::placeholder{
+  font-size: 20px;
+  color: #989898;
+  width: 4cm;
+  height: 1.5cm;
+  justify-content: center;
+  text-align: left;
+}
+Nav ul input{
+  position: absolute;
+  text-align: left;
+  bottom: 0.15cm;
+  border-radius: 0.2cm;
+  justify-content: center;
+  padding: 0.25cm 4cm;
+  border: 0.1px solid white;
+}
+nav ul:last-child li:last-child {
+  width: 12.2cm;
+  display: flex;
+  flex-direction: row;
+}
+
+Nav li{
+  color: rgb(255, 255, 255);
+  text-decoration-line: none;
+  text-decoration-color: black;
+}
+Nav button:hover{
+  cursor: pointer;
+  background-color: #e3feff;
+}
+
+Nav ul button{
+  color: black;
+  font-size: 15px;
+  background-color: white;
+  font-weight: 700;
+  padding: 5px 10px;
+  border: 0.1px solid rgb(255, 255, 255);
+  border-radius: 0.1cm;
+}
+.Edit{
+  color:rgb(58, 58, 255);
+  scale: (1.05);
+  text-decoration-line: none;
+}

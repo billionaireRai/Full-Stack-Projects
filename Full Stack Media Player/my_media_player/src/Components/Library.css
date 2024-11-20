@@ -1,0 +1,188 @@
+  /* Target the entire scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: black;
+    opacity: 0.1;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #33CCFF; /* neon blue-green */
+    border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+    border: none;
+    width: 1px;
+    color: #c5c5c5;
+  }
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #66FFFF; /* lighter neon blue-green */
+    border: 1px solid #66FFFF;
+  }
+  #WrapperTop{
+    display: flex;
+    flex-direction: row;
+    width: 99.8vw;
+    min-height: 91vh;
+    height: auto;
+    gap: 10px;
+    justify-content: center;
+    border: 1px solid white;
+    border: none;
+    border-radius:5px ;
+  }
+  #WrapperTop div{
+    border: 1px solid rgb(10, 10, 10);
+    margin: 0px 10px;
+    background-color: rgb(10, 10, 10); /* Almost black */
+    border-radius: 10px ;
+  }
+  .Left{
+    height: 55vh;
+    width: 20vw;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  .Left div{
+    display: flex;
+    flex-direction: row;
+    margin: 10px 10px;
+    gap: 20px;
+    justify-content:space-between;
+    font-variant: small-caps;
+  }
+  #fdd{
+    font-size: 22px;
+  }
+  #sdd{
+    display: flex;
+    flex-direction: column;
+    font-size: medium;
+    gap: 10px;
+  }
+  #sdd span{
+    font-weight: 650;
+    font-size: 18px;
+    text-align: left;
+  }
+  #sdd div{
+    color: grey;
+    text-align: left;
+  }
+  .CreatePlaylist{
+    text-align: center;
+    align-items: center;
+    border: none;
+    padding: 5px 20px;
+    border-radius: 10px;
+    font-variant: small-caps;
+    color: black;
+    background-color: white;
+    font-weight: 650;
+    &:hover{
+      cursor: pointer;
+      box-shadow: 0px 0px 10px 5px rgba(255, 255, 255, 0.2);
+    }
+  }
+  .Left img{
+    width: 25px;
+    height: 25px ;
+    filter: invert(1);
+  }
+  #plus:hover{
+    cursor: pointer;
+    transform: scale(1.1);
+    transition: all 0.3s ease-in-out;
+  }
+  .Right{
+    height: auto;
+    width: 75vw;
+    display: flex;
+    flex-direction: column;
+  }
+  #topsection {
+    height: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #topsection img{
+    width: 35px;
+    height: 35px;
+  }
+  #topsection span img{
+    margin: 5px 5px;
+    filter: invert(1);
+    &:hover{
+      cursor: pointer;
+      transform: scale(1.1);
+      transition: all 0.3s ease-in-out;
+    }
+  }
+  .Right #Artists {
+    border: 1px solid white;
+    border-radius: 5px;
+    width: 72vw;
+    height: 35vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden hidden;
+    border: none;
+}
+
+#Artists .card {
+  height: 34.8vh;
+  width: 15vw;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: 5px;
+  margin-right: 5px;
+  font-variant: small-caps;
+  align-items: center;
+  &:hover {
+    cursor: pointer;
+    #playbtn {
+      top: 170px;
+    }
+  }
+}
+
+#playbtn {
+  width: 40px; 
+  height: 40px; 
+  filter: invert(1);
+  z-index: 1;
+  position: absolute; /* Ensure it's positioned relative to the card */
+  top: 270px; 
+  right: 0px; 
+  box-shadow: 0px 0px 15px 5px rgba(242, 255, 0, 0.2);
+  transition : top ease-in-out 1.5s linear ;
+  object-fit: contain;
+}
+
+.card img{
+  width: 180px;
+  height: 180px;
+  border-radius: 100px;
+}
+.card p{
+  font-size: 13px;
+  text-align: left;
+}
+
+.artistName{
+  color: grey;
+}
+#albumImg{
+  border-radius: 10px;
+}

@@ -1,0 +1,347 @@
+:root{
+    --Def_opacity_1:0;
+    --Def_opacity_2:1;
+  }
+  /* Target the entire scrollbar */
+  ::-webkit-scrollbar {
+    /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+    /* display: none;  */
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: rgb(219, 219, 219); /* Change the background color of the track */
+    opacity: 0.1;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #a3a3a3; /* Change the color of the thumb */
+    filter: brightness(100%);  
+    border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+    border: 2px solid  #a3a3a3; /* Optional: Add a border around the thumb to create padding effect */
+    z-index: 100;
+    color: #c5c5c5;
+  }
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #989898; /* Change the thumb color on hover */
+    border:1px solid  #989898 ;
+  }
+  *{
+    color: white;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
+  }
+  .MyAccount{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5cm;
+  }
+  .first{
+    width: 90vw;
+    height: 15vh;
+    margin: 0.5cm 0cm;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 0.8cm;
+    border: none;
+    background-color: rgb(24, 24, 24);
+  }
+  .first button{
+    padding: 0.3cm 0.8cm;
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 10px;
+    border:1px solid orange;
+    background-color: rgb(255, 165, 0);
+  }
+  .first button:hover{
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 10px 0.1px rgb(255, 165, 0,0.8);
+    transition: all 0.3s ease-in-out;
+  }
+  .second{
+    width: 90vw;
+    min-width: 47vh;
+    height: auto;
+    border-radius: 10px;
+    border: none;
+    background-color: rgb(24, 24, 24);
+  }
+  .IMGcontainer{
+    width:100px ;
+    height: 100px;
+    margin: 0cm 1cm;
+    /* This is the default profile image for every user... */
+    background-image: url('/public/favicon.ico') ;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size:cover;
+    border-radius: 2cm;
+    background-color:rgb(255, 255, 255);
+  }
+  .IMGcontainer img{
+    width: 100px;
+    height: 100px;
+    border-radius: 2cm;
+  }
+  .IMGcontainer:hover{
+    cursor: pointer;
+    transform: scale(1.1);
+    transition: all 0.3s ease-in-out ;
+  }
+  .second h1{
+    margin: 0.2cm 0.5cm ;
+  }
+  .second ul{
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Creates 3 equal-width columns */
+    grid-template-rows: repeat(3, 1fr);    /* Creates 3 equal-height rows */
+    gap: 1cm; /* Optional: Adds space between grid items */
+  }
+  .second ul li div{
+    background-color: rgb(24, 24, 24);
+    color: orange;
+    width: 90px;
+    font-weight:600 ;
+    padding: 0.1cm 0.1cm;
+    border-radius: 0.5cm;
+  }
+  .second li:last-child input{
+    width: 27vw;
+  }
+  .second li:last-child div{
+    width: 250px;
+  }
+  .second li input{
+    color: black;
+    height: 5vh;
+    width: 20vw;
+    background-color: rgb(217, 217, 217);
+    border: 1px solid rgb(0, 0, 0);
+    font-size: 18px;
+    padding: 0.1cm 0.1cm ;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-radius:0.2cm;
+    outline: none;
+    &::placeholder{
+      color: black;
+      font-weight: 600;
+      font-size: 18px;
+    }
+  }
+  .second ul li{
+    margin: 0cm 0.5cm;
+  }
+  .Buttons{
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    align-items: center;
+    justify-content: center;
+    margin: 1.5cm 0cm;
+    gap: 2.5cm;
+  }
+  .Buttons button{
+    width: 150px;
+    height: 40px;
+    font-weight:650;
+    font-size:18px ;
+    text-align: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    color: rgb(255, 255, 255);
+  }
+  #SC{
+    background-color: rgb(71, 182, 255);
+  }
+  #SC:hover{
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 10px 0.1px  rgb(71, 182, 255,0.65);
+    transition: all 0.3s ease-in-out;
+  }
+  #C{
+    background-color: white;
+    color: rgb(85, 85, 85);
+  }
+  #C:hover{
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 10px 0.1px rgb(255, 255, 255,0.65);
+    transition: all 0.3s ease-in-out;
+  }
+  #DA{
+    background-color: rgb(255, 60, 60);
+  }
+  #DA:hover{
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 10px 0.1px rgb(255, 60, 60,0.65);
+    transition: all 0.3s ease-in-out;
+  }
+  .third{
+      width: 90vw;
+      min-height: 35vh;
+      height: auto;
+      border-radius: 10px;
+      border: none;
+      background-color: rgb(24, 24, 24);
+      margin: 0.5cm 0cm ;
+  }
+  .third h1{
+      margin: 0.2cm 0.5cm ;
+  }
+  /* media query for second box */
+  @media screen and (max-width:900px) {
+    .second ul{
+      display: grid;
+      grid-template-columns:repeat(3,1fr) ;
+      grid-template-rows:repeat(3,1fr) ;
+      column-gap: 0.5cm;
+    }
+  }
+  @media screen and (max-width:832px) {
+    .second ul{
+      display: grid;
+      grid-template-columns:repeat(3,1fr) ;
+      grid-template-rows:repeat(3,1fr) ;
+      column-gap: 0.3cm;
+    }
+    .second input{
+      height: 3vh;
+      width: 20vw;
+
+    }
+  }
+  @media screen and (max-width:794px) {
+    .second ul{
+      display: grid;
+      grid-template-columns:repeat(3,1fr) ;
+      grid-template-rows:repeat(3,1fr) ;
+      column-gap: 0cm;
+    }
+  }
+  #ProfilePop{
+    z-index: 1;
+    width: 99.2vw;
+    height: 100vh;
+    border-radius: 0.1cm;
+    position:absolute;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Black background with 50% opacity */
+  }
+  /* I need to make is adjusted automatically to centre... */
+  #ProfileBox{
+    z-index: 2;
+    opacity: 1;
+    width:65vh ;
+    height:35vh ;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    top: 30%;
+    left: 33%;
+    border:1px solid rgb(0, 0, 0);
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px 5px rgba(52, 52, 52, 0.5);
+    background-color: rgb(0, 0, 0);
+  }
+  #ProfileBox h2 {
+    text-align: center;
+    margin: 3px 0px;
+    color: orange; /* Ensure the text color is visible against the background */
+  }
+  .IMG2container{
+    width:150px ;
+    height: 150px;
+    margin: 0cm 1cm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url('/public/favicon.ico') ;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size:cover;
+    border-radius: 2cm;
+    background-color:rgb(255, 255, 255);
+  }
+  .IMG2container img{
+    width: 150px;
+    height: 150px;
+    border-radius: 2cm;
+  }
+  #ProfileBox form{
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.5cm 0cm;
+    flex-direction: row;
+  }
+  #ProfileBox button{
+    color: rgb(255, 255, 255);
+    padding: 10px 20px;
+    margin-right:0.1cm;
+    border-radius: 5px;
+    font-family:sans-serif;
+    border: none;
+  }
+  #ProfileBox input{
+    font-weight: 600;
+    font-size: 15px;
+  }
+  input[type="file"]::file-selector-button {
+    background-color: rgb(76, 175, 80);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+  
+.Wrapper{
+  height: 90.8vh;
+  width: 99.7vw;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+#Box{
+  width: 40vw;
+  height: 40vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+#Top{
+  font-size: 35px;
+  font-weight: 550;
+  font-variant:small-caps ;  /* New Concept ---> makes the first letter of all words "capital" and "strong"  */
+  color: white;
+}
+#Low{
+  color: #a3a3a3;
+  font-variant: small-caps;
+}

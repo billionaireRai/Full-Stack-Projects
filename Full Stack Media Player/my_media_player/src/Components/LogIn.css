@@ -1,0 +1,150 @@
+.BOSS{
+    background-color: aqua;
+    position: relative;
+    left: 35%;
+    border: none;
+    border-radius:10px ;
+    width: 30vw;
+    height: 85vh;
+    background-color: rgb(11, 11, 11);
+}
+#TopHead{
+    font-size:24px ;
+    text-align: center;
+    padding: 10px 5px;
+    font-variant: small-caps;
+    font-weight: 600;
+}
+.Red{
+    color:rgb(255, 0, 0);
+    text-align: left;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+}
+.Red img{
+    width: auto;
+    height: 20px;
+}
+.options{
+    border: 1px solid white;
+    border: none;
+    width: auto;
+    height: 60px;
+    margin-top: 10px;
+    border-radius: 10px;
+    gap: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.options button{
+    width: auto;
+    height: 36px;
+    border-radius: 10px;
+    padding: 20px 50px;
+    background-color: black;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    outline: none;
+    &:hover{
+        cursor:pointer ;
+        background-color: rgb(50, 50, 50);
+        transition: all 0.3s ease-in-out;
+    }
+}
+.options button img{
+    filter: invert(1);
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+#line{
+    position: relative;
+    top: 100px;
+    height: 0.1px;
+    width: auto;
+    color: rgb(30, 30, 30);
+}
+.input_Box{
+    display: flex;
+    gap: 12px;
+    position: relative;
+    margin: 20px 10px;
+    top: 100px;
+    flex-direction: column;
+}
+.input_Box span{
+    text-align: left;
+    font-weight: 500;
+    font-variant: small-caps;
+}
+.input_Box input {
+    border: none;
+    outline: none;
+    height: 27px;
+    padding: 8px 10px;
+    background-color: #2c2c2c;
+    border-radius: 5px;
+    color: #e0e0e0;
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    &::placeholder{
+        color: #999;
+        font-variant: small-caps;
+    }
+    &:focus{
+       background-color: #414141;
+       border: 1px solid yellow;
+       box-shadow: inset 0 5px 5px rgba(0, 0, 0, 0.5), 0 5 5px rgba(255, 255, 255, 0.8);   
+    }
+}
+#FGT{
+    position: relative;
+    top: 100px;
+    text-align: center;
+}
+
+@media (max-width:1295px) {
+    .BOSS{
+        width: 33vw;
+    }
+}
+@media (max-width:1040px) {
+    .BOSS{
+        width: 37vw;
+    }
+}
+@media (max-width:950px) {
+    .BOSS{
+        width: 50vw;
+    }
+}
+@media (max-width:900px) {
+    .BOSS{
+        width: 450px;
+    }
+}
+@media (max-width:700px) {
+    .BOSS{
+        width: 450px;
+        left:80px;
+    }
+}
+@media (max-width:699px) {
+    .BOSS{
+        width: 540px;
+    }
+}
+@media (max-width:650px) {
+    .BOSS{
+        width: 600px;
+        left: 150px;
+    }
+}

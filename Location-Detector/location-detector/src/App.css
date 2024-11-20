@@ -1,0 +1,64 @@
+/* This our main CSS file for this project... */
+:root{
+  --Def_opacity:0.2;
+}
+/* Target the entire scrollbar */
+::-webkit-scrollbar {
+  /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+  /* display: none;  */
+  width: 12px; /* Change the width of the scrollbar */
+  height: 12px; /* Change the height for horizontal scrollbar */
+}
+
+/* Target the scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background-color: rgb(219, 219, 219); /* Change the background color of the track */
+  opacity: 0.1;
+}
+
+/* Target the scrollbar thumb (handle) */
+::-webkit-scrollbar-thumb {
+  background-color: #a3a3a3; /* Change the color of the thumb */
+  filter: brightness(100%);  
+  border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+  border: 2px solid  #a3a3a3; /* Optional: Add a border around the thumb to create padding effect */
+  z-index: 100;
+  color: #c5c5c5;
+}
+
+/* Change the thumb color on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #989898; /* Change the thumb color on hover */
+  border:1px solid  #989898 ;
+}
+*{
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+nav ul li{
+  margin-top: 0cm 0.1cm;
+}
+nav ul{
+  display: flex;
+  flex-direction: row;
+  list-style-type: none;
+  gap: 1cm;
+  color: white;
+  align-items: center;
+  font-size: 17px;
+  border-radius: 0.1cm;
+  padding:0.3cm 0.5cm;
+  background-color: black;
+  box-shadow: 1px 4px 4px 1px rgb(165, 165, 165);
+}
+nav ul li Link:hover{
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: white;
+  transition: all 0.2s ease-in-out;
+}
+nav ul li:first-child{
+  font-size: 25px;
+  font-weight: 700;
+}

@@ -1,0 +1,305 @@
+:root{
+    --Def_opacity_1:0;
+    --Def_opacity_2:1;
+  }
+  /* Target the entire scrollbar */
+  ::-webkit-scrollbar {
+    /* Making the scrollbar "display none" so when the customer will land on the page he wont be able to use scroll effect throughout the webpage..   */
+    /* display: none;  */
+    width: 12px; /* Change the width of the scrollbar */
+    height: 12px; /* Change the height for horizontal scrollbar */
+    visibility: visible;
+  }
+  
+  /* Target the scrollbar track (background) */
+  ::-webkit-scrollbar-track {
+    background-color: #0f0f0f; /* Change the background color of the track */
+    opacity: 0.8;
+  }
+  
+  /* Target the scrollbar thumb (handle) */
+  ::-webkit-scrollbar-thumb {
+    background-color: #d0d0d0; 
+    filter: brightness(100%);  
+    border-radius: 10cm; 
+    border: 2px solid  #d0d0d0; 
+    z-index: 100;
+    opacity: 0.8; /* Increased opacity to 0.8 */
+}
+  
+  /* Change the thumb color on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    cursor: pointer;
+  }
+  *{
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .Main{
+    height: 90.8vh;
+    width: 99.8vw;
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    border: 1px solid white;
+    border-radius: 10px;
+    border: none;
+  }
+  .L {
+        height: auto;
+        width: 30%;
+        overflow:hidden scroll;
+        border-radius: 10px;
+        margin: 10px 10px;
+        background-color: #0f0f0f;
+        border: 1px solid #0f0f0f;
+      }
+  .R{
+    height: auto;
+    width: 70%;
+    overflow-y: scroll;
+    border-radius: 10px;
+    margin: 10px 10px;
+    border: 1px solid #0f0f0f;
+    background-color: #0f0f0f;
+  }
+  .top_portion{
+    width: auto;
+    height: 40%;
+    background-image:url("/public/briefcase.png");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+  .bottom_portion ul{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    font-size: 15px;
+    font-variant: small-caps;
+    color: white;
+    font-weight: 650;
+    margin: 10px 0px;
+    list-style-type: none;
+  }
+  .Products{
+    width: auto;
+    height: auto;
+    min-width: 35vh;
+    display: flex;
+    align-items: center;
+    font-variant: small-caps;
+    list-style-type: none;
+    flex-direction: column;
+    gap: 10px;
+    border-radius:10px ;
+  }
+  .Products div{
+      width: auto;
+      height: 30px;
+      margin: 10px 10px;
+      border-radius: 5px;
+  }
+  .Products span{
+    padding: 0px 50px;
+  }
+  .Total_Cost {
+    width: auto;
+    margin: 30px 10px;
+    font-size: 15px;
+    font-weight: 650;
+    align-items: center;
+    font-variant: small-caps;
+    justify-content: center;
+    font-variant: small-caps;
+    display: flex;
+  }
+  #cost{
+    font-size: 50px;
+    padding: 5px 20px;
+    color: orange;
+    font-variant: small-caps;
+  }
+  .heading{
+    display: flex;
+    flex-direction:column ;
+    font-variant: small-caps;
+    padding: 10px 10px;
+    gap: 10px;
+  }
+  .option{
+    width: auto;
+    height: auto;
+    position: relative;
+    top: 0cm;
+    overflow-x: hidden;
+    border-radius: 10px;
+    margin: 5px 0px ;
+  }
+  .option ul{
+    display: flex;
+    list-style-type: none;
+    flex-direction: row;
+    padding: 0.15cm 0.2cm;
+    gap: 20px;
+    justify-content: space-between;
+  }
+  .option ul button{
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: centers;
+    border-radius: 2cm;
+    outline:none;
+  }
+  .option button img:hover{
+    cursor: pointer;
+    transform: scale(1.2);
+    transition: all 0.4s ease-in-out ;
+  }
+  .methods{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 0.1cm;
+    height: 100%;
+    width: auto;
+  }
+  .methods span{
+    margin: 0.2cm 0cm;
+    font-weight: 600;
+    color: orange;
+    max-width:fit-content;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .MethodItems{
+    width: 100%;
+    min-height: 45%;
+    height: auto;
+    overflow-x:hidden ;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+  }
+  .MethodItems img{
+    width:253px ;
+    height:190px ;
+    position: relative;
+    left: 0;
+    border-radius: 10px;
+    border: 3px solid #f0f0f0;
+    outline: none;
+  }
+  .MethodItems img:hover{
+    cursor: pointer;
+    transform: scale(0.92);
+    transition:all 0.3s ease-in-out ; 
+  }
+  .FormPart ul{
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    align-items: center;
+    justify-content:space-around;
+    font-variant: small-caps;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .Lower_Part{
+    width: auto;
+    height: auto;
+    min-height: 50vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 10px 5px;
+    border-radius: 10px;
+  }
+  .Lower_Part div{
+    height: auto;
+    width: 40vw;
+    margin: 5px 15px;
+    border-radius: 10px;
+    border: none;
+  }
+  #BI span{
+    font-variant: small-caps;
+    font-weight: 600;
+    color: rgb(199, 199, 199);
+  }
+  #BI input{
+    width: 77%;
+    border: none;
+    outline: none;
+    color: black;
+    margin: 15px 0px;
+    padding: 5px 5px;
+    background-color: #d0d0d0;
+    border-radius: 5px;
+    height: 25px;
+  }
+  #BI input::placeholder{
+    color: rgb(87, 87, 87);
+    font-size: 15px;
+    font-variant: small-caps;
+    font-weight: 600;
+  }
+  #BI input:focus{
+    border:1px solid rgb(255, 165, 0);
+    box-shadow: 0px 0px 10px 1px rgb(255,165,0,0.5);
+    transition: all 0.2s ease-in-out;
+  }
+  #CCD span{
+    font-variant: small-caps;
+    font-weight: 600;
+    display: inline-flex;
+    color: rgb(199, 199, 199);
+  }
+  #CCD input{
+    width: 77%;
+    border: none;
+    outline: none;
+    color: black;
+    margin: 15px 0px;
+    padding: 5px 5px;
+    background-color: #d0d0d0;
+    border-radius: 5px;
+    height: 25px;
+  }
+  #CCD input::placeholder{
+    color: rgb(87,87,87);
+    font-size: 15px;
+    font-variant: small-caps;
+    font-weight: 600;
+  }
+  #CCD input:focus{
+    border:1px solid rgb(255, 165, 0);
+    box-shadow: 0px 0px 10px 1px rgb(255,165,0,0.5);
+    transition: all 0.2s ease-in-out;
+  }
+  #CCD section{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+  }
+  #CCD button{
+    width: 200px ;
+    height: 30px;
+    display: block;
+    color:White;
+    border: none;
+    outline: none;
+    font-size: 20px;
+    font-variant: small-caps;
+    font-weight: 650;
+    border-radius:10px ;
+    background-color: orange;
+    align-content: center;
+    justify-content: center;
+    &:hover{
+    cursor: pointer;
+    background-image: linear-gradient(to right, rgb(21, 0, 255) 0% , rgb(255,165,0)  100%);
+    transition: all 1s ease-in-out;
+    }
+  }
