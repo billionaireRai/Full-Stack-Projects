@@ -10,6 +10,7 @@ const Otp_Generator = require('otp-generator') ;
 const twilio = require('twilio'); // for phone notifications...
 const nodemailer = require('nodemailer'); // for mail functionality...
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
 const session = require('express-session');
 const jsonWebToken = require('jsonwebtoken'); // for state management bteween the requests...
 const passport = require('passport'); // Authentication middleware...
@@ -357,13 +358,13 @@ var scope = ['playlist-read-private' , 'playlist-read-collaborative' , 'user-lib
 
 // spotifies authentication system by Authorization-code flow...
 app.post('/api/spotify/authorize', toauthenticateJWT ,asyncErrorHandler(async (req, res) => {
-    console.log(req.user) ;
+    console.log("Checking is user in request object => ",req.user) ;
     const userID = await userinformation.findOne({ $or : [
         {Email : req.user.Email || req.user.UserName_Email},
         {UserName:req.user.UserName_Email}
     ]})._id ;
-    var AuthURL = spotifyWebAPi.createAuthorizeURL(scope,userID) ;
-    console.log("Redirecting the user to Authorized URL...");
+    var AuthURL = spotifyWebAPi.createAuthorizeURL(scope,userID) ; // creating authorization url...
+    console.log("Authorization URL:", AuthURL);
     res.redirect(AuthURL) ; // redirecting user to get permission to access his account... 
 }))
 

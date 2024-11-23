@@ -5,7 +5,7 @@ import React, { useRef, useEffect, useState } from 'react';
 const Library = () => {
   useEffect(() => {
     const toAuthenticateSpotify = async () => {
-       await axios.post('/api/spotify/authorize', null ,{withCredentials:true}) 
+       await axios.post('/api/spotify/authorize', null ,{withCredentials:true});
     }
    toAuthenticateSpotify();
   }, [])
