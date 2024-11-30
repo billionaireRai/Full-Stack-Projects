@@ -1,0 +1,182 @@
+.main_container {
+    border: 1px solid white;
+    border-radius: 10px;
+    width: 98vw;
+    display: flex;
+    min-height: 80vh;
+    height: auto;
+    margin: 10px 10px;
+    border: none;
+    outline: none;
+    position: relative; /* To create a containing block for positioning */
+}
+
+.left_container {
+    position: fixed; /* Fixes the position of this container */
+    width: 42.4%; /* Takes 40% of the width */
+    height: 88vh; /* Fixed height */
+    border: 1px solid white;
+    border-radius: 10px;
+    border: none;
+}
+
+.left_container * {
+    display: block;
+    visibility: visible;
+}
+
+.right_container {
+    margin-left: 43%; 
+    width: 60%; /* Takes the remaining 60% of the width */
+    height: 88vh; /* Fixed height to match the left container */
+    border: 1px solid white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.mapboxgl-ctrl-geocoder--icon-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    filter: invert(1);
+    &:hover{
+        filter: invert(0);
+    }
+}
+
+/* Make sure the parent container takes full available width */
+.mapboxgl-ctrl-top-right {
+    width: 100%;   /* Ensure it stretches across the container */
+    height: auto;  /* Allow height to adjust based on content */
+    background: none;
+}
+
+/* Make the control container take full available width */
+.mapboxgl-ctrl {
+    width: 200%;   /* Stretch it to full width */
+    background: none;
+    height: auto;  /* Allow height to adjust based on content */
+}
+
+/* Input tag should fill the full width of its parent container */
+.mapboxgl-ctrl-top-right > div{
+    border:none ;
+    width: 100%;
+    border-radius: 10px;
+    border: none;
+}
+
+/* mapboxgl-ctrl-geocoder--input  */
+.mapboxgl-ctrl-top-right > div > input {
+    font: inherit;
+    width: 100%;
+    height: 40px;      /* Fixed height for the input */
+    border: 0;
+    background-color: transparent;
+    margin: 0;
+    border-radius: 10px;
+    border: none;
+    z-index: 5;
+    padding: 5px 50px;
+    color: rgba(0, 0, 0, 0.75);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    box-sizing: border-box; /* Ensure padding is included in the width/height */
+    &:focus{
+        transition: box-shadow 0.3s ease-in-out; /* Include box-shadow in the transition */;
+        box-shadow: 0px 0px 10px 1px white;
+        border-radius: 10px;
+
+    }
+    &::placeholder{
+        font-size: 15px;
+        font-variant: small-caps;
+        font-stretch: normal;
+
+    }
+}
+
+
+.mapboxgl-ctrl-bottom-right {
+    box-shadow: 0px 0px 20px 1px blue;
+    bottom: 0;
+    right: 0;
+    border-radius: 20px;
+    display: none;
+}
+
+.mapboxgl-ctrl-bottom-left {
+    display: none;
+}
+.mapboxgl-popup {
+    display: flex;
+    left: 0;
+    font-variant: small-caps;
+    pointer-events: none;
+    background: none;
+    border: none;
+    padding-top: 10px ;
+    padding-left:10px ;
+    padding-right:10px ;
+    box-shadow: 0px 0px 10px 1px blue;
+    outline: none;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: black;
+    font-weight: 650;
+    position: absolute;
+    top: 0;
+    will-change: transform;
+}
+.mapboxgl-ctrl-geocoder--icon-search {
+    left: 7px;
+    filter: invert(1);
+    width: 20px;
+    height: 20px;
+}
+.mapboxgl-map{
+    border: 1px solid green;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+}
+.suggestions-wrapper{
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+.suggestions li {
+    border: none;
+    background-color: black;
+}
+.suggestions li a > div{
+    font-variant: small-caps;
+    font-size: 12px ;
+    font-weight: 500;
+    border: none;
+    padding: 5px 5px;
+    border-radius: 5px;
+    box-sizing:inherit;
+    background-color: black;
+    color: white;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    
+}
+.mapboxgl-ctrl-geocoder--powered-by {
+    display: none;
+}
+.mapboxgl-marker{
+    background-color: rgb(20, 20, 255);
+    left: 0;
+    opacity: 1;
+    position: absolute;
+    top: 0;
+    border-radius:30px ;
+    transition: opacity .2s;
+    will-change: transform;
+    
+}
+.mapboxgl-marker svg{
+    background-color: blue;
+    border-radius: 30px;
+}

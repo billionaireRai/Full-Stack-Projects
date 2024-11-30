@@ -4,6 +4,7 @@
   "private": true,
   "proxy": "http://localhost:7070",
   "dependencies": {
+    "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -17,6 +18,8 @@
     "framer-motion": "^11.11.17",
     "global": "^4.4.0",
     "jsonwebtoken": "^9.0.2",
+    "mapbox-gl": "^3.8.0",
+    "mongoose": "^8.8.2",
     "nodemon": "^3.1.7",
     "otp-generator": "^4.0.1",
     "react": "^18.3.1",
