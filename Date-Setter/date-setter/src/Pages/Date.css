@@ -1,3 +1,4 @@
+
 .main_container {
     border: 1px solid white;
     border-radius: 10px;
@@ -6,6 +7,7 @@
     min-height: 80vh;
     height: auto;
     margin: 10px 10px;
+    overflow: hidden hidden;
     border: none;
     outline: none;
     position: relative; /* To create a containing block for positioning */
@@ -25,14 +27,6 @@
     visibility: visible;
 }
 
-.right_container {
-    margin-left: 43%; 
-    width: 60%; /* Takes the remaining 60% of the width */
-    height: 88vh; /* Fixed height to match the left container */
-    border: 1px solid white;
-    border-radius: 10px;
-    overflow: hidden;
-}
 .mapboxgl-ctrl-geocoder--icon-close {
     width: 30px;
     height: 30px;
@@ -166,17 +160,196 @@
     display: none;
 }
 .mapboxgl-marker{
-    background-color: rgb(20, 20, 255);
+    background-color: blue;
     left: 0;
     opacity: 1;
     position: absolute;
     top: 0;
     border-radius:30px ;
-    transition: opacity .2s;
+    transition: opacity 0.2s;
     will-change: transform;
     
 }
 .mapboxgl-marker svg{
     background-color: blue;
     border-radius: 30px;
+    box-shadow: 0px 0px 20px 5px blue;
+}
+
+/* styling of right_container starts from here.... */
+.right_container {
+    margin-left: 43%; 
+    width: 60%; /* Takes the remaining 60% of the width */
+    height: 88vh; /* Fixed height to match the left container */
+    border: 1px solid white;
+    border-radius: 10px;
+    color: white;
+    border: none;
+    overflow: scroll;
+}
+.right_container .heading{
+    font-size: 24px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    color: rgb(255, 0, 200);
+    border-bottom: 1px solid grey ;
+    font-weight: 600;
+    font-variant: small-caps;
+}
+.text-content p{
+    padding: 10px 10px;
+    word-spacing: 5px;
+    font-variant: small-caps;
+    line-height: 25px;
+}
+.lowerPart{
+    border: 1px solid white;
+    border-radius: 10px;
+    color: white;
+    height: auto;
+    border: none;
+    display: flex;
+    flex-direction:column ;
+    gap: 10px;
+    padding:10px 10px ;
+}
+.infoBox{
+    border: 1px solid white;
+    border-radius: 10px;
+    border: none;
+    transition: all 0.4s ease-in-out linear ;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+}
+.textInfo{
+    color: white;
+    display: flex;
+    padding: 10px 5px;
+    flex-direction: column;
+    gap: 5px;
+}
+.textInfo div{
+    border: 1px solid white;
+    border: none;
+    outline:none;
+    font-variant: small-caps;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    padding: 5px 0px;
+
+}
+.textInfo b{
+    display: flex;
+    align-items: center;
+    color: rgb(108, 108, 255);
+    text-align: left;
+}
+.textInfo p{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 16px;
+    text-align: left;
+}
+.infoBox img{
+    width: 50%;
+    height: auto;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    margin: 5px 5px;
+    border: 1px solid white;
+}
+.lowerPart select {
+    color: white;
+    min-width: 400px;
+    height: 40px;
+    padding: 10px 10px ;
+    margin: 30px 0px;
+    font-variant: small-caps;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0px 0px 10px 1px grey;
+}
+.lowerPart select option{
+    border: none;
+}
+#statement{
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 10px 10px;
+    font-variant: small-caps;
+    flex-direction: row;
+    gap: 10px;
+}
+#statement span{
+    font-size: 30px;
+    font-weight: 650;
+    color: rgb(255, 0, 174);
+    background: none;
+    text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.8);
+}
+#chooseText{
+    font-style:normal;
+    font-variant: small-caps;
+    padding: 5px 10px;
+}
+#last{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 100px;
+}
+.lowerPart ul{
+    display: flex;
+    flex-direction: row;
+    gap: 0px;
+}
+.lowerPart ul li button {
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    background-color: rgb(255, 0, 238);
+    padding: 5px 30px;
+    transition: all 0.3s ease-in-out;
+    &:hover {
+        cursor: pointer;
+        box-shadow: 0px 0px 15px 3px rgb(255, 0, 238);
+    }
+}
+/* Style the checkbox input */
+#last input[type="checkbox"] {
+    appearance: none; /* Remove default styling */
+    -webkit-appearance: none; /* For Safari */
+    width: 20px; /* Set width */
+    height: 20px; /* Set height */
+    border: 1px solid rgb(255, 0, 238); /* Border color */
+    border-radius: 4px; /* Rounded corners */
+    background-color: black; /* Background color */
+    cursor: pointer; /* Change cursor to pointer */
+    outline: none; /* Remove outline */
+    transition: background-color 0.3s, border-color 0.3s; /* Smooth transition */
+}
+
+/* Style for when the checkbox is checked */
+#last input[type="checkbox"]:checked {
+    background-color: rgb(255, 0, 238); /* Change background color when checked */
+    border-color: white; /* Change border color when checked */
+}
+
+/* Optional: Add a checkmark using a pseudo-element */
+#last input[type="checkbox"]:checked::before {
+    content: '✔'; /* Checkmark character */
+    color: white; /* Checkmark color */
+    position: absolute; /* Positioning */
+    left: 5px; /* Adjust position */
+    top: 0; /* Adjust position */
+    font-size: 16px; /* Size of the checkmark */
 }

@@ -44,7 +44,7 @@ const LandingPage = ({ dotstate ,crushName , setcrushName }) => {
               console.error('An Error occurred in making request from FRONTEND:', error);
           }
       }
-      requestForImages();
+      // requestForImages();
   }, []);
   // logic to send crush coordinates to the backend...
   useEffect(() => {
@@ -113,7 +113,7 @@ const LandingPage = ({ dotstate ,crushName , setcrushName }) => {
               <div className='Red'><img src="./Images/warning.png" alt="img" /><span>{formState.errors.CuteName.message}</span></div>
             )}
             <span>Email-Id</span>
-            <input type="email" placeholder='Enter your Email_Id' {...register('Email_Id', {
+            <input type="email" placeholder='Enter your personal Email_Id' {...register('Email_Id', {
               required: { value: true, message: 'This Field is required for Notification logic of this software...' },
               pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Invalid email format...' }
             })} />

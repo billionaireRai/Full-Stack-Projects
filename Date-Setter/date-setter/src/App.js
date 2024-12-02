@@ -25,7 +25,7 @@ function App() {
    <motion.div style={{ transformOrigin: '0%', height: '5px', borderRadius: '10px', zIndex: 6, scaleX:scaleX , backgroundColor: 'yellow', width: '100%', position: 'fixed', top: 0 }}/>
     <div className="App">
       <nav>
-        <div id='mainHeading'><NavLink to="/home"><img id='heart' src='/Images/heart-attack.png' alt="heart" /><span>forMyCrush</span></NavLink></div>
+        <div id='mainHeading'><NavLink to="/home"><img id='heart' src='/Images/heart-attack.png' alt="heart" /><span>HangoutNavigator</span></NavLink></div>
         <ul>
           <li><NavLink activeClassName='active' style={({ isActive }) => ({ color: isActive ? 'blue' : 'white' })} to="/home"><img src="/Images/home.png" alt="home" /><span>Home</span></NavLink></li>
           <li><NavLink activeClassName='active' style={({ isActive }) => ({ color: isActive ? 'blue' : 'white' })} to="/about"><img src="/Images/about.png" alt="about" /><span>About</span></NavLink></li>
@@ -34,7 +34,7 @@ function App() {
       </nav>
         <Routes>
           <Route path="/home" element={<LandingPage dotstate={prev} crushName={crushName} setcrushName={setcrushName} />} />
-          <Route path="/" element={<LandingPage dotstate={prev} />} />
+          <Route path="/" element={<LandingPage dotstate={prev} crushName={crushName} setcrushName={setcrushName} />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/location-setter" element={<Date crushName={crushName} dotstate={prev}/>} />
           <Route path="/topSecret" element={<SecretPage />} />
