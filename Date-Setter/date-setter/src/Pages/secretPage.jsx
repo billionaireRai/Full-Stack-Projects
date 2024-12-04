@@ -1,4 +1,4 @@
-import './secretPage.css';
+import './secretPage.css'
 import React from 'react'
 
 const secretPage = () => {

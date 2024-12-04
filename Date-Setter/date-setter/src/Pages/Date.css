@@ -321,7 +321,7 @@
     transition: all 0.3s ease-in-out;
     &:hover {
         cursor: pointer;
-        box-shadow: 0px 0px 15px 3px rgb(255, 0, 238);
+        box-shadow: 0px 0px 10px 3px rgb(255, 0, 238);
     }
 }
 /* Style the checkbox input */
@@ -340,7 +340,7 @@
 
 /* Style for when the checkbox is checked */
 #last input[type="checkbox"]:checked {
-    background-color: rgb(255, 0, 238); /* Change background color when checked */
+    background-color: yellow; /* Change background color when checked */
     border-color: white; /* Change border color when checked */
 }
 
@@ -352,4 +352,9 @@
     left: 5px; /* Adjust position */
     top: 0; /* Adjust position */
     font-size: 16px; /* Size of the checkmark */
+}
+.right_container {
+    overflow-x: hidden;
+    scrollbar-width: thin; 
+    scrollbar-color: rgb(255, 0, 238) black; /* Thumb color and track color */
 }

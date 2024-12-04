@@ -1,0 +1,156 @@
+
+#topDiv{
+    border: 1px solid white;
+    padding: 10px 10px;
+    border-radius: 10px;
+    width: 95vw;
+    height: 86vh;
+    gap: 5px;
+    display: flex;
+    border: none;
+    overflow-y: hidden;
+    flex-direction: row;
+    margin:0px 10px;
+}
+
+.left{
+    border:1px solid white ;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    display: flex;
+    overflow-y: scroll;
+    flex-direction: column;
+    scrollbar-width: thin; 
+    scrollbar-color: rgb(255, 0, 238) black; 
+    align-items: center;
+    width: 40%;
+    height: 100%;
+}
+.left video {
+    width: 100%;
+    height: auto; 
+    border-radius: 10px;
+    filter:brightness(100%);
+}
+.right{
+    border: 1px solid white;
+    width: 60%;
+    border: none;
+    overflow-y: hidden;
+    border-radius: 10px;
+    scrollbar-width: thin; 
+    scrollbar-color: rgb(255, 0, 238) black; /* Thumb color and track color */
+}
+.header{
+    font-size: 25px;
+    margin: 5px 10px;
+    font-variant: small-caps;
+    overflow: hidden;
+    color: rgb(124, 124, 255);
+}
+.description{
+    color: white;
+    margin:5px 10px;
+    line-height: 30px;
+    font-variant: small-caps;
+}
+#Asker{
+    padding: 10px 10px;
+    font-size: 20px;
+    border-radius: 10px;
+    border-bottom: 1px solid gray;
+    font-weight: 500;
+    font-variant: small-caps;
+}
+#FORM{
+    display: flex;
+    font-variant: small-caps;
+    padding: 10px 20px;
+    gap: 5px;
+    margin: 5px 10px;
+    box-shadow: 0px 0px 10px 3px rgb(255, 192, 203,0.5) ;
+    flex-direction: column;
+}
+#FORM span{
+    text-align: left;
+    font-weight: 500;
+    font-variant: small-caps;
+}
+#FORM input {
+    border: none;
+    outline: none;
+    height: 27px;
+    padding: 3px 10px;
+    background-color: #2c2c2c;
+    border-radius: 5px;
+    color: #e0e0e0;
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    &::placeholder{
+        color: #999;
+        font-variant: small-caps;
+    }
+    &:focus{
+       background-color: #414141;
+       border: 1px solid pink;
+       box-shadow: inset 0 5px 5px rgba(0, 0, 0, 0.5), 0 5 5px rgba(255, 255, 255, 0.8);   
+    }
+}
+#FORM input::placeholder{
+    color: grey;
+    font-variant: small-caps;
+}
+#FORM button{
+    padding: 5px 10px;
+    width: 50%;
+    color: white;
+    text-align: center;
+    margin: 10px 0px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    background-color: rgb(255, 0, 204);
+    transition: background-color 0.2s ease-in-out;
+}
+
+#FORM button:hover{
+    cursor: pointer;
+    background-color: rgb(255, 75, 219);
+}
+#question{
+    color: white;
+    font-size: 20px;
+    text-align: center;
+    color: rgb(124, 124, 255);
+    margin: 20px 0px;
+    font-variant: small-caps;
+}
+.right ul li button{
+    color: white;
+    width: 100px;
+    height: 30px;
+    border-radius:10px ;
+    font-variant: small-caps;
+    border: none;
+    box-shadow: none;
+}
+#yes{
+    background-color: rgb(0, 255, 0);
+    transition: transform 0.5s ease-in-out , box-shadow 0.5s ease-in-out; /* Specify properties to transition */
+    &:hover{
+        cursor: pointer;
+        transform: scale(1.05);
+        box-shadow: 5px 5px 5px 1px rgb(0, 255, 0);
+    }
+}
+#no {
+    background-color: red; 
+    transition: transform 0.5s ease-in-out , box-shadow 0.5s ease-in-out; /* Specify properties to transition */
+}
+#no:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    box-shadow: 5px 5px 5px 1px rgb(255, 0, 0);
+}

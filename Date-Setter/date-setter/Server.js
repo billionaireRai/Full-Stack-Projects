@@ -3,7 +3,10 @@ const express = require('express');
 const crushinfo = require('./Backend/crushModel.js') ;
 const cors = require("cors") ;
 const jsonWebToken = require('jsonwebtoken') ;
+const nodeMailer = require('nodemailer') ;
 const bcryptJS = require('bcryptjs');
+const twilio = require('twilio') ;
+const {Transform} = require('stream');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const generateOtp = require('otp-generator'); 
@@ -27,6 +30,21 @@ app.use((error, req, res, next) => {
     console.log(`The error statusCode : ${error.statusCode} , error status : ${error.status}  & Text ${error.message}`);
     res.status(error.statusCode).json({ status: error.statusCode, message: error.message });
   });
+
+  // middleware for authenticating JWT for some routes...
+const toauthenticateJWT = asyncErrorHandler(async (req, res) => {
+  const token = req.cookies['jwt'];
+  console.log('Token:', token); // Debugging line...
+  if (!token) return res.status(401).json({ message: 'Unauthorized request please register first...' });
+  try {
+      const decoded = jsonWebToken.verify(token, process.env.SECRET_FOR_JWT);
+      console.log('Decoded payload:', decoded); // Debugging line
+      req.crushDetails = decoded.payload ; // setting the payload to the user object...
+  } catch (error) {
+      console.log('JWT verification error:', error); // Debugging line
+      return res.status(401).json({ message: 'Invalid token, please login again.' });
+  }
+});
 
 app.use(cookieparser());
 app.use(cors({
@@ -97,7 +115,7 @@ app.post('/api/crush/information', asyncErrorHandler(async (req, res) => {
 
   await newCrushDocument.save(); // Save new document
   delete serverStorage.crushLocation; // Clean up location
-  sendJwtCookie(res, newCrushDocument); // Send JWT cookie
+  sendJwtCookie(res, newCrushDocument); // Send JWT cookie...
   res.status(200).json({ message: "Welcome to my software, sweetheart!" });
 }));
 
@@ -118,101 +136,169 @@ app.post('/api/crush/location',asyncErrorHandler( async (req, res) => {
 
 app.post('/api/fetch/hangout-details', asyncErrorHandler(async (req, res) => {
   const { latitude, longitude } = req.body;
+  console.log(latitude, longitude); // Debugging step...
   async function getHangoutInformation(lat, long) {
-    const uriToRequest = `https://api.foursquare.com/v3/places/search?ll=${encodeURIComponent(lat)},${encodeURIComponent(long)}&radius=${encodeURIComponent(6000)}&query=hangout&categories=${encodeURIComponent(process.env.RESTRAUNT_CODE)},${encodeURIComponent(process.env.MALL_CODE)},${encodeURIComponent(process.env.PARK_CODE)},limit=20`;
-    // Fetch the initial hangout details
-    const response = await axios.get(uriToRequest,{maxContentLength:8000 , headers:{ Authorization: `Bearer ${process.env.FOURSQUARE_API_KEY}`}}); 
-    const hangoutDetails = response.data.results;
-    // Function to fetch up to 10 photos for a given place
-    const getPictures = async (fsq_id) => {
-      const urlForPictures = `https://api.foursquare.com/v3/places/${encodeURIComponent(parseInt(fsq_id))}/photos?limit=5`;  
-      try {
-        const responseForPictures = await axios.get(urlForPictures,{ maxContentLength:8000 ,headers:{ Authorization: `Bearer ${process.env.FOURSQUARE_API_KEY}`}});
-        const photos = responseForPictures.data.results;
-        return photos.map(photo => `${photo.prefix}${photo.suffix}`);  // Return array of image URLs
-      } catch (error) {
-        console.error(`Error fetching photos for fsq_id ${fsq_id}: `, error);
-        return [];   // returning empty array if some error occurs...
+    try {
+      // Create the Google Places API endpoint URL
+      const googleMapsApiUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
+      const params = new URLSearchParams({
+        location: `${lat},${long}`,
+        radius: 6000, // 6 km radius
+        key: process.env.GOOGLE_MAPS_API_KEY
+      });
+
+      const response = await axios.get(`${googleMapsApiUrl}?${params.toString()}`);
+      // Log the full API response to debug
+      console.log('Google API Response:', response.data);
+
+      if (response.status !== 200 || !response.data.results) {
+        console.log("Error in Google Places request:", response.data.error_message);
+        return res.status(500).json({ error: "Failed to fetch hangout information" });
       }
-    };
 
-    // Use Promise.all to fetch hangout details and images concurrently
-    const hangoutDetailsArray = await Promise.all(hangoutDetails.map(async (hangout) => {
-      const imgURLs = await getPictures(hangout.fsq_id);  // Get up to 10 images
-      return { name: hangout.name, address: hangout.location, rating: hangout.rating, distance: hangout.distance, category: hangout.categories,
-        urls: imgURLs,  // Store the array of image URLs
+      const results = response.data.results; // Business results array from Google Places...
+
+      // Function to fetch photos for a business (Google Places specific)
+      const getPictures = async (placeId) => {
+        const photoUrl = 'https://maps.googleapis.com/maps/api/place/photo';
+        const params = new URLSearchParams({
+          photoreference: placeId,
+          maxwidth: 400, // You can adjust the size here
+          key: process.env.GOOGLE_MAPS_API_KEY
+        });
+        
+        try {
+          const photoResponse = await axios.get(`${photoUrl}?${params.toString()}`);
+          return photoResponse.config.url; // Returns the full URL of the photo
+        } catch (error) {
+          console.error(`Error fetching photos for place_id ${placeId}:`, error);
+          return null; // Return null if no photo
+        }
       };
-    }));
 
-    return hangoutDetailsArray ;
+      // Fetch hangout details with necessary information
+      const hangoutDetailsArray = await Promise.all(results.map(async (place) => {
+        // Fetching photos and handling the photo data.
+        const imgURLs = place.photos ? await Promise.all(
+          place.photos.map(async (photo) => await getPictures(photo.photo_reference))
+        ) : [];
+
+        return {
+          name: place.name || 'No name',
+          address: place.vicinity || 'No address provided',
+          city: place.vicinity ? place.vicinity.split(',')[0] : 'No city', // extracting city from vicinity
+          rating: place.rating || 'No rating',
+          distance: place.distance || 0,
+          category: place.types || ['No category'], // Google Places returns types
+          price_level: place.price_level ?? 'Not Available',
+          urls: imgURLs.filter(Boolean), // Remove nulls from photo URLs
+        };
+      }));
+      
+      console.log('Hangout Details Array:', hangoutDetailsArray);
+      return hangoutDetailsArray;
+
+    } catch (error) {
+      console.error("Error fetching hangout information:", error);
+      return res.status(500).json({ error: "Error fetching hangout details" });
+    }
   }
-  // Fetch and return the hangout details
+  // Call the function to get hangout details
   const hangoutDetailsArr = await getHangoutInformation(latitude, longitude);
-  console.log(hangoutDetailsArr);
-  res.status(200).json({ message: "Hangout details successfully fetched", infoArray: hangoutDetailsArr }); // sending response...
+  res.status(200).send(hangoutDetailsArr); // Send the details in the response
+
 }));
 
-// final structure of returned entity...
-// {
-//   "message": "Hangout details successfully fetched",
-//   "infoArray": [
-//     {
-//       "name": "Hangout Place Name 1",
-//       "address": {
-//         "formatted_address": "123 Example St, City, Country",
-//         "cross_street": "Near Example Cross Street",
-//         "postal_code": "12345",
-//         "city": "City",
-//         "state": "State",
-//         "country": "Country"
-//       },
-//       "rating": 4.5,
-//       "distance": 1200,
-//       "category": [
-//         {
-//           "id": "category_id",
-//           "name": "Category Name"
-//         }
-//       ],
-//       "urls": [
-//         "https://example.com/photo1.jpg",
-//         "https://example.com/photo2.jpg",
-//         "https://example.com/photo3.jpg",
-//         "https://example.com/photo4.jpg",
-//         "https://example.com/photo5.jpg"
-//       ]
-//     },
-//     {
-//       "name": "Hangout Place Name 2",
-//       "address": {
-//         "formatted_address": "456 Another St, City, Country",
-//         "cross_street": "Near Another Cross Street",
-//         "postal_code": "67890",
-//         "city": "City",
-//         "state": "State",
-//         "country": "Country"
-//       },
-//       "rating": 4.0,
-//       "distance": 800,
-//       "category": [
-//         {
-//           "id": "category_id",
-//           "name": "Category Name"
-//         }
-//       ],
-//       "urls": [
-//         "https://example.com/photo1.jpg",
-//         "https://example.com/photo2.jpg"
-//       ]
-//     }
-//     // More hangout places can follow...
-//   ]
-// }
 
 
-app.post('apiurl', asyncErrorHandler(async (req,res) => {
-  
+app.post('/api/finalizing/mail', toauthenticateJWT, asyncErrorHandler(async (req, res) => {
+  const { selectedPlace } = req.body;
+  const { Email } = req.crushDetails;
+
+  if (!selectedPlace || !Email) return res.status(400).send('Either Place or CrushDetails is missing...');
+  console.log("Place selected by your crush =>", selectedPlace);
+  console.log("Email Id =>", Email);
+
+  delete selectedPlace.urls; // deleting the image url array...
+  const transporter = nodeMailer.createTransport({
+      service: 'gmail',
+      auth: { user: process.env.MY_MAILID,pass: process.env.MY_MAIL_PASSWORD }
+  });
+  const mailOptions = {
+      from: process.env.MY_MAILID,
+      to: Email,
+      subject: 'Confirmation of Hangout with Amritansh',
+      text: `Hey there ${Email}! 🎉\n\nGreat news! You've picked ${selectedPlace.name} for our hangout! 🥳\nLet’s chat about when we should go—just shoot me a text or give me a call whenever you're free!\n\nCan't wait to hang out! 😄\n\n🗺️ Location you choose: ${selectedPlace}`
+  };
+
+  await new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              console.log("Error in sending the mail to crush =>", error);
+              reject(error);
+          } else {
+              console.log("Mail sent successfully to crush =>", info);
+              resolve(info);
+          }
+      });
+  });
+
+  // sending a mail to me...
+  const mailOptionsToMe = {
+      from: process.env.MY_MAILID,
+      to: process.env.MY_MAILID,
+      subject: 'Hangout Confirmed',
+      text: `Hey there! 🎉Great news! \n\n Your crush with Details => ${req.crushDetails} \n
+      Have selected Location for Hangout => ${selectedPlace}.\n
+      Can't wait to hang out! 😄`
+  };
+
+  await new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptionsToMe, (error, info) => {
+          if (error) {
+              console.log("Error in sending the mail to yourself =>", error);
+              reject(error);
+          } else
+          console.log("Mail sent successfully to yourself =>", info);
+          resolve(info)
+      })
+})
+})) ;
+app.post('/api/connect/socialMedia', toauthenticateJWT ,asyncErrorHandler(async (req,res) => { 
+  const {Insta_ID ,FaceBook_ID ,Twitter_ID,crush_DOB} = req.body ;
+  const { Email , Password , PhoneNumber} = req.crushDetails ; // extracting information setted by the JWT...
+  console.log(req.body) // debugging step...
+  var crushDocument = await crushinfo.findOne({Email: Email,PhoneNumber:PhoneNumber});
+  const matched = await bcryptJS.compare(Password,crushDocument.Password) ;
+  if(!matched) {
+    console.log("You are not the user whose credentials are entered...");
+    return res.status(401).json({message: "Please Enter your credentials only"}) ;
+  }
+  // updating the document with other credentials...
+  crushDocument.Instagram_ID = Insta_ID ;
+  crushDocument.FaceBook_ID = FaceBook_ID ;
+  crushDocument.Twitter_ID = Twitter_ID ;
+  crushDocument.DOB = crush_DOB ;
+  await crushinfo.updateOne({Email: Email,PhoneNumber:PhoneNumber},crushDocument) ; // statement for updating...
+  // No need to handle absence of crushDocument as it is authenticated by JWT...
+  console.log("Updated crush document =>",crushDocument) ;  
+  res.status(200).json({message: "Social Media IDs updated successfully!"});
+
 }));
+
+app.get('/api/crush/feedback', asyncErrorHandler(async (req,res) => { 
+  const { responseText } = req.body ;
+  console.log("Crush Response =>",responseText) ; // debugging step...
+  // sending response on my phoneNumber...
+  const client = new twilio(process.env.TWILIO_SID,process.env.TWILIO_AUTHTOKEN,{lazyLoading:true,maxRetries:2,autoRetry:true}) ;
+  const message = await client.message.create({
+    from: process.env.MY_PHONE_NUMBER ,
+    to: process.env.MY_PHONE_NUMBER ,
+    body: `Feedback of your crush on the software is ${responseText}`
+  });
+  console.log("Feedback sent to me =>",message.sid) ;
+  res.status(200).json({message: "Feedback sent successfully to your PhoneNumber!"});
+ }))
 
 app.listen(port, () => {
   console.log(`Date-Setter application is listening on port ${port}`)

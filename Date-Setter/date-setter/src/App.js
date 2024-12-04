@@ -1,8 +1,8 @@
 import './App.css';
 import LandingPage from './Pages/landingPage.jsx';
-import SecretPage from './Pages/secretPage.jsx';
 import AboutPage from './Pages/aboutPage.jsx';
 import Date from './Pages/Date.jsx';
+import secretPage from './Pages/secretPage.jsx'
 import React,{useState,useEffect} from 'react';
 import { useScroll , motion , useSpring} from "framer-motion"; 
 import { Routes, Route, NavLink } from 'react-router-dom';
@@ -29,15 +29,15 @@ function App() {
         <ul>
           <li><NavLink activeClassName='active' style={({ isActive }) => ({ color: isActive ? 'blue' : 'white' })} to="/home"><img src="/Images/home.png" alt="home" /><span>Home</span></NavLink></li>
           <li><NavLink activeClassName='active' style={({ isActive }) => ({ color: isActive ? 'blue' : 'white' })} to="/about"><img src="/Images/about.png" alt="about" /><span>About</span></NavLink></li>
-          <li><NavLink activeClassName='active' style={({ isActive }) => ({ color: isActive ? 'blue' : 'white' })} to="/topSecret"><img src="/Images/secret-file.png" alt="secret" /><span>Top_Secret</span></NavLink></li>
+          <li><NavLink activeClassName='active' style={({ isActive }) => ({ color: isActive ? 'blue' : 'white' })} to="/mySecret"><img src="/Images/secret-file.png" alt="about" /><span>secret</span></NavLink></li>
         </ul>
       </nav>
         <Routes>
           <Route path="/home" element={<LandingPage dotstate={prev} crushName={crushName} setcrushName={setcrushName} />} />
           <Route path="/" element={<LandingPage dotstate={prev} crushName={crushName} setcrushName={setcrushName} />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/about" element={<AboutPage dotState={prev} />} />
+          <Route path="/mySecret" element={<secretPage/>} />
           <Route path="/location-setter" element={<Date crushName={crushName} dotstate={prev}/>} />
-          <Route path="/topSecret" element={<SecretPage />} />
         </Routes>
     </div>
   </>

@@ -20,6 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "mapbox-gl": "^3.8.0",
     "mongoose": "^8.8.2",
+    "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
     "otp-generator": "^4.0.1",
     "react": "^18.3.1",
@@ -28,6 +29,7 @@
     "react-router-dom": "^6.28.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.6",
+    "twilio": "^5.3.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
