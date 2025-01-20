@@ -33,12 +33,10 @@ app.use((error, req, res, next) => {
 
   // middleware for authenticating JWT for some routes...
 const toauthenticateJWT = asyncErrorHandler(async (req, res) => {
-  const token = req.cookies['jwt'];
-  console.log('Token:', token); // Debugging line...
+  const token = req.cookies['crushCredentials']; // taking out the jwt token containing crush information...
   if (!token) return res.status(401).json({ message: 'Unauthorized request please register first...' });
   try {
       const decoded = jsonWebToken.verify(token, process.env.SECRET_FOR_JWT);
-      console.log('Decoded payload:', decoded); // Debugging line
       req.crushDetails = decoded.payload ; // setting the payload to the user object...
   } catch (error) {
       console.log('JWT verification error:', error); // Debugging line
@@ -91,7 +89,7 @@ app.post('/api/crush/information', asyncErrorHandler(async (req, res) => {
   };
   // Function to create and send a JWT cookie
   const sendJwtCookie = (res, userDoc) => {
-      const userObject = userDoc.toObject();
+      const userObject = userDoc.toObject();  // converting it into a object from object instance...
       const token = jsonWebToken.sign(userObject, process.env.SECRET_FOR_JWT, { expiresIn: '1h' });
       res.cookie('crushCredentials', token, { httpOnly: true, maxAge: 3600000, secure: false, sameSite: 'strict' });
   };
@@ -106,7 +104,7 @@ app.post('/api/crush/information', asyncErrorHandler(async (req, res) => {
           await existingGirl.save(); // Save updated document
           delete serverStorage.crushLocation; // Clean up location
           sendJwtCookie(res, existingGirl); // Send JWT cookie
-          return; // Stop further execution
+          return res.status(200).json({ message: "Girl already exists, and password is valid" });
       }
   }
   // Hash the new password and create a new crush document...
@@ -117,6 +115,19 @@ app.post('/api/crush/information', asyncErrorHandler(async (req, res) => {
   delete serverStorage.crushLocation; // Clean up location
   sendJwtCookie(res, newCrushDocument); // Send JWT cookie...
   res.status(200).json({ message: "Welcome to my software, sweetheart!" });
+}));
+
+// ednpoint for generating random images of ...
+app.post('/api/generate_randomImages', asyncErrorHandler(async (req, res) => {
+  const queryArray = ["Adore", "Affection", "Amour", "Angel", "Beloved", "Bliss", "Cherish", "Cupid", "Darling", "Desire", "Devotion", "Dream", "Embrace", "Endearment", "Euphoria", "Fairy", "Flame", "Fondness", "Forever", "Gaze", "Giggle", "Heart", "Honey", "Hope", "Hug", "Joy", "Kiss", "Laughter", "Lover", "Loving", "Magic", "Memories", "Moonlight", "Passion", "Promise", "Radiance", "Romance", "Rose", "Savor", "Secret", "Serenade", "Snuggle", "Soulmate", "Sparkle", "Sweetheart", "Tender", "Together", "Treasure", "Trust", "Twinkle", "Unity", "Valentine", "Warmth", "Whisper", "Wish", "Adoration", "Affectionate", "Allure", "Blossom", "Bond", "Cuddle", "Dewdrop", "Enchant", "Eternal", "Felicity", "Flourish", "Glimmer", "Heartfelt", "Happiness", "Intimacy", "Joyful", "Kismet", "Laughter", "Lullaby", "Magnetism", "Nurture", "Paradise", "Radiant", "Reverie", "Romantic", "Serenity", "Smitten", "Spark", "Sunshine", "Sweetness", "Tenderness", "Togetherness", "Tryst", "Utopia", "Vow", "Wanderlust", "Whimsy", "Yearn", "Zeal", "Zest"];
+  const randomQueryIndex = Math.floor(0 + 99 * Math.random()) ;
+  const response = await axios.get(`${process.env.UNSPLASH_BASE_URI}?query=${queryArray[randomQueryIndex]}&count=9`, {
+      headers: {
+          Authorization: `Client-ID ${process.env.UNSPLASH_API_KEY}`
+      }
+  }); 
+  const images = response.data.map(image => image.urls.small); // Adjust the size as needed
+  res.json({ data: images });
 }));
 
 // endpoint for handling the crush coordinates...
@@ -134,82 +145,80 @@ app.post('/api/crush/location',asyncErrorHandler( async (req, res) => {
   res.status(200).json({message:"Location successfully updated"}); 
 }));
 
-app.post('/api/fetch/hangout-details', asyncErrorHandler(async (req, res) => {
+app.post('/api/fetch/hangout-details', toauthenticateJWT , asyncErrorHandler(async (req, res) => {
   const { latitude, longitude } = req.body;
-  console.log(latitude, longitude); // Debugging step...
+  const { Location } = req.crushDetails ;
+  const state = Location.state ;
+  const state_district = Location.state_district ;
+  console.log('Received Latitude and Longitude:', latitude, longitude); // Debugging step...
+  console.log("Location of crush =>",Location);
   async function getHangoutInformation(lat, long) {
     try {
-      // Create the Google Places API endpoint URL
-      const googleMapsApiUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
-      const params = new URLSearchParams({
-        location: `${lat},${long}`,
+      const params = {
+        at: `${lat},${long}`,
+        limit: 20,
         radius: 6000, // 6 km radius
-        key: process.env.GOOGLE_MAPS_API_KEY
-      });
+        sort: 'distance',
+        q: `${process.env.RESTAURANT_CATEGORY},${process.env.PARK_CATEGORY},${process.env.MALL_CATEGORY},${process.env.BOOK_STORE_CATEGORY},${process.env.ZOO_CATEGORY},${process.env.CAFE_CATEGORY},hangoutPlaces,${state},${state_district}`,
+        apiKey: process.env.HERE_MAP_APIKEY, // Add API key as a query parameter
+      };
+      const response = await axios.get('https://discover.search.hereapi.com/v1/discover', { params }); 
 
-      const response = await axios.get(`${googleMapsApiUrl}?${params.toString()}`);
-      // Log the full API response to debug
-      console.log('Google API Response:', response.data);
-
-      if (response.status !== 200 || !response.data.results) {
-        console.log("Error in Google Places request:", response.data.error_message);
+      // Check if the response contains the expected data
+      if (response.status !== 200) {
+        console.log("Error: API request failed with status", response.status);
         return res.status(500).json({ error: "Failed to fetch hangout information" });
       }
 
-      const results = response.data.results; // Business results array from Google Places...
+      if (!Array.isArray(response.data.items)) {
+        console.log("Error: No items found in the response:", response.data);
+        return res.status(500).json({ error: "No items found" });
+      }
 
-      // Function to fetch photos for a business (Google Places specific)
-      const getPictures = async (placeId) => {
-        const photoUrl = 'https://maps.googleapis.com/maps/api/place/photo';
-        const params = new URLSearchParams({
-          photoreference: placeId,
-          maxwidth: 400, // You can adjust the size here
-          key: process.env.GOOGLE_MAPS_API_KEY
-        });
-        
-        try {
-          const photoResponse = await axios.get(`${photoUrl}?${params.toString()}`);
-          return photoResponse.config.url; // Returns the full URL of the photo
-        } catch (error) {
-          console.error(`Error fetching photos for place_id ${placeId}:`, error);
-          return null; // Return null if no photo
-        }
-      };
-
-      // Fetch hangout details with necessary information
-      const hangoutDetailsArray = await Promise.all(results.map(async (place) => {
-        // Fetching photos and handling the photo data.
-        const imgURLs = place.photos ? await Promise.all(
-          place.photos.map(async (photo) => await getPictures(photo.photo_reference))
-        ) : [];
-
-        return {
-          name: place.name || 'No name',
-          address: place.vicinity || 'No address provided',
-          city: place.vicinity ? place.vicinity.split(',')[0] : 'No city', // extracting city from vicinity
-          rating: place.rating || 'No rating',
-          distance: place.distance || 0,
-          category: place.types || ['No category'], // Google Places returns types
-          price_level: place.price_level ?? 'Not Available',
-          urls: imgURLs.filter(Boolean), // Remove nulls from photo URLs
-        };
-      }));
-      
-      console.log('Hangout Details Array:', hangoutDetailsArray);
-      return hangoutDetailsArray;
-
+      // Process the data and fetch hangout details
+     const hangoutDetailsArray = await Promise.all(response.data.items.map(async place => {
+     const address = place.address || {};    // Extract address details
+     const position = place.position || {};
+    const randomIndex = place.categories.length > 0 ? Math.floor(Math.random() * (place.categories.length - 1)) : 0;
+    let cuteImage = 'No image available'; // Default value in case of failure...
+    try {
+      const unplashResponse = await axios.get(`${process.env.UNSPLASH_BASE_URI}?query=${place.categories[randomIndex]}&count=1`,{
+        headers: { Authorization: `Client-ID ${process.env.UNSPLASH_API_KEY}`}
+      });
+      cuteImage = unplashResponse.data[0].urls.small || cuteImage; // Use optional chaining...
     } catch (error) {
-      console.error("Error fetching hangout information:", error);
-      return res.status(500).json({ error: "Error fetching hangout details" });
+      console.log("Error in UNSPLASH image fetching logic =>",error.message);
     }
-  }
-  // Call the function to get hangout details
-  const hangoutDetailsArr = await getHangoutInformation(latitude, longitude);
-  res.status(200).send(hangoutDetailsArr); // Send the details in the response
 
+  // Construct the place details
+  return {
+    name: place.title || 'No name',
+    address: address.label || 'No address provided',
+    city: address.city || 'No city',
+    state: address.state || 'No state',
+    postal_code: address.postalCode || 'No postal code',
+    country: address.countryName || 'No country',
+    distance: place.distance || 0,
+    categories: place.categories ? place.categories.map(category => category.name) : ['No category'],
+    position: { lat: position.lat || 0, long: position.lng || 0 },
+    imageURL: cuteImage,
+    phone: place.contacts && place.contacts.length > 0 ? place.contacts[0].phone[0].value : 'No phone number',
+    website: place.contacts && place.contacts.length > 0 ? place.contacts[0].www.map(link => link.value).join(", ") : 'No website',
+
+  };
 }));
 
-
+    return hangoutDetailsArray;
+     } catch (error) {
+         console.error("Error fetching hangout information:", error.message);
+         return res.status(500).json({ error: "Error fetching hangout details" });
+     }
+  }
+  // Call the function to get hangout details based on latitude and longitude
+  const hangoutDetailsArr = await getHangoutInformation(latitude, longitude);
+  console.log('Hangout locations fetched => ',hangoutDetailsArr) ;
+  res.status(200).json({infoArray:hangoutDetailsArr});  // Send the details in the response...
+}));
 
 app.post('/api/finalizing/mail', toauthenticateJWT, asyncErrorHandler(async (req, res) => {
   const { selectedPlace } = req.body;

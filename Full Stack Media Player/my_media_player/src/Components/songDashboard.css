@@ -1,0 +1,244 @@
+.left{
+    display: flex;
+    flex-direction:row;
+    border: 1px solid  rgb(14, 14, 14);
+    width: 15vw;
+    background-color: rgb(14, 14, 14);
+    color: white;
+    position: fixed;
+    min-height: 65vh;
+    margin: 10px 10px;
+    border-radius: 10px;
+}
+#innerdiv{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+#innerdiv span{
+    padding: 5px 10px;
+    font-variant: small-caps;
+    font-weight: 600;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    color: rgb(168, 168, 168);
+}
+#innerdiv span img{
+    width: 30px ;
+    height: 30px ;
+    filter:invert(1) ;
+}
+#innerdiv ul{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+    margin: 5px 20px;
+    font-weight: 500;
+    font-variant: small-caps;
+    list-style-type: none;
+}
+#innerdiv ul li{
+    border: 1px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding: 3px 30px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    &:hover{
+        cursor: pointer;
+        background-color: rgb(30, 30, 30);
+    }
+}
+.buttondiv{
+    width: 100%;
+    height: 10%;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.buttondiv button{
+    width: auto ;
+    padding: 5px 10px;
+    border: none;
+    outline: none;
+    border: none;
+    font-size: 15px;
+    font-variant: small-caps;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    justify-content: center;
+    border-radius:10px ;
+    color: white;
+    background-color: red;
+    &:hover{
+        cursor: pointer;
+        background-color: rgb(255, 36, 36);
+    }
+}
+#plus{
+    width: 20px;
+    height: 20px ;
+    filter: invert(1);
+}
+hr{
+    width: 100%;
+    height: 0px;
+    outline: none;
+    color: rgb(67, 67, 67);
+}
+.rightsection{
+    width: 55vw;
+    height: 50vh;
+    position: relative;
+    left: 260px;
+    top: 10px;
+    background-color:  rgb(14, 14, 14);
+    border: 1px solid white;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+}
+#artistIMG{
+    position: relative;
+    top: -255px;
+    border: 1px solid  rgb(255, 255, 255);
+    border-radius: 150px;
+    border: none;
+}
+.rightsection > div{
+    width: auto;
+    height: 100%;
+    border: 1px solid  rgb(255, 255, 255);
+    border-radius:10px ;
+    border: none;
+}
+.rightsection > div img{
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+.mainsongsection{
+    width: 55vw;
+    min-height: 38vh;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: -1;
+    position: relative;
+    left: 260px;
+    top: 20px;
+    background-color:  rgb(0, 0, 0);
+    border: 1px solid white;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+}
+.songcard{
+    width: 100%;
+    height: 8vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 10px;
+    border: 1px solid rgb(255, 255, 255);
+    border: none;
+    &:hover{
+        cursor: pointer;
+        background-color: rgb(10, 10, 10);
+    }
+}
+.songcard ul {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    list-style-type: none;
+    padding: 0;
+}
+.songcard ul li:first-child video{
+    width: 50px;
+    height: 60px;
+    border-radius:100px;
+    opacity: 0;
+}
+.songcard ul li img{
+    width: 55px;
+    height: 7vh;
+    border:none;
+    border-radius: 10px;
+}
+.artistOptions{
+    width: 25% ;
+    height: 500px;
+    border:1px solid grey;
+    border-radius: 10px;
+    border: none;
+    background-color: rgb(14, 14, 14);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: absolute;
+    top: 20%;
+    left: 74%;
+}
+.artistOptions div:first-child{
+    font-size: 18px;
+    margin: 10px 10px;
+}
+.optionCard {
+    width: 100%;
+    height: auto;
+    border: 1px solid white;
+    align-items: center;
+    border-radius: 10px;
+    border: none;
+    &:hover{
+        cursor: pointer;
+        background-color: rgb(30, 30, 30);
+    }
+}
+.optionCard ul{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    align-items: center;
+    list-style-type: none;
+    gap: 10px;
+    font-variant: small-caps;
+    margin: 0;
+    padding: 2px 5px;
+}
+.optionCard ul li img{
+    width: 60px;
+    height: 60px;
+    border-radius: 50px;
+}
+#playicon{
+    width: 30px;
+    height: 30px ;
+    filter: invert(1);
+}
+.controllerSection{
+    width: 100%;
+    height: 60px;
+    border-radius:10px;
+    position: fixed;
+    bottom: 5px;
+    box-shadow: 0px 0px 5px 1px grey;
+    border: 1px solid white;
+    border: none;
+}
+.player{
+    border-radius: 10px !important;
+    border: 1px solid white !important;
+}

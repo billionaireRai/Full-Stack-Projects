@@ -22,8 +22,8 @@
     border: none;
 }
 .container .card{
-    width: 95%;
-    height: 95%;
+    width: 30vw;
+    height: 45vh;
     margin: 5px 5px;
     z-index: 1;
     align-items: center;

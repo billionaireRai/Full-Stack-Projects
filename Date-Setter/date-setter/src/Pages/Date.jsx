@@ -9,7 +9,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'; // Geocoder CSS
 import axios from 'axios';
 
-const Date = ({crushName , dotState}) => {
+const Date = ({crushName}) => {
   const mapContainer = useRef(null);
   const targetElement = useRef();
   const geocoderRef = useRef(null);
@@ -17,7 +17,6 @@ const Date = ({crushName , dotState}) => {
   const navigate =  useNavigate() ;
 
   const [selectedCheckBox, setselectedCheckBox] = useState(null) ; // initial value null...
-  const [randomIndex, setRandomIndex] = useState(Math.floor(0 + 5 * Math.random())); // Initialize randomIndex state
   const [selectedoption, setselectedoption] = useState('select any one') ; // for selected hangout location...
   const [originalDetailsArray, setOriginalDetailsArray] = useState([]); // State for the original array
   const [detailsArray, setdetailsArray] = useState([]); // for storing details array...
@@ -47,21 +46,10 @@ const Date = ({crushName , dotState}) => {
 }
  // Filtering based on selected option...
  useEffect(() => {
-  const filteredArray = originalDetailsArray.filter((item) => item.category[0].name === selectedoption);
+  const filteredArray = originalDetailsArray.filter((item) => item.categories.includes(selectedoption));
   setdetailsArray(filteredArray); // Update the state with filtered results from the original array
-
 }, [selectedoption, originalDetailsArray]); // between the rerenders originalDetailsArray will get reset...
    
-  // initializing the random number generated...
-  useEffect(() => {
-    const intervalId = setInterval(() => {  
-      const newRandomIndex = Math.floor(0 + 9 * Math.random());
-      setRandomIndex(newRandomIndex); // Updating the state...
-    }, 20 * 1000);
-
-    return () => clearInterval(intervalId); // Cleanup interval on component unmount
-  }, []);
-  
    // hook for making scrollbar hidden...
    useEffect(() => {
     if (location.pathname === '/location-setter') document.getElementsByTagName('body')[0].style.overflowY = 'hidden' ;
@@ -84,7 +72,7 @@ const Date = ({crushName , dotState}) => {
     // )
     new mapboxgl.Marker()
       .setLngLat([ longitudeToTarget , latitudeToTarget ])
-      .setPopup(new mapboxgl.Popup().setHTML(`You current location is this ${crushName}`)) // Popup content
+      .setPopup(new mapboxgl.Popup().setHTML(`You current location is this => ${crushName}`)) // Popup content
       .addTo(map);
 
     // Initialize the Mapbox geocoder...
@@ -110,19 +98,18 @@ const Date = ({crushName , dotState}) => {
     const fetchHangoutLocationDetails = async (latitude,longitude) => { 
       try {
         const response = await axios.post('/api/fetch/hangout-details',{latitude:latitude,longitude:longitude});
-        console.log(response.status)
         if (response.status === 200) {
-          const hangoutLocationDetails = response.data ;
-          setOriginalDetailsArray(hangoutLocationDetails); // Set original array
-          setdetailsArray(hangoutLocationDetails); 
+          const hangoutLocationDetails = response.data.infoArray ;
+          setdetailsArray(hangoutLocationDetails);
+          console.log(detailsArray);
         }
-        console.log(`Error from Server : ${response.status} & ${response.statusText}`) ;
+        else console.log(`Error from Server : ${response.status} & ${response.statusText}`) ;
       } catch (error) {
         console.log("Some Error In Making Request for Hangout Details...")
       }
     }
     fetchHangoutLocationDetails(latitudeToTarget,longitudeToTarget);
-  }, [])
+  }, [latitudeToTarget,longitudeToTarget]);
 
   return (
     <>
@@ -150,35 +137,44 @@ const Date = ({crushName , dotState}) => {
           </p>
         </div>
         <div className="heading">places for hangout around your location...</div>
-       <div className='lowerPart'>
+      <div className='lowerPart'>
         <select value={selectedoption} onChange={(e) => { setselectedoption(e.target.value) }}>
-            <option value="disabledOne" disabled >select any location category for hangout...</option>
+            <option value="disabledOne" disabled ><div>select any location category for hangout...</div></option>
+            <option value="default" ><div>Default Selected Option</div></option>
             <option value='Option_1'>restraunt</option>
             <option value='Option_2'>shopping Mall</option>
             <option value='Option_3'>park</option>
             <option value='Option_4'>other_options</option>
         </select>
         <div id='chooseText'>Choose the location that you like!</div>
-        {detailsArray.length !== 0 && detailsArray.map((item, index) => (
-           <div key={index + 1} ref={targetElement} className="infoBox">
-             <img src={item.urls[randomIndex]} alt='img' />
-             <div className="textInfo">
-               <div><strong>name/place :</strong><p>{item.name}</p></div>
-               <div><strong>address :</strong><p>{item.address}</p></div>
-               <div><strong>rating :</strong><p>{item.rating}</p></div>
-               <div><strong>distance :</strong><p>{item.distance}</p></div>
-               <div><strong>category :</strong><p>{item.category}</p></div>
-               <div><strong>price_level :</strong><p>{item.price_level}</p></div>
-               <div id='last'><span><strong>Make a click on the Box</strong></span><p><input onChange={() => { setselectedCheckBox(index) }} checked={selectedCheckBox === index} type="checkbox" /></p></div>
-             </div>
-           </div>
-        ))}
+        {Array.isArray(detailsArray) && detailsArray.map((item, index) => (
+          <div key={index + 1} ref={targetElement} className="infoBox">
+            <img src={item.imageURL} alt='img' />
+           <div className="textInfo">
+            <div><strong>name/place :</strong><p>{item.name}</p></div>
+            <div><strong>address :</strong><p>{item.address}</p></div>
+            <div><strong>city :</strong><p>{item.city}</p></div> {/* Added city */}
+            <div><strong>state :</strong><p>{item.state}</p></div> {/* Added state */}
+            <div><strong>postal code :</strong><p>{item.postal_code}</p></div> {/* Added postal code */}
+            <div><strong>country :</strong><p>{item.country}</p></div> {/* Added country */}
+            <div><strong>distance :</strong><p>{((item.distance)/1000).toFixed(2)} KM</p></div> {/* Display distance */}
+            <div><strong>categories :</strong><p>{item.categories.join(', ')}</p></div> {/* Display categories */}
+            <div><strong>Coordinates of Location :</strong><p>LATITUDE : {item.position['lat']} , LONGITUDE : {item.position['long']}</p></div> {/* Display coordinates */}
+            <div id='last'>
+              <span><strong>Make a click on the Box</strong></span>
+              <p>
+               <input onChange={() => { setselectedCheckBox(index) }} checked={selectedCheckBox === index} type="checkbox" />
+             </p>
+       </div>
+    </div>
+  </div>
+))}
         { detailsArray.length !== 0 && (
         <ul>
           <li><div id='statement'><strong>Let's Final Our Hangout Location</strong><span>?</span></div></li>
           <li><button onClick={handlePlaceDetailSubmittion} disabled={selectedCheckBox === null} >Done</button></li>
         </ul>
-      )}
+       )} 
        </div>
       </div>
     </div>

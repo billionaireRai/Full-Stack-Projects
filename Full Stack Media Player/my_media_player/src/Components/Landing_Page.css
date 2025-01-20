@@ -63,6 +63,7 @@
     flex-direction: row;
     border: 1px solid white;
     position: sticky;
+    background-color: black;
     top: 0;
     z-index: 1;
     border: none;
@@ -106,6 +107,14 @@
     justify-content: center;
     font-variant: small-caps;
   }
+  #SL{
+    color: black;
+    background-color: lightgreen;
+  }
+  #SU{
+    color: black;
+    background-color: white;
+  }
   #SI {
     position: relative;
     right: 35px;
@@ -130,7 +139,7 @@
       transform: scale(1);
     }
   }
-  #SI img{
+  #SI img,#SI_ img{
     width: 20px;
     height: 20px;
     background-color: rgb(255, 255, 255);
@@ -143,11 +152,22 @@
     }
   }
 
+  #SI_{
+    position: relative;
+    left: 35px;
+    top: 5px;
+    padding: 0px 7px;
+    background-color: rgb(255, 255, 255); /* Light pink background */
+    border-radius: 30px; /* Rounded corners */
+    border: none; /* No border */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+  }
   nav > span input{
     width: 500px;
     height: 30px;
     font-size:15px ;
-    padding: 5px 10px;
+    padding: 5px 35px;
     font-variant: small-caps;
     border: none;
     outline: none;
@@ -161,7 +181,7 @@
   #Logo_Img{
     width: 57px;
     height: 57px;
-    filter: invert(1) ;
+    filter: invert(1);
     &:hover{
       cursor: pointer;
     }

@@ -62,13 +62,10 @@ app.use((error, req, res, next) => {
 // middleware for authenticating JWT for some routes...
 const toauthenticateJWT = asyncErrorHandler(async (req, res) => {
     const token = req.cookies['jwt'];
-    console.log('Token:', token); // Debugging line...
     if (!token) return res.status(401).json({ message: 'Unauthorized request please signUp Or Login...' });
-
     try {
         const decoded = jsonWebToken.verify(token, process.env.SECRET_FOR_JWT);
-        console.log('Decoded payload:', decoded); // Debugging line
-        req.user = decoded.payload; // setting the payload to the user object...
+        req.user = decoded.payload; // setting the payload to the user object for endpoint usage...
     } catch (error) {
         console.log('JWT verification error:', error); // Debugging line
         return res.status(401).json({ message: 'Invalid token, please login again.' });
@@ -82,13 +79,14 @@ const forHasshing = async (EntityToHash) => {
     return hashed ;
 }
 
-const toVerifyHassed = async (toCompare,fromCompare) => { 
-   return await bcrypt.compare(toCompare,fromCompare)
-    .then((bool_output) => { bool_output  })
-    .catch((error) => { 
-        console.log(`Error in Hassh Validation proccess : ${error}`) 
-        return false ;
-    })
+const toVerifyHassed = async (toCompare, fromCompare) => { 
+    try {
+        const bool_output = await bcrypt.compare(toCompare, fromCompare);
+        return bool_output; // Return the result of the comparison...
+    } catch (error) { 
+        console.log(`Error in Hash Validation process: ${error}`); 
+        return false; // Return false in case of an error
+    }
 }
  // A function to generate secrets....
 function toGenerateSecret(length) {
@@ -287,38 +285,42 @@ app.post('/api/user/signup' ,asyncErrorHandler( async (req,res) => {
 }));
 
 // Endpoint for handling Normal Login...
-app.post('/api/user/login' , asyncErrorHandler(async (req, res) => { 
+app.post('/api/user/login', asyncErrorHandler(async (req, res) => { 
     const { Text_Info, Password } = req.body;
-    const location = tempStorage.location ;
+    const location = tempStorage.location;
     // any one will be the user entered credential... 
-    const required_user = await userinformation.findOne(Text_Info.includes('@') ? {Email : Text_Info} : {UserName : Text_Info} ); 
+    const required_user = await userinformation.findOne(Text_Info.includes('@') ? { Email: Text_Info } : { UserName: Text_Info }); 
     if (!required_user) {
-        console.log("User not found in database...");
-        return res.status(401).json({ message: "User not found..." });
+        console.log("User  not found in database...");
+        return res.status(401).json({ message: "User  not found..." });
     }
-    const passwordMatched = await toVerifyHassed(Password,required_user.Password_Hashed) ; 
+
+    const passwordMatched = await toVerifyHassed(Password, required_user.Password_Hashed); 
     if (!passwordMatched) {
         console.log("Password not matched...");
         return res.status(401).json({ message: "Password not matched..." });
     }
+
     // updating user location on the basis of geolocation...
     if (location) {
         const updateUser  = await userinformation.findByIdAndUpdate(
-            new_customer._id,
+            required_user._id, // Use required_user._id
             { $set: { Location: location } },
             { new: true } // This option returns the updated document
         );
 
-        console.log("User After Location updation :",updateUser) ;
+        console.log("User After Location updation:", updateUser );
     }
-    const Payload = {  UserName_Email : Text_Info ,  Password : Password , Location :location } 
-    jsonWebToken.sign(Payload,process.env.SECRET_FOR_JWT,{expiresIn : '1h'},(err,encodedToken) => { 
-        if (err) return res.status(400).json({ message: "Error in generating token"}) ;
-        console.log("Final Encoded Token :",encodedToken);
-        res.cookie('jwt', encodedToken , cookieConditions);
-        res.status(200).json({message : "User created successfully..."});
-     })
-     tempStorage = { } ; // making temporary storage empty...
+
+    const Payload = { UserName_Email: Text_Info, Location: location }; // Removed Password
+    jsonWebToken.sign(Payload, process.env.SECRET_FOR_JWT, { expiresIn: '1h' }, (err, encodedToken) => { 
+        if (err) return res.status(400).json({ message: "Error in generating token" });
+        console.log("Final Encoded Token:", encodedToken);
+        res.cookie('jwt', encodedToken, cookieConditions);
+        res.status(200).json({ message: "Login successful..." }); // Updated message
+    });
+
+    tempStorage = {}; // making temporary storage empty...
 }));
 
 // endpoint for determining location of user , not Authenticated through O-auth....
@@ -339,6 +341,85 @@ app.get('/api/user/location/:Latitude/:Longitude', asyncErrorHandler(async (req,
     res.status(200).json({message : "User location successfully determined..."});
 }))
 
+// endpoint for accepting the resetcredentials...
+app.get('/api/user/resetcredentials',asyncErrorHandler(async (req,res) => {
+    const { credential , option } = req.query ; // extracting from request query... 
+    console.log(credential,option) ;
+    const requestedUser = await userinformation.findOne({UserName:credential.username}) ;
+    if (!requestedUser) {
+        console.log("ERROR => trying to change password of non SIGNED UP user...");
+        return res.status(400).json({ message: "User not found..." });
+    }
+    // sending otp to user on the basis of option...
+    const generatedotp = Otp_Generator.generate(6,{specialChars:true , lowerCaseAlphabets:true,upperCaseAlphabets:true,digits:true}) ;
+    tempStorage.generatedotp = generatedotp ; // setting it for temporary storage...
+    tempStorage.requestedUser = requestedUser ;
+    setTimeout(() => {
+        tempStorage.generatedotp = "" ;
+    }, 60 * 1000);
+    if (option === 'Email') {
+        const mailOptions = {
+            from: process.env.MY_MAILID,
+            to: requestedUser.Email,
+            subject: "Reset Credentials",
+            text: `Your OTP is ${generatedotp} for resetting your credentials...`,
+        }
+        const mailTransporter = nodemailer.createTransport({
+            service:'gmail',
+            auth:{ user:process.env.MY_MAILID , pass:process.env.MY_MAIL_PASSWORD }
+        })
+        mailTransporter.sendMail(mailOptions,(error,info) => {
+            if (error) {
+                 console('Error in sending mail...');
+                 return res.status(400).json({ message: "Error in sending mail..." });
+            }
+            console.log('Email sent...');
+            return  res.status(200).json({message:'OTP successfully sent to your credential...'})
+        })
+    }
+    // if option is phone then send otp via SMS..
+    const client = new twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTHTOKEN);
+    const messageToSend = {
+        from: process.env.TWILIO_PHNO,
+        to: `+91${requestedUser.PhoneNumber}`,
+        body: `Your OTP is ${generatedotp} for resetting your credentials...`
+    };
+
+    const message = await client.messages.create(messageToSend);
+    console.log(message.sid); // consoling message SID... 
+    return res.status(200).json({ message: 'OTP successfully sent to your credential...' });
+}))
+
+// endpoint for otp authentication...
+app.post('/api/user/matching_otp',asyncErrorHandler(async (req,res) => {
+    const { entered_otp } = req.body.entered_otp ;
+    console.log(entered_otp) ;
+    if (entered_otp === tempStorage.generatedotp){
+        console.log('OTP is correct...');
+        return res.status(200).json({message:'OTP authentication successfully done...'});
+    } else {
+        console.log('OTP is incorrect...');
+        tempStorage.generatedotp = " " ;
+        return res.status(400).json({ message: 'OTP is incorrect...' });
+    }
+}))
+
+// for reseting the password...
+app.post('/api/user/resetpassword',asyncErrorHandler(async (req,res) => {
+    const { new_password } = req.body.password ;
+    console.log(new_password) ;
+    const hashedPassword = await forHasshing(new_password) ;
+    console.log("Hashed Password:", hashedPassword);
+    const User = await userinformation.findOneAndUpdate(
+        { UserName: tempStorage.requestedUser .UserName },
+        { $set: { Password_Hashed: hashedPassword } }, // Ensure the field name is correct
+        { new: true }
+    );
+    console.log(User);
+    tempStorage.requestedUser = " " ;
+    res.status(200).json({message:'Password successfully reset...'});
+}))
+
 // This is gona return us an instant of our HTTP server... 
 const HTTP_serverInstance = app.listen(port,() => {  console.log(`Music_Player Server is running on port ${port}`) })
 const webSocketServer = new WebSockets.Server({ server: HTTP_serverInstance  }); // for setting up websocket server...
@@ -350,35 +431,40 @@ webSocketServer.on('connection', function connection(ws){
     ws.on('message', function messageHandle(msg){
         console.log("Searched/Spoken Text by the user :",msg.toString());
     })
+
 })
+// Upgrade the HTTP server to handle WebSocket requests
+HTTP_serverInstance.on('upgrade', (request, socket, head) => {
+    webSocketServer.handleUpgrade(request, socket, head, (ws) => {
+        webSocketServer.emit('connection', ws, request);
+    });
+});
 
-// for using spotify song credentials...
-const spotifyWebAPi = new SpotifyWebApi({ clientId:process.env.SPOTIFY_CLIENT_ID, clientSecret:process.env.SPOTIFY_CLIENT_SECRET , redirectUri: process.env.SPOTIFY_REDIRECT_URI }) ;
-var scope = ['playlist-read-private' , 'playlist-read-collaborative' , 'user-library-read' , 'user-top-read'] ;
+// for using spotify song database...
+const spotifyWebAPi = new SpotifyWebApi({ clientId:process.env.REACT_APP_SPOTIFY_CLIENT_ID, clientSecret:process.env.SPOTIFY_CLIENT_SECRET , redirectUri: process.env.REACT_APP_SPOTIFY_REDIRECT_URI }) ;
 
-// spotifies authentication system by Authorization-code flow...
-app.post('/api/spotify/authorize', toauthenticateJWT ,asyncErrorHandler(async (req, res) => {
-    console.log("Checking is user in request object => ",req.user) ;
-    const userID = await userinformation.findOne({ $or : [
-        {Email : req.user.Email || req.user.UserName_Email},
-        {UserName:req.user.UserName_Email}
-    ]})._id ;
-    var AuthURL = spotifyWebAPi.createAuthorizeURL(scope,userID) ; // creating authorization url...
-    console.log("Authorization URL:", AuthURL);
-    res.redirect(AuthURL) ; // redirecting user to get permission to access his account... 
+// endpoint for accepting the authcode coming from frontend...
+app.post('/api/spotify/authcode' , asyncErrorHandler(async (req, res) => {
+    const { authCode } = req.body; // extracting the authcode from request body...
+    console.log("Authcode received from frontend:", authCode);
+        // getting the access token from the authcode...
+        const token_response = await spotifyWebAPi.authorizationCodeGrant(authCode);
+        req.session.accessToken = token_response.body.access_token;
+        req.session.refreshToken = token_response.body.refresh_token;
+        req.session.expiresIn = token_response.body.expires_in;
+        console.log("Final token_response =>", token_response.body); // consoling the token response...
+        scheduleTokenRefresh(expiresIn); // for refreshing once gets expired...
+        res.status(200).json({ message: "Access token successfully obtained on server" , accessToken:accessToken });
 }))
-
-let accessToken , refreshToken , expiresIn ; // defining the variables...
 
 // function to refresh accesstoken after 1 hour...
 function refreshSpotifyToken() {
     spotifyWebAPi.refreshAccessToken()
-    .then((data) => {
-        console.log("New accesstoken is :", data.body.access_token);
-        accessToken = data.body.access_token; // Update the access token
-        spotifyWebAPi.setAccessToken(accessToken); // Set the new access token
-        // Schedule the next refresh...
-        scheduleTokenRefresh(data.body.expires_in);
+    .then((data,req) => {
+        req.session.accessToken = data.body.access_token; // Update the access token
+        console.log("New accesstoken is :", req.session.accessToken);
+        spotifyWebAPi.setAccessToken(req.session.accessToken); // Set the new access token...
+        scheduleTokenRefresh(data.body.expires_in);  // Schedule the next refresh according to the expiry recieved...
     }).catch(err => {
         console.log("Error in refreshing accesstoken :", err);
     });
@@ -391,20 +477,84 @@ function scheduleTokenRefresh(expiresIn) {
     setTimeout(refreshSpotifyToken, refreshTime);
 }
 
-// Function to initialize the Spotify authorization
-app.post(process.env.SPOTIFY_REDIRECT_URI, asyncErrorHandler(async (req, res) => { 
-    const { code } = req.query; // extracting authCode from the url...
-    console.log("The AuthCode: ", code);
-    const token = await spotifyWebAPi.authorizationCodeGrant(code);
-    // taking the required information from the response...
-    accessToken = token.body.access_token;
-    refreshToken = token.body.refresh_token;
-    expiresIn = token.body.expires_in; // Get the expires_in value
-    console.log("Access Token for the user account: ", accessToken);
-    spotifyWebAPi.setAccessToken(accessToken); // setting access_token...
+// endpoint for fetching details for homepage...
+app.get('/api/spotify/homepage/getdetails', toauthenticateJWT, asyncErrorHandler(async (req, res) => {
+    console.log('Getting the details of homepage on the server...');
+    let artistIds = [];
+    let albumIds = [];
+    let trackIds = [];
+    // Function to fetch top artists
+    async function getTopArtists() {
+            const response = await SpotifyWebApi.getFeaturedPlaylists();
+            // Collecting artist IDs
+            response.body.playlists.items.forEach((playlist) => {
+                playlist.tracks.items.forEach((track) => {
+                    track.track.artists.forEach((artist) => {
+                        artistIds.push(artist.id);
+                    });
+                });
+            });
 
-    // Schedule the token refresh...
-    scheduleTokenRefresh(expiresIn);
-    res.json({ access_token: accessToken }); // store it On clientside...
-    res.redirect('http://localhost:3000/song-library');
+            return [...new Set(artistIds)].slice(0, 20); // Return unique artist IDs (top 20)
+    }
+
+    // Function to fetch top albums
+    async function getTopAlbums() {
+            const response = await spotifyWebAPi.getFeaturedPlaylists();
+            // Collecting album IDs
+            response.body.playlists.items.forEach((playlist) => {
+                playlist.tracks.items.forEach((track) => {
+                    if (track.track.album) albumIds.push(track.track.album.id);
+                });
+            });
+
+            return [...new Set(albumIds)].slice(0, 20); // Return unique album IDs (top 20)
+    }
+
+    // Function to fetch radio tracks
+    async function getRadioTracks(genre = 'pop') {
+            const response = await spotifyWebAPi.getRecommendations({ seed_genres: [genre] });
+            // Collecting track IDs
+            response.body.tracks.forEach((track) => {
+                trackIds.push(track.id);
+            });
+
+            return [...new Set(trackIds)].slice(0, 20); // Return unique track IDs (top 20)
+
+    }
+
+        // Fetch data concurrently
+        const [topArtists, topAlbums, topRadioTracks] = await Promise.all([getTopArtists(accessToken),getTopAlbums(accessToken),getRadioTracks(accessToken)]);
+        // Sending response with all the data
+        res.json({ artists: topArtists, albums: topAlbums, radioTracks: topRadioTracks});
+
 }));
+
+// for handling user searched text...
+app.post('/api/user/musicsearch/:searchText', asyncErrorHandler(async (req, res) => { 
+    const { searchText } = req.params ; // extracting the search text from the request params...
+    console.log("Search text received from frontend :", searchText);
+    const searchResults = await spotifyWebAPi.searchTracks(searchText) ; // fetching the tracks...
+    res.status(200).json({dataArray:searchResults.body.tracks.items}) ;
+}));
+
+// endpoint to handle user logout w.r.t to server logic...
+app.get('/api/user/logout', asyncErrorHandler(async (req, res) => {
+    req.session.destroy((err) => { 
+        if (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Error destroying session' });
+        }
+    })
+    res.clearCookie('jwt'); // clearing the JWT...
+    res.status(200).json({ message: 'Logged out successfully' });
+}))
+
+// endpoint to handle user prefered songs and recommendation...
+app.get('/api/user/songsandRecomendation' , asyncErrorHandler( async (req,res) => { 
+    const { artist } = req.params ; // destructring the artist fromm request parameters...
+    // getting songs of that paticular artist and according recommmendation...
+    const songs = spotifyWebAPi.getArtistTopTracks(artist) ;
+    const recommendation = spotifyWebAPi.getRecommendations({ seed_artists: [artist] });
+    res.json({songs: songs.body.tracks.items, recommendation: recommendation.body.tracks.items})
+ }))

@@ -17,35 +17,38 @@ const crushinfo = new mongoose.model('crushinfo', crushSchema);
 module.exports = crushinfo ;
 
 // final structure of returned entity...
-// {
-//   "message": "Hangout details successfully fetched",
-//   "infoArray": [
+// [
 //     {
-//       "name": "Hangout Place Name 1",
-//       "address": {
-//         "formatted_address": "123 Example St, City, Country",
-//         "cross_street": "Near Example Cross Street",
-//         "postal_code": "12345",
-//         "city": "City",
-//         "state": "State",
-//         "country": "Country"
-//       },
-//       "rating": 4.5,
-//       "distance": 1200,
-//       "category": [
-//         {
-//           "id": "category_id",
-//           "name": "Category Name"
-//         }
+//       name: 'Fun N Food Village (Polo Amusement Park)',
+//       address: 'Fun N Food Village, Old D G Road, Kapashera Village, Kapashera, Delhi 110097, India',
+//       city: 'Delhi',
+//       state: 'Delhi',
+//       postal_code: '110097',
+//       country: 'India',
+//       distance: 10122,
+//       categories: [ 'Restaurant', 'Water Park', 'Bakery & Baked Goods Store' ],
+//       position: { lat: 28.52413, long: 77.08361 },
+//       imageURL: 'https://images.unsplash.com/photo-1611288870280-4a322b8ec7ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2Nzg2OTN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3MzM0NzE1MjB8&ixlib=rb-4.0.3&q=80&w=400',
+//       phone: '+911125064500',
+//       website: 'http://www.funnfood.com, http://www.funnfood.com/, https://www.facebook.com/343568369058139, https://www.facebook.com/FunNFoodVillage'
+//     },
+//     {
+//       name: 'Alipore Zoological Garden (Zoo Cafe)',
+//       address: 'Alipore Zoological Garden, Alipore Gargen-ST.Thomas School, Alipore, Kolkata 700027, India',
+//       city: 'Kolkata',
+//       state: 'West Bengal',
+//       postal_code: '700027',
+//       country: 'India',
+//       distance: 1299827,
+//       categories: [
+//         'Tourist Attraction',
+//         'Restaurant',
+//         'Wildlife Refuge',
+//         'Animal Park'
 //       ],
-//       "urls": [
-//         "https://example.com/photo1.jpg",
-//         "https://example.com/photo2.jpg",
-//         "https://example.com/photo3.jpg",
-//         "https://example.com/photo4.jpg",
-//         "https://example.com/photo5.jpg"
-//       ]
+//       position: { lat: 22.53992, long: 88.33028 },
+//       imageURL: 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2Nzg2OTN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3MzM0NzE1MjB8&ixlib=rb-4.0.3&q=80&w=400',
+//       phone: '+913324399391',
+//       website: 'http://www.kolkatazoo.in, https://kolkatazoo.in/alipore/fee-zoo-hours.php'
 //     }
-//     // More hangout places can follow...
 //   ]
-// }

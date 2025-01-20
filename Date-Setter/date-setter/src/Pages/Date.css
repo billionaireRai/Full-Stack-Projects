@@ -185,7 +185,7 @@
     border-radius: 10px;
     color: white;
     border: none;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 .right_container .heading{
     font-size: 24px;
@@ -239,7 +239,8 @@
     padding: 5px 0px;
 
 }
-.textInfo b{
+
+.textInfo strong{
     display: flex;
     align-items: center;
     color: rgb(108, 108, 255);

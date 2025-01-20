@@ -4,11 +4,13 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { toast, ToastContainer, Slide } from 'react-toastify';
+import {useAuth} from '../userAuthContext.js'
 import axios from 'axios' ;
 
 const LogIn = () => {
   const {register,handleSubmit,formState} = useForm() ;
   const navigate = useNavigate() ;
+  const { login } = useAuth() ;
   const waitFor = (t) => {
     return new Promise(resolve => setTimeout(resolve, t * 1000));
   };
@@ -21,6 +23,7 @@ const LogIn = () => {
       if (response.status === 200) {
           toast.success("LogIn Successfully Done...", { onClose: () => { 
             navigate('/song-library');
+            login() // same user authentication context manipulation...
           }}); 
           waitFor(4);
           console.log("LogIn Process successfully done...");

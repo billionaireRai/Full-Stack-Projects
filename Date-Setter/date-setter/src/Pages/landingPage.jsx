@@ -22,7 +22,6 @@ const LandingPage = ({ dotstate ,crushName , setcrushName }) => {
   const handleSubmittion = useCallback(async (formData) => {
     try {
       const response = await axios.post('/api/crush/information', formData);
-      console.log(response.statusText);
       if (response.status === 200) {
         toast.success(`${response.message}${dotstate}`, { onClose: () => { navigate('/location-setter') } }); // will decide where to navigate...
         setcrushName(formData.CuteName) ; // setting crushName...
@@ -37,9 +36,9 @@ const LandingPage = ({ dotstate ,crushName , setcrushName }) => {
   useEffect(() => {
       async function requestForImages() {
           try {
-              const response = await axios.get('/api/generate_randomImages'); // Have setted the proxy in package.json
+              const response = await axios.post('/api/generate_randomImages'); // Have setted the proxy in package.json
               const responseArray = response.data.data ; 
-              setImageLinks(responseArray); // Spread operator to create a new array
+              setImageLinks(responseArray); 
           } catch (error) { 
               console.error('An Error occurred in making request from FRONTEND:', error);
           }

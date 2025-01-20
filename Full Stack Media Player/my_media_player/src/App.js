@@ -5,17 +5,23 @@ import LogIn from './Components/LogIn.jsx';
 import SignUp from './Components/SignUp.jsx';
 import ForgotPassword from './Components/ForgotPassword.jsx';
 import Library from './Components/Library.jsx';
+import SongDashboard from './Components/songDashboard.jsx';
 import { useState,useEffect,useRef } from "react";
 import SpeechRecognition,{useSpeechRecognition} from "react-speech-recognition";
 import { useScroll, motion, useSpring } from "framer-motion";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import { toast , ToastContainer , Slide } from "react-toastify";
+import { useAuth } from "./userAuthContext.js";
 import axios from "axios";
+import React from "react";
 
 function App() {
   const [dot, setdot] = useState(""); // used in dotter animation...
   const [searchText, setsearchText] = useState('') ;
+  const [musicData, setmusicData] = useState([]) ;
+  const navigate = useNavigate() ;
   const { scrollYProgress } = useScroll();
+   const { isAuthenticated ,logout} = useAuth() ;
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
   const waitFor = (t) => {  return new Promise(resolve => setTimeout(resolve, t * 1000)) };
 
@@ -23,6 +29,16 @@ function App() {
   const [locationFetched, setLocationFetched] = useState(false);
   const isFetching = useRef(false); // Use useRef to track fetching state...
 
+  // function to handlelogout...
+  const handleLogout = () => {
+    // hitting a backend request...
+    axios.get('/api/user/logout', { withCredentials:true}) ;
+    toast.success('logging you out...', { onClose: () => {
+      logout(); // Call logout first
+      navigate('/landing_page');
+      window.location.reload(); // Reload after logout
+    }})
+  }
   useEffect(() => {
     const fetchLocation = () => {
       if ('geolocation' in navigator && !locationFetched && !isFetching.current) {
@@ -60,87 +76,100 @@ function App() {
   
    }
    // function to handle the state of search text...
-  //  const ws = new WebSocket('');
-   const handleSearchText = async (e) => { 
-    const updatedText = e.target.value;
-    setsearchText(updatedText);
+  // //  const ws = new WebSocket('');
+  //  const handleSearchText = async (e) => { 
+  //   const updatedText = e.target.value;
+  //   setsearchText(updatedText);
 
-    // Send the new text to the backend via WebSocket
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(updatedText);
-    }
-  }
+  //   // Send the new text to the backend via WebSocket
+  //   if (ws.readyState === WebSocket.OPEN) {
+  //     ws.send(updatedText);
+  //   }
+  // }
   
-  const { transcript, browserSupportsSpeechRecognition, resetTranscript } = useSpeechRecognition();
+  // const { transcript, browserSupportsSpeechRecognition, resetTranscript } = useSpeechRecognition();
 
-  const handleSpeechCommand = async () => {
-    if (!browserSupportsSpeechRecognition) {
-      toast.error("Browser does not support speech recognition");
-      return; // Exit if the browser doesn't support speech recognition...
-    }
+  // const handleSpeechCommand = async () => {
+  //   if (!browserSupportsSpeechRecognition) {
+  //     toast.error("Browser does not support speech recognition");
+  //     return; // Exit if the browser doesn't support speech recognition...
+  //   }
     
-    await waitFor(1.5);
-    resetTranscript();  // clearing the transcpipt logs if something is there...
-    toast.info('Ready for listening...');
+  //   await waitFor(1.5);
+  //   resetTranscript();  // clearing the transcpipt logs if something is there...
+  //   toast.info('Ready for listening...');
     
-    // Start listening with interim results enabled
-    SpeechRecognition.startListening({ interimResults: true, language: 'en', continuous: true });
+  //   // Start listening with interim results enabled
+  //   SpeechRecognition.startListening({ interimResults: true, language: 'en', continuous: true });
   
-    // Wait for a longer time to give the user more time to speak
-    await waitFor(10); 
+  //   // Wait for a longer time to give the user more time to speak
+  //   await waitFor(10); 
   
-    SpeechRecognition.stopListening();
+  //   SpeechRecognition.stopListening();
   
-    // Use a timeout to ensure the transcript is updated after stopping
-    setTimeout(() => {
-      if (ws.readyState === WebSocket.OPEN) {
-        if (transcript && transcript.trim()) { // Check if transcript is not empty
-          ws.send(transcript, (error) => {
-            if (error) {
-              console.error("WebSocket send error:", error);
-            } else {
-              console.log("Transcript sent successfully.");
-            }
-          });
-        } else {
-          console.error("Transcript is empty.");
-        }
-      } else {
-        console.error("WebSocket is not open. Cannot send transcript.");
+  //   // Use a timeout to ensure the transcript is updated after stopping
+  //   setTimeout(() => {
+  //     if (ws.readyState === WebSocket.OPEN) {
+  //       if (transcript && transcript.trim()) { // Check if transcript is not empty
+  //         ws.send(transcript, (error) => {
+  //           if (error) {
+  //             console.error("WebSocket send error:", error);
+  //           } else {
+  //             console.log("Transcript sent successfully.");
+  //           }
+  //         });
+  //       } else {
+  //         console.error("Transcript is empty.");
+  //       }
+  //     } else {
+  //       console.error("WebSocket is not open. Cannot send transcript.");
+  //     }
+  //   }, 500); // Adjust timeout as necessary...
+  // };
+  
+  // // Add error handling for speech recognition
+  // SpeechRecognition.onerror = (event) => {
+  //   console.error("Speech recognition error detected: ", event.error);
+  //   toast.error("Speech recognition error: " + event.error);
+  // };
+  
+  // // Use the onResult callback to handle transcript updates in real-time
+  // const handleResult = (result) => {
+  //   console.log("Updated transcript:", result);
+  // };
+  
+  // // Register the onResult callback
+  // useEffect(() => {
+  //   SpeechRecognition.onresult = (event) => {
+  //     const currentTranscript = event.results[event.resultIndex][0].transcript;
+  //     resetTranscript(); // Reset the transcript to avoid duplication
+  //     handleResult(currentTranscript); // Handle the updated transcript
+  //   };
+  // }, []);
+  //   // dotting animation will as the components unmountation starts...
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     setdot((prevdot) => { 
+  //       if (prevdot.endsWith("....")) return ""; 
+  //       return prevdot + ".";
+  //     });
+  //   }, 500);
+
+  //   return () => clearInterval(intervalId);
+  // }, []);
+
+  // function for sending user search text to server...
+  const handleUserMusicSearch = async (text) => { 
+    try {
+      const response = await axios.get(`/api/user/musicsearch/${text}`,{withCredentials:true}) ;
+      if (response.status === 200) {
+        const musicdata = response.data.dataArray ;
+        setmusicData(musicdata);
       }
-    }, 500); // Adjust timeout as necessary...
-  };
-  
-  // Add error handling for speech recognition
-  SpeechRecognition.onerror = (event) => {
-    console.error("Speech recognition error detected: ", event.error);
-    toast.error("Speech recognition error: " + event.error);
-  };
-  
-  // Use the onResult callback to handle transcript updates in real-time
-  const handleResult = (result) => {
-    console.log("Updated transcript:", result);
-  };
-  
-  // Register the onResult callback
-  useEffect(() => {
-    SpeechRecognition.onresult = (event) => {
-      const currentTranscript = event.results[event.resultIndex][0].transcript;
-      resetTranscript(); // Reset the transcript to avoid duplication
-      handleResult(currentTranscript); // Handle the updated transcript
-    };
-  }, []);
-    // dotting animation will as the components unmountation starts...
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setdot((prevdot) => { 
-        if (prevdot.endsWith("....")) return ""; 
-        return prevdot + ".";
-      });
-    }, 500);
-
-    return () => clearInterval(intervalId);
-  }, []);
+    } catch (error) {
+      console.error("Error in fetching user music search data");
+    }
+   }
   return (
     <>
     <ToastContainer
@@ -162,15 +191,25 @@ function App() {
            <Link to="/landing_page"><img alt="img" id="Logo_Img" src="./Images/Streamify.logo.svg" /></Link><b>Streamify</b>
          </span>
           <span>
-            <form>
-              <input value={searchText} onChange={(e) => {handleSearchText(e)}} type="search" name="Search_Tag" placeholder={`Enter Artist Name / Track Or Anything${dot}`} />
+            {/* <form>
+              <button onClick={() => {handleUserMusicSearch(searchText)}} type="submit" id="SI_"><img src="/Images/search-interface-symbol.png" alt="lens.png" /></button>
+              <input value={searchText} onChange={(e) => {handleSearchText(e)}} type="search" name="Search_Tag" placeholder={`search artist name / track${dot}`} />
               <button type="submit" id="SI"><img onClick={() => { handleSpeechCommand() }} alt="img" src="/Images/microphone.png" /></button>
-            </form>
+            </form> */}
           </span>
           <ul>
-            <li><Link to="/login"><button id="LI">LogIn</button></Link></li>
-            <li><Link to="/signup"><button id="SU">SignUp</button></Link></li>
-            <li id="Profile"><img alt="img" src={"/Images/GeneralPic.Profile.png"} /></li>
+          { isAuthenticated ? (
+          <>
+          <li><button onClick={() => { handleLogout() }} id="SU">logout</button></li>
+          <li id="Profile"><img alt="img" src={"/Images/GeneralPic.Profile.png"} /></li>
+          </>
+          ) : (
+          <>
+          <li><Link to="/login"><button id="LI">LogIn</button></Link></li>
+          <li><Link to="/signup"><button id="SU">SignUp</button></Link></li>
+          </>
+        )
+      }
           </ul>
         </nav>
         <Routes>
@@ -179,11 +218,12 @@ function App() {
           <Route path="/" element={<Landing_Page dot={dot} />} />
           <Route path="/login" element={<LogIn />} />
           <Route path="/signup" element={<SignUp DotState={dot} />} />
-          <Route path="/song-library" element={<Library />} />
+          <Route path="/song-library" element={<Library musicData={musicData} />} />
+          <Route path="/user-musicdashboard" element={<SongDashboard musicData={musicData} />} />
         </Routes>
       </div>
       </>
   );
 }
 
-export default App;
+export default App ;

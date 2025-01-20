@@ -2,7 +2,7 @@ import './App.css';
 import LandingPage from './Pages/landingPage.jsx';
 import AboutPage from './Pages/aboutPage.jsx';
 import Date from './Pages/Date.jsx';
-import secretPage from './Pages/secretPage.jsx'
+import SecretPage from './Pages/secretPage.jsx';
 import React,{useState,useEffect} from 'react';
 import { useScroll , motion , useSpring} from "framer-motion"; 
 import { Routes, Route, NavLink } from 'react-router-dom';
@@ -36,7 +36,7 @@ function App() {
           <Route path="/home" element={<LandingPage dotstate={prev} crushName={crushName} setcrushName={setcrushName} />} />
           <Route path="/" element={<LandingPage dotstate={prev} crushName={crushName} setcrushName={setcrushName} />} />
           <Route path="/about" element={<AboutPage dotState={prev} />} />
-          <Route path="/mySecret" element={<secretPage/>} />
+          <Route path="/mySecret" element={<SecretPage/>} />
           <Route path="/location-setter" element={<Date crushName={crushName} dotstate={prev}/>} />
         </Routes>
     </div>
@@ -46,9 +46,3 @@ function App() {
 }
 
 export default App;
-
-<NavLink 
-        to="/home" 
-        activeClassName="active"  // This will add 'active' class when the route is active
-        style={({ isActive }) => ({ color: isActive ? 'green' : 'blue' })} // Inline style for active state
-      ></NavLink>

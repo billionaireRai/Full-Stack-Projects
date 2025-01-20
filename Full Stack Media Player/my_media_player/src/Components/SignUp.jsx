@@ -4,11 +4,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast, ToastContainer, Slide } from 'react-toastify';
+import { useAuth } from '../userAuthContext.js'
 import axios from 'axios';
 
 const SignUp = ({ DotState }) => {
   const { register, handleSubmit, formState } = useForm();
   const navigate = useNavigate() ;
+  const { signup } = useAuth(); 
   const waitFor = (t) => {
     return new Promise(resolve => setTimeout(resolve, t * 1000));
   };
@@ -20,6 +22,7 @@ const SignUp = ({ DotState }) => {
         // cookies has been successfully set by the browser...
         toast.success('SignUp Successfully Done...',{ onClose : () => { 
           navigate('/song-library');
+          signup() ; // for make isAuthenticated state of user as true...
          }}) ;
         waitFor(4);
         console.log("SignUp Proccess successfully done...");

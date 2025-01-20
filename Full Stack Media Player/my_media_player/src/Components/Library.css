@@ -24,13 +24,15 @@
     background-color: #66FFFF; /* lighter neon blue-green */
     border: 1px solid #66FFFF;
   }
+  *{
+    /* overflow-x: hidden; */
+  }
   #WrapperTop{
     display: flex;
     flex-direction: row;
     width: 99.8vw;
     min-height: 91vh;
     height: auto;
-    gap: 10px;
     justify-content: center;
     border: 1px solid white;
     border: none;
@@ -104,6 +106,7 @@
     height: auto;
     width: 75vw;
     display: flex;
+    gap: 20px;
     flex-direction: column;
   }
   #topsection {

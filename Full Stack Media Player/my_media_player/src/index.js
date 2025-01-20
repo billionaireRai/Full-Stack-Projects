@@ -3,13 +3,19 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { AuthProvider } from './userAuthContext.js';
+import { TokenProvider } from './tokenContext.js'; // Correctly import the TokenProvider
 import { BrowserRouter as Router } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <Router>
-      <App />
+      <AuthProvider>
+        <TokenProvider> 
+          <App />
+        </TokenProvider>
+      </AuthProvider>
     </Router>
   </React.StrictMode>
 );
