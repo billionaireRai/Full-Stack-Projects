@@ -1,0 +1,112 @@
+*{
+  background-color: rgb(0, 0, 0);
+  margin: 0;
+  padding: 0;
+}
+:root{
+  --Def_opacity_1:0;
+  --Def_opacity_2:1;
+}
+/* Target the entire scrollbar */
+::-webkit-scrollbar {
+  width: 12px; /* Change the width of the scrollbar */
+  height: 12px; /* Change the height for horizontal scrollbar */
+}
+
+/* Target the scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background-color: black;
+  opacity: 0.1;
+}
+
+/* Target the scrollbar thumb (handle) */
+::-webkit-scrollbar-thumb {
+  background-color: #FE019A; /* neon pink color of scrollbar...*/
+  border-radius: 10cm; /* Optional: Add rounded corners to the thumb */
+  border: none;
+  z-index: 1;
+  width: 1px;
+}
+
+/* Change the thumb color on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ff5fbf; /* lighter neon pink...*/
+  border: 1px solid #ff5fbf;
+}
+#mainHeading , nav div a{
+  font-size: 25px;
+  font-variant: small-caps;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-weight: 650;
+  text-decoration: none;
+  color: #ff5fbf;
+}
+#mainHeading img , #heart{
+  width: 30px;
+  height: 30px;
+  margin: 0px 5px;
+  animation: heartAnimation 1s ease-in-out infinite linear ;
+}
+@keyframes heartAnimation {
+  0% {
+    transform: scale(1);
+  }
+  70% {
+    transform: scale(0.75);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.App nav {
+  display: flex;
+  flex-direction: row;
+  list-style-type: none;
+  color: white;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  margin: 10px 10px;
+  border: 1px solid #ff5fbf;
+  border-top-right-radius:30px ;
+  border-bottom-left-radius:30px ;
+  padding: 5px 10px;
+  position: sticky;
+  top: 10px;
+  z-index: 5;
+  outline: none;
+  box-shadow:0px 0px 20px 0px  rgb(255, 95, 191,0.6) ; /* Softer and more elegant shadow */
+}
+
+nav ul li a {
+  color: white; /* Replace with your desired color, e.g., 'blue' or '#ff0000' */
+  text-decoration: none; /* This removes the underline */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+nav ul li a img{
+  width: 30px;
+  height: 30px;
+  margin: 5px 5px;
+  background-color: white;
+  border-radius:450px ;
+  /* box-shadow: 0px 0px 10px rgba(254, 1, 154, 0.8) ; */
+}
+
+.App ul{
+  display: flex;
+  list-style-type:none ;
+  align-items: center;
+  justify-content: space-around;
+  font-weight: 600;
+  gap: 60px;
+  font-variant: small-caps;
+  flex-direction: row;
+}
+.App nav *:hover{
+  cursor: pointer;
+}
