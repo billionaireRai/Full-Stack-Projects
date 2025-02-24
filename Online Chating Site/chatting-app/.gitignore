@@ -24,3 +24,6 @@ yarn-error.log*
 
 # ignoring .env file from github push...
 .env
+
+# ignoring the SSl credentials...
+sslCredentials
