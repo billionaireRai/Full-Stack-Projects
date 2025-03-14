@@ -61,7 +61,7 @@ const Homepage = () => {
                             <span className='title title font-bold text-green-600 hover:text-green-800 transition-colors duration-300"'><h3 className="font-semibold font-variant-[small-caps] tracking-wide">Thumline</h3></span>
                             <input placeholder='enter line expresses you' type="text" className='thumbline snap-mandatory focus:shadow-sm transition-shadow focus:shadow-green-500 px-1 py-1 border-none outline-none rounded-md' {...register('thumline', {
                                 required: { value: true, message: 'Field is required to express you' },
-                                maxLength: { value: 50, message: 'Thumline must be at most 50 characters long...' }
+                                maxLength: { value: 35, message: 'Thumline must be at most 35 characters long...' }
                             })} />
                             {errors.thumline && (
                                 <div className='Red Red flex flex-row items-center text-sm py-2 px-1 space-x-2 text-red-600 font-semibold'><img width={'25px'} height={'25px'} src={warningImg} alt="warning" /><span>{errors.thumline.message}</span></div>

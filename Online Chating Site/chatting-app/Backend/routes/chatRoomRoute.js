@@ -14,5 +14,4 @@ router.post('/join',upload.fields([
 ]), handleChatroomUserJoin) // handling user joining with avatar and encryptedData
 
 
-
 module.exports = router ;

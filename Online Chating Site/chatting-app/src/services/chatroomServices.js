@@ -28,6 +28,7 @@ export const handleJoiningForm = async (enteredData, navigate, chatroomID) => {
         
         if (response.status === 200) {
             toast.dismiss(generatingToast);
+            localStorage.setItem("userData", JSON.stringify(enteredData)); // setting userdata to local storage...
             toast.success('Successfully joined the chatroom!', { onClose: () => navigate(`/chatroom/${chatroomID}`),  autoClose: 2000 
             });
         } else {

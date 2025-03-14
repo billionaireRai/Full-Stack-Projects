@@ -46,7 +46,6 @@ const handleChatroomUserJoin = asyncErrorHandler(async (req, res) => {
     // Split IV and encrypted data
     const parts = encryptedData.split(':'); 
     if (parts.length !== 2) return apiGeneralError(res, "Invalid encrypted data format", 400);
-
     const [ivHex, encryptedBase64] = parts; 
     const iv = Buffer.from(ivHex, 'hex');  // Convert IV to Buffer (hex format)
     const encrypted = Buffer.from(encryptedBase64, 'base64'); // encoding is base-64
@@ -63,9 +62,12 @@ const handleChatroomUserJoin = asyncErrorHandler(async (req, res) => {
         const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
         let decryptedData = decipher.update(encrypted, 'base64', 'utf8'); // ✅ Changed input encoding to 'base64'
         decryptedData += decipher.final('utf8');
-
         const userData = JSON.parse(decryptedData); // Parsing JSON format...
         // acctual chatroom joining logic...
+
+
+
+        
 
         return apiGeneralResponse(
             res,
