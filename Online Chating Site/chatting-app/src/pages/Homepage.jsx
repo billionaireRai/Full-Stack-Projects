@@ -10,10 +10,8 @@ import { useForm } from 'react-hook-form';
 import { ToastContainer, Zoom } from 'react-toastify';
 import Tooltip from './Tooltip.jsx';
 
-const Homepage = () => {
+const Homepage = ({isCopied , setisCopied,chatroomID,setchatroomID,handleIdCopy}) => {
     const navigate = useNavigate();
-    const [isCopied, setisCopied] = useState(false);
-    const [chatroomID, setchatroomID] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
 
@@ -25,12 +23,6 @@ const Homepage = () => {
             reader.readAsDataURL(file);
         }
     };
-
-    const handleIdCopy = () => { 
-        navigator.clipboard.writeText(chatroomID);
-        setisCopied(true);
-        setTimeout(() => { setisCopied(false) }, 4000);
-    }
 
     const onSubmit = async (data) => {
         await handleJoiningForm(data, navigate,chatroomID); // calling the main function...

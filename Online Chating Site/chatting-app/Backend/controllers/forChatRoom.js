@@ -1,5 +1,7 @@
 require('dotenv').config() ;
 const crypto = require('crypto');
+const jsonWebToken = require('jsonwebtoken') ;
+const { Server } = require('socket.io') ;
 const { asyncErrorHandler, apiGeneralError , apiGeneralResponse } = require('../utils/ReusableFunc.js') ;
 
 // function to encrypt original chatroomID...
@@ -65,23 +67,12 @@ const handleChatroomUserJoin = asyncErrorHandler(async (req, res) => {
         const userData = JSON.parse(decryptedData); // Parsing JSON format...
         // acctual chatroom joining logic...
 
-
-
-        
+        // logic related to jsonWebToken ...
+        // const token = jsonWebToken.sign(userData, process.env.JWT_SECRET, { expiresIn: '1h', algorithm: 'HS256' });
 
         return apiGeneralResponse(
             res,
-            {
-                message: "User successfully joined chatroom",
-                userData: userData,
-                avatar: avatarFile
-                    ? {
-                          originalname: avatarFile.originalname,
-                          mimetype: avatarFile.mimetype,
-                          size: avatarFile.size,
-                      }
-                    : null,
-            },
+            { message: "User successfully joined chatroom" }, // token: token
             200
         );
     } catch (err) {
@@ -90,4 +81,37 @@ const handleChatroomUserJoin = asyncErrorHandler(async (req, res) => {
     }
 });
 
-module.exports = { generateEncryptedChatroomID , handleChatroomUserJoin } ;
+// logic to handle socketIO connection for Server...
+const createSocketIoConnectionForServer = (serverInstance) => {
+    console.log("Setting up Socket.IO connection..."); // Debug log for setup
+    const io = new Server(serverInstance, {
+        cors: {
+            origin: process.env.CORS_ORIGIN, // Allow all origins
+            methods: process.env.CORS_METHODS,
+            credentials: true
+        },
+        transports: ["websocket"], // Force WebSocket only
+    });
+
+    io.on("connection", (socket) => {
+        console.log("A user connected:", socket.id);
+        socket.on("joinChatroom", (chatroomID) => {
+            console.log(`User ${socket.id} joined chatroom of ID ${chatroomID}`);
+            socket.join(chatroomID);
+        });
+        socket.on("sendMessage", (data) => {
+            console.log(`User ${socket.id} sent message: ${data.message}`);
+            io.to(data.chatroomID).emit("receiveMessage", {
+                message: data.message,
+                senderid: socket.id,
+                timestamp: new Date().toUTCString(),
+            });
+        });
+
+        socket.on("disconnect", () => {
+            console.log(`User with socketID ${socket.id} disconnected`);
+        });
+    });
+};
+
+module.exports = { generateEncryptedChatroomID , handleChatroomUserJoin ,createSocketIoConnectionForServer } ;
