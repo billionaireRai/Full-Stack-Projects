@@ -39,7 +39,6 @@ function App() {
                <Route path={"/signup"} element={<Signup />} />
                <Route path={"/login"} element={<Login />} />
                <Route path="/chatroom/:id" element={<Chatroom isCopied={isCopied} setisCopied={setisCopied} chatroomID={chatroomID} handleIdCopy={handleIdCopy} />} />
-               <Route path="/videoroom/:id_1/:id_2" element={<Videopage />} />
                <Route path="/videoroom/:id" element={<Videopage />} />
             </Routes>
       </div>

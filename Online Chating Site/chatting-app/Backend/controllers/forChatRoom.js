@@ -108,6 +108,22 @@ const createSocketIoConnectionForServer = (serverInstance) => {
             });
         });
 
+        // WebRTC signaling handlers
+        socket.on("offer", (data) => {
+            console.log("Received offer from", data.username);
+            socket.broadcast.emit("offer", data);
+        });
+
+        socket.on("answer", (data) => {
+            console.log("Received answer from", data.username);
+            socket.broadcast.emit("answer", data);
+        });
+
+        socket.on("iceCandidate", (data) => {
+            console.log("Received ICE candidate from", data.username);
+            socket.broadcast.emit("iceCandidate", data);
+        });
+
         socket.on("disconnect", () => {
             console.log(`User with socketID ${socket.id} disconnected`);
         });

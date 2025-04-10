@@ -15,12 +15,12 @@ const MessageCard = ({stateOfMessageSend , messageData ,ClientInfo}) => {
         />
       </div>
       <div className="messageBox flex flex-col border-none w-full gap-2">
-        <div className="text-lg font-semibold border-none text-black">{messageData.senderName}</div>
+        <div className="text-lg font-semibold border-none text-black">{ClientInfo.username}</div>
         <div className="text-sm bg-gray-800 p-3 rounded-lg border-none border-gray-800 leading-relaxed">
           {messageData.message}
         </div>
         <span className='timeNotation border flex flex-row items-center lg:w-1/2 xl:w-2/5 gap-2 ml-auto w-2/3 px-1 py-1 rounded-md border-none text-center font-bold text-black text-xs'>
-        <div>{messageData.timestamp}</div>
+        <div>{messageData.timeStamp}</div>
         <div>{stateOfMessageSend ? <img width={'25px'} height={'25px'} src={Check} alt="doneSending" /> : <><video autoPlay loop muted width={'20px'} height={'20px'} src={loader} ></video></>}</div>
         </span>
       </div>

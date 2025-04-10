@@ -92,3 +92,23 @@ export const handleCreateChatroomID = async (setchatroomID) => {
         toast.error("Error in generating ChatroomID. Please check console for details.");
     }
 };
+
+export const handleStartVideoCall = async (targetUser, navigate) => {
+    try {
+        const currentUser = JSON.parse(localStorage.getItem("userData"));
+        if (!currentUser || !targetUser) throw new Error("User information missing");
+        // generating a videoCall ID
+        const videoCallID = cryptoJS.AES.encrypt(JSON.stringify(currentUser), REACT_APP_CHATROOMID_ENCRYPTION_KEY) ;
+        localStorage.setItem("videoCallParticipants", JSON.stringify({
+            caller: currentUser,
+            callee: targetUser,
+            videoCallID: videoCallID
+        }));
+
+        // Navigate to video call page
+        navigate(`/videocall/${videoCallID}`);
+    } catch (error) {
+        console.error("Error starting video call:", error);
+        toast.error("Failed to start video call");
+    }
+};
