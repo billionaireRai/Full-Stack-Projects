@@ -99,6 +99,11 @@ const createSocketIoConnectionForServer = (serverInstance) => {
             console.log(`User ${socket.id} joined chatroom of ID ${chatroomID}`);
             socket.join(chatroomID);
         });
+        socket.on("Message to Server : New User Joined Chatroom", (chatroomID) => {
+            console.log(`New user joined chatroom: ${chatroomID}, socket id: ${socket.id}`);
+            // Emit to all clients in the chatroom that a new member has joined
+            io.to(chatroomID).emit("newMemberJoined", { socketId: socket.id });
+        });
         socket.on("sendMessage", (data) => {
             console.log(`User ${socket.id} sent message: ${data.message}`);
             io.to(data.chatroomID).emit("receiveMessage", {

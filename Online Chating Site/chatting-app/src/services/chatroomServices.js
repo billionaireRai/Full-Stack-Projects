@@ -106,7 +106,7 @@ export const handleStartVideoCall = async (targetUser, navigate) => {
         }));
 
         // Navigate to video call page
-        navigate(`/videocall/${videoCallID}`);
+        navigate(`/videocall/${encodeURIComponent(videoCallID)}`);
     } catch (error) {
         console.error("Error starting video call:", error);
         toast.error("Failed to start video call");

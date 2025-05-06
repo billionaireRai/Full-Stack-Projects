@@ -1,3 +1,4 @@
+
 import { io } from 'socket.io-client';
 import React,{ useRef, useState , useEffect} from 'react';
 import { Video, VideoOff, Mic, MicOff, PhoneOff, Monitor } from 'lucide-react';
@@ -13,12 +14,13 @@ const Videopage = () => {
     const [endCallHover, setEndCallHover] = useState(false);
     const [screenShareHover, setScreenShareHover] = useState(false);
     const [DidIOffer, setDidIOffer] = useState(false);
-    const [localStream, setlocalStream] = useState(null);
-    const [remoteStream, setremoteStream] = useState(null);
-    const [peerConnection, setpeerConnection] = useState(null);
+
     // references getting involved...
     const remoteVideoSection = useRef() ;
     const localVideoSection = useRef() ; 
+    const peerConnection = useRef(null);
+    const localStream = useRef(null);
+    const remoteStream = useRef(null);
 
     // function to initiate the videoCalling proccess with the neccessary states...
     useEffect(() => {
@@ -60,19 +62,23 @@ const Videopage = () => {
         initiateVideoCall(
             setDidIOffer,
             DidIOffer,
-            { current: localStream },
-            setlocalStream,
-            { current: remoteStream },
-            setremoteStream,
-            { current: peerConnection },
-            setpeerConnection,
+            localStream,
+            remoteStream,
+            peerConnection,
             remoteVideoSection,
             localVideoSection,
-            clientData
+            clientData,
+            socket
         );
 
         return () => {
             socket.disconnect();
+            if (peerConnection.current) {
+                peerConnection.current.close();
+            }
+            if (localStream.current) {
+                localStream.current.getTracks().forEach(track => track.stop());
+            }
         };
     }, [])
     // function handle ending of call for a user...

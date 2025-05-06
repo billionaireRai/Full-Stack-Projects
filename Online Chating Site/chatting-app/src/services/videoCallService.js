@@ -1,21 +1,4 @@
-import { io } from "socket.io-client";
-// socket.io server connection
-const clientData = {
-    username: localStorage.getItem('username') || '',
-    chatroomID:localStorage.getItem('currentChatroomID') || ''
-};
-const socket = io('https://localhost:6060', {
-    auth: { 
-        chatroomID: clientData.chatroomID,
-        username: clientData.username 
-    },
-    rejectUnauthorized: false,
-    secure: true,
-    withCredentials: true,
-    transports: ['websocket']
-});
 
-// STUN server configuration for peerConnection
 const PeerConfiguration = {
     iceServers: [
         {
@@ -43,8 +26,7 @@ const fetchUserMedia = async (localVideoRef, localStreamRef) => {
 };
 
 // Main video call initialization function
-const initiateVideoCall = async (setDidIOffer,DidIOffer,localStreamRef,remoteStreamRef,peerConnectionRef,remoteVideoRef,localVideoRef,ClientInfo
-) => {
+const initiateVideoCall = async (setDidIOffer, DidIOffer, localStreamRef, remoteStreamRef, peerConnectionRef, remoteVideoRef, localVideoRef, ClientInfo, socket) => {
     try {
         // Get user media
         await fetchUserMedia(localVideoRef, localStreamRef);
