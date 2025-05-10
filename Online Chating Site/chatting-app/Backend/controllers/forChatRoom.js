@@ -81,20 +81,59 @@ const handleChatroomUserJoin = asyncErrorHandler(async (req, res) => {
     }
 });
 
-// logic to handle socketIO connection for Server...
+const decrypt = (encrypted) => {
+    try {
+        if (!process.env.REACT_APP_CHATROOMID_ENCRYPTION_KEY) {
+            throw new Error('Encryption key is not configured');
+        }
+        const [ivHex, encryptedDataHex] = encrypted.split(':');
+        if (!ivHex || !encryptedDataHex) {
+            throw new Error('Invalid encrypted data format');
+        }
+        const iv = Buffer.from(ivHex, 'hex');
+        const encryptedData = Buffer.from(encryptedDataHex, 'hex');
+        const key = Buffer.from(process.env.REACT_APP_CHATROOMID_ENCRYPTION_KEY, 'hex');
+        if (key.length !== 32) {
+            throw new Error(`Invalid key length: ${key.length} bytes. Expected 32 bytes for AES-256-CBC`);
+        }
+        const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+        let decrypted = decipher.update(encryptedData);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString();
+    } catch (error) {
+        console.error('Decryption error:', error);
+        return null;
+    }
+};
+
 const createSocketIoConnectionForServer = (serverInstance) => {
     console.log("Setting up Socket.IO connection..."); // Debug log for setup
     const io = new Server(serverInstance, {
         cors: {
-            origin: process.env.CORS_ORIGIN, // Allow all origins
-            methods: process.env.CORS_METHODS,
+            origin: "http://localhost:3000", // <== frontend origin (adjust if different)
+            methods: ["GET", "POST"],
             credentials: true
         },
-        transports: ["websocket"], // Force WebSocket only
+        transports: ["polling", "websocket"],
     });
 
     io.on("connection", (socket) => {
         console.log("A user connected:", socket.id);
+
+        // Decrypt chatroomID from socket handshake auth before joining room
+        let decryptedChatroomID = null;
+        if (socket.handshake.auth && socket.handshake.auth.chatroomID) {
+            decryptedChatroomID = decrypt(socket.handshake.auth.chatroomID);
+            if (decryptedChatroomID) {
+                console.log(`User ${socket.id} joined decrypted chatroom ID ${decryptedChatroomID}`);
+                socket.join(decryptedChatroomID);
+            } else {
+                console.error(`Failed to decrypt chatroomID for user ${socket.id}`);
+            }
+        } else {
+            console.warn(`No chatroomID provided in auth for user ${socket.id}`);
+        }
+
         socket.on("joinChatroom", (chatroomID) => {
             console.log(`User ${socket.id} joined chatroom of ID ${chatroomID}`);
             socket.join(chatroomID);
@@ -102,7 +141,13 @@ const createSocketIoConnectionForServer = (serverInstance) => {
         socket.on("Message to Server : New User Joined Chatroom", (chatroomID) => {
             console.log(`New user joined chatroom: ${chatroomID}, socket id: ${socket.id}`);
             // Emit to all clients in the chatroom that a new member has joined
-            io.to(chatroomID).emit("newMemberJoined", { socketId: socket.id });
+            // Send full member info: socketId, username, avatar (if available)
+            const memberInfo = {
+                socketId: socket.id,
+                username: socket.handshake.auth.username || "Unknown",
+                avatar: socket.handshake.auth.avatar || { url: null }
+            };
+            io.to(chatroomID).emit("newMemberJoined", memberInfo);
         });
         socket.on("sendMessage", (data) => {
             console.log(`User ${socket.id} sent message: ${data.message}`);

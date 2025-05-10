@@ -83,11 +83,55 @@ const Videopage = () => {
     }, [])
     // function handle ending of call for a user...
     const handleUserEndingCall = () => {
-        toast.loading("Ending Video Call...")
-     }
-    const handleUserSharingScreen = () => { 
-        toast.loading("Sharing Screen...")
-     }
+        toast.loading("Ending Video Call...");
+        // Close peer connection and stop media tracks
+        if (peerConnection.current) {
+            peerConnection.current.close();
+            peerConnection.current = null;
+        }
+        if (localStream.current) {
+            localStream.current.getTracks().forEach(track => track.stop());
+            localStream.current = null;
+        }
+        if (remoteStream.current) {
+            remoteStream.current.getTracks().forEach(track => track.stop());
+            remoteStream.current = null;
+        }
+        // Optionally navigate away or show call ended UI
+        toast.dismiss();
+        toast.success("Video call ended");
+    };
+
+    const handleUserSharingScreen = async () => {
+        toast.loading("Sharing Screen...");
+        try {
+            if (!localStream.current) {
+                throw new Error("Local stream not available");
+            }
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            // Replace video track in peer connection
+            const videoTrack = screenStream.getVideoTracks()[0];
+            const sender = peerConnection.current.getSenders().find(s => s.track.kind === 'video');
+            if (sender) {
+                sender.replaceTrack(videoTrack);
+            }
+            // When screen sharing stops, revert to camera
+            videoTrack.onended = () => {
+                if (localStream.current) {
+                    const cameraTrack = localStream.current.getVideoTracks()[0];
+                    if (sender) {
+                        sender.replaceTrack(cameraTrack);
+                    }
+                }
+            };
+            toast.dismiss();
+            toast.success("Screen sharing started");
+        } catch (error) {
+            toast.dismiss();
+            toast.error("Failed to share screen");
+            console.error("Screen sharing error:", error);
+        }
+    };
     return (
         <>
         <ToastContainer autoClose={4000} icon={true} style={{ alignItems: 'center', color: 'black', border: 'none', outline: 'none' }} hideProgressBar={true} closeOnClick={false} newestOnTop={true} closeButton={true} position='top-right' transition={Zoom} />

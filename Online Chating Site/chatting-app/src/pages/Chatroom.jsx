@@ -29,7 +29,7 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
   const messageInputTag = useRef();
   const navigate = useNavigate();
   const [Members, setMembers] = useState([]);
-  const [Socket, setSocket] = useState();
+  const [socket, setSocket] = useState(null);
   const [messageMediaCursor, setmessageMediaCursor] = useState(false);
   const [messageEmojiCursor, setmessageEmojiCursor] = useState(false);
   const [noMessageCursor, setnoMessageCursor] = useState(false);
@@ -39,7 +39,8 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
   const [isInputFocus, setisInputFocus] = useState(false);
   const [UserSearched, setUserSearched] = useState(null);
   const [ClientInfo, setClientInfo] = useState();
-  const [messageSent, setmessageSent] = useState(true);
+  // messageSent holds the index of the message being sent, or null if none
+  const [messageSent, setmessageSent] = useState(null);
   const [isRotated, setisRotated] = useState([]);
 
   const [Play] = useSound(notification, { volume: 1, playbackRate: 1 });
@@ -79,81 +80,112 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
     searchingUserFromTheMembers();
   }, [UserSearched]);
 
-  const handleMessageSendButtonClick = async (msg) => {
-    const MSG = String(msg);
-    setmessageSent(false); // for making the loader visualize...
-    if (MSG.trim() !== "") {
-      Socket.emit(
-        "sendMessage",
-        { message: MSG, chatroomID: ClientInfo.chatroomID },
-        (response) => {
-          if (response.error) {
-            console.error("Error sending message:", response.error);
-            toast.error("Failed to send message. Please try again.");
-          } else {
-            console.log("Message sent successfully:", response);
-          }
-        }
-      );
-      setMessage("");
-      await delay(2.5); // making the function execution halt intensionally...
-      setmessageSent(true);
-      Play();
-    } else {
-      toast.error("Cant send an Empty Message", {
-        onClose: () => {
-          messageInputTag.current?.focus();
-        },
+  // Removed duplicate handleMessageSendButtonClick function to fix block-scoped variable redeclaration error
+  
+  useEffect(() => {
+    if (socket) {
+      console.log("Socket connected:", socket.connected);
+      socket.on("connect", () => {
+        console.log("Socket connected event");
+        console.log("Socket connected property:", socket.connected);
+      });
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+        console.log("Socket connected property:", socket.connected);
+      });
+      socket.on("connect_error", (err) => {
+        console.error("Socket connection error:", err);
+      });
+      socket.on("reconnect_attempt", (attempt) => {
+        console.log("Socket reconnect attempt:", attempt);
+      });
+      socket.on("reconnect_error", (error) => {
+        console.error("Socket reconnect error:", error);
+      });
+      socket.on("reconnect_failed", () => {
+        console.error("Socket reconnect failed");
       });
     }
-  };
+  }, [socket]);
+
+  useEffect(() => {
+    if (socket) {
+      console.log("Socket connected state changed:", socket.connected);
+    }
+  }, [socket?.connected]);
 
   const createSocketioConnectionForClient = () => {
-    const socket = io(
-      "https://localhost:6060",
-      {
-        // credentials as client authenticator for websocket connection...
-        auth: {
-          chatroomID: ClientInfo.chatroomID,
-          username: ClientInfo.username,
-        },
-      },
-      {
-        rejectUnauthorized: false,
-        secure: true,
-        withCredentials: true,
-        transports: ["websocket"],
-      }
-    );
-    socket.on("connect", () => {
-      console.log("Socket connection established");
-    });
-    socket.on("connect_error", (err) => {
-      console.error("Socket connection error:", err);
-    });
-    setSocket(socket);
-    socket.emit("joinChatroom", ClientInfo.chatroomID);
-    socket.emit(
-      "Message to Server : New User Joined Chatroom",
-      ClientInfo.chatroomID
-    );
-    socket.on("receiveMessage", (data) => {
-      ChatMessageRef.current.push({
-        senderName: data.senderid,
-        message: data.message,
-        timeStamp: data.timestamp,
-      });
-      setChatMessage([...ChatMessageRef.current]);
-    });
-    return () => socket.disconnect();
+    const newSocket = io("https://localhost:6060", {
+  auth: {
+    chatroomID: ClientInfo.encryptedChatroomID || ClientInfo.chatroomID,
+    username: ClientInfo.username,
+  },
+  transports: ["websocket"], // use websocket only to avoid xhr poll error which occurs due to polling fallback
+  secure: true,
+  withCredentials: true,
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  randomizationFactor: 0.5,
+  transportOptions: {
+    websocket: {
+      rejectUnauthorized: false
+    }
+  }
+});
+
+
+    return newSocket;
   };
 
   useEffect(() => {
     if (ClientInfo && ClientInfo.chatroomID) {
-      const socket = createSocketioConnectionForClient();
+      console.log("Creating socket connection for chatroomID:", ClientInfo.chatroomID);
+      const newSocket = createSocketioConnectionForClient();
+      setSocket(newSocket);
+
+      newSocket.on("connect", () => {
+        console.log("Socket connection established");
+        // Update ClientInfo with socketId only if not already set to prevent infinite loop
+        setClientInfo((prev) => {
+          if (!prev.socketId) {
+            return { ...prev, socketId: newSocket.id };
+          }
+          return prev;
+        });
+      });
+      newSocket.on("connect_error", (err) => {
+        console.error("Socket connection error:", err);
+      });
+      newSocket.on("disconnect", (reason) => {
+        console.log("Socket disconnected:", reason);
+      });
+      newSocket.on("reconnect_attempt", (attempt) => {
+        console.log("Socket reconnect attempt:", attempt);
+      });
+      newSocket.on("reconnect_error", (error) => {
+        console.error("Socket reconnect error:", error);
+      });
+      newSocket.on("reconnect_failed", () => {
+        console.error("Socket reconnect failed");
+      });
+      newSocket.emit("joinChatroom", ClientInfo.chatroomID);
+      newSocket.emit(
+        "Message to Server : New User Joined Chatroom",
+        ClientInfo.chatroomID
+      );
+      newSocket.on("receiveMessage", (data) => {
+        ChatMessageRef.current.push({
+          senderName: data.senderid,
+          message: data.message,
+          timeStamp: data.timestamp,
+        });
+        setChatMessage([...ChatMessageRef.current]);
+      });
 
       // Listen for new member joined event
-      socket.on("newMemberJoined", (newMemberData) => {
+      newSocket.on("newMemberJoined", (newMemberData) => {
         // Assuming newMemberData contains at least socketId or username
         // Here we add the new member to Members array if not already present
         setMembers((prevMembers) => {
@@ -165,12 +197,60 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
       });
 
       return () => {
-        socket.off("newMemberJoined");
-        socket.disconnect();
+        newSocket.off("newMemberJoined");
+        newSocket.off("receiveMessage");
+        newSocket.off("connect");
+        newSocket.off("connect_error");
+        newSocket.off("disconnect");
+        newSocket.off("reconnect_attempt");
+        newSocket.off("reconnect_error");
+        newSocket.off("reconnect_failed");
+        newSocket.disconnect();
       };
+    } else if (ClientInfo && !ClientInfo.chatroomID) {
+      console.warn("ClientInfo is present but chatroomID is missing:", ClientInfo);
     }
   }, [ClientInfo]);
 
+  const handleMessageSendButtonClick = async (msg) => {
+    const MSG = String(msg);
+    if (MSG.trim() !== "") {
+      if (socket && socket.connected) {
+        // Set messageSent to the index of the new message (which will be current length)
+        setmessageSent(ChatMessageRef.current.length);
+        socket.emit(
+          "sendMessage",
+          { message: MSG, chatroomID: ClientInfo.chatroomID },
+          (response) => {
+            if (response.error) {
+              console.error("Error sending message:", response.error);
+              toast.error("Failed to send message. Please try again.");
+              // Reset messageSent on error
+              setmessageSent(null);
+            } else {
+              console.log("Message sent successfully:", response);
+            }
+          }
+        );
+      } else {
+        console.error("Socket is not connected.");
+        toast.error("Socket connection not established. Please try again.");
+      }
+      setMessage("");
+      await delay(2.5); // making the function execution halt intentionally...
+      // Reset messageSent to null after sending
+      setmessageSent(null);
+      Play();
+    } else {
+      toast.error("Can't send an Empty Message", {
+        onClose: () => {
+          messageInputTag.current?.focus();
+        },
+      });
+    }
+  };
+
+  // Refactored rotation logic to avoid adding multiple event listeners on each click
   const handleRotationLogic = (index) => {
     if (
       messageInputTag.current &&
@@ -183,28 +263,28 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
       newRotated[index] = !newRotated[index];
       return newRotated;
     });
+  };
+
+  // useEffect to handle click outside to close all rotations
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".parentOf3Dot")) {
-        setisRotated((prev) => {
-          const newRotated = [...prev];
-          newRotated[index] = false;
-          return newRotated;
-        });
+        setisRotated([]);
       }
     };
     window.addEventListener("click", handleClickOutside);
     return () => {
       window.removeEventListener("click", handleClickOutside);
     };
-  };
+  }, []);
 
   useEffect(() => {
-    if (ClientInfo) {
+    if (ClientInfo && ClientInfo.socketId) {
       try {
         setMembers((prevMemArray) => {
           if (
             !prevMemArray.some(
-              (member) => member.username === ClientInfo.username
+              (member) => member.socketId === ClientInfo.socketId
             )
           ) {
             return [...prevMemArray, ClientInfo];
@@ -270,7 +350,7 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
                     </div>
 
                     {/* 3-dot Menu */}
-                    <div className="relative">
+                    <div className="relative parentOf3Dot">
                       <img onClick={() => handleRotationLogic(index)} src={More} alt="More options" className={`w-6 h-6 cursor-pointer transition-transform duration-500`} style={{transform: isRotated[index] ? "rotate(90deg)" : "rotate(0deg)" }}
                       />
                       {/* Dropdown */}
@@ -297,7 +377,7 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
                                 { icon: block, label: "Block User" },
                                 { icon: report, label: "Report User" },
                               ].map(({icon,label,action,textColor = "text-gray-700"}) => (
-                                  <button key={label} onClick={action} className={`w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-gray-100 ${textColor}`}>
+                                  <button key={label} onClick={action} className={`cursor-pointer w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-gray-100 ${textColor}`}>
                                     <img src={icon} alt={label} className="w-5 h-5"/>
                                     {label}
                                   </button>
@@ -307,15 +387,15 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
                           ) : (
                             <>
                               {[
-                                { label: "Edit Profile", color: "text-blue-600", hover: "hover:bg-blue-600 hover:text-white"},
-                                { label: "Mute Notifications", color: "text-gray-700", hover: "hover:bg-gray-700 hover:text-white"},
-                                { label: "Change Status", color: "text-green-600", hover: "hover:bg-green-600 hover:text-white"},
-                                { label: "Logout", color: "text-gray-900", hover: "hover:bg-gray-900 hover:text-white"},
-                                { label: "Leave Chatroom", color: "text-red-600", hover: "hover:bg-red-600 hover:text-white"},
+                                { label: "Edit Profile", color: "text-blue-600", hover: "hover:bg-blue-600 hover:text-white "},
+                                { label: "Mute Notifications", color: "text-gray-700", hover: "hover:bg-gray-700 hover:text-white "},
+                                { label: "Change Status", color: "text-green-600", hover: "hover:bg-green-600 hover:text-white "},
+                                { label: "Logout", color: "text-gray-900", hover: "hover:bg-gray-900 hover:text-white "},
+                                { label: "Leave Chatroom", color: "text-red-600", hover: "hover:bg-red-600 hover:text-white "},
                               ].map(({ label, color, hover }) => (
                                 <button
                                   key={label}
-                                  className={`w-full px-4 py-2 text-sm font-medium rounded-md border border-gray-300 bg-white ${color} ${hover} transition duration-300 shadow-sm active:scale-95`}
+                                  className={`cursor-pointer w-full px-4 py-2 text-sm font-medium rounded-md border border-gray-300 bg-white ${color} ${hover} transition duration-300 shadow-sm active:scale-95`}
                                 >
                                   {label}
                                 </button>
@@ -360,11 +440,12 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
                 </div>
               </div>
             ) : (
-              ChatMessageRef.current.map((eachMessageData, index) => (
-                <MessageCard key={index + 1} messageData={eachMessageData} ClientInfo={ClientInfo} stateOfMessageSend={messageSent}
-                />
+              ChatMessageRef.current.map((eachMessageData, index) => 
+            messageSent === index  ? (<MessageCard key={index + 1} messageData={eachMessageData} ClientInfo={ClientInfo} stateOfMessageSend={false}/>)   
+              :
+              (<MessageCard key={index + 1} messageData={eachMessageData} ClientInfo={ClientInfo} stateOfMessageSend={true}/>) 
               ))
-            )}
+            }
           </div>
           <div className="messageInputSection bg-gradient-to-r from-gray-900 to-black shadow-lg rounded-lg w-full my-2 p-1">
             <ul className="w-full h-full flex flex-row items-center gap-3 px-2">
@@ -391,15 +472,17 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
               </li>
               <li
                 onClick={() => {
-                  setmessageEmojiCursor(false);
+                  setmessageEmojiCursor((prev) => !prev);
                 }}
                 onMouseEnter={() => {
-                  setmessageEmojiCursor(true);
+                  // Show tooltip only if emoji picker is not open
+                  if (!messageEmojiCursor) setmessageEmojiCursor(true);
                 }}
                 onMouseLeave={() => {
-                  setmessageEmojiCursor(false);
+                  // Hide tooltip only if emoji picker is not open
+                  if (messageEmojiCursor) setmessageEmojiCursor(false);
                 }}
-                className="cursor-pointer rounded-full bg-gray-800 p-2 transition-transform transform hover:scale-110 relative"
+                className="relative cursor-pointer rounded-full bg-gray-800 p-2 transition-transform transform hover:scale-110"
               >
                 <img width={25} height={25} className="invert" src={Smile} alt="emoji"
                 />
@@ -410,9 +493,9 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
                     </div>
                   </div>
                 ) : (
-                  <EmojiPicker
-                    className="absolute z-10 flex flex-col left-1/2 -translate-x-1/2 sm:right-0 bottom-38 w-max bg-gray-800 shadow-sm shadow-gray-400 rounded-lg border-none p-2 hover:scale-105 transition-transform"
-                    onEmojiClick={(event, emojiObject) => {
+                  <EmojiPicker          
+                    className="absolute z-10 top-full left-0 mt-1 w-max bg-gray-800 shadow-sm shadow-gray-400 rounded-lg border-none p-2 hover:scale-105 transition-transform"
+                    onEmojiClick={(emojiObject) => {
                       setMessage((prev) => (prev ? prev + emojiObject.emoji : emojiObject.emoji));
                       messageInputTag.current?.focus();
                     }}
@@ -420,18 +503,21 @@ const Chatroom = ({ isCopied, setisCopied, handleIdCopy }) => {
                 )}
               </li>
               <li className="flex-grow">
-                <input value={Message} ref={messageInputTag} onChange={(e) => setMessage(e.target.value)} onBlur={() => setisInputFocus(false)} onFocus={() => setisInputFocus(true)} disabled={!messageSent} className={`${
-                    !messageSent ? "cursor-wait" : "cursor-auto"
-                  } w-full h-12 py-2 px-4 bg-gray-900 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-500 transition-all`}
-                  placeholder="Enter your message..."
-                  type="text"
-                />
+              <input value={Message} ref={messageInputTag} onChange={(e) => setMessage(e.target.value)} onBlur={() => setisInputFocus(false)} onFocus={() => setisInputFocus(true)} disabled={messageSent !== null} className={`${
+                  messageSent !== null ? "cursor-wait" : "cursor-auto"
+                } w-full h-12 py-2 px-4 bg-gray-900 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-500 transition-all`}
+                placeholder="Enter your message..."
+                type="text"
+              />
               </li>
               <li
                 onClick={() => {
                   handleMessageSendButtonClick(Message);
                 }}
-                className="cursor-pointer rounded-full p-2 transition-transform transform hover:scale-90"
+                className={`rounded-full p-2 transition-transform transform hover:scale-90 ${
+                  !(socket && socket.connected) ? "opacity-50 cursor-not-allowed" : " cursor-pointer"
+                }`}
+                aria-disabled={!(socket && socket.connected)}
               >
                 <img className="invert" width={25} height={25} src={Send} alt />
               </li>
