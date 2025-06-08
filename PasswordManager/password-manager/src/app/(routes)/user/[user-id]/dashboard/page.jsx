@@ -1,18 +1,19 @@
 "use client";
 
-import Navbar from '@/components/navbar.jsx';
 import { useState } from 'react';
+import VaultNavbar from '@/components/navbar.jsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend, RadialBarChart, RadialBar } from 'recharts';
-
+import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
 
 export default function MainDashboardPage() {
+    useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT)
     const [topInformation, settopInformation] = useState([
     { label: 'Total Vaults', value: '14' },
     { label: 'Items Stored', value: '274' },
     { label: 'Shared Vaults', value: '3' },
-    { label: 'Breach Alerts', value: '1 Active', valueClass: 'text-red-600' },
+    { label: 'Breach Alerts', value: '1 Active', valueClass: 'text-red-600 dark:text-red-400' },
 ]);
 
 const [vaultUsageData, setvaultUsageData] = useState([
@@ -47,19 +48,19 @@ const [storageData, setstorageData] = useState([
   { name: 'Available', value: 30, fill: '#d0d0d0' },
 ])
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-50 text-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-100">
       <nav>
-        <Navbar />
+        <VaultNavbar/>
       </nav>
       <main className="pt-24 px-6 md:px-12 max-w-7xl mx-auto">
-        <h1 className="text-4xl flex items-center gap-3 font-extrabold mb-10 text-left text-gray-900"><span>Your Vault Dashboard</span><Image width={50} height={50} src="/images/secreticon.png" alt="logo" /></h1>
+        <h1 className="text-4xl flex items-center gap-3 font-extrabold mb-10 text-left text-gray-900 dark:text-gray-100"><span>Your Vault Dashboard</span><Image width={50} height={50} src="/images/secreticon.png" alt="logo" /></h1>
 
         {/* Quick Stats */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {topInformation.map((stat, i) => (
-            <div key={i} className={`${stat.label === 'Breach Alerts' ? 'animate-pulse border-red-500 shadow-red-400' : "" } cursor-pointer bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition`}>
-              <h2 className="text-sm font-medium text-gray-500">{stat.label}</h2>
-              <p className={`text-3xl font-bold mt-2 ${stat.valueClass || 'text-gray-900'}`}>{stat.value}</p>
+            <div key={i} className={`${stat.label === 'Breach Alerts' ? 'animate-pulse border-red-500 dark:border-red-400 shadow-red-400 dark:shadow-red-600' : "" } cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition`}>
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</h2>
+              <p className={`text-3xl font-bold mt-2 ${stat.valueClass || 'text-gray-900 dark:text-gray-100'}`}>{stat.value}</p>
             </div>
           ))}
         </section>
@@ -68,8 +69,8 @@ const [storageData, setstorageData] = useState([
         <section className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
           <ChartCard title="Vault Usage Over Time">
             <LineChart data={vaultUsageData}>
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis dataKey="name" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip />
               <Line type="monotone" dataKey="count" stroke="#10B981" strokeWidth={2} />
             </LineChart>
@@ -88,8 +89,8 @@ const [storageData, setstorageData] = useState([
 
           <ChartCard title="Breach Alerts Trend">
             <BarChart data={breachTrendData}>
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis dataKey="name" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip />
               <Bar dataKey="breaches" fill="#EF4444" />
             </BarChart>
@@ -97,8 +98,8 @@ const [storageData, setstorageData] = useState([
 
           <ChartCard title="Item Categories">
             <BarChart data={categoryData} layout="vertical">
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" />
+              <XAxis type="number" stroke="#6B7280" />
+              <YAxis dataKey="name" type="category" stroke="#6B7280" />
               <Tooltip />
               <Bar dataKey="value" fill="#34D399" />
             </BarChart>
@@ -113,7 +114,7 @@ const [storageData, setstorageData] = useState([
         </section>
 
         {/* Quick Actions */}
-        <section className="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-12">
+        <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-12">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="flex flex-wrap gap-4">
             <Link href="/shared-vault" className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-md font-medium transition">
@@ -129,20 +130,20 @@ const [storageData, setstorageData] = useState([
         </section>
 
         {/* Recent Activity */}
-        <section className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-          <ul className="divide-y divide-gray-200 text-sm text-gray-700">
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700 text-sm text-gray-700 dark:text-gray-300">
             <li className="flex justify-between py-2">
               <span>Added new item to "Bank Vault"</span>
-              <span className="text-gray-400">2 hours ago</span>
+              <span className="text-gray-400 dark:text-gray-500">2 hours ago</span>
             </li>
             <li className="flex justify-between py-2">
               <span>Vault settings updated</span>
-              <span className="text-gray-400">Yesterday</span>
+              <span className="text-gray-400 dark:text-gray-500">Yesterday</span>
             </li>
             <li className="flex justify-between py-2">
               <span>Shared vault access granted to John</span>
-              <span className="text-gray-400">2 days ago</span>
+              <span className="text-gray-400 dark:text-gray-500">2 days ago</span>
             </li>
           </ul>
         </section>
@@ -153,7 +154,7 @@ const [storageData, setstorageData] = useState([
 
 function ChartCard({ title, children }) {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
       <h2 className="text-xl font-semibold mb-4">{title}</h2>
       <ResponsiveContainer width="100%" height={250}>
         {children}

@@ -1,33 +1,60 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
+const versionSchema = new Schema(
+  {
+    iv: {
+      type: String,
+      required: [true, "Initialization vector (iv) is required."]
+    },
+    encryptedPreviousData: {
+      type: Schema.Types.Mixed,
+      required: [true, "Encrypted previous data is required."]
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  { _id: false } // prevents automatic _id in subdocuments
+);
+
 const vaultSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
-      index: true, // For faster lookup by user
+      required: [true, "User ID is required."]
     },
-    type: {
+
+    vaultType: {
       type: String,
-      required: true,
-      enum: ["password-details", "Bank-Account", "crypto-wallet-details", "credit-card"], // adjust as needed
+      required: [true, "Vault type is required."],
+      enum: {
+        values: ["password-details", "bank-account", "cryptowallet-details", "credit-card"],
+        message: "{VALUE} is not a valid vault type."
+      }
     },
+    vaultDescription: {
+      type: String,
+      required: [true, "Vault description is required."],
+      minlength: [10, "Vault description must be at least 10 characters."],
+      maxlength: [300, "Vault description must not exceed 300 characters."],
+      trim: true // removes extra whitespace
+    },
+
     encryptedCurrentData: {
       type: Schema.Types.Mixed,
-      required: true,
+      required: [true, "Encrypted current data is required."]
     },
-    versionHistory: [
-      {
-        iv: { type: String, required: true },
-        encryptedPreviousData: { type: Schema.Types.Mixed, required: true },
-        timestamp: { type: Date, default: Date.now },
-      },
-    ],
+
+    versionHistory: {
+      type: [versionSchema],
+      default: []
+    }
   },
   { timestamps: true }
 );
 
-const VaultItem = mongoose.model("VaultItem", vaultSchema);
-export default VaultItem;
+const vaultitems = mongoose.model("vaultitems", vaultSchema);
+export default vaultitems;

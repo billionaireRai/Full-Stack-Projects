@@ -1,18 +1,26 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-const isUserAuthenticated = create(persist((set,get) => { 
-    return {
-        isAuthenticated: false,
-        setisAuthenticated: () => {
-            if (!get().isAuthenticated) set({ isConnected: true });
+const useIsUserAuthenticated = create(
+  persist(
+    (set, get) => ({
+      isAuthenticated: false,
+      setIsAuthenticated: () => {
+        if (!get().isAuthenticated) set({ isAuthenticated: true });
       },
-      setisNotAuthenticated: () =>{
-        if (get().isAuthenticated) set({ isConnected: false });
-      }
-    },
+
+      setIsNotAuthenticated: () => {
+        if (get().isAuthenticated){
+          const { resetAccessAndRefreshToken } = require('./jwtTokens').default(); // ✅ Lazy load hook
+          set({ isAuthenticated: false });
+          resetAccessAndRefreshToken(); // ✅ Token reset after logout
+        }
+      },
+    }),
     {
-        name: 'user-authenticity-stored',
+      name: 'user-authenticity-stored',
     }
- }));
-export default isUserAuthenticated ;
+  )
+);
+
+export default useIsUserAuthenticated;

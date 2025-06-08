@@ -1,38 +1,51 @@
 import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-const sharedVaultSchema = new mongoose.Schema({
-    ownerId:{
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: 'User',
-        required: true,
+const sharedWithSchema = new Schema(
+  {
+    sharedWithId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Shared user ID is required."],
     },
-    sharedWithIndivisuals:{
-        type: [
-            {
-                sharedWithId:{
-                    type: mongoose.SchemaTypes.ObjectId,
-                    ref: 'User',
-                },
-                timeStampOfSharing:{
-                    type: Date,
-                }
-            }
-        ],
-        default:[null] ,
+    timeStampOfSharing: {
+      type: Date,
+      default: Date.now,
     },
-    encryptedData:{
-        type: Schema.Types.Mixed,
-        required: true
-    },
-    accessExpiresAt:{
-        type: Date,
-        default: null,
-    },
-    passPhraseHass:{
-        type: String,
-        required: true,
-    }
+  },
+  { _id: false }
+);
 
-},{timestamps:true})
-const sharedvaults = mongoose.model('sharedvaults', sharedVaultSchema);
+const sharedVaultSchema = new Schema(
+  {
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Owner ID is required."],
+    },
+
+    sharedWithIndividuals: {
+      type: [sharedWithSchema],
+      default: [], // Use empty array instead of [null]
+    },
+
+    encryptedData: {
+      type: Schema.Types.Mixed,
+      required: [true, "Encrypted data is required."],
+    },
+
+    accessExpiresAt: {
+      type: Date,
+      default: null,
+    },
+
+    passPhraseHash: {
+      type: String,
+      required: [true, "Passphrase hash is required."],
+    },
+  },
+  { timestamps: true }
+);
+
+const sharedvaults = mongoose.model("sharedvaults", sharedVaultSchema);
 export default sharedvaults;

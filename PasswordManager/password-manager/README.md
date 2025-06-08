@@ -91,3 +91,10 @@ Recharts offers components for a wide range of charts:
 <ScatterChart> – Relationships between variables
 
 <ComposedChart> – Mix different types (e.g. bar + line)
+
+/app
+  /api
+    /arcjet
+      route.js        # Arcjet endpoint for browser signal collection
+/middleware.ts        # Arcjet protection
+.env.local            # Contains ARCJET_SECRET_KEY and ARCJET_PUBLIC_KEY

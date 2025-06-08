@@ -1,23 +1,31 @@
 import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-const breachWatchSchema = new mongoose.Schema({
-    userId:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+const breachWatchSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "User ID is required."],
     },
-    emailChecked:{
-        type:Boolean,
-        default:false,
+
+    emailChecked: {
+      type: Boolean,
+      default: false,
     },
-    breachFound:{
-        type:Boolean,
-        default:false,
+
+    breachFound: {
+      type: Boolean,
+      default: false,
     },
-    details:{
-        type:mongoose.Schema.Types.Array,
-        default:[],
-    }
-},{timestamps:true})
-const breachwatch = mongoose.model('breachwatch', breachWatchSchema);
-export default breachwatch ;
+
+    details: {
+      type: [Schema.Types.Mixed], // corrected from Schema.Types.Array
+      default: [],
+    },
+  },
+  { timestamps: true }
+);
+
+const breachwatchs = mongoose.model("breachwatchs", breachWatchSchema);
+export default breachwatchs;

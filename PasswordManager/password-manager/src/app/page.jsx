@@ -3,13 +3,17 @@
 import { useEffect, useState } from "react";
 import MatrixBackground from "../lib/matrixBackground";
 import LoadingSimulation from "./loading";
+import { getUserLocationInfoByPermission } from "@/lib/userLocation.js";
 import Link from "next/link";
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
 
-
-
+  useEffect(() => {
+    const locationDetails = getUserLocationInfoByPermission() ; // calling the defiend function
+    // do whatever you want to with user location..
+  }, [])
+  
   if (loading) {
     return <LoadingSimulation />;
   }

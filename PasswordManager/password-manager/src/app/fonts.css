@@ -1,0 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+  font-family: 'Share Tech Mono', monospace;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}

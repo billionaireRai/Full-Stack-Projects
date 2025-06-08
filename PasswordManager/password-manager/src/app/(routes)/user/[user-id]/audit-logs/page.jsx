@@ -1,42 +1,44 @@
-"use client"
+ "use client";
 
-import Navbar from '@/components/navbar.jsx';
+import Navbar from '../../../../../components/navbar.jsx';
+import { useInactivityChecker } from '../../../../../components/useInactivityChecker.jsx';
 
 export default function UserAuditLogsPage() {
+  useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT);
   return (
-    <div className="min-h-screen bg-[#f9fafb] text-gray-800">
+    <div className="min-h-screen bg-[#f9fafb] dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <Navbar />
       <main className="pt-28 px-6 md:px-12 max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold mb-6 text-center">📋 User Audit Logs</h1>
-        <p className="text-center text-gray-600 mb-14 max-w-2xl mx-auto text-lg">
+        <p className="text-center text-gray-600 dark:text-gray-400 mb-14 max-w-2xl mx-auto text-lg">
           Monitor, trace, and verify every significant action within your secure vault. This page helps you audit user interactions, ensuring accountability and transparency.
         </p>
 
         {/* Overview Section */}
-        <section className="bg-white p-10 rounded-2xl shadow-lg border border-blue-200 mb-12">
-          <h2 className="text-2xl font-semibold mb-6 text-blue-600">🔎 Account Access Overview</h2>
+        <section className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-lg border border-blue-200 dark:border-blue-900 mb-12">
+          <h2 className="text-2xl font-semibold mb-6 text-blue-600 dark:text-blue-400">🔎 Account Access Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            <div className="p-6 cursor-pointer bg-blue-50 rounded-xl border-none hover:shadow-md">
-              <h3 className="text-3xl font-bold text-blue-600">9</h3>
-              <p className="text-gray-600 mt-1">Total Logins Last 7 Days</p>
+            <div className="p-6 cursor-pointer bg-blue-50 dark:bg-blue-900 rounded-xl border-none hover:shadow-md">
+              <h3 className="text-3xl font-bold text-blue-600 dark:text-blue-400">9</h3>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Total Logins Last 7 Days</p>
             </div>
-            <div className="p-6 cursor-pointer bg-blue-50 rounded-xl border-none hover:shadow-md">
-              <h3 className="text-3xl font-bold text-yellow-500">3</h3>
-              <p className="text-gray-600 mt-1">New Devices Detected</p>
+            <div className="p-6 cursor-pointer bg-blue-50 dark:bg-blue-900 rounded-xl border-none hover:shadow-md">
+              <h3 className="text-3xl font-bold text-yellow-500 dark:text-yellow-400">3</h3>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">New Devices Detected</p>
             </div>
-            <div className="p-6 cursor-pointer bg-blue-50 rounded-xl border-none hover:shadow-md">
-              <h3 className="text-3xl font-bold text-green-600">100%</h3>
-              <p className="text-gray-600 mt-1">Successful Auth Rate</p>
+            <div className="p-6 cursor-pointer bg-blue-50 dark:bg-blue-900 rounded-xl border-none hover:shadow-md">
+              <h3 className="text-3xl font-bold text-green-600 dark:text-green-400">100%</h3>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Successful Auth Rate</p>
             </div>
           </div>
         </section>
 
         {/* Activity Logs Table */}
-        <section className="bg-white p-10 rounded-2xl shadow-lg border border-blue-200 mb-12">
-          <h2 className="text-2xl font-semibold mb-6 text-blue-600">🕵️‍♂️ Recent Activity Logs</h2>
+        <section className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-lg border border-blue-200 dark:border-blue-900 mb-12">
+          <h2 className="text-2xl font-semibold mb-6 text-blue-600 dark:text-blue-400">🕵️‍♂️ Recent Activity Logs</h2>
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-gray-700">
-              <thead className="bg-blue-50 border-b border-blue-200">
+            <table className="min-w-full text-left text-sm text-gray-700 dark:text-gray-300">
+              <thead className="bg-blue-50 dark:bg-blue-900 border-b border-blue-200 dark:border-blue-900">
                 <tr>
                   <th className="px-6 py-3 font-medium">Date</th>
                   <th className="px-6 py-3 font-medium">Time</th>
@@ -46,38 +48,38 @@ export default function UserAuditLogsPage() {
                   <th className="px-6 py-3 font-medium">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-blue-100">
-                <tr className='cursor-pointer hover:shadow hover:shadow-blue-md hover:bg-blue-50 rounded-lg'>
+              <tbody className="divide-y divide-blue-100 dark:divide-blue-900">
+                <tr className="cursor-pointer hover:shadow hover:shadow-blue-md hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg">
                   <td className="px-6 py-4">May 14, 2025</td>
                   <td className="px-6 py-4">10:42 AM</td>
                   <td className="px-6 py-4">Logged in</td>
                   <td className="px-6 py-4">Chrome on Windows</td>
                   <td className="px-6 py-4">192.168.1.2</td>
-                  <td className="px-6 py-4 text-green-600">Success</td>
+                  <td className="px-6 py-4 text-green-600 dark:text-green-400">Success</td>
                 </tr>
-                <tr className='cursor-pointer hover:shadow hover:shadow-blue-md hover:bg-blue-50 rounded-lg'>
+                <tr className="cursor-pointer hover:shadow hover:shadow-blue-md hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg">
                   <td className="px-6 py-4">May 13, 2025</td>
                   <td className="px-6 py-4">5:31 PM</td>
                   <td className="px-6 py-4">Updated Bank Account Info</td>
                   <td className="px-6 py-4">Safari on iPhone</td>
                   <td className="px-6 py-4">192.168.1.5</td>
-                  <td className="px-6 py-4 text-green-600">Success</td>
+                  <td className="px-6 py-4 text-green-600 dark:text-green-400">Success</td>
                 </tr>
-                <tr className='cursor-pointer hover:shadow hover:shadow-blue-md hover:bg-blue-50 rounded-lg'>
+                <tr className="cursor-pointer hover:shadow hover:shadow-blue-md hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg">
                   <td className="px-6 py-4">May 12, 2025</td>
                   <td className="px-6 py-4">8:15 AM</td>
                   <td className="px-6 py-4">Failed Login Attempt</td>
                   <td className="px-6 py-4">Unknown</td>
                   <td className="px-6 py-4">45.32.189.22</td>
-                  <td className="px-6 py-4 text-red-600">Failed</td>
+                  <td className="px-6 py-4 text-red-600 dark:text-red-400">Failed</td>
                 </tr>
-                <tr className='cursor-pointer hover:shadow hover:shadow-blue-md hover:bg-blue-50 rounded-lg'>
+                <tr className="cursor-pointer hover:shadow hover:shadow-blue-md hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg">
                   <td className="px-6 py-4">May 11, 2025</td>
                   <td className="px-6 py-4">9:47 PM</td>
                   <td className="px-6 py-4">Enabled Two-Factor Authentication</td>
                   <td className="px-6 py-4">Firefox on Mac</td>
                   <td className="px-6 py-4">192.168.1.10</td>
-                  <td className="px-6 py-4 text-green-600">Success</td>
+                  <td className="px-6 py-4 text-green-600 dark:text-green-400">Success</td>
                 </tr>
               </tbody>
             </table>
@@ -85,26 +87,26 @@ export default function UserAuditLogsPage() {
         </section>
 
         {/* Filters */}
-        <section className="bg-white p-8 rounded-2xl shadow border border-gray-200 mb-12">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">🔍 Filter Activity</h2>
+        <section className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow border border-gray-200 dark:border-gray-700 mb-12">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">🔍 Filter Activity</h2>
           <div className="grid md:grid-cols-4 gap-4">
-            <input type="date" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <input type="date" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+            <select className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
               <option>All Types</option>
               <option>Login</option>
               <option>Data Change</option>
               <option>Settings</option>
               <option>2FA</option>
             </select>
-            <input type="text" placeholder="IP or Device" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-            <button className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Apply</button>
+            <input type="text" placeholder="IP or Device" className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+            <button className="cursor-pointer bg-blue-600 dark:bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition">Apply</button>
           </div>
         </section>
 
         {/* Tips */}
-        <section className="bg-white p-8 rounded-2xl shadow border border-gray-200 mb-12">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">💡 Reviewing Best Practices</h2>
-          <ul className="list-disc list-inside text-gray-700 leading-relaxed">
+        <section className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow border border-gray-200 dark:border-gray-700 mb-12">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">💡 Reviewing Best Practices</h2>
+          <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 leading-relaxed">
             <li>Look for repeated failed attempts — they could signal a brute-force attack.</li>
             <li>Verify new device logins and unexpected geographic IPs.</li>
             <li>Enable auto-logoff for sensitive sessions.</li>
@@ -113,21 +115,21 @@ export default function UserAuditLogsPage() {
         </section>
 
         {/* Geo & Device Graphs Placeholder */}
-        <section className="bg-white p-10 rounded-2xl shadow border border-gray-200 mb-12">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">🌍 Login Locations & Devices</h2>
-          <p className="text-gray-600 mb-4">Track where your account has been accessed from and which devices were used.</p>
-          <div className="h-64 bg-gray-100 flex items-center justify-center text-gray-400 text-sm rounded-xl">
-            <span className='animate-caret-blink'>Graphical Map & Device Distribution Charts Coming Soon</span>
+        <section className="bg-white dark:bg-gray-800 p-10 rounded-2xl shadow border border-gray-200 dark:border-gray-700 mb-12">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">🌍 Login Locations & Devices</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Track where your account has been accessed from and which devices were used.</p>
+          <div className="h-64 bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-300 text-sm rounded-xl">
+            <span className="animate-caret-blink">Graphical Map & Device Distribution Charts Coming Soon</span>
           </div>
         </section>
 
         {/* Export Button */}
-        <section className="bg-white p-8 rounded-2xl shadow border border-gray-200 mb-24">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">📥 Export Logs</h2>
-          <p className="text-gray-600 mb-4">Export detailed logs for audits, personal recordkeeping, or reporting.</p>
+        <section className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow border border-gray-200 dark:border-gray-700 mb-24">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">📥 Export Logs</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Export detailed logs for audits, personal recordkeeping, or reporting.</p>
           <div className="flex gap-4">
-            <button className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition">Download CSV</button>
-            <button className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg transition">Print Report</button>
+            <button className="cursor-pointer bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded-lg transition">Download CSV</button>
+            <button className="cursor-pointer bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300 px-6 py-3 rounded-lg transition">Print Report</button>
           </div>
         </section>
       </main>

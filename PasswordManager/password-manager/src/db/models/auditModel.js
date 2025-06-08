@@ -1,49 +1,73 @@
 import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-const auditLogSchema = new mongoose.Schema(
+// Optional: define a sub-schema for coordinates
+const coordinatesSchema = new Schema(
+  {
+    latitude: {
+      type: Number,
+      default: 0.0,
+    },
+    longitude: {
+      type: Number,
+      default: 0.0,
+    },
+  },
+  { _id: false } // No need for _id in embedded object
+);
+
+const auditLogSchema = new Schema(
   {
     userId: {
-      type: mongoose.SchemaTypes.ObjectId,
-      required: true,
-      ref: "User"
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "User ID is required."],
       // The ID of the user performing the action
     },
+
     action: {
       type: String,
-      required: true,
+      required: [true, "Action description is required."],
+      trim: true,
       // Description of the action performed
     },
+
     targetItemId: {
-      type: mongoose.SchemaTypes.ObjectId,
-      required: true,
+      type: Schema.Types.ObjectId,
+      required: [true, "Target item ID is required."],
       // ID of the item/resource the action was performed on
     },
+
     timestamp: {
       type: Date,
       default: Date.now,
       // When the action occurred
     },
+
     ipAddress: {
       type: String,
-      required: true,
+      required: [true, "IP address is required."],
+      trim: true,
       // IP address from which the action was performed
     },
+
     userAgent: {
       type: String,
-      required: true,
+      required: [true, "User agent is required."],
+      trim: true,
       // User agent string from the browser/client
     },
+
     coordinates: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {
+      type: coordinatesSchema,
+      default: () => ({
         latitude: 0.0,
         longitude: 0.0,
-      },
+      }),
     },
   },
   { timestamps: true }
 );
 
-const auditlog = mongoose.model("auditlog", auditLogSchema);
-
-export default auditlog;
+const auditlogs = mongoose.model("auditlogs", auditLogSchema);
+export default auditlogs;
