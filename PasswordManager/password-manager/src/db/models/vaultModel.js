@@ -31,7 +31,7 @@ const vaultSchema = new Schema(
       type: String,
       required: [true, "Vault type is required."],
       enum: {
-        values: ["password-details", "bank-account", "cryptowallet-details", "credit-card"],
+        values: ["password-details", "bank-account", "cryptowallet-details", "credit-card","other"],
         message: "{VALUE} is not a valid vault type."
       }
     },
@@ -56,5 +56,5 @@ const vaultSchema = new Schema(
   { timestamps: true }
 );
 
-const vaultitems = mongoose.model("vaultitems", vaultSchema);
+const vaultitems =  mongoose.models.vaultitems || mongoose.model("vaultitems", vaultSchema);
 export default vaultitems;

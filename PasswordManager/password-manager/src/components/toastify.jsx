@@ -5,31 +5,37 @@ const Toastify = ({ children }) => {
   return (
     <>
       <Toaster 
-      toastOptions={{
-          duration: 3000,
+        toastOptions={{
+          duration: 4000,
           style: {
-            background: '#1f2937', // Tailwind `gray-800`
-            color: '#fff',
-            padding: '16px 20px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 20px rgba(0,0,0,0.15)',
+            background: '#121212', // Dark black background
+            color: '#e0e0e0', // Light gray text for contrast
+            padding: '16px 24px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.7)',
             fontSize: '15px',
+            fontWeight: '500',
+            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+            backdropFilter: 'none',
+            border: '1px solid #333',
+            transition: 'transform 0.3s ease, opacity 0.3s ease',
           },
           success: {
             iconTheme: {
-              primary: '#10b981', // Tailwind `green-500`
-              secondary: '#ecfdf5', // Tailwind `green-50`
+              primary: '#34d399', // Tailwind `green-400`
+              secondary: '#d1fae5', // Tailwind `green-100`
             },
           },
           error: {
             iconTheme: {
-              primary: '#ef4444', // Tailwind `red-500`
+              primary: '#f87171', // Tailwind `red-400`
               secondary: '#fee2e2', // Tailwind `red-100`
             },
           },
         }} 
-      position="top-center" 
-      reverseOrder={false} />
+        position="top-center" 
+        reverseOrder={false} 
+      />
       {children}
     </>
   )

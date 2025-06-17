@@ -3,8 +3,80 @@
 import Link from "next/link";
 import Image from "next/image";
 import Tooltip from "@/components/Tooltip";
+import toast from "react-hot-toast";
+import axios from "axios";
+import useUserID from "@/state/useridState";
+import { getUserLocationInfoByPermission } from "@/lib/userLocation";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { useState,useEffect } from "react";
 
 export default function UserLoginPage() {
+  const { userId , setUserId } = useUserID() ; // initilizing the useUserId function 
+  const router = useRouter() ; // for programmatic navigation...
+  const [userLocation, setUserLocation] = useState(null);
+  // initializing useForm() for form handling...
+  const {register,handleSubmit,formState: { errors },trigger,} = useForm({
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+
+useEffect(() => {
+  // Fetch user location on component mount
+  const fetchUserLocation = async () => {
+    try {
+      const location = await getUserLocationInfoByPermission();
+      setUserLocation(location);
+    } catch (error) {
+      console.error("Failed to get user location:", error);
+    }
+  };
+  fetchUserLocation();
+}, []);
+
+// handler function for calling logic route handler...
+const handleLoginForm = async (formData) => {
+  try {
+    // Add userLocation to formData if available
+    if (userLocation) formData.userLatestLocation = userLocation ;
+    const apiResponse = await axios.post("/apis/user/login", formData);
+    if (apiResponse.status === 200) {
+      setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
+      return apiResponse.data.userId; // return userId instead of string
+    } else {
+      throw new Error(apiResponse.data.message || "login failed");
+    }
+  } catch (error) {
+    console.error("Some error occurred in API request process...", error);
+    throw new Error(error.response?.data?.message || error.message || "login failed");
+  }
+};
+
+  const handleToast = (formData) => {
+    return toast.promise(handleLoginForm(formData), {
+      loading: "logging-In please wait...",
+      success: (userIdFromResponse) => {
+        if (userIdFromResponse) router.push(`/user/${userIdFromResponse}/dashboard`);
+        return "login successful!!";
+      },
+      error: "login failed!!",
+    }, {
+      success: { duration: 4000 },
+      error: { duration: 4000 },
+      loading: { duration: 3000 },
+    });
+  };
+
+  // top-level handler function for useForm() hook...
+  const onSubmit = async (data) => { await handleToast(data) };
+  // handling the routing after registration...
+  useEffect(() => {
+    if (userId !== null) {
+      console.log("UserID :", userId);
+    }
+  }, [userId])
+  
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Left - Image Section */}
@@ -26,7 +98,7 @@ export default function UserLoginPage() {
             Please log in to your account to continue.
           </p>
 
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
             {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Email</label>
@@ -34,8 +106,26 @@ export default function UserLoginPage() {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-2 ${
+                    errors.email ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "Invalid email format",
+                    },
+                  })}
+                  onBlur={() => {
+                    trigger("email");
+                  }}
                 />
+                {errors.email && (
+                   <div className="flex flex-row items-center gap-0.5">
+                    <img width={20} height={20} src="/images/warning.png" alt="warning" />
+                    <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                   </div>
+                )}
               </Tooltip>
             </div>
 
@@ -45,9 +135,21 @@ export default function UserLoginPage() {
               <Tooltip text="Enter your password">
                 <input
                   type="password"
-                  placeholder="Enter your password"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  placeholder="••••••••"
+                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none transition-all duration-300 focus:ring-2 ${
+                    errors.password ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
+                  {...register("password", { required: "Password is required" })}
+                  onBlur={() => {
+                    trigger("password");
+                  }}
                 />
+                {errors.password && (
+                   <div className="flex flex-row items-center gap-0.5">
+                    <img width={20} height={20} src="/images/warning.png" alt="warning" />
+                    <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+                   </div>
+                )}
               </Tooltip>
             </div>
             {/* Checkbox */}
@@ -57,22 +159,30 @@ export default function UserLoginPage() {
                   type="checkbox"
                   id="agree"
                   className="cursor-pointer mt-1 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
+                  {...register("agree", { required: "You must confirm the information" })}
+                  onBlur={() => {
+                    trigger("agree");
+                  }}
                 />
                 <label htmlFor="agree" className="text-sm text-gray-600 dark:text-gray-400 leading-snug">
                   You confirm that the above information is correct.
                 </label>
               </div>
+                {errors.agree && (
+                   <div className="flex flex-row items-center gap-0.5">
+                    <img width={20} height={20} src="/images/warning.png" alt="warning" />
+                    <p className="text-red-500 text-xs mt-1">{errors.agree.message}</p>
+                   </div>
+                )}
             </Tooltip>
 
             {/* Submit Button */}
-            <Tooltip text="Click to log in">
               <button
                 type="submit"
                 className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-400"
               >
                 Log In
               </button>
-            </Tooltip>
 
             {/* Register Link */}
             <div className="flex flex-row items-center justify-between">

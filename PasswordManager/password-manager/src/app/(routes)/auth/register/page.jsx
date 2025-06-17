@@ -4,40 +4,56 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useForm } from "react-hook-form";
 import useUserID from "@/state/useridState";
 import Tooltip from "@/components/Tooltip";
-import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getUserLocationInfoByPermission } from "@/lib/userLocation";
 
 export default function UserRegisterPage() {
-  const { userId , setUserId } = useUserID() ; // getting userId state update function...
-  const router = useRouter() ; // intializing the router...
+const { userId , setUserId } = useUserID() ; // getting userId state update function...
+const router = useRouter() ; // intializing the router...
+const [userLocation, setUserLocation] = useState(null);
   // initializing the react hook form
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting }, setError, clearErrors,} = useForm({mode: "onBlur",});
-  const handleRegistrationForm = async (formData) => {
-    clearErrors();
+const { register, handleSubmit, watch, formState: { errors, isSubmitting }, setError, clearErrors,} = useForm({mode: "onBlur",reValidateMode:"onChange"});
+
+useEffect(() => {
+  // Fetch user location on component mount
+  const fetchUserLocation = async () => {
     try {
-      const apiResponse = await axios.post("/apis/user/register", formData);
-      if (apiResponse.status === 201) {
-        console.log(apiResponse.data); // logging the api response from the server...
-        setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
-        return "Registration successful!!";
-      } else {
-        throw new Error(apiResponse.data.message || "Registration failed");
-      }
+      const location = await getUserLocationInfoByPermission();
+      setUserLocation(location);
     } catch (error) {
-      console.error("Some error occurred in API request process...", error);
-      throw new Error(error.response?.data?.message || error.message || "Registration failed");
+      console.error("Failed to get user location:", error);
     }
   };
+  fetchUserLocation();
+}, []);
+const handleRegistrationForm = async (formData) => {
+  clearErrors();
+  try {
+    // Add userLocation to formData if available
+    if (userLocation) formData.userLatestLocation = userLocation ;
+    const apiResponse = await axios.post("/apis/user/register", formData);
+    if (apiResponse.status === 201) {
+      console.log(apiResponse.data); // logging the api response from the server...
+      setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
+      return apiResponse.data.userId; // return userId instead of string
+    } else {
+      throw new Error(apiResponse.data.message || "Registration failed");
+    }
+  } catch (error) {
+    console.error("Some error occurred in API request process...", error);
+    throw new Error(error.response?.data?.message || error.message || "Registration failed");
+  }
+};
 
   const handleToast = (formData) => {
     return toast.promise(handleRegistrationForm(formData), {
-      pending: "Registering please wait...",
-      success: (data) => {
-        toast.success("Registration successful!!");
-        if (data === "Registration successful!!") router.push(`/user/${userId}/dashboard`);
+      loading: "Registering please wait...",
+      success: (userIdFromResponse) => {
+        if (userIdFromResponse) router.push(`/user/${userIdFromResponse}/dashboard`);
         return "Registration successful!!";
       },
       error: "Registration failed!!",
@@ -186,16 +202,16 @@ export default function UserRegisterPage() {
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Encryption Salt
               </label>
-              <Tooltip text="Enter a value between 10 - 30">
+              <Tooltip text="Enter a value between 5 - 15">
                 <input
                   type="number"
                   {...register("salt", {
                     required: "Salt is required",
                     valueAsNumber: true,
-                    min: { value: 10, message: "Salt must be at least 10" },
-                    max: { value: 30, message: "Salt must be at most 30" },
+                    min: { value: 5, message: "Salt must be at least 5" },
+                    max: { value: 15, message: "Salt must be at most 15" },
                   })}
-                  placeholder="Enter a value between 10 - 30"
+                  placeholder="Enter a value between 5 - 15"
                   className={`w-full px-4 py-2 border placeholder:text-gray-400 dark:text-white border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 ${
                     errors.salt ? "border-red-500" : ""
                   }`}
@@ -208,7 +224,6 @@ export default function UserRegisterPage() {
                 </div>
               )}
             </div>
-
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

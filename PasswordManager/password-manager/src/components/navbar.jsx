@@ -43,7 +43,7 @@ export default function VaultNavbar() {
             <li className="relative">
               <button
                 onClick={() => setvaultDropdown(!vaultDropdown)}
-                className="flex items-center gap-1 hover:text-green-400 transition"
+                className="cursor-pointer flex items-center gap-1 hover:text-green-400 transition"
               >
                 Vault <ChevronDown size={15} />
               </button>

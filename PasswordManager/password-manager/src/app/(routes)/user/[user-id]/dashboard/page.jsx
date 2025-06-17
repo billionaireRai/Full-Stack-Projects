@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import VaultNavbar from '@/components/navbar.jsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend, RadialBarChart, RadialBar } from 'recharts';
 import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
+import axios from 'axios';
 
 export default function MainDashboardPage() {
-    useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT)
+    useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT) ; // component for integrating inactivity checker functionality...
     const [topInformation, settopInformation] = useState([
     { label: 'Total Vaults', value: '14' },
     { label: 'Items Stored', value: '274' },
@@ -37,16 +38,36 @@ const [breachTrendData, setbreachTrendData] = useState([
 ]);
 
 const [categoryData, setcategoryData] = useState([
-  { name: 'Passwords', value: 120 },
-  { name: 'Bank Info', value: 45 },
-  { name: 'IDs', value: 60 },
-  { name: 'Notes', value: 49 },
+  { name: 'password-details', value: 120 },
+  { name: 'bank-account', value: 45 },
+  { name: 'cryptowallet-details', value: 60 },
+  { name: 'credit-card', value: 49 },
+  { name: 'other' , value:10}
 ]);
 
 const [storageData, setstorageData] = useState([
   { name: 'Used', value: 70, fill: '#8884d8' },
   { name: 'Available', value: 30, fill: '#d0d0d0' },
 ])
+
+// function to get dashboard related data...
+const fetchData = async () =>{
+  try {
+    const incomingData = await axios.post('/apis/user/dashboard',{method:'POST'})
+    settopInformation(incomingData.data.topInformation) // data in response should be of this name exact...
+    setvaultUsageData(incomingData.data.vaultUsageData)
+    setvaultTypeData(incomingData.data.vaultTypeData)
+    setbreachTrendData(incomingData.data.breachTrendData)
+    setcategoryData(incomingData.data.categoryData)
+    setstorageData(incomingData.data.storageData)
+  } catch (error) {
+    console.error(error);
+  }
+  }
+useEffect(() => {
+  fetchData() ;
+}, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-100">
       <nav>
@@ -57,7 +78,7 @@ const [storageData, setstorageData] = useState([
 
         {/* Quick Stats */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {topInformation.map((stat, i) => (
+          {topInformation?.map((stat, i) => (
             <div key={i} className={`${stat.label === 'Breach Alerts' ? 'animate-pulse border-red-500 dark:border-red-400 shadow-red-400 dark:shadow-red-600' : "" } cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition`}>
               <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</h2>
               <p className={`text-3xl font-bold mt-2 ${stat.valueClass || 'text-gray-900 dark:text-gray-100'}`}>{stat.value}</p>
@@ -78,8 +99,8 @@ const [storageData, setstorageData] = useState([
 
           <ChartCard title="Vault Type Distribution">
             <PieChart>
-              <Pie data={vaultTypeData} dataKey="value" nameKey="name" outerRadius={80} label>
-                {vaultTypeData.map((entry, index) => (
+              <Pie data={vaultTypeData || []} dataKey="value" nameKey="name" outerRadius={80} label>
+                {(vaultTypeData || []).map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={index === 0 ? '#60A5FA' : '#FBBF24'} />
                 ))}
               </Pie>

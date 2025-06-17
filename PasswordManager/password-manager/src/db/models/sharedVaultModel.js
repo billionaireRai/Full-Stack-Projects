@@ -42,10 +42,11 @@ const sharedVaultSchema = new Schema(
     passPhraseHash: {
       type: String,
       required: [true, "Passphrase hash is required."],
+      select:false
     },
   },
   { timestamps: true }
 );
 
-const sharedvaults = mongoose.model("sharedvaults", sharedVaultSchema);
+const sharedvaults = mongoose.models.sharedvaults || mongoose.model("sharedvaults", sharedVaultSchema);
 export default sharedvaults;

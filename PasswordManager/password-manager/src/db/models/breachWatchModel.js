@@ -27,5 +27,5 @@ const breachWatchSchema = new Schema(
   { timestamps: true }
 );
 
-const breachwatchs = mongoose.model("breachwatchs", breachWatchSchema);
+const breachwatchs = mongoose.models.breachwatchs || mongoose.model("breachwatchs", breachWatchSchema);
 export default breachwatchs;

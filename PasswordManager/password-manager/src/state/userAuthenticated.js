@@ -1,3 +1,5 @@
+"use client"
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -18,7 +20,7 @@ const useIsUserAuthenticated = create(
       },
     }),
     {
-      name: 'user-authenticity-stored',
+      name: "user-auth-storage",
     }
   )
 );

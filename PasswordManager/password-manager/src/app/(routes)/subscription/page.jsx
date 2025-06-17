@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import Navbar from "../components/navbar";
+import Navbar from "@/components/navbar.jsx";
 
 export default function UserSubscriptionOptionsPage() {
   const [selectedPlan, setSelectedPlan] = useState("Freemium"); // targeting initially on the freemium one...

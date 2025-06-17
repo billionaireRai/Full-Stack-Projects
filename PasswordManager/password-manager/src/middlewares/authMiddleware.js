@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies , headers } from "next/headers";
 import jsonWebToken from 'jsonwebtoken';
 
-// protected route matcher
 export const config = {
-    matcher: '/user/:user-id'
+    matcher: ['/user/:user-id', ] // URL structure from where the request is coming...
 };
 
 export function authMiddleware(request) {
@@ -12,7 +11,7 @@ export function authMiddleware(request) {
     // Check if the request is for a protected route...
     if (pathname.startsWith('/user/')) {
         const userCookie = cookies(); // initializing the cookies function...
-        const requestHeaders = headers(request.headers); // initializing header function
+        const requestHeaders = headers(); // initializing header function
 
         let accessToken = userCookie.get('accessToken')?.value; // checking for accessToken...
         const authHeader = requestHeaders.get('Authorization'); // authorization header...
@@ -28,18 +27,21 @@ export function authMiddleware(request) {
 
         let decodedAccessToken ; // for storing the value of accessToken...
         try {
-            decodedAccessToken = jsonWebToken.verify(accessToken, process.env.SECRET_FOR_ACCESS_TOKEN);
+            decodedAccessToken = jsonWebToken.verify(accessToken, process.env.SECRET_FOR_ACCESS_TOKEN); // gives decoded-data , iat , exp
+            // if access token is expired...
+            const currentTime = Math.floor(new Date.now() / 1000); ; // getting current time after converting in seconds...
+            if (currentTime >= decodedAccessToken.exp) {
+                console.log("accesstoken coming from user is EXPIRED...")
+                return NextResponse.redirect('/auth/re-auth')
+            }
         } catch (error) {
             console.log("An Error Occured :",error);
             return NextResponse.json({
                 error: "Unauthorized User Trying to access secured route page...",
                 status: 401
             });
-        }
-        console.log("Correct Decoded accessToken :", decodedAccessToken); 
-        //passing user info via headers if needed ( New Concept )...
-        const response = NextResponse.next(); // capturing the control , going to next middleware...
-        response.headers.set('userObj', JSON.stringify(decodedAccessToken));
+        } 
+        return NextResponse.next() ; // giving control to the next middleware or , route handler...
     }
     // Allow the request to continue to next middleware...
     return NextResponse.next();

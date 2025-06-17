@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcryptjs from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jsonWebToken from 'jsonwebtoken';
 
 // Embedded schema for subscription details
@@ -7,7 +7,7 @@ const subscriptionSchema = new mongoose.Schema(
   {
     subscriptionLevel: {
       type: String,
-      enum: ["free","standard","premium"],
+      enum: ["free","basic","standard","premium"],
       default: "free",
     },
     subscriptionDate: {
@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema(
       type: subscriptionSchema,
       default: () => ({})
     },
-    userLocation: {
+    userLatestLocation: {
       coordinates: {
         type: [Number], // [longitude, latitude]
         default: [0.0, 0.0]
@@ -63,17 +63,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required."],
       minlength: [10, "Password must be at least 10 characters long."],
-      select: false // Ensures password is not returned in queries by default
+      select: true 
     },
 
     encryptionSalt: {
       type: Number,
       required: [true, "Encryption salt is required."],
-      select: false // hides from query results
+      select: true // makes sure that it comes in query result...
     },
     refreshToken : {
       type:String,
-      select:false,
+      select:true,
     }
   },
   { timestamps: true }
@@ -82,27 +82,31 @@ const userSchema = new mongoose.Schema(
 // Redundant but reinforces indexing of frequently queried fields...
 // userSchema.index({ email: 1 });  can be done like thi...
 // pre function to HASH password before saving...
-userSchema.pre("save",
-  function(next) {
-    const user = this;
-    if (!user.isModified("password")) return next();
-    bcryptjs.hash(user.password, this.encryptionSalt, (err, hash) =>{
-      if (err) return next(err); // if there is some error in hasshing password before saving...
-      user.password = hash; 
-      next();
-    })
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  try {
+    // Validate encryptionSalt again here
+    if (typeof this.encryptionSalt !== 'number' || isNaN(this.encryptionSalt))   throw new Error(`Invalid encryptionSalt: ${this.encryptionSalt}`);
+    const hashedPassword = await bcrypt.hash(this.password, this.encryptionSalt);
+    this.password = hashedPassword;
+    next();
+  } catch (err) {
+    console.error("Error hashing password:", err);
+    next(err);
   }
-)
+});
+
+
 
 // pre function for checking password validity...
 userSchema.methods.isPasswordValid = function (incomingPassword) {
-  return bcryptjs.compare(incomingPassword, this.password); // will gona return a boolean value...
+  return bcrypt.compare(incomingPassword, this.password); // will gona return a boolean value...
 }
 // generating access token..
 userSchema.methods.generateAccessToken = function () {
-  const userDataToEncode = { name:this.name ,email:this.email ,password:this.password };
-  const accessToken = jsonWebToken.sign(userDataToEncode,process.env.SECRET_FOR_ACCESS_TOKEN,{expiresIn:process.env.EXPIRY_FOR_ACCESS_TOKEN});
-  return accessToken ; 
+  const userDataToEncode = { id: this._id, name: this.name, email: this.email };
+  const accessToken = jsonWebToken.sign(userDataToEncode, process.env.SECRET_FOR_ACCESS_TOKEN, { expiresIn: process.env.EXPIRY_FOR_ACCESS_TOKEN });
+  return accessToken;
 }
 
 // generating refresh token
