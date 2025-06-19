@@ -6,6 +6,7 @@ import Tooltip from "@/components/Tooltip";
 import toast from "react-hot-toast";
 import axios from "axios";
 import useUserID from "@/state/useridState";
+import useIsUserAuthenticated from "@/state/userAuthenticated";
 import { getUserLocationInfoByPermission } from "@/lib/userLocation";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -13,6 +14,7 @@ import { useState,useEffect } from "react";
 
 export default function UserLoginPage() {
   const { userId , setUserId } = useUserID() ; // initilizing the useUserId function 
+  const { setIsAuthenticated } = useIsUserAuthenticated();
   const router = useRouter() ; // for programmatic navigation...
   const [userLocation, setUserLocation] = useState(null);
   // initializing useForm() for form handling...
@@ -42,6 +44,7 @@ const handleLoginForm = async (formData) => {
     const apiResponse = await axios.post("/apis/user/login", formData);
     if (apiResponse.status === 200) {
       setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
+      setIsAuthenticated(); // set authentication state to true after successful login
       return apiResponse.data.userId; // return userId instead of string
     } else {
       throw new Error(apiResponse.data.message || "login failed");

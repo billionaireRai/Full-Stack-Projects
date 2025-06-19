@@ -16,7 +16,7 @@ export const decodeGivenJWT = (token, secret) => {
     }
     try {
         const decodedInfo = jsonwebtoken.verify(token,secret);
-        console.log("Decoded JWT Contains :", decodedInfo);
+        // console.log("Decoded JWT Contains :", decodedInfo);
         return decodedInfo;
     } catch (error) {
         console.log("Error in decoding JWT : ", error);

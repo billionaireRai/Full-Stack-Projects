@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import { connectWithMongoDB } from "@/db/dbConnection";
 import { decodeGivenJWT } from "@/lib/decodejwt";
+import { cookies } from "next/headers";
+import { generateVaultReport } from '@/lib/pdfGenerator.js'
+import { calculateObjectSize } from 'bson';
+import fs from 'fs/promises';
+import path from "path";
 import users from "@/db/models/userModel";
 import vaultitems from "@/db/models/vaultModel";
 import sharedvaults from "@/db/models/sharedVaultModel";
 import breachwatchs from "@/db/models/breachWatchModel";
+import auditlogs from "@/db/models/auditModel";
 import asyncErrorHandler from "@/middlewares/errorMiddleware";
-import { cookies } from "next/headers";
-
+import axios from "axios";
 
 
 const POST = asyncErrorHandler( async (request) => {
@@ -98,19 +103,23 @@ const POST = asyncErrorHandler( async (request) => {
     });
     const categoryData = Object.entries(categoryCounts).map(([name, value]) => ({ name:name, value:value }));
 
-    // each vault takes 400 byte units, total available 100 units
-    const usedStorage = (totalVaults * 400 )/1024 ; // data will come in 'MB';
-    const { isSubscribed , subscriptionLevel } = await (users.find({_id:decodedUser.id})).subscription ; // destructuing from subscription object..
+    // getting the storage of all the vaults...
+    const totalVaultStorage = userVaults.reduce((acc, vault) => acc + calculateObjectSize(vault.encryptedCurrentData), 0); // getting accual size of the vault...
+
+    // main storage logic...
+    const usedStorage = (totalVaultStorage)/1024 ; // data will come in 'MB';
+    const user = await users.findById(decodedUser.id);
+    const { isSubscribed , subscriptionLevel } = user.subscription ; // destructuring from subscription object..
     const levelInString = String(subscriptionLevel).toLowerCase() ;
     if (!isSubscribed) {
         var storageLimit = 20 * 1024 * 1024 ; // 20MB
     } else {
         if (levelInString === 'basic'){
-            var storageLimit = 40 * 1024 * 1024 ; // 40MB
+            var storageLimit = 40 * 1024 * 1024 ; // 60MB
         } else if(levelInString === 'standard'){
-            var storageLimit = 70 * 1024 * 1024 ; // 70MB
+            var storageLimit = 70 * 1024 * 1024 ; // 100MB
         } else {
-            var storageLimit = 100 * 1024 * 1024 ; // 100MB
+            var storageLimit = 100 * 1024 * 1024 ; // 150MB
         } 
     }
     const availableStorage = Math.max(storageLimit - usedStorage, 0) ; // it cant go below to zero...
@@ -130,8 +139,147 @@ const POST = asyncErrorHandler( async (request) => {
 })
 
 
-const GET = asyncErrorHandler( async (request) => {
-    
+// handler handling logic related to HIBP to DB...
+const PUT = asyncErrorHandler( async (request) => {
+        const incomingRequestMethod = request.method ; // verifiying the request method used for this route...
+        console.log("Breach Update handler called",incomingRequestMethod);
+
+        // cookies and JWT logic... 
+        const cookieStore = await cookies() ;
+        const accessToken = cookieStore.get('accessToken').value;
+        const decodedUser = decodeGivenJWT(accessToken,process.env.SECRET_FOR_ACCESS_TOKEN) ;
+
+        const HIBP_URI = `https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(decodedUser.email)}?truncateResponse=false`;
+        const HIBP_API_RESPONSE = await axios.get(HIBP_URI , { headers: { 
+            'hibp-api-key': process.env.HIBP_API_KEY,
+            'user-agent': process.env.APP_NAME,
+        }}) ;
+
+        const exactData = HIBP_API_RESPONSE.data ; // getting the data section...
+        if (!exactData || exactData.length === 0) {
+            console.log(`No Breach Found for this ${decodedUser.email} emailID.`)
+            return NextResponse.json({ message: 'No breach found for this email.' }, { status: 200 });
+        }
+
+        const { IsVerified: emailChecked, DataClasses: breachFounds, Name: breachName, BreachDate: breachDate, Description: breachDescription, Domain: breachLink, PwnCount: pwnCount, LogoPath: logoPath } = exactData[0]; // destructuring the required data for our record...
+
+        // will automatically create new doc if its first time breach pushing in DB...
+        await breachwatchs.findOneAndUpdate(
+            { userId: decodedUser.id },
+            {
+                $set: {
+                    emailChecked,
+                    breachFounds,
+                    details: {
+                        breachName,
+                        breachDate,
+                        breachDescription,
+                        breachLink,
+                        pwnCount,
+                        logoPath
+                    }
+                }
+            },
+            { upsert: true } // update the doc if already exists , otherwise create one... 
+        );
+        console.log("Breach data upserted in DB...");
+        return NextResponse.json({ message: 'DB Breach Update successful...' }, { status: 200 });
 })
 
-export { POST }
+const PATCH = asyncErrorHandler ( async (request) => {
+    const method = request.method ; // detecting the request method...
+    const { isAuthenticated , reportGeneratedFrom } = await request.json() ; // authentication state of user coming from client...
+    console.log("vault-report-generation handler triggered by method :",method);
+    console.log("Authentication state coming from client :",isAuthenticated);
+
+    if (!isAuthenticated){
+        console.log("Authentication failed from Client Variable...");
+        return NextResponse.json({ message: 'Authentication failed from Client Variable...' }, { status: 401 })
+    }
+    await connectWithMongoDB(); // connecting to mongodb...
+
+    // cookies and JWT handling...
+    const cookieStore = await cookies() ;
+    const accessToken = cookieStore.get('accessToken').value;
+    const decodedUser = decodeGivenJWT(accessToken,process.env.SECRET_FOR_ACCESS_TOKEN) ;
+    const userWhoseReport = await users.findById(decodedUser.id) ; // getting the user by ID... 
+
+    // getting all the relevent data from DB for REPORT...
+    const userVaults = await vaultitems.find({userId:decodedUser.id}) ; // getting all user vaults...
+    // main report generation starts here by creating a pdfdoc...
+    const pdfBuffer = await generateVaultReport(userVaults, userWhoseReport);
+    // writting this pdf buffer in a file of our project...
+    const filePath = path.join(process.cwd(), 'public', 'vault-report.pdf'); // .cwd() current working directory...
+    await fs.writeFile(filePath, pdfBuffer); // writing pdf in file...
+
+    // Extract IP address from headers
+    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    // Extract user-agent from headers
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    // Validate or adjust reportGeneratedFrom to match locationOfAction schema
+    const locationOfAction = {
+        latitude: reportGeneratedFrom?.latitude || 0.0,
+        longitude: reportGeneratedFrom?.longitude || 0.0,
+        addressText: reportGeneratedFrom?.addressText || {}
+    };
+
+    // log the action in auditlog...
+    const newAuditLog = auditlogs({
+        userId: decodedUser.id,
+        action: 'Vault Report Generation',
+        ipAddress: ipAddress, // setting the IP address of the device by which action is made...
+        userAgent: userAgent,
+        locationOfAction: locationOfAction
+    });
+    console.log("Audit Log created for Vault Report Generation...");
+    await newAuditLog.save() ; // saving it to the database...
+
+    //  Return as downloadable PDF...
+    return NextResponse(pdfBuffer, {
+        status: 200,
+        headers: {
+            'Content-Disposition': `attachment; filename="vault-report.pdf"`,
+            'Content-Type': 'application/pdf',
+        }
+    });
+
+}) 
+
+const GET = asyncErrorHandler( async (request) => {
+    const method = request.method ; // detecting the request method...
+    // cookies , JWT and user authorization handling
+    const cookieStore = await cookies() ;
+    const accessToken = cookieStore.get('accessToken').value;
+    const decodedUser = decodeGivenJWT(accessToken,process.env.SECRET_FOR_ACCESS_TOKEN) ;
+    const userInfoInToken = await users.findById(decodedUser.id) ; // getting the user by ID... 
+    
+    // making a empty array...
+    var recentActivity = [] ;
+    // getting all the recent activity of the user from DB...
+    const allActivitiesOfUser = await auditlogs.find({userId:userInfoInToken.id}) ; // return an array of user audits accross the app...
+    // looping through all the activities of the user and adding them to recentActivity.
+    allActivitiesOfUser.forEach((activity) => {
+        // checking for activities last 30 days only...
+        const currentTime = new Date() ; // current time
+        const creationDateInMs = new Date(activity.createdAt) ; // converting in redable date...
+        const time = creationDateInMs.getTime() ; // current...
+        const oneMonthAgo = currentTime - (30 * 24 * 60 * 60 * 1000) ; // ms 30 days before...
+
+        if (time > oneMonthAgo)  { 
+           const place = activity.locationOfAction ? (activity.locationOfAction.addressText?.name || `${activity.locationOfAction.latitude},${activity.locationOfAction.longitude}`)
+             : 'Unknown location';
+           const objectToPush = {
+               action:activity.action,
+               when:(activity.createdAt).toUTCString(),
+               place: place,
+               ip:activity.ipAddress,
+           }
+           recentActivity.push(objectToPush) ; // pushing it to main array...
+        };
+    })
+    // setting 200 response...
+    return NextResponse.json({ message: 'User Activities successfully updated...', recentActivity:recentActivity }, { status:200})
+
+})
+
+export { POST , PUT , PATCH , GET} ;

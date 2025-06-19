@@ -6,6 +6,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import useUserID from "@/state/useridState";
 import Tooltip from "@/components/Tooltip";
+import useIsUserAuthenticated from "@/state/userAuthenticated";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -13,6 +14,7 @@ import { getUserLocationInfoByPermission } from "@/lib/userLocation";
 
 export default function UserRegisterPage() {
 const { userId , setUserId } = useUserID() ; // getting userId state update function...
+const { setIsAuthenticated } = useIsUserAuthenticated() ;
 const router = useRouter() ; // intializing the router...
 const [userLocation, setUserLocation] = useState(null);
   // initializing the react hook form
@@ -38,6 +40,7 @@ const handleRegistrationForm = async (formData) => {
     const apiResponse = await axios.post("/apis/user/register", formData);
     if (apiResponse.status === 201) {
       console.log(apiResponse.data); // logging the api response from the server...
+      setIsAuthenticated();
       setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
       return apiResponse.data.userId; // return userId instead of string
     } else {

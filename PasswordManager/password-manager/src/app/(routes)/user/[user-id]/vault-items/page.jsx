@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useInactivityChecker } from '../../../../../components/useInactivityChecker.jsx';
+import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
 
 export default function UserTotalVaultItems() {
   useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT);
@@ -185,7 +185,7 @@ export default function UserTotalVaultItems() {
         )}
 
         <div className="mt-20 border-t pt-10 text-center text-gray-500 dark:text-gray-400 text-sm">
-          © {new Date().getFullYear()} YourSecureVault Inc. All rights reserved.
+          © {new Date().getFullYear()} lockRift Inc. All rights reserved.
         </div>
       </div>
     </div>

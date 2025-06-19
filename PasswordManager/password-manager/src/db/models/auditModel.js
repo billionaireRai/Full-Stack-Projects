@@ -12,6 +12,10 @@ const coordinatesSchema = new Schema(
       type: Number,
       default: 0.0,
     },
+    addressText: {
+      type: mongoose.Schema.Types.Mixed ,
+      default: {}
+    }
   },
   { _id: false } // No need for _id in embedded object
 );
@@ -33,17 +37,9 @@ const auditLogSchema = new Schema(
     },
 
     targetItemId: {
-      type: Schema.Types.ObjectId,
-      required: [true, "Target item ID is required."],
-      // ID of the item/resource the action was performed on
+      type: Schema.Types.ObjectId ,
+      ref: "Item",
     },
-
-    timestamp: {
-      type: Date,
-      default: Date.now,
-      // When the action occurred
-    },
-
     ipAddress: {
       type: String,
       required: [true, "IP address is required."],
@@ -58,12 +54,13 @@ const auditLogSchema = new Schema(
       // User agent string from the browser/client
     },
 
-    coordinates: {
+    locationOfAction: {
       type: coordinatesSchema,
       default: () => ({
         latitude: 0.0,
         longitude: 0.0,
       }),
+      alias: 'coordinates'
     },
   },
   { timestamps: true }

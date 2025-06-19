@@ -1,8 +1,8 @@
 "use client";
 
-import Navbar from '../../../../../components/navbar.jsx';
-import CustomDropDown from '../../../../../components/customDropDown.jsx';
-import { useInactivityChecker } from '../../../../../components/useInactivityChecker.jsx';
+import Navbar from '@/components/navbar.jsx';
+import CustomDropDown from '@/components/customDropDown.jsx';
+import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
 import { useState } from 'react';
 
 export default function UserSharedVaultPage() {

@@ -26,13 +26,22 @@ const vaultSchema = new Schema(
       ref: "User",
       required: [true, "User ID is required."]
     },
-
     vaultType: {
-      type: String,
-      required: [true, "Vault type is required."],
-      enum: {
-        values: ["password-details", "bank-account", "cryptowallet-details", "credit-card","other"],
-        message: "{VALUE} is not a valid vault type."
+      vaultCategory:{
+        type: String,
+        required: [true, "Vault type is required."],
+        enum: {
+          values: ["password-details", "bank-account", "cryptowallet-details", "credit-card","other"],
+          message: "{VALUE} is not a valid vault type."
+        }
+      },
+      access:{
+        type: String,
+        required: [true, "Access is required."],
+        enum: {
+          values: ["shared", "private"],
+          message: "{VALUE} is not a valid access."
+        }
       }
     },
     vaultDescription: {

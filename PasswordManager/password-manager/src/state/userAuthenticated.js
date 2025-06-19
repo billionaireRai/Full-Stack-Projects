@@ -13,9 +13,9 @@ const useIsUserAuthenticated = create(
 
       setIsNotAuthenticated: () => {
         if (get().isAuthenticated){
-          const { resetAccessAndRefreshToken } = require('./jwtTokens').default(); // ✅ Lazy load hook
+          const { resetAccessAndRefreshToken } = require('@/state/jwtTokens.js').default(); // Lazy load hook
           set({ isAuthenticated: false });
-          resetAccessAndRefreshToken(); // ✅ Token reset after logout
+          resetAccessAndRefreshToken(); // Token reset after logout
         }
       },
     }),

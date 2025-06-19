@@ -14,8 +14,8 @@ const breachWatchSchema = new Schema(
       default: false,
     },
 
-    breachFound: {
-      type: Boolean,
+    breachFounds: {
+      type: [String],
       default: false,
     },
 

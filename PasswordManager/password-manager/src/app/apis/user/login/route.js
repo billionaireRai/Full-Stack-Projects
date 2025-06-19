@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectWithMongoDB } from "@/db/dbConnection";
 import asyncErrorHandler from "@/middlewares/errorMiddleware";
 import users from "@/db/models/userModel.js";
+import auditlogs from "@/db/models/auditModel.js";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
 
@@ -77,6 +78,18 @@ const POST = asyncErrorHandler(async (request) => {
   userGettingChecked.refreshToken = refreshToken;
   await userGettingChecked.save();
 
+  // Extract IP address and user agent from request headers
+  const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "Unknown IP";
+  const userAgent = request.headers.get("user-agent") || "Unknown User Agent";
+
+  // Create and save audit log entry
+  const auditEntry = new auditlogs({
+    userId: userGettingChecked._id,
+    action: "User logged in",
+    ipAddress,
+    userAgent,
+  });
+  await auditEntry.save();
   // Set cookie flags based on environment...
   const isProduction = process.env.NODE_ENV === "production";
   const cookieOptions = `HttpOnly; Path=/; Secure=${isProduction}; SameSite=Lax`;

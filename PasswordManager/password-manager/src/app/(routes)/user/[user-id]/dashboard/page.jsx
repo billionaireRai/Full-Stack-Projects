@@ -1,15 +1,23 @@
 "use client";
 
 import { useState , useEffect } from 'react';
+import useUserID from '@/state/useridState';
 import VaultNavbar from '@/components/navbar.jsx';
+import useIsUserAuthenticated from '@/state/userAuthenticated';
+import toast from 'react-hot-toast';
+import { getUserLocationInfoByPermission } from '@/lib/userLocation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend, RadialBarChart, RadialBar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, RadialBarChart, RadialBar } from 'recharts';
 import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
 import axios from 'axios';
 
 export default function MainDashboardPage() {
+  const { userId } = useUserID() ;
+  const { isAuthenticated } = useIsUserAuthenticated() ; // intializing the hook of user authentication state...
     useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT) ; // component for integrating inactivity checker functionality...
+    // these are all default values...
+    const [buttonClickedProccesing, setbuttonClickedProccesing] = useState(false) ;
     const [topInformation, settopInformation] = useState([
     { label: 'Total Vaults', value: '14' },
     { label: 'Items Stored', value: '274' },
@@ -23,6 +31,13 @@ const [vaultUsageData, setvaultUsageData] = useState([
     { name: 'Mar', count: 10 },
     { name: 'Apr', count: 12 },
     { name: 'May', count: 15 },
+    { name: 'Jun', count: 10 },
+    { name: 'Jul', count: 3 },
+    { name: 'Aug', count: 11 },
+    { name: 'Sep', count: 20 },
+    { name: 'Oct', count: 0 },
+    { name: 'Nov', count: 0 },
+    { name: 'DEc', count: 5 },
 ]);
 
 const [vaultTypeData, setvaultTypeData] = useState([
@@ -50,6 +65,23 @@ const [storageData, setstorageData] = useState([
   { name: 'Available', value: 30, fill: '#d0d0d0' },
 ])
 
+const [RecentActivity, setRecentActivity] = useState([
+  { action:"Added new item to Bank Vault" , when:"2 hours ago" },
+  { action:"Shared vault access granted to John" , when:"yesterday" },
+  { action:"Vault settings Changed" , when:"2 Days ago" },
+])
+
+// function handling request ot route for breach...
+const functionToUpdateBreachInDB = async () => { 
+  try {
+    const apiRes = await axios.put('/apis/user/dashboard') ;
+    console.log(apiRes.data.message);
+    return apiRes.data.message ;
+  } catch (error) {
+    console.error(error);
+    return "DB Breach Update failed...";
+  }
+ }
 // function to get dashboard related data...
 const fetchData = async () =>{
   try {
@@ -65,21 +97,74 @@ const fetchData = async () =>{
   }
   }
 useEffect(() => {
-  fetchData() ;
+  // functionToUpdateBreachInDB() ; // will uncomment it when will get HIBP api-key...
+  //  fetchData() ; // uncomment it immedeatly for this page...
 }, [])
 
-  return (
+// function for handling security check click...
+const handleRecentActivityUpdationLogic = async () => {
+  try {
+    setbuttonClickedProccesing(true) ; // setting it true...
+    const activityUpRes = await axios.get("/apis/user/dashboard") ;
+    console.log(activityUpRes.data.message);
+    setRecentActivity(activityUpRes.data.recentActivity) ;
+    setbuttonClickedProccesing(false) ;
+    return activityUpRes.data.message ;
+  } catch (error) {
+    console.error(error);
+    setbuttonClickedProccesing(false) ;
+    return "Security Check failed...";
+  }
+ }
+ // adding toast promise on the above funtion...
+const handleRecentToast = async () => {
+  return toast.promise(handleRecentActivityUpdationLogic(), {
+    loading: "Verifying recent activity and securing access...",
+    success: () => "Vault integrity and user credentials verified successfully.",
+    error: "Security validation failed. Please try again.",
+  }, {
+    success: { duration: 4000 },
+    error: { duration: 4000 },
+    loading: { duration: 3000 },
+  });
+};
+
+// function for handling the vault report generation logic...
+const handleGenerateVaultReportLogic = async () => { 
+  try {
+    setbuttonClickedProccesing(true) ;
+    const reportGeneratedFrom = await getUserLocationInfoByPermission() // getting the current location of user...
+    const response = await axios.patch('/apis/user/dashboard', { reportGeneratedFrom:reportGeneratedFrom }, { responseType: 'blob' }); // making the request to backend endpoint...
+    // create a blob link to download the PDF...
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'vault-report.pdf');
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    setbuttonClickedProccesing(false) ;
+  } catch (error) {
+    console.error('Error generating vault report:', error);
+    setbuttonClickedProccesing(false) ;
+  }
+}
+
+return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-100">
       <nav>
-        <VaultNavbar/>
+        <VaultNavbar />
       </nav>
       <main className="pt-24 px-6 md:px-12 max-w-7xl mx-auto">
-        <h1 className="text-4xl flex items-center gap-3 font-extrabold mb-10 text-left text-gray-900 dark:text-gray-100"><span>Your Vault Dashboard</span><Image width={50} height={50} src="/images/secreticon.png" alt="logo" /></h1>
+        <h1 className="text-4xl flex items-center gap-3 font-extrabold mb-10 text-left text-gray-900 dark:text-gray-100">
+          <span>Your Vault Dashboard</span>
+          <Image width={50} height={50} src="/images/secreticon.png" alt="logo" />
+        </h1>
 
         {/* Quick Stats */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {topInformation?.map((stat, i) => (
-            <div key={i} className={`${stat.label === 'Breach Alerts' ? 'animate-pulse border-red-500 dark:border-red-400 shadow-red-400 dark:shadow-red-600' : "" } cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition`}>
+            <div key={i} className={`${stat.label === 'Breach Alerts' ? 'animate-pulse border-red-500 dark:border-red-400 shadow-red-400 dark:shadow-red-600' : ""} cursor-pointer bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition`}>
               <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</h2>
               <p className={`text-3xl font-bold mt-2 ${stat.valueClass || 'text-gray-900 dark:text-gray-100'}`}>{stat.value}</p>
             </div>
@@ -88,84 +173,241 @@ useEffect(() => {
 
         {/* Charts */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
-          <ChartCard title="Vault Usage Over Time">
-            <LineChart data={vaultUsageData}>
-              <XAxis dataKey="name" stroke="#6B7280" />
-              <YAxis stroke="#6B7280" />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#10B981" strokeWidth={2} />
-            </LineChart>
-          </ChartCard>
+          <VisualCardForStats title="Vault Usage Over Time">
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart style={{cursor:"pointer"}} data={vaultUsageData}>
+                <XAxis dataKey="name" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
+                <Line type="monotone" dataKey="count" stroke="#10B981" strokeWidth={2} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
+                  contentStyle={{
+                      backgroundColor: '#111827', // Tailwind dark: gray-900
+                       border: '1px solid #374151', // gray-700
+                       borderRadius: '0.5rem',
+                       padding: '0.75rem 1rem',
+                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                       color: '#F9FAFB', // gray-100
+                       fontSize: '0.875rem',
+                       fontWeight: 500,
+                       minWidth:'20px'
+                  }}
+                  labelStyle={{
+                    color: '#D1D5DB', // gray-300
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    marginBottom: '0.25rem',
+                  }}
+                  itemStyle={{
+                    color: '#F9FAFB',
+                    padding: '2px 0px',
+                  }}
+                  wrapperStyle={{
+                    zIndex: 50,
+                   }}
+                   />
+              </LineChart>
+            </ResponsiveContainer>
+          </VisualCardForStats>
 
-          <ChartCard title="Vault Type Distribution">
-            <PieChart>
-              <Pie data={vaultTypeData || []} dataKey="value" nameKey="name" outerRadius={80} label>
-                {(vaultTypeData || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={index === 0 ? '#60A5FA' : '#FBBF24'} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ChartCard>
+          <VisualCardForStats title="Vault Type Distribution">
+            <ResponsiveContainer width="100%" height={250}>
+              {vaultTypeData && vaultTypeData.length > 0 ? (
+                <PieChart style={{cursor:"pointer"}}>
+                  <Pie data={vaultTypeData} dataKey="value" nameKey="name" outerRadius={80} label>
+                    {vaultTypeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 0 ? '#60A5FA' : '#FBBF24'} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
+                  contentStyle={{
+                      backgroundColor: '#111827', // Tailwind dark: gray-900
+                       border: '1px solid #374151', // gray-700
+                       borderRadius: '0.5rem',
+                       padding: '0.75rem 1rem',
+                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                       color: '#F9FAFB', // gray-100
+                       fontSize: '0.875rem',
+                       fontWeight: 500,
+                  }}
+                  labelStyle={{
+                    color: '#D1D5DB', // gray-300
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    marginBottom: '0.25rem',
+                  }}
+                  itemStyle={{
+                    color: '#F9FAFB',
+                    padding: '2px 0',
+                  }}
+                  wrapperStyle={{
+                    zIndex: 50,
+                   }}
+                   />
+                </PieChart>
+              ) : (
+                <div className="flex justify-center items-center h-full text-gray-500 dark:text-gray-400">
+                  No data available
+                </div>
+              )}
+            </ResponsiveContainer>
+          </VisualCardForStats>
 
-          <ChartCard title="Breach Alerts Trend">
-            <BarChart data={breachTrendData}>
-              <XAxis dataKey="name" stroke="#6B7280" />
-              <YAxis stroke="#6B7280" />
-              <Tooltip />
-              <Bar dataKey="breaches" fill="#EF4444" />
-            </BarChart>
-          </ChartCard>
+          <VisualCardForStats title="Breach Alerts Trend">
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart style={{cursor:"pointer"}} data={breachTrendData}>
+                <XAxis dataKey="name" stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
+                <Bar dataKey="breaches" fill="#EF4444" />
+                <Tooltip
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
+                  contentStyle={{
+                      backgroundColor: '#111827', // Tailwind dark: gray-900
+                       border: '1px solid #374151', // gray-700
+                       borderRadius: '0.5rem',
+                       padding: '0.75rem 1rem',
+                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                       color: '#F9FAFB', // gray-100
+                       fontSize: '0.875rem',
+                       fontWeight: 500,
+                  }}
+                  labelStyle={{
+                    color: '#D1D5DB', // gray-300
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    marginBottom: '0.25rem',
+                  }}
+                  itemStyle={{
+                    color: '#F9FAFB',
+                    padding: '2px 0',
+                  }}
+                  wrapperStyle={{
+                    zIndex: 50,
+                   }}
+                   />
+              </BarChart>
+            </ResponsiveContainer>
+          </VisualCardForStats>
 
-          <ChartCard title="Item Categories">
-            <BarChart data={categoryData} layout="vertical">
-              <XAxis type="number" stroke="#6B7280" />
-              <YAxis dataKey="name" type="category" stroke="#6B7280" />
-              <Tooltip />
-              <Bar dataKey="value" fill="#34D399" />
-            </BarChart>
-          </ChartCard>
+          <VisualCardForStats title="Item Categories">
+            <ResponsiveContainer width="100%" height={250}>
+                <BarChart style={{cursor:"pointer"}} data={categoryData} layout="vertical">
+                  <XAxis type="number" stroke="#6B7280" />
+                  <YAxis dataKey="name" type="category" stroke="#6B7280" />
+                  <Bar dataKey="value" fill="#34D399" />
+                  <Tooltip
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
+                  contentStyle={{
+                      backgroundColor: '#111827', // Tailwind dark: gray-900
+                       border: '1px solid #374151', // gray-700
+                       borderRadius: '0.5rem',
+                       padding: '0.75rem 1rem',
+                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                       color: '#F9FAFB', // gray-100
+                       fontSize: '0.875rem',
+                       fontWeight: 500,
+                  }}
+                  labelStyle={{
+                    color: '#D1D5DB', // gray-300
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    marginBottom: '0.25rem',
+                  }}
+                  itemStyle={{
+                    color: '#F9FAFB',
+                    padding: '2px 0',
+                  }}
+                  wrapperStyle={{
+                    zIndex: 50,
+                   }}
+                   />
+                </BarChart>
+            </ResponsiveContainer>
+          </VisualCardForStats>
 
-          <ChartCard title="Storage Consumption">
-            <RadialBarChart innerRadius="60%" outerRadius="100%" data={storageData} startAngle={90} endAngle={-270}>
-              <RadialBar background clockWise dataKey="value" />
-              <Tooltip />
-            </RadialBarChart>
-          </ChartCard>
+          <VisualCardForStats title="Storage Consumption">
+            <ResponsiveContainer width="100%" height={250}>
+              <RadialBarChart style={{cursor:"pointer"}} innerRadius="60%" outerRadius="100%" data={storageData} startAngle={90} endAngle={-270}>
+                <RadialBar background clockWise dataKey="value" />
+                <Tooltip
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
+                  contentStyle={{
+                      backgroundColor: '#111827', // Tailwind dark: gray-900
+                       border: '1px solid #374151', // gray-700
+                       borderRadius: '0.5rem',
+                       padding: '0.75rem 1rem',
+                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                       color: '#F9FAFB', // gray-100
+                       fontSize: '0.875rem',
+                       fontWeight: 500,
+                  }}
+                  labelStyle={{
+                    color: '#D1D5DB', // gray-300
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    marginBottom: '0.25rem',
+                  }}
+                  itemStyle={{
+                    color: '#F9FAFB',
+                    padding: '2px 0',
+                  }}
+                  wrapperStyle={{
+                    zIndex: 50,
+                   }}
+                   />
+              </RadialBarChart>
+            </ResponsiveContainer>
+          </VisualCardForStats>
         </section>
 
         {/* Quick Actions */}
         <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-12">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="flex flex-wrap gap-4">
-            <Link href="/shared-vault" className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-md font-medium transition">
+            <Link 
+            href={`/user/${userId}/shared-vault`} className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-md font-medium transition">
               Manage Sharing
             </Link>
-            <button className="cursor-pointer bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded-md font-medium transition">
+            <button
+              disabled={buttonClickedProccesing}
+              onClick={handleGenerateVaultReportLogic}
+              className="cursor-pointer bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded-md font-medium transition">
               Generate Vault Report
             </button>
-            <button className="cursor-pointer bg-purple-500 hover:bg-purple-600 text-white px-5 py-2 rounded-md font-medium transition">
-              Download Backup
+            <button
+              disabled={buttonClickedProccesing}
+              onClick={() => { handleRecentToast() }} 
+              className="cursor-pointer bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-md font-medium transition">
+              Update Recent Activity
             </button>
           </div>
         </section>
-
         {/* Recent Activity */}
         <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
           <ul className="divide-y divide-gray-200 dark:divide-gray-700 text-sm text-gray-700 dark:text-gray-300">
-            <li className="flex justify-between py-2">
-              <span>Added new item to "Bank Vault"</span>
-              <span className="text-gray-400 dark:text-gray-500">2 hours ago</span>
-            </li>
-            <li className="flex justify-between py-2">
-              <span>Vault settings updated</span>
-              <span className="text-gray-400 dark:text-gray-500">Yesterday</span>
-            </li>
-            <li className="flex justify-between py-2">
-              <span>Shared vault access granted to John</span>
-              <span className="text-gray-400 dark:text-gray-500">2 days ago</span>
-            </li>
+            {RecentActivity.map((activity, index) => (
+              <li key={index + 1}
+              className="flex flex-col sm:flex-row justify-between hover:shadow-lg sm:items-center gap-4 px-5 py-4 bg-white dark:bg-gray-900 rounded-xl shadow-md border-none m-2 dark:border-gray-700 transition-all duration-300">
+                <div className="flex m-2 flex-col sm:w-1/4">
+                  <span className="text-xstext-gray-500 dark:text-gray-400">Action</span>
+                  <span className="text-base font-semibold text-gray-800 dark:text-white">{activity.action}</span>
+                </div>
+                <div className="flex m-2 flex-col sm:w-1/4">
+                  <span className="text-xstext-gray-500 dark:text-gray-400">Time</span>
+                  <span className="text-smtext-gray-700 dark:text-gray-300">{activity.when}</span>
+                </div>
+                <div className="flex m-2 flex-col sm:w-1/4">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Location</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{activity.place || "Delhi"}</span>
+                </div>
+                <div className="flex m-2 flex-col sm:w-1/4">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">IP Address</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{activity.ip || "0.0.0.0"}</span>
+                </div>
+              </li>
+            ))}
           </ul>
         </section>
       </main>
@@ -173,13 +415,31 @@ useEffect(() => {
   );
 }
 
-function ChartCard({ title, children }) {
+function VisualCardForStats({ title, children }) {
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-      <h2 className="text-xl font-semibold mb-4">{title}</h2>
-      <ResponsiveContainer width="100%" height={250}>
-        {children}
-      </ResponsiveContainer>
+    <div className="relative bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl border border-gray-200 dark:border-gray-700 transition-all duration-300 group">
+      {/* Accent strip */}
+      <div className="absolute top-0 left-0 h-full w-1 bg-indigo-500 rounded-l-2xl group-hover:bg-indigo-600 transition-all duration-300"></div>
+      {/* Title */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-all">
+          {title}
+        </h2>
+        {/* svg container */}
+         <div className="group">
+            <div className="p-3 rounded-full bg-yellow-50 dark:bg-yellow-900 transition">
+              <svg className="w-6 h-6 text-yellow-500 group-hover:text-yellow-600 dark:text-yellow-300 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h10M4 14h6M4 18h4" />
+              </svg>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-300 mt-2">Activity</p>
+          </div>
+      </div>
+      {/* Chart */}
+      <div className="h-64">
+          {children}
+        </div>
     </div>
   );
 }
+
