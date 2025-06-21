@@ -7,16 +7,19 @@ import toast from "react-hot-toast";
 import useUserID from "@/state/useridState";
 import Tooltip from "@/components/Tooltip";
 import useIsUserAuthenticated from "@/state/userAuthenticated";
+import useUserDerivedEncryptionKey from "@/state/derivedEncrypKey";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getUserLocationInfoByPermission } from "@/lib/userLocation";
+import { generateUserEncryptionKey } from "@/lib/encryptionLogic";
 
 export default function UserRegisterPage() {
 const { userId , setUserId } = useUserID() ; // getting userId state update function...
 const { setIsAuthenticated } = useIsUserAuthenticated() ;
 const router = useRouter() ; // intializing the router...
 const [userLocation, setUserLocation] = useState(null);
+const { setEncryptionKeyValue } = useUserDerivedEncryptionKey() ;
   // initializing the react hook form
 const { register, handleSubmit, watch, formState: { errors, isSubmitting }, setError, clearErrors,} = useForm({mode: "onBlur",reValidateMode:"onChange"});
 
@@ -36,13 +39,15 @@ const handleRegistrationForm = async (formData) => {
   clearErrors();
   try {
     // Add userLocation to formData if available
-    if (userLocation) formData.userLatestLocation = userLocation ;
+    if (userLocation) formData.userLocation = userLocation ;
     const apiResponse = await axios.post("/apis/user/register", formData);
     if (apiResponse.status === 201) {
       console.log(apiResponse.data); // logging the api response from the server...
       setIsAuthenticated();
       setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
-      return apiResponse.data.userId; // return userId instead of string
+      const userEncryptionKey = generateUserEncryptionKey(apiResponse.data.salt,formData.password);
+      setEncryptionKeyValue(userEncryptionKey); // updating the derived encryption key state with the generated key...
+      return apiResponse.data.userId ;
     } else {
       throw new Error(apiResponse.data.message || "Registration failed");
     }

@@ -2,3 +2,10 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
+.vault-form-input {
+     @apply transition-all duration-300 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500
+} 
+.vault-btn-submit { 
+    @apply cursor-pointer w-full border-none outline-none bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition font-medium shadow
+}

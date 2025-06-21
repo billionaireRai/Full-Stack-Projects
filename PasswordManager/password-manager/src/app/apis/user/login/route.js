@@ -50,7 +50,7 @@ const POST = asyncErrorHandler(async (request) => {
   }
 
   // Parse request body and validate input
-  const { email, password } = await request.json();
+  const { email, password, locationOfAction } = await request.json();
   if (!email || !password) {
     console.log("Missing email or password in request");
     return NextResponse.json({ error: "Email and password both are required" },{ status: 400 });
@@ -88,6 +88,7 @@ const POST = asyncErrorHandler(async (request) => {
     action: "User logged in",
     ipAddress,
     userAgent,
+    locationOfAction: locationOfAction 
   });
   await auditEntry.save();
   // Set cookie flags based on environment...
@@ -95,7 +96,7 @@ const POST = asyncErrorHandler(async (request) => {
   const cookieOptions = `HttpOnly; Path=/; Secure=${isProduction}; SameSite=Lax`;
 
   return NextResponse.json(
-    { message: "Login Successful", userId: userGettingChecked._id },
+    { message: "Login Successful", userId: userGettingChecked._id , salt:(userGettingChecked.encryptionSalt).toString()},
     {
       status: 200,
       headers: {

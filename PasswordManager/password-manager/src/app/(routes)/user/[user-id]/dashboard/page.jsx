@@ -1,6 +1,7 @@
 "use client";
 
-import { useState , useEffect } from 'react';
+import { useState , useEffect} from 'react';
+import CustomSelect from '@/components/customSelect';
 import useUserID from '@/state/useridState';
 import VaultNavbar from '@/components/navbar.jsx';
 import useIsUserAuthenticated from '@/state/userAuthenticated';
@@ -46,10 +47,18 @@ const [vaultTypeData, setvaultTypeData] = useState([
 ]);
 
 const [breachTrendData, setbreachTrendData] = useState([
-  { name: 'Week 1', breaches: 1 },
-  { name: 'Week 2', breaches: 2 },
-  { name: 'Week 3', breaches: 1 },
-  { name: 'Week 4', breaches: 3 },
+  { name: 'Mon 1', breaches: 1 },
+  { name: 'Mon 2', breaches: 2 },
+  { name: 'Mon 3', breaches: 2 },
+  { name: 'Mon 4', breaches: 4 },
+  { name: 'Mon 5', breaches: 5 },
+  { name: 'Mon 6', breaches: 2 },
+  { name: 'Mon 7', breaches: 9 },
+  { name: 'Mon 8', breaches: 7 },
+  { name: 'Mon 9', breaches: 1 },
+  { name: 'Mon 10', breaches: 1 },
+  { name: 'Mon 11', breaches: 10 },
+  { name: 'Mon 12', breaches: 13 },
 ]);
 
 const [categoryData, setcategoryData] = useState([
@@ -66,10 +75,19 @@ const [storageData, setstorageData] = useState([
 ])
 
 const [RecentActivity, setRecentActivity] = useState([
-  { action:"Added new item to Bank Vault" , when:"2 hours ago" },
-  { action:"Shared vault access granted to John" , when:"yesterday" },
-  { action:"Vault settings Changed" , when:"2 Days ago" },
-])
+  { action:"Added new item to Bank Vault" , when:"2h",place:'delhi',ip:'124.403.21' },
+  { action:"Shared vault access granted to John" , when:"1d",place:'mumbai',ip:'124.423.41' },
+  { action:"Vault settings Changed" , when:"2d",place: 'chennai',ip:'124.213.21'},
+]);
+
+const [sortOptions, setsortOptions] = useState([
+  { value: 'latest', label: 'Latest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'ip', label: 'By IP Address' },
+  { value: 'location', label: 'By Location' },
+  { value: 'action', label: 'By Action' },
+]);
+
 
 // function handling request ot route for breach...
 const functionToUpdateBreachInDB = async () => { 
@@ -116,6 +134,7 @@ const handleRecentActivityUpdationLogic = async () => {
     return "Security Check failed...";
   }
  }
+
  // adding toast promise on the above funtion...
 const handleRecentToast = async () => {
   return toast.promise(handleRecentActivityUpdationLogic(), {
@@ -150,6 +169,36 @@ const handleGenerateVaultReportLogic = async () => {
   }
 }
 
+// useffect for sorting the activity logs...
+const [selectedOption, setselectedOption] = useState(sortOptions[0]) ; // setting default selected option...
+useEffect(() => {
+  let sortedActivities = [];
+  if (selectedOption.value === 'latest') {
+    // Sort by latest first based on 'when' date descending
+    sortedActivities = [...RecentActivity].sort((a, b) => new Date(b.when) - new Date(a.when));
+  } else if (selectedOption.value === 'oldest') {
+    // Sort by oldest first based on 'when' date ascending
+    sortedActivities = [...RecentActivity].sort((a, b) => new Date(a.when) - new Date(b.when));
+  } else if (selectedOption.value === 'ip') {
+    // Sort by IP address lexicographically
+    sortedActivities = [...RecentActivity].sort((a, b) => a.ip.localeCompare(b.ip));
+  } else if (selectedOption.value === 'location') {
+    // Sort by location lexicographically
+    sortedActivities = [...RecentActivity].sort((a, b) => a.place.localeCompare(b.place));
+  } else {
+    // Sort by action lexicographically
+    sortedActivities = [...RecentActivity].sort((a, b) => a.action.localeCompare(b.action));
+  }
+  // Only update state if sortedActivities is different from RecentActivity to avoid infinite loop
+  const isEqual = sortedActivities.length === RecentActivity.length && sortedActivities.every((val, index) => {
+    const recentVal = RecentActivity[index];
+    return val.action === recentVal.action && val.when === recentVal.when && val.place === recentVal.place && val.ip === recentVal.ip;
+  });
+  if (!isEqual) setRecentActivity(sortedActivities);
+  
+}, [selectedOption, RecentActivity])
+
+
 return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-100">
       <nav>
@@ -181,30 +230,10 @@ return (
                 <Line type="monotone" dataKey="count" stroke="#10B981" strokeWidth={2} />
                 <Tooltip
                   cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
-                  contentStyle={{
-                      backgroundColor: '#111827', // Tailwind dark: gray-900
-                       border: '1px solid #374151', // gray-700
-                       borderRadius: '0.5rem',
-                       padding: '0.75rem 1rem',
-                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                       color: '#F9FAFB', // gray-100
-                       fontSize: '0.875rem',
-                       fontWeight: 500,
-                       minWidth:'20px'
-                  }}
-                  labelStyle={{
-                    color: '#D1D5DB', // gray-300
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    marginBottom: '0.25rem',
-                  }}
-                  itemStyle={{
-                    color: '#F9FAFB',
-                    padding: '2px 0px',
-                  }}
-                  wrapperStyle={{
-                    zIndex: 50,
-                   }}
+                  contentStyle={{ backgroundColor: '#111827',  border: '1px solid #374151',  borderRadius: '0.5rem', padding: '0.75rem 1rem', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', color: '#F9FAFB',  fontSize: '0.875rem', fontWeight: 500, minWidth:'20px'}}
+                  labelStyle={{ color: '#D1D5DB', fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.25rem',}}
+                  itemStyle={{ color: '#F9FAFB', padding: '2px 0px',}}
+                  wrapperStyle={{ zIndex: 50,}}
                    />
               </LineChart>
             </ResponsiveContainer>
@@ -221,29 +250,10 @@ return (
                   </Pie>
                   <Tooltip
                   cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
-                  contentStyle={{
-                      backgroundColor: '#111827', // Tailwind dark: gray-900
-                       border: '1px solid #374151', // gray-700
-                       borderRadius: '0.5rem',
-                       padding: '0.75rem 1rem',
-                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                       color: '#F9FAFB', // gray-100
-                       fontSize: '0.875rem',
-                       fontWeight: 500,
-                  }}
-                  labelStyle={{
-                    color: '#D1D5DB', // gray-300
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    marginBottom: '0.25rem',
-                  }}
-                  itemStyle={{
-                    color: '#F9FAFB',
-                    padding: '2px 0',
-                  }}
-                  wrapperStyle={{
-                    zIndex: 50,
-                   }}
+                  contentStyle={{ backgroundColor: '#111827',  border: '1px solid #374151',  borderRadius: '0.5rem', padding: '0.75rem 1rem', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', color: '#F9FAFB',  fontSize: '0.875rem', fontWeight: 500 }}
+                  labelStyle={{ color: '#D1D5DB',  fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.25rem' }}
+                  itemStyle={{ color: '#F9FAFB', padding: '2px 0' }}
+                  wrapperStyle={{ zIndex: 50 }}
                    />
                 </PieChart>
               ) : (
@@ -262,29 +272,10 @@ return (
                 <Bar dataKey="breaches" fill="#EF4444" />
                 <Tooltip
                   cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
-                  contentStyle={{
-                      backgroundColor: '#111827', // Tailwind dark: gray-900
-                       border: '1px solid #374151', // gray-700
-                       borderRadius: '0.5rem',
-                       padding: '0.75rem 1rem',
-                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                       color: '#F9FAFB', // gray-100
-                       fontSize: '0.875rem',
-                       fontWeight: 500,
-                  }}
-                  labelStyle={{
-                    color: '#D1D5DB', // gray-300
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    marginBottom: '0.25rem',
-                  }}
-                  itemStyle={{
-                    color: '#F9FAFB',
-                    padding: '2px 0',
-                  }}
-                  wrapperStyle={{
-                    zIndex: 50,
-                   }}
+                  contentStyle={{ backgroundColor: '#111827',  border: '1px solid #374151',  borderRadius: '0.5rem', padding: '0.75rem 1rem', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', color: '#F9FAFB',  fontSize: '0.875rem', fontWeight: 500 }}
+                  labelStyle={{ color: '#D1D5DB',  fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.25rem' }}
+                  itemStyle={{ color: '#F9FAFB', padding: '2px 0' }}
+                  wrapperStyle={{ zIndex: 50 }}
                    />
               </BarChart>
             </ResponsiveContainer>
@@ -298,29 +289,10 @@ return (
                   <Bar dataKey="value" fill="#34D399" />
                   <Tooltip
                   cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
-                  contentStyle={{
-                      backgroundColor: '#111827', // Tailwind dark: gray-900
-                       border: '1px solid #374151', // gray-700
-                       borderRadius: '0.5rem',
-                       padding: '0.75rem 1rem',
-                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                       color: '#F9FAFB', // gray-100
-                       fontSize: '0.875rem',
-                       fontWeight: 500,
-                  }}
-                  labelStyle={{
-                    color: '#D1D5DB', // gray-300
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    marginBottom: '0.25rem',
-                  }}
-                  itemStyle={{
-                    color: '#F9FAFB',
-                    padding: '2px 0',
-                  }}
-                  wrapperStyle={{
-                    zIndex: 50,
-                   }}
+                  contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151',  borderRadius: '0.5rem', padding: '0.75rem 1rem', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', color: '#F9FAFB',  fontSize: '0.875rem', fontWeight: 500 }}
+                  labelStyle={{ color: '#D1D5DB', fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.25rem' }}
+                  itemStyle={{ color: '#F9FAFB', padding: '2px 0' }}
+                  wrapperStyle={{ zIndex: 50 }}
                    />
                 </BarChart>
             </ResponsiveContainer>
@@ -332,29 +304,10 @@ return (
                 <RadialBar background clockWise dataKey="value" />
                 <Tooltip
                   cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} // subtle hover effect
-                  contentStyle={{
-                      backgroundColor: '#111827', // Tailwind dark: gray-900
-                       border: '1px solid #374151', // gray-700
-                       borderRadius: '0.5rem',
-                       padding: '0.75rem 1rem',
-                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                       color: '#F9FAFB', // gray-100
-                       fontSize: '0.875rem',
-                       fontWeight: 500,
-                  }}
-                  labelStyle={{
-                    color: '#D1D5DB', // gray-300
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    marginBottom: '0.25rem',
-                  }}
-                  itemStyle={{
-                    color: '#F9FAFB',
-                    padding: '2px 0',
-                  }}
-                  wrapperStyle={{
-                    zIndex: 50,
-                   }}
+                  contentStyle={{ backgroundColor: '#111827',  border: '1px solid #374151',  borderRadius: '0.5rem', padding: '0.75rem 1rem', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', color: '#F9FAFB',  fontSize: '0.875rem', fontWeight: 500 }}
+                  labelStyle={{ color: '#D1D5DB',  fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.25rem' }}
+                  itemStyle={{ color: '#F9FAFB', padding: '2px 0' }}
+                  wrapperStyle={{ zIndex: 50 }}
                    />
               </RadialBarChart>
             </ResponsiveContainer>
@@ -365,10 +318,12 @@ return (
         <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 mb-12">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="flex flex-wrap gap-4">
-            <Link 
-            href={`/user/${userId}/shared-vault`} className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-md font-medium transition">
-              Manage Sharing
-            </Link>
+            {userId && (
+              <Link 
+                href={`/user/${userId}/shared-vault`} className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-md font-medium transition">
+                Manage Sharing
+              </Link>
+            )}
             <button
               disabled={buttonClickedProccesing}
               onClick={handleGenerateVaultReportLogic}
@@ -383,9 +338,18 @@ return (
             </button>
           </div>
         </section>
-        {/* Recent Activity */}
         <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+          <div className='flex flex-row items-center justify-between'>
+            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+            <span id='filterBox' className='flex flex-row items-center gap-2 cursor-pointer'>
+              <span>sort By :</span>
+              <CustomSelect
+                options={sortOptions}
+                value={selectedOption}
+                onChange={setselectedOption} 
+              />
+            </span>
+          </div>
           <ul className="divide-y divide-gray-200 dark:divide-gray-700 text-sm text-gray-700 dark:text-gray-300">
             {RecentActivity.map((activity, index) => (
               <li key={index + 1}
@@ -400,17 +364,18 @@ return (
                 </div>
                 <div className="flex m-2 flex-col sm:w-1/4">
                   <span className="text-xs text-gray-500 dark:text-gray-400">Location</span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{activity.place || "Delhi"}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{activity.place}</span>
                 </div>
                 <div className="flex m-2 flex-col sm:w-1/4">
                   <span className="text-xs text-gray-500 dark:text-gray-400">IP Address</span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{activity.ip || "0.0.0.0"}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{activity.ip}</span>
                 </div>
               </li>
             ))}
           </ul>
         </section>
       </main>
+        {/* Recent Activity */}
     </div>
   );
 }

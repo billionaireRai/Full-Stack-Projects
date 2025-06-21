@@ -1,13 +1,18 @@
 "use client";
 
 import Navbar from '@/components/navbar.jsx';
-import CustomDropDown from '@/components/customDropDown.jsx';
+import CustomSelect from '@/components/customSelect';
 import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
 import { useState } from 'react';
 
 export default function UserSharedVaultPage() {
   useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT);
-  const [roles, setroles] = useState(['View Only', 'Edit', 'Admin']);
+  const [roles, setroles] = useState([
+    { label: 'View Only', value: 'View Only' },
+    { label: 'Edit', value: 'Edit' },
+    { label: 'Admin', value: 'Admin' }
+  ]);
+  const [selecteRole, setselecteRole] = useState(roles[0]);
   const [sharedVaults, setSharedVaults] = useState([
     {
       id: 1,
@@ -150,7 +155,7 @@ export default function UserSharedVaultPage() {
   </div>
   
   <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Access Role</label>
-  <CustomDropDown defaultOption='View Only' options={roles}/>
+  <CustomSelect options={roles} value={selecteRole} onChange={setselecteRole}/>
 </div>
 
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition">
@@ -173,7 +178,7 @@ export default function UserSharedVaultPage() {
   </div>
   
   <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Access Role</label>
-<CustomDropDown defaultOption='View Only' options={roles}/>
+  <CustomSelect options={roles} value={selecteRole} onChange={setselecteRole} />
 </div>
           </div>
         </section>
@@ -196,11 +201,6 @@ export default function UserSharedVaultPage() {
             </div>
           </div>
         </section>
-
-        {/* Previously Existing Sections */}
-        {/* Guidelines */}
-        {/* Activity Logs */}
-        {/* Future Enhancements */}
 
       </main>
     </div>

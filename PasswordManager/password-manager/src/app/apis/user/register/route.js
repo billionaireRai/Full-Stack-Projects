@@ -42,7 +42,7 @@ const POST = asyncErrorHandler(async (request) => {
     );
   }
   // main route logics...
-const { name, email, salt, password, confirmPassword, userLatestLocation } = await request.json() ; // destructuring syntax...
+const { name, email, salt, password, confirmPassword, userLocation } = await request.json() ; // destructuring syntax...
   if (password !== confirmPassword) {
     console.log("Password and confirmPassword do not match");
     return NextResponse.json({ message: "Passwords do not match" }, { status: 400 });
@@ -73,7 +73,7 @@ const { name, email, salt, password, confirmPassword, userLatestLocation } = awa
       email: email.toLowerCase().trim(),
       password,
       encryptionSalt,
-      userLocation: userLatestLocation || undefined,
+      userLocation: userLocation ,
     });
 
     let accessToken, refreshToken;
@@ -98,7 +98,7 @@ const { name, email, salt, password, confirmPassword, userLatestLocation } = awa
   const cookieOptions = `HttpOnly; Path=/; Secure=${isProduction}; SameSite=Lax`;
 
   return NextResponse.json(
-    { message: "User registered successfully", userId: newUserDoc._id },
+    { message: "User registered successfully", userId: newUserDoc._id , salt:(newUserDoc.encryptionSalt).toString()},
     {
       status: 201,
       headers: {

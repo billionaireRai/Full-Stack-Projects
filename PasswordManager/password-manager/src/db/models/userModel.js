@@ -2,6 +2,21 @@ import mongoose from "mongoose";
 import bcrypt from 'bcrypt';
 import jsonWebToken from 'jsonwebtoken';
 
+// location schema...
+const locationSchema = new mongoose.Schema(
+  {
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      default: [0.0, 0.0]
+    },
+    addressText: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    }
+  },
+  { _id: false }
+);
+
 // Embedded schema for subscription details
 const subscriptionSchema = new mongoose.Schema(
   {
@@ -49,15 +64,10 @@ const userSchema = new mongoose.Schema(
       type: subscriptionSchema,
       default: () => ({})
     },
-    userLatestLocation: {
-      coordinates: {
-        type: [Number], // [longitude, latitude]
-        default: [0.0, 0.0]
-      },
-      addressText: {
-        type: mongoose.Schema.Types.Mixed ,
-        default: {}
-      }
+    userLocation: {
+      type: locationSchema,
+      alias: 'userLatestLocation',
+      default: () => ({})
     },
     password: {
       type: String,

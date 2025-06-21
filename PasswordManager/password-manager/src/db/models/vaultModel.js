@@ -3,10 +3,6 @@ const { Schema } = mongoose;
 
 const versionSchema = new Schema(
   {
-    iv: {
-      type: String,
-      required: [true, "Initialization vector (iv) is required."]
-    },
     encryptedPreviousData: {
       type: Schema.Types.Mixed,
       required: [true, "Encrypted previous data is required."]
@@ -16,7 +12,7 @@ const versionSchema = new Schema(
       default: Date.now
     }
   },
-  { _id: false } // prevents automatic _id in subdocuments
+  { _id: false } // prevents automatic _id in subdocuments...
 );
 
 const vaultSchema = new Schema(
@@ -31,7 +27,7 @@ const vaultSchema = new Schema(
         type: String,
         required: [true, "Vault type is required."],
         enum: {
-          values: ["password-details", "bank-account", "cryptowallet-details", "credit-card","other"],
+          values: ["password-details", "bank-details", "cryptowallet-details", "credit-card-details","other"],
           message: "{VALUE} is not a valid vault type."
         }
       },
@@ -39,7 +35,7 @@ const vaultSchema = new Schema(
         type: String,
         required: [true, "Access is required."],
         enum: {
-          values: ["shared", "private"],
+          values: ["shared","private"],
           message: "{VALUE} is not a valid access."
         }
       }

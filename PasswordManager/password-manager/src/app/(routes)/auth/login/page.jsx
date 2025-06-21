@@ -6,7 +6,9 @@ import Tooltip from "@/components/Tooltip";
 import toast from "react-hot-toast";
 import axios from "axios";
 import useUserID from "@/state/useridState";
+import useUserDerivedEncryptionKey from "@/state/derivedEncrypKey"; 
 import useIsUserAuthenticated from "@/state/userAuthenticated";
+import { generateUserEncryptionKey } from "@/lib/encryptionLogic";
 import { getUserLocationInfoByPermission } from "@/lib/userLocation";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -15,6 +17,8 @@ import { useState,useEffect } from "react";
 export default function UserLoginPage() {
   const { userId , setUserId } = useUserID() ; // initilizing the useUserId function 
   const { setIsAuthenticated } = useIsUserAuthenticated();
+  const { setEncryptionKeyValue } = useUserDerivedEncryptionKey() ; // setting user encryption key once he loggs in...
+
   const router = useRouter() ; // for programmatic navigation...
   const [userLocation, setUserLocation] = useState(null);
   // initializing useForm() for form handling...
@@ -40,16 +44,19 @@ useEffect(() => {
 const handleLoginForm = async (formData) => {
   try {
     // Add userLocation to formData if available
-    if (userLocation) formData.userLatestLocation = userLocation ;
+    if (userLocation) formData.locationOfAction = userLocation ;
     const apiResponse = await axios.post("/apis/user/login", formData);
     if (apiResponse.status === 200) {
       setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
       setIsAuthenticated(); // set authentication state to true after successful login
-      return apiResponse.data.userId; // return userId instead of string
+      // logic for generating personalized encryption key...
+      const userEncryptionKey = generateUserEncryptionKey(apiResponse.data.salt,formData.password); // salt is returned from server...
+      setEncryptionKeyValue(userEncryptionKey); // setting the encryption key in the state.
+      return apiResponse.data.userId ;
     } else {
       throw new Error(apiResponse.data.message || "login failed");
     }
-  } catch (error) {
+  } catch (error) { 
     console.error("Some error occurred in API request process...", error);
     throw new Error(error.response?.data?.message || error.message || "login failed");
   }

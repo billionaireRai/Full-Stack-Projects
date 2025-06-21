@@ -73,18 +73,26 @@ export default function VaultNavbar() {
                   </li>
                   <li>
                     <Link
+                      href={`/user/${userId}/shared-vault/${token}`}
+                      className={`${pathname === `/user/${userId}/shared-vault/${token}` ? "p-2 rounded-lg shadow-sm shadow-green-500 bg-green-100 text-green-600 font-semibold block text-center m-1 transition-colors" : "block p-3 text-center text-black hover:bg-gray-200 hover:text-green-400 rounded-md m-1 transition-colors"}`}
+                    >
+                      shared vault
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
                       href={`/user/${userId}/new-vault`}
                       className={`${pathname === `/user/${userId}/new-vault` ? "p-2 rounded-lg shadow-sm shadow-green-500 bg-green-100 text-green-600 font-semibold block text-center m-1 transition-colors" : "block p-3 text-center text-black hover:bg-gray-100 hover:text-green-400 rounded-md m-1 transition-colors"}`}
                     >
                       new vault
                     </Link>
                   </li>
-                  <li>
+                   <li>
                     <Link
-                      href={`/user/${userId}/shared-vault/${token}`}
-                      className={`${pathname === `/user/${userId}/shared-vault/${token}` ? "p-2 rounded-lg shadow-sm shadow-green-500 bg-green-100 text-green-600 font-semibold block text-center m-1 transition-colors" : "block p-3 text-center text-black hover:bg-gray-200 hover:text-green-400 rounded-md m-1 transition-colors"}`}
+                      href={`/user/${userId}/vault-settings`}
+                      className={`${pathname === `/user/${userId}/vault-settings` ? "p-2 rounded-lg shadow-sm shadow-green-500 bg-green-100 text-green-600 font-semibold block text-center m-1 transition-colors" : "block p-3 text-center text-black hover:bg-gray-100 hover:text-green-400 rounded-md m-1 transition-colors"}`}
                     >
-                      shared vault
+                      VaultSettings
                     </Link>
                   </li>
                 </ul>
@@ -106,14 +114,6 @@ export default function VaultNavbar() {
                 className={`${pathname === `/user/${userId}/breach-info` ? "p-2 rounded-lg shadow-sm shadow-green-500 text-green-600 font-semibold hover:text-green-600" : "hover:text-green-400"}`}
               >
                 BreachInfo
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={`/user/${userId}/vault-settings`}
-                className={`${pathname === `/user/${userId}/vault-settings` ? "p-2 rounded-lg shadow-sm shadow-green-500 text-green-600 font-semibold hover:text-green-600" : "hover:text-green-400"}`}
-              >
-                VaultSettings
               </Link>
             </li>
             <li>

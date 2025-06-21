@@ -59,6 +59,7 @@ const auditLogSchema = new Schema(
       default: () => ({
         latitude: 0.0,
         longitude: 0.0,
+        addressText:{}
       }),
       alias: 'coordinates'
     },

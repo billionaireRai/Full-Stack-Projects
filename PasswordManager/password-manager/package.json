@@ -34,6 +34,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
     "react-hot-toast": "^2.5.2",
+    "react-select": "^5.10.1",
     "recharts": "^2.15.3",
     "tailwind-merge": "^3.3.0",
     "winston": "^3.17.0",

@@ -76,16 +76,16 @@ const POST = asyncErrorHandler( async (request) => {
     const currentMonth = now.getMonth();
     const currentYearBreach = now.getFullYear();
  
-    // each month has 4 weeks...
-    for (let week = 1; week <= 4; week++) {
-        const weekStart = new Date(currentYearBreach, currentMonth, (week - 1) * 7 + 1);
-        const weekEnd = new Date(currentYearBreach, currentMonth, week * 7);
+    // each year has 12 months ...
+    for (let month ; month < 12; month++) {
+        const monthStart = new Date(currentYearBreach, currentMonth, (month  - 1) * 30 + 1);
+        const monthEnd = new Date(currentYearBreach, currentMonth,  month * 30);
         const count = await breachwatchs.countDocuments({
             userId: decodedUser.id,
-            breachDate: { $gte: weekStart, $lt: weekEnd }, // will change according to the breach details fetched from API...
+            breachDate: { $gte: monthStart, $lt: monthEnd}, // will change according to the breach details fetched from API...
             breachFound: true
         });
-        breachTrendData.push({ name: `Week ${week}`, breaches: parseInt(count) }); // pushing...
+        breachTrendData.push({ name: `Month ${month}`, breaches: parseInt(count) }); // pushing...
     }
 
     // categoryData: count by category - mapping vaultType to categories
@@ -216,20 +216,13 @@ const PATCH = asyncErrorHandler ( async (request) => {
     const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     // Extract user-agent from headers
     const userAgent = request.headers.get('user-agent') || 'unknown';
-    // Validate or adjust reportGeneratedFrom to match locationOfAction schema
-    const locationOfAction = {
-        latitude: reportGeneratedFrom?.latitude || 0.0,
-        longitude: reportGeneratedFrom?.longitude || 0.0,
-        addressText: reportGeneratedFrom?.addressText || {}
-    };
-
     // log the action in auditlog...
     const newAuditLog = auditlogs({
         userId: decodedUser.id,
         action: 'Vault Report Generation',
         ipAddress: ipAddress, // setting the IP address of the device by which action is made...
         userAgent: userAgent,
-        locationOfAction: locationOfAction
+        locationOfAction: reportGeneratedFrom
     });
     console.log("Audit Log created for Vault Report Generation...");
     await newAuditLog.save() ; // saving it to the database...
