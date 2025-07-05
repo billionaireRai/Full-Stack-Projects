@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 
 import Link from "next/link";
 import Image from "next/image";
@@ -7,19 +7,23 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import useUserID from "@/state/useridState";
 import useUserDerivedEncryptionKey from "@/state/derivedEncrypKey"; 
+import useUserPassPhraseHash from "@/state/passphraseHash";
 import useIsUserAuthenticated from "@/state/userAuthenticated";
-import { generateUserEncryptionKey } from "@/lib/encryptionLogic";
+import { generateUserEncryptionKey , funtionToMakePassPhraseHass } from "@/lib/encryptionLogic";
 import { getUserLocationInfoByPermission } from "@/lib/userLocation";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useState,useEffect } from "react";
+import { motion } from "framer-motion";
 
 export default function UserLoginPage() {
   const { userId , setUserId } = useUserID() ; // initilizing the useUserId function 
   const { setIsAuthenticated } = useIsUserAuthenticated();
   const { setEncryptionKeyValue } = useUserDerivedEncryptionKey() ; // setting user encryption key once he loggs in...
-
+  const { setPassPhraseHashValue } = useUserPassPhraseHash() ;
+  
   const router = useRouter() ; // for programmatic navigation...
+  const [UserIP, setUserIP] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   // initializing useForm() for form handling...
   const {register,handleSubmit,formState: { errors },trigger,} = useForm({
@@ -38,6 +42,16 @@ useEffect(() => {
     }
   };
   fetchUserLocation();
+  // Fetch user IP address on component mount
+    const fetchUserIP = async () => {
+      try {
+        const response = await axios.get("https://api.ipify.org?format=json");
+        setUserIP(response.data.ip);
+      } catch (error) {
+        console.error("Failed to fetch IP address:", error);
+      }
+    };
+    fetchUserIP(); // calling the function...
 }, []);
 
 // handler function for calling logic route handler...
@@ -45,6 +59,8 @@ const handleLoginForm = async (formData) => {
   try {
     // Add userLocation to formData if available
     if (userLocation) formData.locationOfAction = userLocation ;
+    // Add UserIP to formData if available
+    if (UserIP) formData.ip = UserIP ;
     const apiResponse = await axios.post("/apis/user/login", formData);
     if (apiResponse.status === 200) {
       setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
@@ -52,6 +68,9 @@ const handleLoginForm = async (formData) => {
       // logic for generating personalized encryption key...
       const userEncryptionKey = generateUserEncryptionKey(apiResponse.data.salt,formData.password); // salt is returned from server...
       setEncryptionKeyValue(userEncryptionKey); // setting the encryption key in the state.
+      // logic for hashing the pass phrase and storing it in the state...
+      const { passPhraseHash } = await funtionToMakePassPhraseHass(userEncryptionKey,apiResponse.data.salt); // getting hash value...
+      setPassPhraseHashValue(passPhraseHash); // updating the pass phrase hash value in state...
       return apiResponse.data.userId ;
     } else {
       throw new Error(apiResponse.data.message || "login failed");
@@ -71,9 +90,9 @@ const handleLoginForm = async (formData) => {
       },
       error: "login failed!!",
     }, {
-      success: { duration: 4000 },
-      error: { duration: 4000 },
-      loading: { duration: 3000 },
+      success: { duration: 3000 },
+      error: { duration: 3000 },
+      loading: { duration: 2000 },
     });
   };
 
@@ -88,15 +107,25 @@ const handleLoginForm = async (formData) => {
   
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 dark:bg-gray-900">
+    <motion.div
+      className="flex flex-col md:flex-row min-h-screen bg-gray-100 dark:bg-gray-900"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
       {/* Left - Image Section */}
-      <div className="hidden md:flex md:w-1/2 items-center justify-center bg-black dark:bg-gray-800">
+      <motion.div
+        className="hidden md:flex md:w-1/2 items-center justify-center bg-black dark:bg-gray-800"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <img
           src="/images/homePage_img.png"
           alt="Login Illustration"
           className=" rounded-xl w-4/5 h-4/5 object-cover shadow-lg"
         />
-      </div>
+      </motion.div>
       {/* Right - Login Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center py-6 px-10">
         <div className="w-full max-w-md bg-white dark:shadow-gray-700 dark:shadow-2xl dark:bg-gray-800 rounded-2xl bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-gray-800 shadow-lg px-6 py-8">
@@ -122,7 +151,7 @@ const handleLoginForm = async (formData) => {
                   {...register("email", {
                     required: "Email is required",
                     pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      value:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]/, 
                       message: "Invalid email format",
                     },
                   })}
@@ -222,6 +251,6 @@ const handleLoginForm = async (formData) => {
           </form>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

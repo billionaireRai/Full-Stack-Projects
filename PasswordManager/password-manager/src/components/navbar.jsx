@@ -7,20 +7,24 @@ import { usePathname } from "next/navigation";
 import { useParams } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
 import useThemeToggler from "@/state/themeState";
+import useUserPassPhraseHash from "@/state/passphraseHash";
 
 export default function VaultNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { PassPhraseHashValue } = useUserPassPhraseHash() ; // getting passPhraseHaashValue
   const [vaultDropdown, setvaultDropdown] = useState(false);
-  const pathname = usePathname() ; // initialixing the usePathname() hook...
+  const [SearchedText, setSearchedText] = useState() ;
   const { theme, toggleTheme } = useThemeToggler();
+  const pathname = usePathname() ; // initialixing the usePathname() hook...
 
   const params = useParams();
   const userId = params["user-id"];
   const token = params["token"];
 
+  // ueffect handling the code related to search..
   useEffect(() => {
     
-  }, [])
+  }, [SearchedText])
   
 
   return (
@@ -73,7 +77,7 @@ export default function VaultNavbar() {
                   </li>
                   <li>
                     <Link
-                      href={`/user/${userId}/shared-vault/${token}`}
+                      href={`/user/${userId}/shared-vault/${PassPhraseHashValue}`}
                       className={`${pathname === `/user/${userId}/shared-vault/${token}` ? "p-2 rounded-lg shadow-sm shadow-green-500 bg-green-100 text-green-600 font-semibold block text-center m-1 transition-colors" : "block p-3 text-center text-black hover:bg-gray-200 hover:text-green-400 rounded-md m-1 transition-colors"}`}
                     >
                       shared vault
@@ -87,12 +91,20 @@ export default function VaultNavbar() {
                       new vault
                     </Link>
                   </li>
-                   <li>
+                  <li>
                     <Link
                       href={`/user/${userId}/vault-settings`}
                       className={`${pathname === `/user/${userId}/vault-settings` ? "p-2 rounded-lg shadow-sm shadow-green-500 bg-green-100 text-green-600 font-semibold block text-center m-1 transition-colors" : "block p-3 text-center text-black hover:bg-gray-100 hover:text-green-400 rounded-md m-1 transition-colors"}`}
                     >
                       VaultSettings
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href={`/subscription`}
+                      className={`${pathname === `/subscription` ? "p-2 rounded-lg shadow-sm shadow-green-500 bg-green-100 text-green-600 font-semibold block text-center m-1 transition-colors" : "block p-3 text-center text-black hover:bg-gray-100 hover:text-green-400 rounded-md m-1 transition-colors"}`}
+                    >
+                      subscription
                     </Link>
                   </li>
                 </ul>
@@ -130,6 +142,7 @@ export default function VaultNavbar() {
               <input
                 type="text"
                 placeholder="Search..."
+                onChange={(e) => { setSearchedText(e.target.value) }}
                 className="w-full max-w-xs px-4 py-2 rounded-lg bg-white text-gray-800 placeholder-gray-500 text-sm border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition"
               />
             </li>

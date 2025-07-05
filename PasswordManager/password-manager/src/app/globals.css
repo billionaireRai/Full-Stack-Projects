@@ -6,6 +6,43 @@
 .vault-form-input {
      @apply transition-all duration-300 w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500
 } 
-.vault-btn-submit { 
-    @apply cursor-pointer w-full border-none outline-none bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition font-medium shadow
+.vault-btn-submit {
+  @apply 
+    cursor-pointer 
+    w-full 
+    border 
+    border-transparent 
+    outline-none 
+    bg-gradient-to-r from-green-500 to-green-600 
+    hover:from-green-600 hover:to-green-700 
+    text-white 
+    px-6 
+    py-3 
+    rounded-xl 
+    transition-colors
+    duration-300 
+    ease-in-out 
+    font-semibold 
+    tracking-wide 
+    shadow-md 
+    hover:shadow-lg 
+    focus:ring-4 
+    focus:ring-green-300 
+    disabled:opacity-50 
+    disabled:cursor-not-allowed;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.3);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.5);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: rgba(100, 100, 100, 0.7);
 }

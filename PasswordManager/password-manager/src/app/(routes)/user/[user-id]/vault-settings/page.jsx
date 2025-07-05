@@ -1,15 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import CustomDropDown from '../../../../../components/customDropDown.jsx';
-import { useInactivityChecker } from '../../../../../components/useInactivityChecker.jsx';
+import CustomSelect from '@/components/customSelect.jsx';
+import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
+import { motion } from "framer-motion";
 
 export default function UserVaultSettingPage() {
   useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT);
   const [vaultDescription, setVaultDescription] = useState("");
-  const [Options, setOptions] = useState(["Personal","Team","Shared","Confidential"]);
-  const [encryptedData, setEncryptedData] = useState(
-    "U2FsdGVkX1+XyzEncryptedVaultData..."
-  );
+  const [Options, setOptions] = useState([
+    {label:"private",value:"private"},
+    {label:"shared",value:'shared'},
+  ]);
+  const [encryptedData, setEncryptedData] = useState("U2FsdGVkX1+XyzEncryptedVaultData...");
   const [decrypted, setDecrypted] = useState(false);
 
   const handleFetchVaultByDescription = () => { }
@@ -24,8 +26,12 @@ export default function UserVaultSettingPage() {
           </p>
         </div>
 
-        {/* Vault ID Section */}
-        <section className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
+        {/* Vault sorting criteria Section */}
+        <motion.div 
+        initial={{ opacity: 0 , y:-100}}
+        animate={{ opacity: 1 , y:0}}
+        transition={{ duration: 1 }}
+        className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
            <div className="mb-4">
              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Search Vault by Description</h2>
              <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -47,9 +53,13 @@ export default function UserVaultSettingPage() {
                Fetch Vault
              </button>
            </div>
-         </section>
+         </motion.div>
         {/* Vault Data Section (Beautified) */}
-        <section className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
+        <motion.div 
+        initial={{ opacity: 0 , y:-100}}
+        animate={{ opacity: 1 , y:0}}
+        transition={{ duration: 0.5 }}
+        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-lg">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Vault Data</h2>
@@ -57,7 +67,7 @@ export default function UserVaultSettingPage() {
                 View and manage encrypted vault contents. Click below to reveal decrypted data.
               </p>
             </div>
-            <button 
+            <button
             onClick={() => setDecrypted(!decrypted)}
             className="cursor-pointer relative inline-block text-blue-600 dark:text-blue-400 font-medium group">
                    <span className="relative z-10">{decrypted ? "Hide Decrypted" : "Decrypt"}</span>
@@ -85,7 +95,8 @@ export default function UserVaultSettingPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Category</label>
-                      <CustomDropDown defaultOption='Personal' options={Options}/>
+                      {/* <CustomDropDown defaultOption='Personal' options={Options}/> */}
+                      <CustomSelect value={Options[0]} options={Options}/>
                   </div>
                   <div className="col-span-full flex flex-col gap-1 mt-2">
                     <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Description</label>
@@ -166,7 +177,7 @@ export default function UserVaultSettingPage() {
               </div>
             </div>
           )}
-        </section>
+        </motion.div>
       </div>
     </div>
   );

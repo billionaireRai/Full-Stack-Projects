@@ -18,6 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="antialiased">
+      <script id='razorpay-script' src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <ThemeProvider>
           <ToastifyProvider>
             {children}

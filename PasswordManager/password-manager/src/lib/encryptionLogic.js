@@ -3,7 +3,7 @@ import CRYPTOS from 'crypto';
 
 // function to generate userEncryption key (in backend)...
 export const generateUserEncryptionKey = (salt, globalPassword) => {
-  const key = CRYPTOS.pbkdf2Sync(globalPassword, salt, 10000, 64, 'sha512'); // Correct: use Sync version
+  const key = CRYPTOS.pbkdf2Sync(globalPassword, salt, 10000, 32, 'sha512'); // Changed length from 64 to 32 bytes
   if (!key) throw new Error("Something went wrong in KEY generation...");
 
   const hexKey = key.toString('hex');
@@ -12,7 +12,7 @@ export const generateUserEncryptionKey = (salt, globalPassword) => {
 
 // function to encrypt the vault data (on client-side)...
 export const encryptionOfVaultData = async (vaultData, userencrpnKey) => {
-  if (!userencrpnKey || encrpnKey.length !== 64) throw new Error("Encryption key must be a 64-character hex string (32 bytes).");
+  if (!userencrpnKey || userencrpnKey.length !== 64) throw new Error("Encryption key must be a 64-character hex string (32 bytes).");
   const encoder = new TextEncoder();
 
   // Convert the key and data...
@@ -83,4 +83,12 @@ export const decryptionOfVaultData = async (vaultData, userencrpnKey) => {
   }
 };
 
-
+// function to generate passPhase for a user...
+export const funtionToMakePassPhraseHass = async (encryptionkey,salt) => { 
+  const keyBuffer = new Uint8Array(encryptionkey.match(/.{1,2}/g).map(byte => parseInt(byte, 16))) ;
+  const hashBuffer = await crypto.subtle.digest('SHA-256', new Uint8Array([...keyBuffer, salt]));
+  // Convert hash buffer to hex string
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return { passPhraseHash : hashHex } ;
+}

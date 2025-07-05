@@ -3,6 +3,11 @@ const { Schema } = mongoose;
 
 const versionSchema = new Schema(
   {
+    // versionNumber represents how many times this vault has been changed...
+    versionNumber:{ 
+      type: Number,
+      required: true,
+    },
     encryptedPreviousData: {
       type: Schema.Types.Mixed,
       required: [true, "Encrypted previous data is required."]
@@ -25,7 +30,7 @@ const vaultSchema = new Schema(
     vaultType: {
       vaultCategory:{
         type: String,
-        required: [true, "Vault type is required."],
+        default:'other',
         enum: {
           values: ["password-details", "bank-details", "cryptowallet-details", "credit-card-details","other"],
           message: "{VALUE} is not a valid vault type."

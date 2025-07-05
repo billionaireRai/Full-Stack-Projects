@@ -50,7 +50,7 @@ const POST = asyncErrorHandler(async (request) => {
   }
 
   // Parse request body and validate input
-  const { email, password, locationOfAction } = await request.json();
+  const { email, password, locationOfAction , ip} = await request.json();
   if (!email || !password) {
     console.log("Missing email or password in request");
     return NextResponse.json({ error: "Email and password both are required" },{ status: 400 });
@@ -79,15 +79,14 @@ const POST = asyncErrorHandler(async (request) => {
   await userGettingChecked.save();
 
   // Extract IP address and user agent from request headers
-  const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "Unknown IP";
   const userAgent = request.headers.get("user-agent") || "Unknown User Agent";
 
   // Create and save audit log entry
   const auditEntry = new auditlogs({
     userId: userGettingChecked._id,
     action: "User logged in",
-    ipAddress,
-    userAgent,
+    ipAddress:ip,
+    userAgent:userAgent,
     locationOfAction: locationOfAction 
   });
   await auditEntry.save();

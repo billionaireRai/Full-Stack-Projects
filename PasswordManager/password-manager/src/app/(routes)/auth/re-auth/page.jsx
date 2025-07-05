@@ -32,9 +32,9 @@ const reAuthenticationPage = () => {
       },
       error: "token generation failed..",
     }, {
-      success: { duration: 4000 },
-      error: { duration: 4000 },
-      loading: { duration: 3000 },
+      success: { duration: 3000 },
+      error: { duration: 3000 },
+      loading: { duration: 2000 },
     });
   }
   return (

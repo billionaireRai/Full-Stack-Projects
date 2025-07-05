@@ -1,20 +1,21 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const sharedWithSchema = new Schema(
+const sharedWithEachSchema = new Schema(
   {
-    sharedWithId: {
+    sharedWithId : {
       type: Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "Shared user ID is required."],
+      ref: 'User',
+      required:true 
     },
-    timeStampOfSharing: {
-      type: Date,
-      default: Date.now,
-    },
+    sharedWithText : {
+      type: String,
+      required:true
+    }
   },
   { _id: false }
 );
+
 
 const sharedVaultSchema = new Schema(
   {
@@ -23,10 +24,31 @@ const sharedVaultSchema = new Schema(
       ref: "User",
       required: [true, "Owner ID is required."],
     },
-
+    vaultCategory:{
+        type: String,
+        default:'other',
+        enum: {
+          values: ["password-details", "bank-details", "cryptowallet-details", "credit-card-details","other"],
+          message: "{VALUE} is not a valid vault type."
+        }
+      },
+    vaultDescription: {
+      type: String,
+      required: [true, "Vault description is required."],
+      minlength: [10, "Vault description must be at least 10 characters."],
+      maxlength: [300, "Vault description must not exceed 300 characters."],
+      trim: true // removes extra whitespace
+    },
     sharedWithIndividuals: {
-      type: [sharedWithSchema],
-      default: [], // Use empty array instead of [null]
+      detailsOfSharing: {
+        type: [sharedWithEachSchema],
+        default: []
+      },
+      timeStampOfSharing: {
+        type: Date,
+        default: null
+      },
+      _id: false
     },
 
     encryptedData: {

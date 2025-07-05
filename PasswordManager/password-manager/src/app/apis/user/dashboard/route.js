@@ -29,7 +29,6 @@ const POST = asyncErrorHandler( async (request) => {
     // Fetch vaults for the user
     const userVaults = await vaultitems.find({ userId: decodedUser.id }); // will return an array of vaults of this user...
     // Calculate topInformation
-    const totalVaults = userVaults.length ; // one of the information required...
     const itemsStored = userVaults.reduce((acc, vault) => {
         // encryptedCurrentData is an object with keys representing items...
         if (vault.encryptedCurrentData && typeof vault.encryptedCurrentData === 'object') {
@@ -39,7 +38,9 @@ const POST = asyncErrorHandler( async (request) => {
     }, 0); // inital accumulator is 0...
 
     // For shared vaults...
-    const sharedVaultsCount = await sharedvaults.countDocuments({ ownerId: decodedUser.id });
+    const sharedVaultsOfuser = await sharedvaults.find({ownerId:decodedUser.id});
+    const sharedVaultsCount = sharedVaultsOfuser.length ; // simpler to fetch , get same result
+    const totalVaults = userVaults.length + sharedVaultsCount ; // one of the information required...
 
     // For breach alerts...
     const activeBreachAlertsCount = await breachwatchs.countDocuments({ userId: decodedUser.id, breachFound: true }); 
@@ -51,16 +52,27 @@ const POST = asyncErrorHandler( async (request) => {
     ];
 
     // count vaults created per month in current year...
-    const vaultUsageData = [];
-    const currentYear = new Date().getFullYear(); // pulling current year...
-    for (let month = 0 ; month < 12 ; month++) {
-        const count = userVaults.filter(vault => {
-            const createdAt = vault.createdAt || vault._id.getTimestamp(); // time of creation of a paticular vault...
-            return createdAt.getFullYear() === currentYear && createdAt.getMonth() === month;
-        }).length;
-        const monthName = new Date(currentYear, month).toLocaleString('default', { month: 'short' }); // getting the month name for sending...
-        vaultUsageData.push({ name: monthName, count:count }); // pushing the data in the main ARRAY...
-    }
+   const vaultUsageData = [];
+   const currentYear = new Date().getFullYear();
+
+   for (let month = 0; month < 12; month++) {
+    let count = 0;
+    // Private vaults
+    const countPrivateForMonth = userVaults.filter(vault => {
+      const createdAt = new Date(vault.createdAt || vault._id.getTimestamp());
+      return createdAt.getFullYear() === currentYear && createdAt.getMonth() === month;
+    }).length;
+
+    // Shared vaults
+    const countSharedForMonth = sharedVaultsOfuser.filter(sharedVault => {
+      const createdAt = new Date(sharedVault.createdAt || sharedVault._id.getTimestamp());
+      return createdAt.getFullYear() === currentYear && createdAt.getMonth() === month;
+    }).length;
+
+    count = countPrivateForMonth + countSharedForMonth;
+    const monthName = new Date(currentYear, month).toLocaleString('default', { month: 'short' });
+    vaultUsageData.push({ name: monthName, count });
+  }
 
     // count by vaultType private/shared...
     const privateVaultCount = totalVaults - sharedVaultsCount; // normal summation logic...
@@ -77,57 +89,72 @@ const POST = asyncErrorHandler( async (request) => {
     const currentYearBreach = now.getFullYear();
  
     // each year has 12 months ...
-    for (let month ; month < 12; month++) {
-        const monthStart = new Date(currentYearBreach, currentMonth, (month  - 1) * 30 + 1);
-        const monthEnd = new Date(currentYearBreach, currentMonth,  month * 30);
+    for (let month = 0 ; month < 12; month++) {
+        const monthStart = new Date(currentYearBreach, month, 1);
+        const monthEnd = new Date(currentYearBreach, month + 1, 1);
         const count = await breachwatchs.countDocuments({
             userId: decodedUser.id,
             breachDate: { $gte: monthStart, $lt: monthEnd}, // will change according to the breach details fetched from API...
             breachFound: true
         });
-        breachTrendData.push({ name: `Month ${month}`, breaches: parseInt(count) }); // pushing...
+        breachTrendData.push({ name: `Month ${month + 1}`, breaches: parseInt(count) }); // pushing...
     }
 
     // categoryData: count by category - mapping vaultType to categories
-    const categoryMap = {
-        'password-details': 'Passwords',
-        'bank-account': 'Bank Info',
-        'cryptowallet-details': 'IDs',
-        'credit-card': 'Notes',
-        'other':'credentials '
-    };
+    const categoryMap = ['password-details','bank-details','cryptowallet-details','credit-card-details','other'];
     const categoryCounts = {};
     userVaults.forEach(vault => {
-        const category = categoryMap[vault.vaultType] ;
-        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+        const specificCategoryType = vault.vaultType.vaultCategory ;
+        if (categoryMap.includes(specificCategoryType)) {
+            categoryCounts[specificCategoryType] = (categoryCounts[specificCategoryType] || 0) + 1;
+        }
     });
     const categoryData = Object.entries(categoryCounts).map(([name, value]) => ({ name:name, value:value }));
 
-    // getting the storage of all the vaults...
-    const totalVaultStorage = userVaults.reduce((acc, vault) => acc + calculateObjectSize(vault.encryptedCurrentData), 0); // getting accual size of the vault...
+    // getting the storage of private the vaults...
+    const totalPrivateStorage = userVaults.reduce((acc, vault) => {
+        if (vault.encryptedCurrentData && typeof vault.encryptedCurrentData === 'object') return acc + calculateObjectSize(vault.encryptedCurrentData);
+        
+        return acc;
+    }, 0); // getting actual size of the vault...
+    // getting the storage of shared vaults..
+    const totalSharedStorage = sharedVaultsOfuser.reduce((acc, vault) => {
+        if (vault.encryptedData && typeof vault.encryptedData === 'object') return acc + calculateObjectSize(vault.encryptedData) ;
+
+        return acc ;
+    },0);
 
     // main storage logic...
-    const usedStorage = (totalVaultStorage)/1024 ; // data will come in 'MB';
+    const usedStorage = (totalPrivateStorage + totalSharedStorage)/ (1024 * 1024); // convert bytes to MB
     const user = await users.findById(decodedUser.id);
     const { isSubscribed , subscriptionLevel } = user.subscription ; // destructuring from subscription object..
     const levelInString = String(subscriptionLevel).toLowerCase() ;
+    let storageLimitBytes ;
     if (!isSubscribed) {
-        var storageLimit = 20 * 1024 * 1024 ; // 20MB
+        storageLimitBytes = 20 * 1024 * 1024 ; // 20MB in bytes
     } else {
         if (levelInString === 'basic'){
-            var storageLimit = 40 * 1024 * 1024 ; // 60MB
+            storageLimitBytes = 40 * 1024 * 1024 ; // 40MB in bytes
         } else if(levelInString === 'standard'){
-            var storageLimit = 70 * 1024 * 1024 ; // 100MB
+            storageLimitBytes = 80 * 1024 * 1024 ; // 80MB in bytes
         } else {
-            var storageLimit = 100 * 1024 * 1024 ; // 150MB
+            storageLimitBytes = 150 * 1024 * 1024 ; // 150MB in bytes
         } 
     }
-    const availableStorage = Math.max(storageLimit - usedStorage, 0) ; // it cant go below to zero...
-    const storageData = [
-        { name: 'Used', value: usedStorage, fill: '#8884d8' },
-        { name: 'Available', value: availableStorage, fill: '#d0d0d0' },
-    ];
+    const storageLimit = storageLimitBytes / (1024 * 1024); // convert bytes to MB
+    const availableStorage = Math.max(storageLimit - usedStorage, 0) ; // it cant go below zero...
 
+    // message before the storage gets exceed...
+    if ((storageLimit - usedStorage) <= 3) {
+        const message = `Storage is almost full. You have ${(storageLimit - usedStorage).toFixed(4)}MB storage capacity left !!`;
+        return NextResponse.json({message:message});
+
+    }
+    // Return numeric values for frontend to handle formatting
+    const storageData = [
+        { name: 'Used', value: `${usedStorage.toFixed(4)} MB`, fill: '#8884d8' },
+        { name: 'Available', value:`${availableStorage.toFixed(4)} MB`, fill: '#d0d0d0' },
+    ]
     return NextResponse.json({
         topInformation,
         vaultUsageData,
@@ -144,46 +171,51 @@ const PUT = asyncErrorHandler( async (request) => {
         const incomingRequestMethod = request.method ; // verifiying the request method used for this route...
         console.log("Breach Update handler called",incomingRequestMethod);
 
-        // cookies and JWT logic... 
-        const cookieStore = await cookies() ;
-        const accessToken = cookieStore.get('accessToken').value;
-        const decodedUser = decodeGivenJWT(accessToken,process.env.SECRET_FOR_ACCESS_TOKEN) ;
+        try {
+            // cookies and JWT logic... 
+            const cookieStore = await cookies() ;
+            const accessToken = cookieStore.get('accessToken').value;
+            const decodedUser = decodeGivenJWT(accessToken,process.env.SECRET_FOR_ACCESS_TOKEN) ;
 
-        const HIBP_URI = `https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(decodedUser.email)}?truncateResponse=false`;
-        const HIBP_API_RESPONSE = await axios.get(HIBP_URI , { headers: { 
-            'hibp-api-key': process.env.HIBP_API_KEY,
-            'user-agent': process.env.APP_NAME,
-        }}) ;
+            const HIBP_URI = `https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(decodedUser.email)}?truncateResponse=false`;
+            const HIBP_API_RESPONSE = await axios.get(HIBP_URI , { headers: { 
+                'hibp-api-key': process.env.HIBP_API_KEY,
+                'user-agent': process.env.APP_NAME,
+            }}) ;
 
-        const exactData = HIBP_API_RESPONSE.data ; // getting the data section...
-        if (!exactData || exactData.length === 0) {
-            console.log(`No Breach Found for this ${decodedUser.email} emailID.`)
-            return NextResponse.json({ message: 'No breach found for this email.' }, { status: 200 });
-        }
+            const exactData = HIBP_API_RESPONSE.data ; // getting the data section...
+            if (!exactData || exactData.length === 0) {
+                console.log(`No Breach Found for this ${decodedUser.email} emailID.`)
+                return NextResponse.json({ message: 'No breach found for this email.' }, { status: 200 });
+            }
 
-        const { IsVerified: emailChecked, DataClasses: breachFounds, Name: breachName, BreachDate: breachDate, Description: breachDescription, Domain: breachLink, PwnCount: pwnCount, LogoPath: logoPath } = exactData[0]; // destructuring the required data for our record...
+            const { IsVerified: emailChecked, DataClasses: breachFounds, Name: breachName, BreachDate: breachDate, Description: breachDescription, Domain: breachLink, PwnCount: pwnCount, LogoPath: logoPath } = exactData[0]; // destructuring the required data for our record...
 
-        // will automatically create new doc if its first time breach pushing in DB...
-        await breachwatchs.findOneAndUpdate(
-            { userId: decodedUser.id },
-            {
-                $set: {
-                    emailChecked,
-                    breachFounds,
-                    details: {
-                        breachName,
-                        breachDate,
-                        breachDescription,
-                        breachLink,
-                        pwnCount,
-                        logoPath
+            // will automatically create new doc if its first time breach pushing in DB...
+            await breachwatchs.findOneAndUpdate(
+                { userId: decodedUser.id },
+                {
+                    $set: {
+                        emailChecked,
+                        breachFounds,
+                        details: {
+                            breachName,
+                            breachDate,
+                            breachDescription,
+                            breachLink,
+                            pwnCount,
+                            logoPath
+                        }
                     }
-                }
-            },
-            { upsert: true } // update the doc if already exists , otherwise create one... 
-        );
-        console.log("Breach data upserted in DB...");
-        return NextResponse.json({ message: 'DB Breach Update successful...' }, { status: 200 });
+                },
+                { upsert: true } // update the doc if already exists , otherwise create one... 
+            );
+            console.log("Breach data upserted in DB...");
+            return NextResponse.json({ message: 'DB Breach Update successful...' }, { status: 200 });
+        } catch (error) {
+            console.error("Error in PUT /apis/user/dashboard:", error);
+            return NextResponse.json({ message: "Failed to update breach data." }, { status: 500 });
+        }
 })
 
 const PATCH = asyncErrorHandler ( async (request) => {

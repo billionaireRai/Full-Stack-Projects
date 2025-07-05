@@ -22,8 +22,24 @@ const subscriptionSchema = new mongoose.Schema(
   {
     subscriptionLevel: {
       type: String,
-      enum: ["free","basic","standard","premium"],
-      default: "free",
+      enum: ["freemium","basic","standard","premium"],
+      default: "freemium",
+    },
+    orderId:{
+      type:String,
+      default:"",
+    },
+    paymentId:{
+      type:String,
+      default:"",
+    },
+    subscriptionId:{
+      type:String,
+      default:"",
+    },
+    cardInformation:{
+      type:mongoose.Schema.Types.Mixed,
+      default:{}
     },
     subscriptionDate: {
       type: Date,

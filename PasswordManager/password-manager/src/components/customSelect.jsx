@@ -10,7 +10,7 @@ const CustomSelect = ({ options = [], value, onChange, placeholder }) => {
   const customStyles = {
     control: (base, state) => ({
       ...base,
-      borderColor: state.isFocused ? (isDark ? "#4B5563" : "#D1D5DB") : (isDark ? "#374151" : "var(--tw-border)"),
+      borderColor: state.isFocused ? (isDark ? "#4B5563" : "#D1D5DB") : (isDark ? "#4B5563" : "#D1D5DB"),
       boxShadow: state.isFocused ? (isDark ? "0 0 0 2px rgba(99,102,241,0.5)" : "0 0 0 2px rgba(99,102,241,0.5)") : "none",
       backgroundColor: isDark ? "#1F2937" : "#ffffff",
       width: '100%',
@@ -36,7 +36,7 @@ const CustomSelect = ({ options = [], value, onChange, placeholder }) => {
     menuList: (base) => ({
       ...base,
       padding: 0,
-      borderRadius: '5px',
+      borderRadius:'8px'
     }),
     option: (base, state) => ({
       ...base,
@@ -48,7 +48,6 @@ const CustomSelect = ({ options = [], value, onChange, placeholder }) => {
       color: state.isSelected ? "#ffffff" : (isDark ? "#D1D5DB" : "var(--tw-text)"),
       padding: "10px 14px",
       fontSize: "0.875rem",
-      borderRadius:'5px',
       fontWeight: "500",
       cursor: "pointer",
     }),
@@ -89,7 +88,7 @@ const CustomSelect = ({ options = [], value, onChange, placeholder }) => {
         options={options}
         placeholder={placeholder}
         styles={customStyles}
-        className='w-full border-none outline-none'
+        className='w-full outline-none'
         theme={(theme) => ({
           ...theme,
           borderRadius: 6,

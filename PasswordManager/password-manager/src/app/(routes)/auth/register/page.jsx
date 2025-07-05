@@ -7,12 +7,14 @@ import toast from "react-hot-toast";
 import useUserID from "@/state/useridState";
 import Tooltip from "@/components/Tooltip";
 import useIsUserAuthenticated from "@/state/userAuthenticated";
+import useUserPassPhraseHash from "@/state/passphraseHash";
 import useUserDerivedEncryptionKey from "@/state/derivedEncrypKey";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getUserLocationInfoByPermission } from "@/lib/userLocation";
-import { generateUserEncryptionKey } from "@/lib/encryptionLogic";
+import { generateUserEncryptionKey , funtionToMakePassPhraseHass } from "@/lib/encryptionLogic";
+import { motion } from "framer-motion";
 
 export default function UserRegisterPage() {
 const { userId , setUserId } = useUserID() ; // getting userId state update function...
@@ -20,6 +22,7 @@ const { setIsAuthenticated } = useIsUserAuthenticated() ;
 const router = useRouter() ; // intializing the router...
 const [userLocation, setUserLocation] = useState(null);
 const { setEncryptionKeyValue } = useUserDerivedEncryptionKey() ;
+const { setPassPhraseHashValue } = useUserPassPhraseHash();
   // initializing the react hook form
 const { register, handleSubmit, watch, formState: { errors, isSubmitting }, setError, clearErrors,} = useForm({mode: "onBlur",reValidateMode:"onChange"});
 
@@ -47,6 +50,9 @@ const handleRegistrationForm = async (formData) => {
       setUserId(apiResponse.data.userId); // updating the userId state with the response from the server...
       const userEncryptionKey = generateUserEncryptionKey(apiResponse.data.salt,formData.password);
       setEncryptionKeyValue(userEncryptionKey); // updating the derived encryption key state with the generated key...
+      // logic for hashing the pass phrase and storing it in the state...
+      const { passPhraseHash } = await funtionToMakePassPhraseHass(userEncryptionKey,apiResponse.data.salt); // getting hash value...
+      setPassPhraseHashValue(passPhraseHash); // updating the pass phrase hash value in state...
       return apiResponse.data.userId ;
     } else {
       throw new Error(apiResponse.data.message || "Registration failed");
@@ -66,9 +72,9 @@ const handleRegistrationForm = async (formData) => {
       },
       error: "Registration failed!!",
     }, {
-      success: { duration: 4000 },
-      error: { duration: 4000 },
-      loading: { duration: 3000 },
+      success: { duration: 3000 },
+      error: { duration: 3000 },
+      loading: { duration: 2000 },
     });
   };
 
@@ -82,12 +88,20 @@ const handleRegistrationForm = async (formData) => {
   
 
   return (
-    <div
+    <motion.div
       id="top"
       className="min-h-screen flex flex-col md:flex-row bg-white dark:bg-gray-900"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
     >
       {/* Left Section */}
-      <div className="flex flex-col items-center justify-center gap-3 w-full md:w-1/2 p-6 md:p-10 bg-gray-50 dark:bg-gray-800">
+      <motion.div
+        className="flex flex-col items-center justify-center gap-3 w-full md:w-1/2 p-6 md:p-10 bg-gray-50 dark:bg-gray-800"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <Image
           className="mt-1 dark:invert"
           width={60}
@@ -140,7 +154,7 @@ const handleRegistrationForm = async (formData) => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Right Section */}
       <div className="flex items-center justify-center w-full md:w-1/2 bg-gradient-to-br from-white to-blue-100 dark:from-gray-900 dark:to-gray-800 p-6">
@@ -329,6 +343,6 @@ const handleRegistrationForm = async (formData) => {
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

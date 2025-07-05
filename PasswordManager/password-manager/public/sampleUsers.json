@@ -1,0 +1,242 @@
+[
+  {
+    "_id": {
+      "$oid": "68550e6c1f78683048193632"
+    },
+    "name": "Amritansh Rai",
+    "email": "amritansh6136@gmail.com",
+    "userLocation": {
+      "coordinates": [
+        77.14645486000701,
+        28.45005424479988
+      ],
+      "addressText": {
+        "name": "Mehrauli Tehsil",
+        "local_names": {
+          "en": null,
+          "ascii": null,
+          "feature": null
+        },
+        "state": "Delhi",
+        "country": "IN"
+      }
+    },
+    "password": "$2b$11$cS6NmKIruf5tJelVp5jeoO6lsWTL7bXGs6k2aoL128wo5ueEqJUFe",
+    "encryptionSalt": 11,
+    "subscription": {
+      "subscriptionLevel": "free",
+      "isSubscribed": false,
+      "subscriptionDate": {
+        "$date": "2025-06-20T07:31:56.524Z"
+      }
+    },
+    "refreshToken": "TOKEN_1",
+    "createdAt": {
+      "$date": "2025-06-20T07:31:56.547Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-24T05:28:27.828Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "68550e6c1f78683048193633"
+    },
+    "name": "Priya Sharma",
+    "email": "priya.sharma@example.com",
+    "userLocation": {
+      "coordinates": [
+        72.8777,
+        19.076
+      ],
+      "addressText": {
+        "name": "Mumbai Suburban",
+        "local_names": {
+          "en": null,
+          "ascii": null,
+          "feature": null
+        },
+        "state": "Maharashtra",
+        "country": "IN"
+      }
+    },
+    "password": "$2b$11$someFakeHash1234567890abcdefghi",
+    "encryptionSalt": 11,
+    "subscription": {
+      "subscriptionLevel": "pro",
+      "isSubscribed": true,
+      "subscriptionDate": {
+        "$date": "2025-05-10T09:45:00.000Z"
+      }
+    },
+    "refreshToken": "TOKEN_2",
+    "createdAt": {
+      "$date": "2025-05-10T09:45:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-21T12:00:00.000Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "68550e6c1f78683048193634"
+    },
+    "name": "Ravi Verma",
+    "email": "ravi.verma@example.com",
+    "userLocation": {
+      "coordinates": [
+        77.209,
+        28.6139
+      ],
+      "addressText": {
+        "name": "Connaught Place",
+        "local_names": {
+          "en": null,
+          "ascii": null,
+          "feature": null
+        },
+        "state": "Delhi",
+        "country": "IN"
+      }
+    },
+    "password": "$2b$11$examplePasswordHash12345abcd",
+    "encryptionSalt": 11,
+    "subscription": {
+      "subscriptionLevel": "free",
+      "isSubscribed": false,
+      "subscriptionDate": {
+        "$date": "2025-04-01T08:22:00.000Z"
+      }
+    },
+    "refreshToken": "TOKEN_3",
+    "createdAt": {
+      "$date": "2025-04-01T08:22:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-15T10:10:00.000Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "68550e6c1f78683048193635"
+    },
+    "name": "Sneha Kapoor",
+    "email": "sneha.kapoor@example.com",
+    "userLocation": {
+      "coordinates": [
+        88.3639,
+        22.5726
+      ],
+      "addressText": {
+        "name": "Salt Lake",
+        "local_names": {
+          "en": null,
+          "ascii": null,
+          "feature": null
+        },
+        "state": "West Bengal",
+        "country": "IN"
+      }
+    },
+    "password": "$2b$11$sampleHashSneha98765abcdef",
+    "encryptionSalt": 11,
+    "subscription": {
+      "subscriptionLevel": "premium",
+      "isSubscribed": true,
+      "subscriptionDate": {
+        "$date": "2025-03-18T14:30:00.000Z"
+      }
+    },
+    "refreshToken": "TOKEN_4",
+    "createdAt": {
+      "$date": "2025-03-18T14:30:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-22T16:40:00.000Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "68550e6c1f78683048193636"
+    },
+    "name": "Kunal Mehta",
+    "email": "kunal.mehta@example.com",
+    "userLocation": {
+      "coordinates": [
+        80.2707,
+        13.0827
+      ],
+      "addressText": {
+        "name": "T Nagar",
+        "local_names": {
+          "en": null,
+          "ascii": null,
+          "feature": null
+        },
+        "state": "Tamil Nadu",
+        "country": "IN"
+      }
+    },
+    "password": "$2b$11$kunalHashAbc123xyz0987def",
+    "encryptionSalt": 11,
+    "subscription": {
+      "subscriptionLevel": "free",
+      "isSubscribed": false,
+      "subscriptionDate": {
+        "$date": "2025-01-05T11:00:00.000Z"
+      }
+    },
+    "refreshToken": "TOKEN_5",
+    "createdAt": {
+      "$date": "2025-01-05T11:00:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-01T09:00:00.000Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "68550e6c1f78683048193637"
+    },
+    "name": "Neha Patel",
+    "email": "neha.patel@example.com",
+    "userLocation": {
+      "coordinates": [
+        73.8567,
+        18.5204
+      ],
+      "addressText": {
+        "name": "Koregaon Park",
+        "local_names": {
+          "en": null,
+          "ascii": null,
+          "feature": null
+        },
+        "state": "Maharashtra",
+        "country": "IN"
+      }
+    },
+    "password": "$2b$11$nehapatelhash1234xyzz098",
+    "encryptionSalt": 11,
+    "subscription": {
+      "subscriptionLevel": "pro",
+      "isSubscribed": true,
+      "subscriptionDate": {
+        "$date": "2025-02-10T06:50:00.000Z"
+      }
+    },
+    "refreshToken": "TOKEN_6",
+    "createdAt": {
+      "$date": "2025-02-10T06:50:00.000Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-20T11:20:00.000Z"
+    },
+    "__v": 0
+  }
+]
