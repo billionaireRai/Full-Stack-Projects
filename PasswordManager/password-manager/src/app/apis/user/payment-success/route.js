@@ -1,13 +1,13 @@
 import users from "@/db/models/userModel";
 import asyncErrorHandler from "@/middlewares/errorMiddleware";
+import nodemailer from "nodemailer";
 import { decodeGivenJWT } from "@/lib/decodejwt";
 import { connectWithMongoDB } from "@/db/dbConnection";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 
 
-const sendMailToUser = async (userEmail, token, userName) => { 
+const sendMailToUser = async (userEmail, userName, paymentDetails) => { 
   const mailTransporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -21,9 +21,14 @@ const sendMailToUser = async (userEmail, token, userName) => {
   const mailOptions = {
     from: process.env.MY_MAIL,
     to: userEmail,
-    subject: `Password Reset Requested By ${userName}`,
-    text: `You are receiving this because you OR someone else have requested password resetting for EmailId in SUBJECT
-    if that is you Please click on the link below to reset your password http://${isProduction ? 'www.lockrift.com' :'localhost:3000'}/auth/reset-password?token=${token}`
+    subject: `Payment Successful - Thank you, ${userName}!`,
+    text: `Dear ${userName},
+    Thank you for your successful payment. Your subscription details are as follows :
+    ${JSON.stringify(paymentDetails, null, 2)}
+
+    If you have any questions, feel free to contact our support team.
+    Best regards,
+    Lockrift Team ${isProduction ? 'https://lockRift.com' : "https://localhost:3000"}`
   };
   return new Promise((resolve, reject) => {
     mailTransporter.sendMail(mailOptions, (error, info) => {
@@ -38,8 +43,8 @@ const sendMailToUser = async (userEmail, token, userName) => {
   });
 };
 
-const GET = asyncErrorHandler( async (request) => {
-    console.log("Route handler for sending success payment EMAIL...")
+const POST = asyncErrorHandler( async () => {
+    console.log("Route handler for sending success payment EMAIL...");
     // cookies related logic..
     const cookiesStore = await cookies();
     const accessToken = cookiesStore.get("accessToken").value ;
@@ -52,9 +57,25 @@ const GET = asyncErrorHandler( async (request) => {
     }
 
     await connectWithMongoDB() ; // establishing the connection to mongoDB...
-    const subscriptionDetails = await users.findById(decodedToken.id);
-    const objectToSend = subscriptionDetails.subscription ;
+    const userToGet = await users.findById(decodedToken.id);
+    const objectToSend = userToGet.subscription ; // extracting the main subscription object...
 
-    const mailSend = await sendMailToUser()
+    // await sendMailToUser(decodedToken.email, decodedToken.name, objectToSend);
+    const plans = [
+          { name: "freemium", price: "₹0/month" },
+          { name: "basic", price: "₹899/month"},
+          { name: "standard", price: "₹1499/month" },
+          { name: "premium", price: "₹3199/month"}
+    ];
+    // exact data to render on UI...
+    const dataToRender = {
+      billingTo : userToGet.email ,
+      date : new Date(objectToSend.subscriptionDate).toUTCString() ,
+      amountPaid : plans.find((plan) => plan.name === objectToSend.subscriptionLevel).price,
+      plan: plans.find((plan) => plan.name === objectToSend.subscriptionLevel).name,
+      transactionId: objectToSend.paymentId
+    }
+    return NextResponse.json({message:"Payment success email sent",dataToRender:dataToRender}, { status: 200 });
+});
 
-})
+export { POST };

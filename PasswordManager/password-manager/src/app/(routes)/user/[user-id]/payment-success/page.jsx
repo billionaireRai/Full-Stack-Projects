@@ -5,19 +5,16 @@ import useUserID from '@/state/useridState';
 import React, { useEffect , useState } from 'react';
 import axios from 'axios';
 
+
 const SuccessfulPaymentPage = () => {
     const { userId } = useUserID(); 
     const [PaymentDetails, setPaymentDetails] = useState(null) ;
-    // function for getting the payment related data...
-    const getPaymentData = async () => {
-
-    }
     // function for sending the confirmation Email to the user...
-    const sendConfirmationEmail = async () => {
+    const sendConfirmationEmailAndGetData = async () => {
       try {
-        const emailRes = await axios.get('/apis/user/payment-success');
+        const emailRes = await axios.post('/apis/user/payment-success');
         if(emailRes.status === 200) {
-          sendConfirmationEmail();
+          setPaymentDetails(emailRes.data.dataToRender); // updating the state of payment details...
           console.log(emailRes.message);
           return 
         }
@@ -25,10 +22,21 @@ const SuccessfulPaymentPage = () => {
         console.log(error);
         return ;
       }
-
     }
+    useEffect(() => {
+      sendConfirmationEmailAndGetData() ; // sending the confermational email...
+    }, [])
 
   const currentYear = new Date().getFullYear();
+
+  if (!PaymentDetails) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading payment details...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 flex items-center justify-center px-4 py-10">
       <div className="max-w-3xl w-full space-y-10">
@@ -51,8 +59,8 @@ const SuccessfulPaymentPage = () => {
           <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-white">
             Payment Successful
           </h1>
-          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 max-w-lg">
-            Thank you for subscribing to the Pro Plan. We've sent a confirmation to your email.
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 max-w-full">
+            Thank you for choosing to subscribe to the Pro Plan! We truly appreciate your support and are excited to have you on board. A detailed confirmation along with your subscription information has been sent to your registered email address. Please check your inbox to review the details.
           </p>
         </section>
 
@@ -64,15 +72,11 @@ const SuccessfulPaymentPage = () => {
           <div className="space-y-5 text-sm sm:text-base">
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Transaction ID:</span>
-              <span className="font-medium">#TXN65478923</span>
+              <span className="font-medium">{PaymentDetails.transactionId}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Plan:</span>
-              <span className="font-medium">Pro Annual</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Amount Paid:</span>
-              <span className="font-semibold text-green-600 dark:text-green-400">₹4,999</span>
+              <span className="font-medium">{PaymentDetails.plan}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Payment Method:</span>
@@ -80,23 +84,31 @@ const SuccessfulPaymentPage = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Date:</span>
-              <span className="font-medium">2nd July 2025</span>
+              <span className="font-medium">{PaymentDetails.date}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Billed To:</span>
-              <span className="font-medium">you@example.com</span>
+              <span className="font-medium">{PaymentDetails.billingTo}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500 dark:text-gray-400">Amount Paid:</span>
+              <span className="font-semibold text-green-600 dark:text-green-400">{PaymentDetails.amountPaid}</span>
             </div>
           </div>
         </section>
 
         {/* Action Buttons */}
         <section className="flex flex-col sm:flex-row justify-center gap-4 text-center">
-          <Link
-            href={`/user/${userId}/dashboard`}
-            className="cursor-pointer w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg"
-          >
-            Go to Dashboard
-          </Link>
+          {userId ? (
+            <Link
+              href={`/user/${userId}/dashboard`}
+              className="cursor-pointer w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg"
+            >
+              Go to Dashboard
+            </Link>
+          ) : (
+            <p>Loading user info...</p>
+          )}
         </section>
 
         {/* Support & Footer */}
