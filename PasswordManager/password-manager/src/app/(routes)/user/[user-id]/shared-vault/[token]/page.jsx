@@ -2,6 +2,8 @@
 
 import Navbar from '@/components/navbar.jsx';
 import CustomSelect from '@/components/customSelect';
+import Image from 'next/image';
+import toast from 'react-hot-toast';
 import Dropdown from '@/components/dropdown';
 import axios from 'axios';
 import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
@@ -183,6 +185,17 @@ export default function UserSharedVaultPage() {
     return ;
    }
   }
+  // function for copying encryted and decrypted data...
+  const copyTheItemCredentials = (data,text) => { 
+    navigator.clipboard.writeText(data).then(() => {
+      console.log('Copied to clipboard...');
+      toast.success(text);
+    })
+    .catch(err => {
+      console.error('Failed to copy:', err);
+      toast.error('Failed to copy to clipboard');
+    })
+   }
   return (
     <div className="min-h-screen bg-[#f9fafb] dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <Navbar />
@@ -298,16 +311,24 @@ export default function UserSharedVaultPage() {
                     transition={{ duration: 0.4 }}
                     className="w-full lg:w-[40%] bg-gray-900 text-green-400 p-6 rounded-xl overflow-x-auto shadow-inner transition-all duration-300"
                   >
-                    <h3 className="text-lg font-semibold text-green-300 mb-2">
-                      🔐 Encrypted Vault Data
+                    <h3 className="text-lg flex flex-row items-center justify-between font-semibold text-green-300 mb-2">
+                       <span>🔐 Encrypted Vault Data</span>
+                          <span 
+                          onClick={() => { copyTheItemCredentials(vault.encryptedData.encryptedData,'encrypted data copied!!') }} className="bg-gray-900 p-1 rounded-lg hover:bg-gray-700 transition-colors duration-300">
+                            <Image src='/images/copy.png' className="invert cursor-pointer" width={20} height={20} alt="copy-icon"/>
+                          </span>
                     </h3>
                     <code className="text-xs break-words whitespace-pre-wrap block">
                       {typeof vault.encryptedData === 'object' ? JSON.stringify(vault.encryptedData, null, 2) : vault.encryptedData}
                     </code>
                     {DecryptionActivated && selectedVaultId === vault._id && (
                       <div>
-                        <h3 className="text-lg font-semibold text-blue-300 mt-4 mb-2">
-                          🔓 Decrypted Vault Data
+                        <h3 className="text-lg flex flex-row items-center justify-between font-semibold text-blue-300 mt-4 mb-2">
+                          <span>🔓 Decrypted Vault Data</span>
+                              <span 
+                              onClick={() => { copyTheItemCredentials(vault.decryptedData,'decrypted data copied!!') }} className="bg-gray-900 p-1 rounded-lg hover:bg-gray-700 transition-colors duration-300">
+                                <Image src='/images/copy.png' className="invert cursor-pointer" width={20} height={20} alt="copy-icon"/>
+                              </span>
                         </h3>
                         <pre className="text-xs break-words whitespace-pre-wrap block bg-gray-800 p-2 rounded text-white">
                           {typeof vault.decryptedData === 'object' ? JSON.stringify(vault.decryptedData, null, 2) : vault.decryptedData}

@@ -15,7 +15,6 @@ export default function Tooltip({ children, text }) {
     >
       {/* The Trigger */}
       {children}
-
       {/* The Tooltip Box */}
       <span
         id="tooltip"

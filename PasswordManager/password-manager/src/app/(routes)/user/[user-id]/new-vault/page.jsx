@@ -280,7 +280,7 @@ const SectionWrapper = ({ title, children }) => {
                               <input
                                 key={index}
                                 {...registerBank(`sharedWithIndividuals.${index}`)}
-                                placeholder={`email/name of User ${index + 1}`}
+                                placeholder={`email of User ${index + 1}`}
                                 className="vault-form-input mb-2"
                                 value={user}
                                 onChange={(e) => {
@@ -376,7 +376,7 @@ const SectionWrapper = ({ title, children }) => {
                               <input
                                 key={index}
                                 {...registerCard(`sharedWithIndividuals.${index}`)}
-                                placeholder={`email/name of User ${index + 1}`}
+                                placeholder={`email of User ${index + 1}`}
                                 className="vault-form-input mb-2"
                                 value={user}
                                 onChange={(e) => {
@@ -469,7 +469,7 @@ const SectionWrapper = ({ title, children }) => {
                               <input
                                 key={index}
                                 {...registerCrypto(`sharedWithIndividuals.${index}`)}
-                                placeholder={`email/name of User ${index + 1}`}
+                                placeholder={`email of User ${index + 1}`}
                                 className="vault-form-input mb-2"
                                 value={user}
                                 onChange={(e) => {
@@ -562,7 +562,7 @@ const SectionWrapper = ({ title, children }) => {
                               <input
                                 key={index}
                                 {...registerPassword(`sharedWithIndividuals.${index}`)}
-                                placeholder={`email/name of User ${index + 1}`}
+                                placeholder={`email of User ${index + 1}`}
                                 className="vault-form-input mb-2"
                                 value={user}
                                 onChange={(e) => {

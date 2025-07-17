@@ -7,6 +7,7 @@ const useUserDerivedEncryptionKey = create(
   persist(
     (set) => ({
       encryptionKeyValue: null, // state variable holding the value of encryptionKey...
+      hasHydrated: false, // flag to indicate hydration status
       // function for setting it...
       setEncryptionKeyValue: (encryptionKeyValue) => {
         set({ encryptionKeyValue });
@@ -15,10 +16,16 @@ const useUserDerivedEncryptionKey = create(
       resetEncryptionKeyValue: () => {
         set({ encryptionKeyValue: null });
       },
+      setHasHydrated: (state) => {
+        set({ hasHydrated: state });
+      }
     }),
     {
       name: "encryption-key-storage",
-      getStorage: () => localStorage
+      getStorage: () => localStorage,
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      }
     }
   )
 );

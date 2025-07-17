@@ -1,6 +1,7 @@
 
 import "./globals.css";
 import "./fonts.css";
+import ErrorWrapper from "./error-wrapper";
 import ThemeProvider from "@/components/ThemeProvider";
 import ToastifyProvider from "@/components/toastify";
 
@@ -22,7 +23,7 @@ export default function RootLayout({ children }) {
       <script id='razorpay-script' src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <ThemeProvider>
           <ToastifyProvider>
-            {children}
+            <ErrorWrapper>{children}</ErrorWrapper>
           </ToastifyProvider>
         </ThemeProvider>
       </body>
