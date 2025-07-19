@@ -1,9 +1,17 @@
 // Logging middleware - add your logging logic here
 import winston from 'winston';
+import fs from 'fs';
+import path from 'path';
+
+// Ensure logs directory exists
+const logsDir = path.resolve('logs');
+if (!fs.existsSync(logsDir))  fs.mkdirSync(logsDir);
+
 
 // defining the structure for a log...
 const loggingFormat = winston.format.printf((info) =>{
-        return `${info.timestamp} - ${info.level}: ${info.message} - ${info.meta.request}`;
+        const requestInfo = info.meta && info.meta.request ? info.meta.request : 'No request info';
+        return `${info.timestamp} - ${info.level}: ${info.message} - ${requestInfo}`;
 })
 
 // creating logger instance...

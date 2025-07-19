@@ -5,11 +5,11 @@ import VaultNavbar from "@/components/navbar";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import useUserDerivedEncryptionKey from "@/state/derivedEncrypKey.js";
+import useUserPassPhraseHash from "@/state/passphraseHash";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { decryptionOfVaultData } from "@/lib/encryptionLogic";
 import { useInactivityChecker } from '@/components/useInactivityChecker.jsx';
-import useUserPassPhraseHash from "@/state/passphraseHash";
 
 export default function UserTotalVaultItems() {
   useInactivityChecker(process.env.NEXT_PUBLIC_INACTIVITY_CHECKER_LOGOUT);
@@ -40,10 +40,11 @@ export default function UserTotalVaultItems() {
     setDeleteItemId(itemId);
     setShowDeleteModal(true);
   }
+  // function for handling the deletion of item...
   const handleDeleteItemLogic = async () => { 
       setShowDeleteModal(false);
       try {
-        const deleteRes = await axios.delete('/apis/user/vault-item',{data:{idToDelete :deleteItemId}})
+        const deleteRes = await axios.delete('/apis/user/vault-item',{data:{idToDelete :deleteItemId}}); 
         if(deleteRes.status === 200){
            setDeleteItemId(null);
            setVaultItems((prevItems) => prevItems.filter(item => item.id !== deleteItemId));

@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import useJWTTokens from "@/state/jwtTokens.js";
 
 const useIsUserAuthenticated = create(
   persist(
@@ -13,9 +14,8 @@ const useIsUserAuthenticated = create(
 
       setIsNotAuthenticated: () => {
         if (get().isAuthenticated){
-          const { resetAccessAndRefreshToken } = require('@/state/jwtTokens.js').default(); // Lazy load hook
           set({ isAuthenticated: false });
-          resetAccessAndRefreshToken(); // Token reset after logout
+          useJWTTokens.getState().resetAccessAndRefreshToken();
         }
       },
     }),

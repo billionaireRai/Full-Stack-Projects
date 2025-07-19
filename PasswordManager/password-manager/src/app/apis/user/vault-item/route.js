@@ -1,12 +1,12 @@
 import vaultitems from "@/db/models/vaultModel";
 import users from "@/db/models/userModel";
 import asyncErrorHandler from "@/middlewares/errorMiddleware";
-import { cookies } from "next/headers";
+import sharedvaults from "@/db/models/sharedVaultModel";
 import { connectWithMongoDB } from "@/db/dbConnection";
 import { calculateObjectSize } from 'bson';
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { decodeGivenJWT } from "@/lib/decodejwt";
-import sharedvaults from "@/db/models/sharedVaultModel";
 
 const POST = asyncErrorHandler( async () => {
     console.log("Route handler for getting all vaults !!");
@@ -102,10 +102,30 @@ const GET = asyncErrorHandler(async (request) => {
 
 const DELETE = asyncErrorHandler( async (request) => {
   const { idToDelete } = await request.json() ; // destructuring syntax...
-  
+  if (!idToDelete || typeof idToDelete !== "string") {
+    console.log("ID of ITEM to delete is missing OR invalid...");
+    return new NextResponse("ID of ITEM to delete is missing OR invalid!!", { status: 404 }) ;
+  }
+  // getting the user from token...
+  const allCookies = await cookies() ;
+  const accessToken = allCookies.get('accessToken').value ;
+  const decodedUser = await decodeGivenJWT(accessToken,process.env.SECRET_FOR_ACCESS_TOKEN) ;
 
-  // returning a response for the handler...
-  return new NextResponse("Vault item deleted successfully", { status: 200 });
+  // some more debugging steps...
+  if (!decodedUser) {
+    console.log("User is not authenticated!!!");
+    return new NextResponse("User is not authenticated!!!", { status: 401 });
+  }
+  
+  await connectWithMongoDB() ; // establishing connection to DB...
+  // Ensure items belongs to this user only...
+  const deleteResult = await vaultitems.deleteOne({ _id: idToDelete, userId: decodedUser.id }) ; // main deleting action...
+  if (deleteResult.deletedCount === 0) {
+    console.log("No vault item found for deletion or user unauthorized");
+    return new NextResponse("No vault item found for deletion or user unauthorized", { status: 404 });
+  }
+  // sending final response...
+  return NextResponse.json({message:'vault item successfully deleted',success:true},{status:200})
 });
 
 

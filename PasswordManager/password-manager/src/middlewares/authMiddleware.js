@@ -29,7 +29,7 @@ export function authMiddleware(request) {
         try {
             decodedAccessToken = jsonWebToken.verify(accessToken, process.env.SECRET_FOR_ACCESS_TOKEN); // gives decoded-data , iat , exp
             // if access token is expired...
-            const currentTime = Math.floor(new Date.now() / 1000); ; // getting current time after converting in seconds...
+            const currentTime = Math.floor(Date.now() / 1000); // getting current time after converting in seconds...
             if (currentTime >= decodedAccessToken.exp) {
                 console.log("accesstoken coming from user is EXPIRED...")
                 return NextResponse.redirect('/auth/re-auth')
@@ -41,7 +41,7 @@ export function authMiddleware(request) {
                 status: 401
             });
         } 
-        return NextResponse.next() ; // giving control to the next middleware or , route handler...
+        return { decodedUser : decodedAccessToken } ;
     }
     // Allow the request to continue to next middleware...
     return NextResponse.next();
