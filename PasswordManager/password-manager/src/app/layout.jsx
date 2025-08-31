@@ -1,6 +1,6 @@
-
 import "./globals.css";
 import "./fonts.css";
+import BubbleCursor from "@/components/bubbleCursor";
 import ErrorWrapper from "./error-wrapper";
 import ThemeProvider from "@/components/ThemeProvider";
 import ToastifyProvider from "@/components/toastify";
@@ -15,17 +15,17 @@ export const metadata = {
   description: "lockRift is a secure and encrypted vault manager for storing passwords, confidential files, and personal data. Protect your digital life with military-grade encryption, seamless access, and intuitive design."
 };
 
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="antialiased">
-      <script id='razorpay-script' src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script id='razorpay-script' src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <ThemeProvider>
           <ToastifyProvider>
             <ErrorWrapper>{children}</ErrorWrapper>
           </ToastifyProvider>
         </ThemeProvider>
+        <BubbleCursor />
       </body>
     </html>
   );

@@ -98,12 +98,6 @@ const handleLoginForm = async (formData) => {
 
   // top-level handler function for useForm() hook...
   const onSubmit = async (data) => { await handleToast(data) };
-  // handling the routing after registration...
-  useEffect(() => {
-    if (userId !== null) {
-      console.log("UserID :", userId);
-    }
-  }, [userId])
   
 
   return (

@@ -100,15 +100,25 @@ const POST = asyncErrorHandler( async (request) => {
         breachTrendData.push({ name: `Month ${month + 1}`, breaches: parseInt(count) }); // pushing...
     }
 
-    // categoryData: count by category - mapping vaultType to categories
+    // counting vaults by category...
     const categoryMap = ['password-details','bank-details','cryptowallet-details','credit-card-details','other'];
     const categoryCounts = {};
-    userVaults.forEach(vault => {
-        const specificCategoryType = vault.vaultType.vaultCategory ;
-        if (categoryMap.includes(specificCategoryType)) {
-            categoryCounts[specificCategoryType] = (categoryCounts[specificCategoryType] || 0) + 1;
-        }
-    });
+    
+    function countingByCategory(vaultArray, isShared = false) {
+        vaultArray.forEach(vault => {
+            let specificCategoryType ;
+            if (isShared) specificCategoryType = vault.vaultCategory;
+            else {
+               specificCategoryType = vault.vaultType?.vaultCategory || vault.vaultCategory;
+            }
+            if (categoryMap.includes(specificCategoryType)) {
+                categoryCounts[specificCategoryType] = (categoryCounts[specificCategoryType] || 0) + 1;
+            }
+        });
+    }
+    
+    countingByCategory(userVaults, false);
+    countingByCategory(sharedVaultsOfuser, true); 
     const categoryData = Object.entries(categoryCounts).map(([name, value]) => ({ name:name, value:value }));
 
     // getting the storage of private the vaults...

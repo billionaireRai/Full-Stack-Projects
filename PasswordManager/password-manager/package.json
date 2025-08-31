@@ -23,7 +23,7 @@
     "chartjs-node-canvas": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.12.1",
+    "framer-motion": "^12.23.12",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.509.0",
     "mongoose": "^8.14.2",
@@ -39,6 +39,7 @@
     "recharts": "^2.15.3",
     "tailwind-merge": "^3.3.0",
     "winston": "^3.17.0",
+    "zod": "^4.0.17",
     "zustand": "^5.0.4"
   },
   "devDependencies": {
