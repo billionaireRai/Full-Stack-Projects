@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB = process.env.MONGODB_DB;
+const MONGODB_URI = process.env.MONGODB_CLOUD_URL;
+const MONGODB_DB = process.env.MONGODB_DB_NAME;
 if (!MONGODB_URI || !MONGODB_DB) throw new Error("Any MONGODB credentials are missing...");
 
 mongoose.set("debug", true); // this logs all DB activity!
