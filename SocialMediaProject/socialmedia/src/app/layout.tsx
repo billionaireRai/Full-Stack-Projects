@@ -1,10 +1,10 @@
-
 import type { Metadata } from "next";
 import Providers from "@/app/provider";
 import Sidenavbar from "@/components/sidenavbar";
 import UnAuthorize from "@/components/unAuthorize-wrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
+import React from "react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -41,10 +41,10 @@ export default function RootLayout({children, params}: {children: React.ReactNod
           <ThemeProvider>
             <Providers>
               <Sidenavbar/>
-              <div className="flex-1">
-                <UnAuthorize>
+              <div className="flex-1 overflow-auto">
+                {/* <UnAuthorize> */}
                   {children}
-                </UnAuthorize>
+                {/* </UnAuthorize> */}
               </div>
             </Providers>
           </ThemeProvider>

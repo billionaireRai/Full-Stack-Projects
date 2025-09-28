@@ -1,10 +1,9 @@
 import React from 'react'
 
-export default function forgotPassword() {
+export default function monetizationpage (){
   return (
     <div>
       
     </div>
   )
 }
-

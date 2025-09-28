@@ -11,7 +11,7 @@ export default function UnAuthorize({ children }: { children: React.ReactNode })
   const pathname = usePathname(); // Getting the current page URL
   const isSecuredUrl = pathname.startsWith('/username');
 
-  // Conditional rendering: if user is authenticated or on a non-secured page, render children
+  // Conditional rendering => if user is authenticated or on a non-secured page, render children...
   if ((session && isSecuredUrl) || (!session && !isSecuredUrl) || (session && !isSecuredUrl)) {  return <>{children}</>  }
 
   return (

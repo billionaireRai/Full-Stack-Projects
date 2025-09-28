@@ -6,7 +6,7 @@ import Image from "next/image";
 export default function LogIn() {
   return (
     <div className="w-screen h-screen flex items-center justify-center font-poppins bg-gradient-to-r from-white to-gray-100 dark:from-gray-950 dark:to-black dark:bg-none">
-      <div className="border border-gray-200 w-full max-w-sm rounded-xl shadow-lg bg-white dark:bg-black dark:border-gray-600 flex flex-col items-center p-6 gap-2">
+      <div className="border border-gray-200 w-full max-w-md rounded-xl shadow-lg bg-white dark:bg-black dark:border-gray-600 flex flex-col items-center p-6 gap-2">
         <div>
           <Image
             src="/images/letter-B.png"

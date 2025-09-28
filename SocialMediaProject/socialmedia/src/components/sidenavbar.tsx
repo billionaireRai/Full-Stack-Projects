@@ -1,15 +1,309 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import useCreatePost from '@/app/states/createpost'
 import { usePathname } from 'next/navigation'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import {
+  HomeIcon,
+  SearchIcon,
+  MoreHorizontalIcon,
+  BellIcon,
+  MessageCircleIcon,
+  UserPlusIcon,
+  UserIcon,
+  BookmarkIcon,
+  DollarSignIcon,
+  SettingsIcon,
+  LogOutIcon,
+} from 'lucide-react'
 
-export default function sidenavbar() {
-    const pathname = usePathname() ;
-    if (!pathname.startsWith('/username/')) return ( <> </> ) ;
-    
-    return (
-        <div className='border border-black w-[100px] h-screen mx-3'>
-             
-        </div>
-    )  
-} 
+export default function SideNavbar() {
+  const { setCreatePop } = useCreatePost()
+  const [DotClick, setDotClick] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
+  const { data: session } = useSession()
+  const pathname = usePathname()
+
+  const shouldShowSidebar =
+    !pathname.startsWith('/auth/') && pathname !== '/'
+
+  // auto-collapse sidebar on small screens...
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) setIsOpen(false)
+      else setIsOpen(true)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Close dropdown when clicking outside...
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        DotClick &&
+        !(event.target as Element).closest('.dropdown-container')
+      ) {
+        setDotClick(false)
+      }
+    }
+
+    if (DotClick) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [DotClick])
+
+  return (
+    <>
+      {/* Sidebar */}
+      {shouldShowSidebar && (
+        <aside
+          className={`fixed top-0 left-0 h-screen z-40 font-poppins border-r transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          w-72 bg-white dark:bg-black rounded-md`}
+        >
+          <div className="flex flex-col h-full p-4">
+            {/* Logo */}
+            <Tooltip>
+              <Link
+                href="/"
+                className="flex w-fit rounded-full items-center justify-start mb-6"
+              >
+                <TooltipTrigger>
+                  <Image
+                    className="rounded-full cursor-pointer dark:invert"
+                    width={45}
+                    height={45}
+                    src="/images/letter-B.png"
+                    alt="logo"
+                  />
+                </TooltipTrigger>
+              </Link>
+              <TooltipContent>Briezly.com</TooltipContent>
+            </Tooltip>
+
+            {/* Nav Links */}
+            <nav className="flex-1">
+              <ul className="flex flex-col space-y-1">
+                <Link
+                  className={`${
+                    pathname === '/username/feed'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/username/feed"
+                >
+                  <NavItem icon={<HomeIcon className={`${pathname === '/username/feed' ? 'fill-black dark:fill-white' : ''}`} />} label="Feed" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/explore'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/explore"
+                >
+                  <NavItem icon={<SearchIcon className={`${pathname === '/explore' ? 'fill-black dark:fill-white' : ''}`} />} label="Explore" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/username/notifications'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/username/notifications"
+                >
+                  <NavItem icon={<BellIcon className={`${pathname === '/username/notifications' ? 'fill-black dark:fill-white' : ''}`} />} label="Notifications" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/username/messages'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/username/messages"
+                >
+                  <NavItem icon={<MessageCircleIcon className={`${pathname === '/username/messages' ? 'fill-black dark:fill-white' : ''}`} />} label="Messages" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/subscription'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/subscription"
+                >
+                  <NavItem icon={<UserPlusIcon className={`${pathname === '/subscription' ? 'fill-black dark:fill-white' : ''}`} />} label="Subscription" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/username'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/username"
+                >
+                  <NavItem icon={<UserIcon className={`${pathname === '/username' ? 'fill-black dark:fill-white' : ''}`} />} label="Profile" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/username/bookmarked'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/username/bookmarked"
+                >
+                  <NavItem icon={<BookmarkIcon className={`${pathname === '/username/bookmarked' ? 'fill-black dark:fill-white' : ''}`} />} label="Bookmarked" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/monetization'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/monetization"
+                >
+                  <NavItem
+                    icon={<DollarSignIcon className={`${pathname === '/monetization' ? 'fill-black dark:fill-white' : ''}`} />}
+                    label="Monetization"
+                  />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/username/settings/account'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/username/settings/account"
+                >
+                  <NavItem
+                    icon={<SettingsIcon className={`${pathname === '/username/settings/account' ? 'fill-black dark:fill-white' : ''}`} />}
+                    label="Settings & Privacy"
+                  />
+                </Link>
+              </ul>
+            </nav>
+
+            {/* Bottom Section */}
+            <div className="mt-auto">
+              {/* Post Button */}
+              <button
+                onClick={() => { setCreatePop(true) }}
+                className="w-full p-3 cursor-pointer rounded-lg dark:bg-blue-600 dark:text-white bg-yellow-400 dark:hover:bg-blue-700 active:bg-yellow-400 dark:active:bg-blue-600 hover:bg-yellow-500 text-black font-bold transition-all duration-300"
+              >
+                CREATE POST
+              </button>
+
+              {/* Profile dropdown trigger */}
+              <div className="dropdown-container flex items-center relative gap-2 mt-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
+                <Image
+                  src="/images/myProfile.jpg"
+                  height={40}
+                  width={40}
+                  alt="profile"
+                  className="rounded-full w-13 h-13"
+                />
+                <Link
+                  href="/username/settings/profile"
+                  className={`${
+                    pathname === '/username/settings/profile'
+                      ? 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900'
+                      : ''
+                  } flex flex-col`}
+                >
+                  <span className="flex items-center font-medium text-gray-900 dark:text-gray-100 gap-1">
+                    AMRITANSH RAI
+                    <Image
+                      src="/svg/blue-tick.svg"
+                      width={18}
+                      height={18}
+                      alt="blue-tick"
+                    />
+                  </span>
+                  <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold">
+                    @amritansh_coder
+                  </span>
+                </Link>
+                <MoreHorizontalIcon
+                  onClick={() => {
+                    setDotClick(!DotClick)
+                  }}
+                  className={`ml-auto cursor-pointer rounded-full p-1 w-7 h-7 text-gray-600 dark:text-gray-300 ${
+                    DotClick ? 'bg-amber-200 dark:bg-gray-950' : ''
+                  }`}
+                />
+              </div>
+
+              {/* Dropdown */}
+              {DotClick && (
+                <div className="absolute left-0 bottom-0 sm:left-73 sm:bottom-0 w-70 mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl z-[60] dark:shadow-gray-950">
+                  <div className="p-2 font-medium">
+                    <button className="w-full rounded-md cursor-pointer text-left px-4 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors flex items-center gap-3">
+                      <UserPlusIcon className="w-5 h-5" />
+                      <span>Add new account</span>
+                    </button>
+                    <button className="w-full rounded-md cursor-pointer text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors flex items-center gap-3">
+                      <UserIcon className="w-5 h-5" />
+                      <span>Add an existing account</span>
+                    </button>
+                    <button className="w-full rounded-md cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center gap-3">
+                      <LogOutIcon className="w-5 h-5" />
+                      <span>
+                        Log out @{session?.user?.name || 'Amritansh_Coder'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
+      )}
+
+      {/* Hamburger Button */}
+      <Tooltip>
+        <TooltipTrigger>
+          {shouldShowSidebar && (
+            <div
+              onClick={() => setIsOpen(!isOpen)}
+              className="fixed top-4 cursor-e-resize left-4 z-50 p-2 rounded-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow-md transition-all duration-300 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800 md:hidden"
+            >
+              <Image
+                src="/svg/hamburger.svg"
+                width={24}
+                height={24}
+                alt="menu"
+                className="invert-0 dark:invert"
+              />
+            </div>
+          )}
+        </TooltipTrigger>
+        <TooltipContent>Open side bar</TooltipContent>
+      </Tooltip>
+    </>
+  )
+}
+
+function NavItem({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <li className="flex items-center group dark:text-white gap-3 p-3 rounded-md text-black hover:bg-gray-50 dark:hover:bg-gray-950  dark:hover:text-yellow-500 cursor-pointer transition-all">
+      <span className="w-5 h-5 group-hover:fill-black dark:group-hover:fill-yellow-500">{icon}</span>
+      <span className="font-medium">{label}</span>
+    </li>
+  )
+}
