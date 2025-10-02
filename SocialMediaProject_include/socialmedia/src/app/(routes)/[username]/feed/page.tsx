@@ -1,17 +1,66 @@
 'use client'
 
-import React from 'react';
-import useCreatePost from '@/app/states/createpost';
+import React , { useState , useEffect } from 'react';
+import Interestpage from '@/components/interestselection';
 import PostCard from '@/components/postcard';
-import CreatePost from '@/components/createpost'
+import Activebeep from '@/components/activebeep';
+import CreatePost from '@/components/createpost';
+import Trendcancelpop from '@/components/trendcancelpop';
+import useCreatePost from '@/app/states/createpost';
+import Interest from '@/components/interestpop';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Flame, TrendingUp, Gamepad2, Briefcase , MoreHorizontalIcon} from 'lucide-react';
 
-export default function explore() {
-  const { isCreatePop } = useCreatePost() ; // create post state...
-  return (
-    <div className='h-full flex flex-col md:ml-72 font-poppins border border-black rounded-lg'>
-      <div className='mainbox dark:bg-black w-full h-fit rounded-lg flex flex-col lg:flex-row-reverse gap-8 p-6 max-w-7xl mx-auto font-poppins shadow-lg'>
-        <div className='right w-full lg:w-80 xl:w-96 hidden xl:block  space-y-2'>
-           {/* Search Box */}
+export default function feed() {
+    const { isCreatePop } = useCreatePost() ;
+    const [hpninPopUp, sethpninPopUp] = useState<number>() ;
+    // const [showInterest, setshowInterest] = useState(false) ;
+    // const [Start, setStart] = useState(false)
+    // useEffect(() => {
+    //   let timer = setTimeout(() => {
+    //     setshowInterest(true)
+    //    }, 2000)
+    //   return () => {
+    //     clearTimeout(timer) ;
+    //   }
+
+    // }, [])
+
+     useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+          if (hpninPopUp && !(event.target as Element).closest('.happening-dropdown')) {
+            sethpninPopUp(0)
+          }
+        }
+    
+        if (hpninPopUp) {
+          document.addEventListener('mousedown', handleClickOutside)
+        }
+    
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [hpninPopUp])
+
+    return (
+        <div className='h-full flex flex-col md:ml-72 font-poppins'>
+            {/* interest popup modal... */}
+            {/* {showInterest && (
+                <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
+                    <Interest getStarted={() => { setshowInterest(false) ; setStart(true) }} onClose={() => setshowInterest(false)} />
+                </div>
+            )} */}
+            {/* main selection popup... */}
+            {/* {Start && (
+                <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
+                    <Interestpage />
+                </div>
+            )} */}
+            <div className='mainbox dark:bg-black w-full h-fit rounded-lg flex flex-col lg:flex-row-reverse gap-8 p-6 max-w-7xl mx-auto font-poppins shadow-lg'>
+                {/* Right Sidebar */}
+                <div className='right w-full lg:w-80 xl:w-96 hidden xl:block space-y-2'>
+                    {/* Search Box */}
                     <div className='bg-white w-full dark:bg-black rounded-xl dark:border-slate-700 p-4'>
                         <div className='relative'>
                             <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
@@ -229,20 +278,18 @@ export default function explore() {
                         </div>
                     </div>
                 </div>
-
+                {/* Main Feed Area - Left Side */}
+                <div className='left flex-1 h-fit bg-white dark:bg-black rounded-xl'>
+                    <div className=''>
+                        <PostCard />
+                        <PostCard />
+                    </div>
+                </div>
+             { isCreatePop && (
+                <CreatePost />
+              )}
+            </div>
         </div>
 
-        {/* Main Feed Area - Left Side */}
-          <div className='left flex-1 h-fit bg-white dark:bg-black rounded-xl'>
-              <div className=''>
-                
-              </div>
-          </div>
-        { isCreatePop && (
-          <CreatePost />
-        )}
-      </div>
-    </div>
-  )
+    )
 }
-

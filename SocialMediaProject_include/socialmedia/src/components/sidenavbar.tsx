@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import useCreatePost from '@/app/states/createpost'
 import { usePathname } from 'next/navigation'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import { useTheme } from 'next-themes'
 import {
   HomeIcon,
   SearchIcon,
@@ -19,6 +20,8 @@ import {
   DollarSignIcon,
   SettingsIcon,
   LogOutIcon,
+  Sun,
+  Moon,
 } from 'lucide-react'
 
 export default function SideNavbar() {
@@ -27,6 +30,9 @@ export default function SideNavbar() {
   const [isOpen, setIsOpen] = useState(true)
   const { data: session } = useSession()
   const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
+  const isDark = theme === 'dark'
+  const [mounted, setMounted] = useState(false)
 
   const shouldShowSidebar =
     !pathname.startsWith('/auth/') && pathname !== '/'
@@ -62,6 +68,11 @@ export default function SideNavbar() {
     }
   }, [DotClick])
 
+  // Set mounted to true after component mounts
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <>
       {/* Sidebar */}
@@ -72,6 +83,7 @@ export default function SideNavbar() {
           w-72 bg-white dark:bg-black rounded-md`}
         >
           <div className="flex flex-col h-full p-4">
+            <div className='flex flex-row items-center justify-between'>
             {/* Logo */}
             <Tooltip>
               <Link
@@ -90,7 +102,29 @@ export default function SideNavbar() {
               </Link>
               <TooltipContent>Briezly.com</TooltipContent>
             </Tooltip>
-
+          {mounted && (
+          <div className="themetoggler border-none flex items-center justify-end">
+            <div
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              className="relative group"
+            >
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="p-3 m-2 cursor-pointer rounded-full bg-white shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ease-in-out ring-2 ring-transparent hover:ring-gray-500 dark:hover:ring-gray-400">
+                    <div className={`transition-transform duration-500 ${isDark ? 'rotate-180' : 'rotate-0'}`}>
+                      {isDark ? <Sun size={20} className="text-black" /> : <Moon size={20} className="text-black" />}
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Switch to {isDark ? 'Light' : 'Dark'} Mode</p>
+                </TooltipContent>
+              </Tooltip>
+              <div className="absolute inset-0 rounded-full bg-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300 border border-gray-300 dark:border-gray-600"></div>
+            </div>
+          </div>
+        )}
+        </div>
             {/* Nav Links */}
             <nav className="flex-1">
               <ul className="flex flex-col space-y-1">
@@ -301,8 +335,8 @@ function NavItem({
   label: string
 }) {
   return (
-    <li className="flex items-center group dark:text-white gap-3 p-3 rounded-md text-black hover:bg-gray-50 dark:hover:bg-gray-950  dark:hover:text-yellow-500 cursor-pointer transition-all">
-      <span className="w-5 h-5 group-hover:fill-black dark:group-hover:fill-yellow-500">{icon}</span>
+    <li className="flex items-center group dark:text-white gap-3 p-3 rounded-md text-black hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer transition-all">
+      <span className="w-5 h-5 group-hover:fill-black">{icon}</span>
       <span className="font-medium">{label}</span>
     </li>
   )
