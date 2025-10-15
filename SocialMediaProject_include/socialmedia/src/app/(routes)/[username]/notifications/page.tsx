@@ -52,8 +52,38 @@ const sampleNotifications: Notification[] = [
       id: 'p2',
       thumbnailUrl: '/images/comment.png',
     },
-    commentText: 'Great post!',
+    commentText: 'Hey buddy light weight!!',
     timestamp: new Date(Date.now() - 86400000).toISOString(),
+  },
+  {
+    id: '4',
+    type: 'mention',
+    actor: {
+      id: 'u4',
+      name: 'Bob Wilson',
+      username: 'bobwilson',
+      avatarUrl: '/images/myProfile.jpg',
+    },
+    post: {
+      id: 'p3',
+      thumbnailUrl: '/images/atsign.png',
+    },
+    timestamp: new Date(Date.now() - 1800000).toISOString(),
+  },
+  {
+    id: '5',
+    type: 'repost',
+    actor: {
+      id: 'u5',
+      name: 'Charlie Brown',
+      username: 'charliebrown',
+      avatarUrl: '/images/myProfile.jpg',
+    },
+    post: {
+      id: 'p4',
+      thumbnailUrl: '/images/repost.png',
+    },
+    timestamp: new Date(Date.now() - 7200000).toISOString(),
   },
 ];
 
@@ -83,7 +113,7 @@ export default function notifications() {
   }, []);
   return (
     <div className='h-fit flex flex-row-reverse md:ml-72 font-poppins rounded-lg dark:bg-black'>
-      <div className='mainbox hidden dark:bg-black w-fit h-fit rounded-lg xl:flex flex-col lg:flex-row-reverse gap-8 p-6 max-w-7xl mx-auto font-poppins shadow-lg'>
+      <div className='mainbox hidden lg:flex flex-col lg:flex-row-reverse gap-8 p-6 max-w-7xl mx-auto font-poppins shadow-lg dark:bg-black w-fit h-fit rounded-lg'>
         <div className='right w-fit lg:w-80 xl:w-96 space-y-2'>
 
                     {/* What's Happening */}

@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import { X, Ban, AlertTriangle, EyeOff, Copy } from "lucide-react";
 
 interface dropdownProp {
   setNumber?: () => void;
@@ -12,13 +12,19 @@ export default function trendcancelpop({ setNumber }: dropdownProp) {
         onClick={() => {setNumber}}
         className="w-full text-left px-4 py-2 cursor-pointer rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 rounded-t-lg"
       >
-    <span>🤷 content is not relevant</span>
+    <div className="flex items-center gap-2">
+      <X size={16} />
+      <span>content is not relevant</span>
+    </div>
       </button>
       <button
         onClick={() => {setNumber}}
         className="w-full text-left px-4 py-2 cursor-pointer rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
       >
-    <span>🚫 This trend is spam</span>
+    <div className="flex items-center gap-2">
+      <Ban size={16} />
+      <span>This trend is spam</span>
+    </div>
       </button>
       <button
         onClick={() => {
@@ -26,31 +32,46 @@ export default function trendcancelpop({ setNumber }: dropdownProp) {
         }}
         className="w-full text-left px-4 py-2 cursor-pointer rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
       >
-    <span>⚠️ This trend is abusive OR harmful</span>
+    <div className="flex items-center gap-2">
+      <AlertTriangle size={16} />
+      <span>This trend is abusive OR harmful</span>
+    </div>
       </button>
       <button
         onClick={() => {setNumber}}
         className="w-full text-left px-4 py-2 cursor-pointer rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
       >
-<span>😴 Not interested in this</span>
+    <div className="flex items-center gap-2">
+      <EyeOff size={16} />
+      <span>Not interested in this</span>
+    </div>
       </button>
       <button
         onClick={() => {setNumber}}
         className="w-full text-left px-4 py-2 cursor-pointer rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
       >
-        <span>🔄 This trend is a duplicate</span>
+        <div className="flex items-center gap-2">
+          <Copy size={16} />
+          <span>This trend is a duplicate</span>
+        </div>
       </button>
       <button
         onClick={() => {setNumber}}
         className="w-full text-left px-4 py-2 cursor-pointer rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
       >
-    <span>🚫 This trend is spammy</span>
+    <div className="flex items-center gap-2">
+      <Ban size={16} />
+      <span>This trend is spammy</span>
+    </div>
       </button>
       <button
         onClick={() => {setNumber}}
         className="w-full text-left px-4 py-2 cursor-pointer rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 rounded-b-lg"
       >
-    <span>🚫 Don't want to see this ad</span>
+    <div className="flex items-center gap-2">
+      <EyeOff size={16} />
+      <span>Don't want to see this ad</span>
+    </div>
       </button>
     </div>
   );

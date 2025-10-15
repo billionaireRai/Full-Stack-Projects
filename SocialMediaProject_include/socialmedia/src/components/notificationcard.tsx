@@ -1,6 +1,9 @@
 
 import { HeartIcon, MoreHorizontalIcon, ReplyIcon, Trash2Icon } from 'lucide-react';
 import React, { useState , useEffect , useRef} from 'react';
+import Notificationreply from './notificationreply';
+import DeleteModal from './deletemodal';
+import toast from 'react-hot-toast';
 
 export type NotificationType = 'follow' | 'like' | 'comment' | 'mention' | 'repost';
 
@@ -46,6 +49,8 @@ function timeAgo(timestamp: string) {
 
 export default function NotificationCard({ notification,onFollowToggle,onRemove }: NotificationCardProps) {
   const [isFollowing, setIsFollowing] = useState(notification.isFollowing || false);
+  const [replyModal, setreplyModal] = useState(false) ;
+  const [deletePop, setdeletePop] = useState(false);
   const [openDD, setopenDD] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -79,6 +84,7 @@ export default function NotificationCard({ notification,onFollowToggle,onRemove 
     }, []);
 
   return (
+    <>
     <div className="flex flex-col md:flex-row md:items-center md:justify-between dark:shadow-gray-900 bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md cursor-pointer p-4 md:p-5 mb-3 font-poppins">
       <div className="flex items-center space-x-3 md:space-x-4 flex-1">
         <img
@@ -94,11 +100,11 @@ export default function NotificationCard({ notification,onFollowToggle,onRemove 
             <span className="text-gray-400 dark:text-gray-500 hidden sm:inline">·</span>
             <span className="text-gray-400 dark:text-gray-500 text-xs truncate">{timeAgo(timestamp)}</span>
           </div>
-          <div className="text-yellow-500 dark:text-gray-300 font-semibold md:text-base break-words">
+          <div className="text-yellow-500 dark:text-blue-600 font-semibold md:text-base break-words">
             {type === 'follow' && <span className='text-xs'>Started Following you</span>}
             {type === 'like' && <span className='text-xs'>Liked your post</span>}
-            {type === 'comment' && <span className='text-xs'>Commented: "{commentText}"</span>}
-            {type === 'mention' && <span className='text-xs'>Mentioned you in a post</span>}
+            {type === 'comment' && <span className='text-xs'>Commented : "{commentText}"</span>}
+            {type === 'mention' && <span className='text-xs'>Mentioned you in a post . @{'amritansh_coder'}</span>}
             {type === 'repost' && <span className='text-xs'>Reposted your post</span>}
           </div>
         </div>
@@ -124,36 +130,35 @@ export default function NotificationCard({ notification,onFollowToggle,onRemove 
           <img
             src={post.thumbnailUrl}
             alt="Post thumbnail"
-            className="w-4 h-4 rounded-lg object-cover cursor-pointer flex-shrink-0"
+            className="w-4 h-4 dark:invert rounded-lg object-cover cursor-pointer flex-shrink-0"
             onClick={() => {
               window.location.href = `/username/post/${post.id}`;
             }}
           />
         )}
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <div
-            ref={dropdownRef}
-            onClick={() => { setopenDD(!openDD) }}
+            onClick={(e) => { e.stopPropagation(); setopenDD(!openDD); }}
             className='hover:bg-gray-100 dark:hover:bg-gray-950 p-1 rounded-full cursor-pointer'>
             <MoreHorizontalIcon width={15} height={15} />
           </div>
           { openDD && (
-            <div className="absolute flex flex-col gap-1 right-0 mt-2 w-53 p-2 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10">
+            <div className="absolute flex flex-col gap-1 right-0 mt-2 w-53 p-2 dark:shadow-gray-900 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-10">
               <button
-                onClick={() => { setopenDD(false); /* Add like action here */ }}
+                onClick={(e) => { e.stopPropagation(); setopenDD(false); toast.success('successfully liked notification !!') }}
                 className="flex flex-row items-center justify-between cursor-pointer gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 rounded-md"
               >
                 <span>Like Notification</span><HeartIcon width={20} height={20}/>
               </button>
               <button
-                onClick={() => { setopenDD(false); /* Add reply action here */ }}
+                onClick={(e) => { e.stopPropagation(); setreplyModal(true); setopenDD(false); }}
                 className="flex flex-row items-center justify-between cursor-pointer gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 rounded-md"
               >
                 <span>Reply Notification</span><ReplyIcon className='rotate-180' height={20} width={20}/>
               </button>
               <button
-                onClick={() => { setopenDD(false) ;}}
-                className="flex flex-row items-center justify-between cursor-pointer gap-2 w-full text-left px-4 py-2 text-sm text-red-500  hover:bg-red-100/50 dark:hover:bg-red-900 rounded-md transition-colors"
+                onClick={(e) => { e.stopPropagation(); setopenDD(false); setdeletePop(true) }}
+                className="flex flex-row items-center justify-between cursor-pointer gap-2 w-full text-left px-4 py-2 text-sm text-red-500  hover:bg-red-100/50 dark:hover:bg-red-950 rounded-md transition-colors"
               >
                 <span>Delete Notification</span><Trash2Icon width={20} height={20} className="text-red-500" />
               </button>
@@ -163,5 +168,12 @@ export default function NotificationCard({ notification,onFollowToggle,onRemove 
         </div>
       </div>
     </div>
+    { replyModal && (
+      <Notificationreply closeModal={() => { setreplyModal(false) }} notification={notification} />
+    )}
+    { deletePop && (
+      <DeleteModal closePopUp={() => { setdeletePop(false) }}/>
+    )}
+  </>
   );
 }

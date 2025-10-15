@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import useUnreadMessage from '@/app/states/unreadmessage';
+import useNotificationNum from '@/app/states/notificationsnum' 
 import useCreatePost from '@/app/states/createpost'
 import { usePathname } from 'next/navigation'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
@@ -26,6 +28,7 @@ import {
 
 export default function SideNavbar() {
   const { setCreatePop } = useCreatePost()
+  const { numOfNotification } = useNotificationNum() ;
   const [DotClick, setDotClick] = useState(false)
   const [isOpen, setIsOpen] = useState(true)
   const { data: session } = useSession()
@@ -157,13 +160,16 @@ export default function SideNavbar() {
                   href="/username/notifications"
                 >
                   <NavItem icon={<BellIcon className={`${pathname === '/username/notifications' ? 'fill-black dark:fill-white' : ''}`} />} label="Notifications" />
+                  { numOfNotification !== 0 && (
+                  <span className='px-2 rounded-full text-black dark:text-white bg-yellow-400 dark:bg-blue-500'>{numOfNotification}</span>
+                  )}
                 </Link>
                 <Link
                   className={`${
                     pathname === '/username/messages'
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                       : ''
-                  }`}
+                  } flex items-center gap-2`}
                   href="/username/messages"
                 >
                   <NavItem icon={<MessageCircleIcon className={`${pathname === '/username/messages' ? 'fill-black dark:fill-white' : ''}`} />} label="Messages" />
@@ -334,10 +340,14 @@ function NavItem({
   icon: React.ReactNode
   label: string
 }) {
+  const { unreadMessage } = useUnreadMessage() ; // getting the state...
   return (
-    <li className="flex items-center group dark:text-white gap-3 p-3 rounded-md text-black hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer transition-all">
+    <li className="flex items-center group w-full dark:text-white gap-3 p-3 rounded-md text-black hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer transition-all">
       <span className="w-5 h-5 group-hover:fill-black">{icon}</span>
       <span className="font-medium">{label}</span>
+       { unreadMessage !== 0 && label ==='Messages' && (
+          <span className='px-2 rounded-full text-black dark:text-white bg-yellow-400 dark:bg-blue-500'>{unreadMessage}</span>
+       )}
     </li>
   )
 }

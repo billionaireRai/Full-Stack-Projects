@@ -2,11 +2,12 @@
 import React, { useState , useEffect } from "react";
 import Image from "next/image";
 import useCreatePost from '@/app/states/createpost';
+import toast from "react-hot-toast";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontalIcon , UserPlusIcon , LucideGlobe} from 'lucide-react' ;
 import { TooltipContent, TooltipTrigger , Tooltip } from "./ui/tooltip";
-import toast from "react-hot-toast";
 
 export default function CreatePost() {
   const [post, setPost] = useState('');
@@ -64,7 +65,7 @@ export default function CreatePost() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex flex-row items-center justify-center gap-2">
-          <Image className="rounded-full w-13 h-13" src='/images/letter-B.png' width={40} height={40} alt="logo" />
+          <Link href='/username'><img className="rounded-full w-13 h-13" src='/images/myProfile.jpg' alt="profile-pic" /></Link>
           <div className="flex flex-row items-center justify-center sm:gap-3">
             <span className="text-gray-500 dark:text-gray-300 text-sm font-semibold truncate">@{Session?.user?.name || 'amritansh_coder'}</span>
             <span className="text-gray-400 px-1">·</span>

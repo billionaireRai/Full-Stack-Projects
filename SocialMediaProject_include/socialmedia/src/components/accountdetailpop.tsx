@@ -50,6 +50,7 @@ export default function AccountDetailPop({
           <Image
             src={user.cover}
             alt={`${user.name} cover`}
+            fill
             className="object-cover"
           />
         )}

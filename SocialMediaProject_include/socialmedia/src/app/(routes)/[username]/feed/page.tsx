@@ -4,16 +4,13 @@ import React , { useState , useEffect } from 'react';
 import Interestpage from '@/components/interestselection';
 import PostCard from '@/components/postcard';
 import Activebeep from '@/components/activebeep';
-import CreatePost from '@/components/createpost';
 import Trendcancelpop from '@/components/trendcancelpop';
-import useCreatePost from '@/app/states/createpost';
 import Interest from '@/components/interestpop';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Flame, TrendingUp, Gamepad2, Briefcase , MoreHorizontalIcon} from 'lucide-react';
 
 export default function feed() {
-    const { isCreatePop } = useCreatePost() ;
     const [hpninPopUp, sethpninPopUp] = useState<number>() ;
     // const [showInterest, setshowInterest] = useState(false) ;
     // const [Start, setStart] = useState(false)
@@ -285,9 +282,7 @@ export default function feed() {
                         <PostCard />
                     </div>
                 </div>
-             { isCreatePop && (
-                <CreatePost />
-              )}
+
             </div>
         </div>
 

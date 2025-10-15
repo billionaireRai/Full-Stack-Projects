@@ -3,11 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import useSound from 'use-sound';
 import { User, Mail, Lock , AtSign} from "lucide-react"; // lightweight icons
 
 export default function SignUp() {
-  const [ play ] = useSound('/audio/notification.mp3');
   return (
     <div className="w-full h-screen flex flex-col-reverse md:flex-row font-poppins overflow-y-scroll p-4 bg-gradient-to-r from-white to-gray-100 dark:bg-black dark:bg-none">
       {/* Left Section - Form */}
@@ -80,7 +78,6 @@ export default function SignUp() {
           </div>
 
           <button
-            onClick={() => { play()}}
             type="button"
             className="w-full cursor-pointer border-none py-3 my-3 rounded-lg bg-yellow-300 hover:bg-yellow-300 transition-all duration-300 font-semibold text-gray-900 shadow-yellow-400 hover:shadow-sm active:bg-yellow-400 dark:bg-blue-700 dark:hover:bg-blue-800
             dark:active:bg-blue-700 dark:shadow-lg dark:shadow-blue-800/50 dark:text-white"
