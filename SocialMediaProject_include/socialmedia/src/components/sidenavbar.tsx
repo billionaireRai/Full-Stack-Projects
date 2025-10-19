@@ -24,6 +24,7 @@ import {
   LogOutIcon,
   Sun,
   Moon,
+  LayoutDashboard,
 } from 'lucide-react'
 
 export default function SideNavbar() {
@@ -130,7 +131,7 @@ export default function SideNavbar() {
         </div>
             {/* Nav Links */}
             <nav className="flex-1">
-              <ul className="flex flex-col space-y-1">
+              <ul className="flex flex-col">
                 <Link
                   className={`${
                     pathname === '/username/feed'
@@ -193,6 +194,16 @@ export default function SideNavbar() {
                   href="/username"
                 >
                   <NavItem icon={<UserIcon className={`${pathname === '/username' ? 'fill-black dark:fill-white' : ''}`} />} label="Profile" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === '/username/user-analytics'
+                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      : ''
+                  }`}
+                  href="/username/user-analytics"
+                >
+                  <NavItem icon={<LayoutDashboard className={`${pathname === '/username/user-analytics' ? 'fill-black dark:fill-white' : ''}`} />} label="Dashboard" />
                 </Link>
                 <Link
                   className={`${

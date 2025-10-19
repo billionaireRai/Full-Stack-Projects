@@ -4,6 +4,7 @@ import React, { useState , useEffect } from 'react';
 import Image from 'next/image';
 import { X, Smile, ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 interface CommentCardInfo {
   avatar?:string ,
@@ -55,7 +56,7 @@ export default function Commentpopcard({avatar , username, handle, timestamp , c
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Reply</h2>
-          <button onClick={() => handleClose?.()} className="cursor-pointer p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <button onClick={() => handleClose?.()} className="cursor-pointer p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors">
             <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
@@ -108,12 +109,26 @@ export default function Commentpopcard({avatar , username, handle, timestamp , c
               />
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center gap-2">
-                  <button className="p-2 rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors">
-                    <Image src='/images/smile.png' height={20} width={20} alt='emoji'/>
-                  </button>
-                  <button className="p-2 rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors">
-                    <Image className='dark:invert' src='/images/location.png' height={20} width={20} alt='location' />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="p-2 rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors">
+                        <Image src='/images/smile.png' height={20} width={20} alt='emoji'/>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Emoji
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="p-2 rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors">
+                        <Image className='dark:invert' src='/images/location.png' height={20} width={20} alt='location' />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Location
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`text-sm ${replyText.length > maxChars * 0.9 ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>

@@ -39,7 +39,7 @@ export default function AccountDetailPop({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.18 }}
-      className="fixed z-50 w-fit p-3 rounded-2xl border border-gray-200 dark:shadow-gray-700 dark:border-gray-800 bg-white dark:bg-black shadow-md overflow-hidden"
+      className="fixed z-50 w-1/4 p-3 rounded-2xl border border-gray-200 dark:shadow-gray-700 dark:border-gray-800 bg-white dark:bg-black shadow-md overflow-hidden"
       style={{ top: position.top, left: position.left }}
       onMouseEnter={onOpen}
       onMouseLeave={onClose}

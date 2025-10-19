@@ -277,7 +277,7 @@ export default function feed() {
                 </div>
                 {/* Main Feed Area - Left Side */}
                 <div className='left flex-1 h-fit bg-white dark:bg-black rounded-xl'>
-                    <div className=''>
+                    <div className='py-2 px-1 flex flex-col'>
                         <PostCard />
                         <PostCard />
                     </div>

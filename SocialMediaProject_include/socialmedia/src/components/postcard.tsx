@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, ReactHTMLElement, ReactElement } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MoreVerticalIcon, Trash2, Edit3, Pin, Star, List, MessageCircle, BarChart3, Code, TrendingUp, FileText, Share2, Mail, Link as LinkIcon, X , SendHorizontalIcon} from 'lucide-react';
+import { MoreVerticalIcon, Trash2, Edit3, Pin, Star, List, MessageCircle, BarChart3, Code, TrendingUp, FileText, Share2, Mail, Link as LinkIcon, X , SendHorizontalIcon, Heart, Repeat, Eye, Bookmark} from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import Commentpopcard from './Commentpopcard';
 import AccountDetailPop from './accountdetailpop';
@@ -23,6 +23,15 @@ interface PostCardProps {
   shares?: number;
   views?: number;
   bookmarked?: number;
+  hashTags?: string[];
+  mentions?: string[];
+  showActions?:boolean
+}
+
+interface actionType {
+  icon:ReactElement ,
+  label:string ,
+  value:number
 }
 
 export default function PostCard({
@@ -37,16 +46,19 @@ export default function PostCard({
   replies = 0,
   shares = 0,
   views = 0,
-  bookmarked = 0
+  bookmarked = 0,
+  hashTags = [],
+  mentions = [],
+  showActions = true
 }: PostCardProps) {
   const displayMedia = media || [];
 
-  const [postOptions, setPostOptions] = useState(false);
-  const [showAccountPopup, setShowAccountPopup] = useState(false);
-  const [viewPop, setviewPop] = useState(false) ;
-  const [CommentCardPop, setCommentCardPop] = useState(false) ;
-  const [shareCardPop, setshareCardPop] = useState(false) ;
-  const [ShareDropDown, setShareDropDown] = useState(false);
+  const [postOptions, setPostOptions] = useState<boolean>(false);
+  const [showAccountPopup, setShowAccountPopup] = useState<boolean>(false);
+  const [viewPop, setviewPop] = useState<boolean>(false) ;
+  const [CommentCardPop, setCommentCardPop] = useState<boolean>(false) ;
+  const [shareCardPop, setshareCardPop] = useState<boolean>(false) ;
+  const [ShareDropDown, setShareDropDown] = useState<boolean>(false);
   const [popupPosition, setPopupPosition] = useState({ top: 0 , left: 0 });
   const [sharePosition, setSharePosition] = useState({ top: 0, left: 0 });
   const avatarRef = useRef<HTMLImageElement>(null);
@@ -63,15 +75,86 @@ export default function PostCard({
       { label: "View analytics", icon: <TrendingUp className="w-4 h-4" /> },
       { label: "Request Community Note", icon: <FileText className="w-4 h-4" /> }
   ])
-  const [actions, setactions] = useState([
-      { icon: '/images/comment.png', label: "Comment", value: replies },
-      { icon: '/images/repost.png', label: "Repost", value: retweets },
-      { icon: '/images/like.png', label: "Like", value: likes },
-      { icon: '/images/view.png', label: "Views", value: views },
-      { icon: '/images/bookmark.png', label: "Bookmark", value: bookmarked },
-      { icon: '/images/share.png', label: "Share", value: shares }
-  ])
+
+  // states related to actions of each post...
+  const [isLiked, setIsLiked] = useState(false);
+  const [localLikes, setLocalLikes] = useState<number>(likes);
+  const [isCommented, setIsCommented] = useState(false);
+  const [localComments, setLocalComments] = useState<number>(replies);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [localBookmarks, setLocalBookmarks] = useState<number>(bookmarked);
+  const [isShared, setIsShared] = useState(false);
+  const [localShares, setLocalShares] = useState<number>(shares);
+
+  const actions = [
+      { icon: <MessageCircle className={`w-5 h-5 ${isCommented ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''}`} />, label: "Comment", value: replies },
+      { icon: <Repeat className="w-5 h-5" />, label: "Repost", value: retweets },
+      { icon: <Heart className={`w-5 h-5 ${isLiked ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''}`} />, label: "Like", value: localLikes },
+      { icon: <Eye className="w-5 h-5" />, label: "Views", value: views },
+      { icon: <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''}`} />, label: "Bookmark", value: bookmarked },
+      { icon: <Share2 className={`w-5 h-5 ${isShared ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''}`} />, label: "Share", value: shares }
+  ]
   const generalImage = '/images/broken-laptop.jpg';
+
+  // Function to parse content and make hashtags and mentions clickable...
+  function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactElement[] {
+    let combinedArray: ReactElement[] = [] ;
+    // looping through hashtag array...
+    hashTags.forEach((eachHash) => {
+      combinedArray.push(
+        <Link
+          key={`hash-${eachHash}`}
+          href={`/explore?q=${encodeURIComponent('#'.concat(eachHash))}&utm_source=post-click`}
+          className="dark:text-blue-500 dark:hover:text-blue-700 text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+        >
+          #{eachHash}
+        </Link>
+      )
+    });
+    // looping through mentions array...
+    mentions.forEach((eachMention) => {
+      combinedArray.push(
+        <Link
+          key={`mention-${eachMention}`}
+          href={`/@${eachMention}`}
+          className="dark:text-blue-500 dark:hover:text-blue-700 text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+        >
+          @{eachMention}
+        </Link>
+      )
+    });
+
+    return combinedArray;
+  }
+
+  // function handling action click...
+  const actionClick = (action : actionType) => { 
+    if (action.label === 'Comment') setCommentCardPop(true)  ; // after successfull commmenting , will edit comment ui...
+      else if (action.label === 'Like') {
+        setIsLiked(!isLiked);
+        setLocalLikes(isLiked ? localLikes - 1 : localLikes + 1);
+      }
+      else if (action.label === 'Bookmark') {
+        setIsBookmarked(!isBookmarked);
+        setLocalBookmarks(isBookmarked ? localBookmarks - 1 : localBookmarks + 1);
+      }
+      else if (action.label === 'Views') setviewPop(true) ;
+      else if (action.label === 'Share') { // same with share as well...
+         if (shareRef.current) {
+           const rect = shareRef.current.getBoundingClientRect();
+           const dropdownWidth = 200; // approximate width...
+           let left = rect.left + window.scrollX;
+           if (left + dropdownWidth > window.innerWidth) {
+             left = rect.right + window.scrollX - dropdownWidth;
+           }
+           setSharePosition({
+             top: rect.bottom + window.scrollY + 5,
+             left: left
+           });
+         }
+         setShareDropDown(true);
+      }
+   }
 
   // handle avatar hover logic...
   const handleAvatarHover = () => {
@@ -128,15 +211,15 @@ export default function PostCard({
   }, [ShareDropDown])
 
   return (
-    <div className="bg-white cursor-pointer dark:bg-black shadow-md hover:shadow-gray-400 dark:hover:shadow-gray-800 dark:border-0 dark:border-b dark:border-gray-800 rounded-2xl my-4 p-4 sm:p-6 transition-all duration-300 border border-gray-100">
-      <div className="flex items-start gap-4">
+    <div className={`bg-white cursor-pointer dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl transition-all duration-300 border border-gray-100 ${!showActions ? ' shadow-none m-0 p-2 cursor-none' : 'my-3 sm:p-4'}`}>
+      <div className="flex items-start gap-3">
         {/* Avatar */}
         <Link href='/username'>
         <img
           ref={avatarRef}
           src={avatar}
           alt={`${username}'s avatar`}
-          className="w-12 h-12 border-none sm:w-14 sm:h-14 rounded-full object-cover border border-gray-200 dark:border-gray-600 cursor-pointer"
+          className={`${!showActions ? 'w-10 h-10' : 'w-12 h-12 sm:w-14 sm:h-14'} border-none rounded-full object-cover border border-gray-200 dark:border-gray-600 cursor-pointer`}
           onMouseEnter={handleAvatarHover}
           onMouseLeave={handleAvatarLeave}
         />
@@ -146,26 +229,26 @@ export default function PostCard({
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="relative flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="font-semibold text-gray-900 dark:text-gray-100 text-base sm:text-lg truncate">
+            <span className={`font-semibold text-gray-900 dark:text-gray-100 text-base ${!showActions ? 'text-sm' : 'sm:text-md'} truncate`}>
               {username}
             </span>
             <span><Image src='/svg/blue-tick.svg'  width={20} height={20} alt='verified'/></span>
-            <span className="text-gray-500 dark:text-gray-400 text-sm sm:text-base truncate">
+            <span className={`text-gray-500 dark:text-gray-400 ${!showActions ? 'text-xs' : 'sm:text-md'} sm:text-base truncate`}>
               @{handle}
             </span>
             <span className="text-gray-400">·</span>
-            <span className="text-gray-500 dark:text-gray-400 text-sm truncate">
+            <span className={`text-gray-500 dark:text-gray-400 ${!showActions ? 'text-xs' : 'text-sm'} truncate`}>
               {timestamp}
             </span>
 
             {/* Options */}
+          { showActions && 
             <Tooltip>
               <TooltipTrigger asChild>
             <button
               onClick={() => setPostOptions(!postOptions)}
               className={`ml-auto rounded-full p-1.5 cursor-pointer transition-colors ${postOptions ? 'bg-gray-100 dark:bg-gray-950' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}
             >
-
               <MoreVerticalIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
             </TooltipTrigger>
@@ -173,9 +256,10 @@ export default function PostCard({
               More
             </TooltipContent>
             </Tooltip>
+          }
 
             {postOptions && (
-              <div className="dropdown-container animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 shadow-xl border border-gray-200 dark:border-gray-700 rounded-xl z-50 overflow-hidden">
+              <div className="dropdown-container animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
                 {popUpControl.map((item, i) => (
                   <button
                     key={i}
@@ -193,13 +277,13 @@ export default function PostCard({
           </div>
 
           {/* Content */}
-          <div className="mt-3 text-gray-900 dark:text-gray-100 text-md sm:text-sm leading-relaxed">
-            {content}
+          <div className={`mt-2 text-gray-900 dark:text-gray-100 ${!showActions ? 'text-xs' : 'text-md sm:text-sm'} leading-relaxed`}>
+            <div>{content}</div><div>{parseHashAndMentions(hashTags, mentions)}</div>
           </div>
 
           {/* Media */}
           {displayMedia.length > 0 && (
-            <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div className="mt-2 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
               {displayMedia.length === 1 ? (
                 <img
                   src={displayMedia[0]}
@@ -222,34 +306,16 @@ export default function PostCard({
           )}
 
           {/* Actions */}
-          <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-            {actions.map((action, i) => (
+          <div className={`flex justify-between items-center mt-3 pt-2 ${!showActions ? "border-none" : ''} border-t border-gray-100 dark:border-gray-700`}>
+            {showActions && actions.map((action, i) => (
               <Tooltip key={i}>
                 <TooltipTrigger asChild>
                   <button
                   ref={action.label === 'Share' ? shareRef : null}
-                  onClick={() => {
-                    if (action.label === 'Comment') setCommentCardPop(true)  ;
-                    else if (action.label === 'Views') setviewPop(true) ;
-                    else if (action.label === 'Share') {
-                      if (shareRef.current) {
-                        const rect = shareRef.current.getBoundingClientRect();
-                        const dropdownWidth = 200; // approximate width...
-                        let left = rect.left + window.scrollX;
-                        if (left + dropdownWidth > window.innerWidth) {
-                          left = rect.right + window.scrollX - dropdownWidth;
-                        }
-                        setSharePosition({
-                          top: rect.bottom + window.scrollY + 5,
-                          left: left
-                        });
-                      }
-                      setShareDropDown(true);
-                    }
-                  }}
-                  className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg text-gray-500 dark:text-white hover:text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-950 transition-all text-sm cursor-pointer">
-                    <Image className='dark:invert' src={action.icon} width={18} height={18} alt={action.label} />
-                    <span className="hidden sm:inline">{action.value}</span>
+                  onClick={() => { actionClick(action) }}
+                  className="flex items-center group py-1.5 sm:py-1 sm:px-3 rounded-lg text-gray-500 dark:text-white hover:text-yellow-500 dark:hover:text-blue-500 transition-all text-sm cursor-pointer">
+                    <span className='p-2 rounded-full group-hover:bg-yellow-100 dark:group-hover:bg-gray-950'>{action.icon}</span>
+                    <span className={`hidden sm:inline ${(action.label === 'Like' && isLiked) || (action.label === 'Comment' && isCommented) || (action.label === 'Bookmark' && isBookmarked) || (action.label === 'share' && isShared) ? 'text-yellow-500 dark:text-blue-500' : ''}`}>{action.value}</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
