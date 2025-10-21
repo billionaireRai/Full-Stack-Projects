@@ -1,19 +1,22 @@
 'use client'
 
 import React,{ useState } from 'react'
-import { userInfoType } from '@/app/(routes)/[username]/page'
-import { useForm } from 'react-hook-form';
 import Link from 'next/link'
+import { useForm } from 'react-hook-form';
+import { userInfoType } from '@/app/(routes)/[username]/page'
+import { useRouter } from 'next/navigation';
 import { Edit2Icon, X } from 'lucide-react'
+import toast from 'react-hot-toast';
 
 interface EditorProps {
   closePop: () => void ,
-  updateCredentials:(newCredentials: userInfoType) => void,
   credentials?:userInfoType,
 }
 
-export default function ProfileEditor({ closePop , credentials , updateCredentials }: EditorProps) {
-  const [formData, setFormData] = useState<userInfoType>(credentials || {
+export default function ProfileEditor({ closePop , credentials }: EditorProps) {
+  const router = useRouter() ; // initializing useRouter...
+  const editorForm = useForm() ; // initializing react-hook-form...
+  const [formInfo, setformInfo] = useState<userInfoType>(credentials || {
     name: '',
     username: '',
     bio: '',
@@ -26,17 +29,20 @@ export default function ProfileEditor({ closePop , credentials , updateCredentia
     isVerified: false,
     coverImage: '',
     avatar: ''
-  });
+  })
 
-  const handleInputChange = (key: keyof userInfoType, value: string) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+  // funtion containing submittion logic...
+  const formSubmittion = () => {
+
+    toast.success('Profile updated successfully !!');
+    closePop?.()  // closing the editor popup...
+    router.refresh() ; // refreshing the current page...
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateCredentials(formData);
-    closePop();
-  };
+  // function for handling input changes...
+  const handleInputChange = (field:keyof userInfoType,value:string) => {
+    setformInfo(prev => ({ ...prev, [field]: value }))
+  }
 
   const inputs = [
     { label: 'Name', type: 'text', placeholder: 'Enter your name', key: 'name' },
@@ -47,7 +53,7 @@ export default function ProfileEditor({ closePop , credentials , updateCredentia
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200 p-3 sm:p-4">
-      <div className="bg-card text-card-foreground dark:bg-black rounded-lg shadow-2xl w-11/12 sm:w-3/4 lg:w-1/2 p-5 border border-border max-h-[90vh] overflow-y-auto">
+      <div className="bg-card text-card-foreground dark:bg-black rounded-lg shadow-2xl w-11/12 sm:w-3/4 lg:w-1/2 p-5 border border-border max-h-[95vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="text-xl flex items-center justify-center gap-2 font-semibold"><Edit2Icon/><span>Edit Profile</span></div>
@@ -60,12 +66,14 @@ export default function ProfileEditor({ closePop , credentials , updateCredentia
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={editorForm.handleSubmit(formSubmittion)} className="space-y-5">
           {/* Profile Picture */}
           <div className='flex items-center'>
             <div className="flex items-center gap-4">
               <div className="w-25 h-25 rounded-full overflow-hidden border-none shadow-lg hover:shadow-xl dark:shadow-gray-950 transition-shadow duration-300 cursor-pointer">
-                <Link href={"https://res.cloudinary.com/demo/image/upload/v1698765432/images/sample-img.png"}><img src="/images/myProfile.jpg" alt="Profile" className="w-full h-full object-cover" /></Link>
+                <Link href={"https://res.cloudinary.com/demo/image/upload/v1698765432/images/sample-img.png"}>
+                  <img src={formInfo.avatar} className="w-full h-full object-cover" alt="Profile-pic" />
+                </Link>
               </div>
               <button
                 type="button"
@@ -83,9 +91,9 @@ export default function ProfileEditor({ closePop , credentials , updateCredentia
               <input
                 type={field.type}
                 placeholder={field.placeholder}
-                value={formData[field.key as keyof userInfoType] as string}
+                value={formInfo[field.key as keyof userInfoType] || ''}
                 onChange={(e) => handleInputChange(field.key as keyof userInfoType, e.target.value)}
-                className="w-full p-2.5 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 text-sm"
+                className="w-full p-2.5 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 text-sm"
               />
             </div>
           ))}
@@ -96,7 +104,7 @@ export default function ProfileEditor({ closePop , credentials , updateCredentia
             <textarea
               rows={3}
               placeholder="Tell us about yourself..."
-              value={formData.bio}
+              value={formInfo.bio || ''}
               onChange={(e) => handleInputChange('bio', e.target.value)}
               className="w-full p-2.5 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
             />

@@ -2,11 +2,14 @@
 
 import React, { useState , useEffect } from 'react';
 import Trendcancelpop from '@/components/trendcancelpop';
+import ReportPop from '@/components/reportPop';
+import BlockUser from '@/components/blockUser';
 import Link from 'next/link';
 import Image from 'next/image';
 import PostCard from '@/components/postcard';
 import ProfileEditor from '@/components/profileeditor';
-import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText, Download } from 'lucide-react';
+import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 // definging the type for user information...
 export interface userInfoType {
@@ -80,6 +83,10 @@ export default function UserProfilePage() {
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
+  const [OpenReportPop, setOpenReportPop] = useState<boolean>(false)
+  const [showBlockPop, setshowBlockPop] = useState<Boolean>(false)
+  const [IsBlocked, setIsBlocked] = useState<boolean>(false);
+
   const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
   
   // random user data
@@ -88,7 +95,7 @@ export default function UserProfilePage() {
     username: "johndoe",
     bio: "Digital creator • Photography enthusiast • Coffee lover • Building amazing things one line of code at a time",
     location: "San Francisco, CA",
-    website: "johndoe-portfolio.com",
+    website: "https://www.johndoe-portfolio.com",
     joinDate: "Joined March 2012",
     following: '542',
     followers: '187k',
@@ -109,7 +116,7 @@ export default function UserProfilePage() {
   const [activeTab, setActiveTab] = useState<tabsTypes>({id:'all',label:'All'}); // current active tab state...
 
   // random post data of UI checking...
-  let posts = [
+  const posts = [
     {
       id: "1",
       content: "Just launched my new portfolio website! Built with Next.js and Tailwind CSS. The developer experience is amazing! 🚀",
@@ -144,7 +151,7 @@ export default function UserProfilePage() {
     }
   ];
 
-   let repliedPostData = [
+   const repliedPostData: RepliedPostsType[] = [
     {
       id: "3",
       postId: '4223',
@@ -168,6 +175,78 @@ export default function UserProfilePage() {
       likes: 289,
       views: 500,
       bookmarks: 20
+    },
+    {
+      id: "4",
+      postId: '4224',
+      postAuthorInfo: {
+        name: "Saket Ghokhale",
+        username: "saketghokhale",
+        followers:'150k',
+        following:'180',
+        isVerified: false,
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        content: "Excited to share my latest blog post on React performance optimization techniques!",
+        postedAt: "1d ago"
+      },
+      commentedText: "Great insights! I've been implementing similar optimizations in my projects.",
+      mediaUrls: ["https://picsum.photos/400/300?random=20"],
+      mentions:['amritansh_coder','ezsnippet'],
+      hashTags:['React','Performance'],
+      repliedAt: "1d ago",
+      comments: 15,
+      reposts: 23,
+      likes: 89,
+      views: 320,
+      bookmarks: 5
+    },
+    {
+      id: "5",
+      postId: '4225',
+      postAuthorInfo: {
+        name: "Vedant Choudhary",
+        username: "vedantchoudhary",
+        followers:'89.2k',
+        following:'95',
+        isVerified: true,
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        content: "Just finished a 10k run! 🏃‍♂️ Feeling accomplished and ready for the next challenge.",
+        postedAt: "5h ago"
+      },
+      commentedText: "Congrats! That's impressive. What's your training routine like?",
+      mediaUrls: [],
+      mentions:['fitnessguru','runningclub'],
+      hashTags:['Running','Fitness'],
+      repliedAt: "4h ago",
+      comments: 8,
+      reposts: 12,
+      likes: 67,
+      views: 250,
+      bookmarks: 3
+    },
+    {
+      id: "6",
+      postId: '4226',
+      postAuthorInfo: {
+        name: "Not So Fit",
+        username: "notsofit",
+        followers:'45.8k',
+        following:'120',
+        isVerified: false,
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+        content: "Exploring the world of machine learning. Just built my first neural network model!",
+        postedAt: "2d ago"
+      },
+      commentedText: "Awesome! Which framework did you use? TensorFlow or PyTorch?",
+      mediaUrls: ["https://picsum.photos/400/300?random=21", "https://picsum.photos/400/300?random=22"],
+      mentions:['ml_expert','data_science'],
+      hashTags:['MachineLearning','AI'],
+      repliedAt: "2d ago",
+      comments: 22,
+      reposts: 18,
+      likes: 145,
+      views: 680,
+      bookmarks: 15
     }
   ]
 
@@ -297,6 +376,15 @@ export default function UserProfilePage() {
     }
   }, [showProfileOptions])
 
+  // funtion for profile link copy...
+  const handleProfileLinkCopy = () => {
+    navigator.clipboard.writeText(`http://localhost:3000/@${UserInfo.username}`)
+    .then(() => { 
+      console.log('profile url copied');
+      toast.success('Profile URL is copied...');
+     })
+  }
+
   return (
     <div className='h-fit flex flex-col md:ml-72 font-poppins rounded-md p-2 dark:bg-black'>
         <div className='flex gap-2'>
@@ -358,28 +446,37 @@ export default function UserProfilePage() {
                           <li className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                             <span>Share Profile</span><Share2Icon size={15} />
                           </li>
-                          <li className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                          <li 
+                          onClick={() => { handleProfileLinkCopy() }}
+                          className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                            <span>Copy Link</span><CopyIcon size={15}/>
                           </li>
-                          <li className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                            <span>Block User</span><BanIcon size={15}/>
+                          <li 
+                          onClick={() => { setshowBlockPop(true) }}
+                          className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors ${IsBlocked ? 'dark:bg-red-950/50 bg-red-100 text-red-500' : ''}`}>
+                            <span>{IsBlocked ? 'UnBlock' : 'Block User'}</span><BanIcon size={15}/>
                           </li>
-                          <li className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
+                          <li 
+                          onClick={() => { setOpenReportPop(true) }}
+                          className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
                             <span>Report User</span><Flag size={15} />
                           </li>
                         </ul>
                       </div>
                     )}
                   </button>
-                  <button 
+                  <button
+                    disabled={IsBlocked}
                     onClick={() => setIsFollowing(!isFollowing)}
-                    className={`px-4 py-2 rounded-full font-bold text-sm cursor-pointer transition-colors ${
-                      isFollowing 
-                        ? 'bg-transparent border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-yellow-100 dark:hover:bg-gray-950 hover:text-yellow-400 dark:hover:text-blue-700' 
-                        : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'
+                    className={`px-4 py-2 rounded-full font-bold text-sm transition-colors ${
+                      IsBlocked
+                        ? 'border border-red-600 bg-red-200 dark:bg-gray-950 text-red-600 dark:text-red-700 cursor-not-allowed'
+                        : isFollowing
+                          ? 'bg-transparent border border-gray-300 dark:border-gray-700 text-black dark:text-white hover:bg-yellow-100 dark:hover:bg-gray-950 hover:text-yellow-400 dark:hover:text-blue-700 cursor-pointer'
+                          : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 cursor-pointer'
                     }`}
                   >
-                    {isFollowing ? 'Following' : 'Follow'}
+                    {IsBlocked ? 'Blocked' : isFollowing ? 'Following' : 'Follow' }
                   </button>
                 </div>
 
@@ -402,15 +499,16 @@ export default function UserProfilePage() {
                   <p className="text-sm">{UserInfo.bio}</p>
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    <div className="flex items-center space-x-1">
+                    <Link href={`https://www.google.com/maps?q=37.7749,-122.4194`}  // lat,lng
+                    className="flex items-center space-x-1 py-1 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
                       <MapPin className="w-4 h-4 stroke-black dark:stroke-white" />
                       <span>{UserInfo.location}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
+                    </Link>
+                    <div className="flex items-center space-x-1 py-1 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
                       <LinkIcon className="w-4 h-4 stroke-black dark:stroke-white" />
-                      <Link href={`https://www.${UserInfo.website}?utm_source=briezly-profile-page`} className="text-blue-500 hover:underline">{UserInfo.website}</Link>
+                      <Link href={`${UserInfo.website}?utm_source=briezly-profile-page`} className="text-blue-500 hover:underline">{UserInfo.website}</Link>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 py-1 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
                       <Calendar className="w-4 h-4 stroke-black dark:stroke-white" />
                       <span>{UserInfo.joinDate}</span>
                     </div>
@@ -804,7 +902,13 @@ export default function UserProfilePage() {
           </div>
         </div>
       { OpenProfileEditor && (
-        <ProfileEditor updateCredentials={setUserInfo} credentials={UserInfo} closePop={() => { setOpenProfileEditor(false) }}/>
+        <ProfileEditor credentials={UserInfo} closePop={() => { setOpenProfileEditor(false) }}/>
+      )}
+      { OpenReportPop && (
+        <ReportPop closeReportModal={() => { setOpenReportPop(false) }} username={UserInfo.username} />
+      )}
+      { showBlockPop && (
+        <BlockUser closeBlockPop={() => { setshowBlockPop(false) }} username={UserInfo.username} updateblockState={() => { setIsBlocked(true) }} />
       )}
     </div>
   );
