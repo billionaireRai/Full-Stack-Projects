@@ -274,7 +274,7 @@ export default function SideNavbar() {
                   <span className="flex items-center font-medium text-gray-900 dark:text-gray-100 gap-1">
                     AMRITANSH RAI
                     <Image
-                      src="/svg/blue-tick.svg"
+                      src="/images/yellow-tick.png"
                       width={18}
                       height={18}
                       alt="blue-tick"

@@ -3,6 +3,7 @@ import { HeartIcon, MoreHorizontalIcon, ReplyIcon, Trash2Icon } from 'lucide-rea
 import React, { useState , useEffect , useRef} from 'react';
 import Notificationreply from './notificationreply';
 import DeleteModal from './deletemodal';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 export type NotificationType = 'follow' | 'like' | 'comment' | 'mention' | 'repost';
@@ -97,7 +98,7 @@ export default function NotificationCard({ notification,onFollowToggle,onRemove 
             <p className="font-bold text-gray-900 dark:text-white truncate">{actor.name}</p>
             <span className="text-gray-400 dark:text-gray-500 hidden sm:inline">·</span>
             <span className="text-gray-400 dark:text-gray-500 truncate">@{actor.username}</span>
-            <span className="text-gray-400 dark:text-gray-500 hidden sm:inline">·</span>
+            <span><Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' /></span>
             <span className="text-gray-400 dark:text-gray-500 text-xs truncate">{timeAgo(timestamp)}</span>
           </div>
           <div className="text-yellow-500 dark:text-blue-600 font-semibold md:text-base break-words">

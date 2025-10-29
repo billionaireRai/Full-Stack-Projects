@@ -4,6 +4,7 @@ import React,{ useState , useEffect }from 'react'
 import Chatusercard from '@/components/chatusercard'
 import { useTheme } from 'next-themes'
 import useUnreadMessage from '@/app/states/unreadmessage'; 
+import Image from 'next/image';
 import AudioRecordModal from '@/components/audioRecordModal';
 import MessageCard from '@/components/messagecard';
 import Sharecontactonchat from '@/components/sharecontactonchat';
@@ -12,7 +13,7 @@ import { USER } from '@/components/adduserinchatlist'
 import useSound from 'use-sound' ;
 import EmojiPicker ,{ EmojiClickData } from 'emoji-picker-react';
 import { motion } from 'framer-motion';
-import { SearchIcon, PlusCircleIcon, MessageCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, UserX, Flag, Trash, Smile, Paperclip, Mic, Image, Video, File, Music, Square, Play, X, PhoneIcon, BarChart3 } from 'lucide-react'
+import { SearchIcon, PlusCircleIcon, MessageCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, UserX, Flag, Trash, Smile, Paperclip, Mic, Image as image, Video, File, Music, Square, Play, X, PhoneIcon, BarChart3 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import toast from 'react-hot-toast';
 
@@ -192,7 +193,7 @@ export default function Messages() {
     }
   ])
   const attachFileoptions = [
-    { icon: <Image className="w-3 h-3 text-blue-500" />, label: "Photos" },
+    { icon: <image className="w-3 h-3 text-blue-500" />, label: "Photos" },
     { icon: <Video className="w-3 h-3 text-purple-500" />, label: "Videos" },
     { icon: <File className="w-3 h-3 text-green-500" />, label: "Documents" },
     { icon: <Music className="w-3 h-3 text-pink-500" />, label: "Audio" },
@@ -341,6 +342,9 @@ export default function Messages() {
                 <span>.</span>
                 <span className="text-sm text-gray-500 dark:text-gray-400 font-normal">
                   @{OpenedCard.handle}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 font-normal">
+                  <Image src='/images/yellow-tick.png' width={18} height={18} alt='verified'/>
                 </span>
               </h3>
               <p className="text-xs text-gray-600 dark:text-gray-400">

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import PostCard from '@/components/postcard';
 import ProfileEditor from '@/components/profileeditor';
-import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText } from 'lucide-react';
+import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // definging the type for user information...
@@ -111,7 +111,8 @@ export default function UserProfilePage() {
     { id: 'posts', label: 'Posts' },
     { id: 'replies', label: 'Replied-Posts' },
     { id: 'media', label: 'Media' },
-    { id: 'likes', label: 'Likes' }
+    { id: 'likes', label: 'Likes' },
+    { id: 'highlights', label: 'Highlights' }
   ];
   const [activeTab, setActiveTab] = useState<tabsTypes>({id:'all',label:'All'}); // current active tab state...
 
@@ -354,9 +355,69 @@ export default function UserProfilePage() {
     ]
   }
 
+  let highLightPosts = [
+    {
+      id: "highlight1",
+      content: "Excited to share my latest project! It's been a journey of learning and growth.",
+      postedAt: "1h ago",
+      comments: 15,
+      reposts: 25,
+      likes: 120,
+      views: 500,
+      bookmarks: 10,
+      mediaUrls: ["https://picsum.photos/400/300?random=10"],
+      hashTags: ["webdev", "react"],
+      mentions: ["developer1"]
+    },
+    {
+      id: "highlight2",
+      content: "Beautiful sunrise this morning. Nature's way of saying good morning! 🌅",
+      postedAt: "3h ago",
+      comments: 8,
+      reposts: 12,
+      likes: 89,
+      views: 320,
+      bookmarks: 5,
+      mediaUrls: ["https://picsum.photos/400/300?random=11"]
+    },
+    {
+      id: "highlight3",
+      content: "Just finished reading an amazing book on AI ethics. Highly recommend it to everyone interested in tech!",
+      postedAt: "5h ago",
+      comments: 22,
+      reposts: 18,
+      likes: 145,
+      views: 680,
+      bookmarks: 15,
+      hashTags: ["AI", "ethics", "books"]
+    },
+    {
+      id: "highlight4",
+      content: "Coffee and code - the perfect combination for a productive day! ☕💻",
+      postedAt: "8h ago",
+      comments: 6,
+      reposts: 9,
+      likes: 67,
+      views: 250,
+      bookmarks: 3
+    },
+    {
+      id: "highlight5",
+      content: "Team collaboration at its finest! Grateful to work with such talented people.",
+      postedAt: "1d ago",
+      comments: 12,
+      reposts: 20,
+      likes: 98,
+      views: 450,
+      bookmarks: 8,
+      mentions: ["teamlead", "colleague1"]
+    }
+  ]
+
   const [Posts, setPosts] = useState<PostType[]>(posts) ; // rendering some random posts...
   const [RepliedPosts, setRepliedPosts] = useState<RepliedPostsType[]>(repliedPostData) ; // rendering some random replied posts...
   const [Medias, setMedias] = useState<userAllMedias>(userMedia);
+  const [Highlights, setHighlights] = useState<PostType[]>(highLightPosts);
   const [LikedPost, setLikedPost] = useState<PostType[]>(likedPosts);
 
   // useeffect for more popup closing...
@@ -384,7 +445,7 @@ export default function UserProfilePage() {
       toast.success('Profile URL is copied...');
      })
   }
-
+  
   return (
     <div className='h-fit flex flex-col md:ml-72 font-poppins rounded-md p-2 dark:bg-black'>
         <div className='flex gap-2'>
@@ -392,9 +453,9 @@ export default function UserProfilePage() {
           <div className='flex-2 overflow-y-auto'>
             <div className="bg-white dark:bg-black text-gray-900 dark:text-white">
               {/* Header */}
-              <header className="sticky top-0 z-10 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+              <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
                 <div className="px-4 py-3">
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-0">
                     <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer rounded-full transition-colors">
                      <Image src='/images/up-arrow.png' width={30} height={30} alt='back-arrow' className='-rotate-90 dark:invert' />
                     </button>
@@ -402,12 +463,25 @@ export default function UserProfilePage() {
                       <h1 className="text-xl font-bold">{UserInfo.name}</h1>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{Posts.length} Posts</p>
                     </div>
+                      {IsBlocked ? (
+                        <div className={`flex items-center justify-center flex-row flex-1 ml-5 p-2 gap-1 rounded-md ${IsBlocked ? 'bg-red-50 dark:bg-red-950' : 'bg-white/80 dark:bg-black/80'}`}>
+                            <BanIcon size={35} className="text-red-600 dark:text-red-400" />
+                            <p className="text-sm text-red-600 dark:text-red-400">
+                              You have blocked this user. You won't be able to interact with there POSTS, no suggestions in TAGGING and your FEED...
+                            </p>
+                        </div>
+                      ):(
+                        <div>
+
+                        </div>
+                      )
+                      }
                   </div>
                 </div>
               </header>
 
               {/* Cover Photo */}
-              <div className="relative h-48 rounded-lg bg-gradient-to-r from-blue-400 to-purple-500">
+              <div className={`relative h-48 rounded-lg bg-gradient-to-r from-blue-400 to-purple-500`}>
                 <img 
                   src={UserInfo.coverImage} 
                   alt="Cover" 
@@ -416,15 +490,14 @@ export default function UserProfilePage() {
               </div>
 
               {/* Profile Info */}
-              <div className="relative px-4">
+              <div className={`relative px-4 ${ IsBlocked ? 'bg-red-50 dark:bg-red-950 border border-red-600' : ''}  rounded-lg`}>
                 {/* Avatar */}
                 <div className="absolute -top-16 left-4">
                   <div className="relative">
                     <img 
                       src={UserInfo.avatar} 
                       alt={UserInfo.name}
-                      className="w-32 h-32 rounded-full border-4 border-white dark:border-black bg-white dark:bg-black"
-                    />
+                      className={`w-32 h-32 rounded-full border-2 bg-white dark:bg-black ${IsBlocked ? 'border-red-500' : 'border-4 border-white dark:border-black'}`}/>
                   </div>
                 </div>
 
@@ -432,7 +505,7 @@ export default function UserProfilePage() {
                 <div className="flex justify-end pt-4 pb-3">
                   <button
                     onClick={() => setShowProfileOptions(!showProfileOptions)}
-                    className="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer rounded-full transition-colors mr-2"
+                    className={`relative p-2 ${IsBlocked ? 'hover-' : 'hover:bg-gray-100 dark:hover:bg-gray-950'} cursor-pointer rounded-full transition-colors mr-2`}
                   >
                     <MoreHorizontalIcon size={20} />
                     {showProfileOptions && (
@@ -452,7 +525,7 @@ export default function UserProfilePage() {
                            <span>Copy Link</span><CopyIcon size={15}/>
                           </li>
                           <li 
-                          onClick={() => { setshowBlockPop(true) }}
+                          onClick={() => { setshowBlockPop(!showBlockPop) }}
                           className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors ${IsBlocked ? 'dark:bg-red-950/50 bg-red-100 text-red-500' : ''}`}>
                             <span>{IsBlocked ? 'UnBlock' : 'Block User'}</span><BanIcon size={15}/>
                           </li>
@@ -483,32 +556,33 @@ export default function UserProfilePage() {
                 {/* User Details */}
                 <div className="space-y-3 pb-3">
                   <div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-2">
                       <h1 className="text-xl font-bold">{UserInfo.name}</h1>
+                      <h1 className="text-sm font-bold">.</h1>
+                      <p className="text-gray-500 text-sm dark:text-gray-400">@{UserInfo.username}</p>
                       { UserInfo.isVerified ? (
-                       <Image src='/svg/blue-tick.svg' width={25} height={25} alt='blue-tick' />
+                       <Image src='/images/yellow-tick.png' width={25} height={25} alt='yellow-tick' />
                        ) : (
                         <Link href='/subscription?utm_source=profile-page' className='border border-gray-400 hover:bg-gray-100 dark:hover:bg-gray-950 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full'>
-                          <span>Get Verified</span><Image src='/svg/blue-tick.svg' width={18} height={18} alt='blue-tick' />
+                          <span>Get Verified</span><Image src='/images/yellow-tick.png' width={18} height={18} alt='blue-tick' />
                         </Link>
                       )}
                     </div>
-                    <p className="text-gray-500 text-sm dark:text-gray-400">@{UserInfo.username}</p>
                   </div>
 
                   <p className="text-sm">{UserInfo.bio}</p>
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <Link href={`https://www.google.com/maps?q=37.7749,-122.4194`}  // lat,lng
-                    className="flex items-center space-x-1 py-1 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
+                    className={`flex items-center space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <MapPin className="w-4 h-4 stroke-black dark:stroke-white" />
                       <span>{UserInfo.location}</span>
                     </Link>
-                    <div className="flex items-center space-x-1 py-1 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
+                    <div className={`flex items-center space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <LinkIcon className="w-4 h-4 stroke-black dark:stroke-white" />
                       <Link href={`${UserInfo.website}?utm_source=briezly-profile-page`} className="text-blue-500 hover:underline">{UserInfo.website}</Link>
                     </div>
-                    <div className="flex items-center space-x-1 py-1 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
+                    <div className={`flex items-center space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <Calendar className="w-4 h-4 stroke-black dark:stroke-white" />
                       <span>{UserInfo.joinDate}</span>
                     </div>
@@ -556,6 +630,7 @@ export default function UserProfilePage() {
                       {Posts.map((post:PostType) => (
                         <PostCard
                           key={post.id}
+                          postId={post.id}
                           avatar={UserInfo.avatar}
                           username={UserInfo.name}
                           handle={UserInfo.username}
@@ -580,7 +655,7 @@ export default function UserProfilePage() {
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Posts you replied to</h3>
                     <div className='space-y-6'>
                       {RepliedPosts.map((post: RepliedPostsType) => (
-                        <div key={post.id} className="bg-gray-50 dark:bg-black rounded-xl p-4 border border-gray-200 dark:border-gray-900 shadow-sm hover:shadow-md transition-shadow">
+                        <div key={post.id} className="dark:bg-black rounded-xl p-4 border border-gray-200 dark:border-gray-900 transition-shadow">
                           <div className="flex space-x-3">
                             <img
                               src={UserInfo.avatar}
@@ -599,8 +674,9 @@ export default function UserProfilePage() {
                               </div>
                               <div className="space-y-3">
                                 <Link href={`@${post.postAuthorInfo.username}/post/${post.postId}`} className="text-blue-500 hover:underline text-sm inline-block">Replied to post</Link>
-                                <div className="ml-4 border-l-2 border-gray-300 dark:border-gray-600 pl-4">
+                                <div className="ml-4 border-l-2 rounded-md border-gray-300 dark:border-gray-600 pl-4">
                                   <PostCard
+                                    postId={post.id}
                                     avatar={post.postAuthorInfo.avatar}
                                     username={post.postAuthorInfo.name}
                                     handle={post.postAuthorInfo.username}
@@ -619,6 +695,7 @@ export default function UserProfilePage() {
                                   />
                                 </div>
                                 <PostCard
+                                  postId={post.id}
                                   avatar={UserInfo.avatar}
                                   username={UserInfo.name}
                                   handle={UserInfo.username}
@@ -741,6 +818,7 @@ export default function UserProfilePage() {
                       {LikedPost.map((post:PostType) => (
                         <PostCard
                           key={post.id}
+                          postId={post.id}
                           avatar={UserInfo.avatar}
                           username={UserInfo.name}
                           handle={UserInfo.username}
@@ -755,6 +833,33 @@ export default function UserProfilePage() {
                           bookmarked={post.bookmarks}
                           hashTags={post.hashTags}
                           mentions={post.mentions}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {(activeTab.label === 'Highlights' || activeTab.label === 'All') && Posts.length > 0 && (
+                  <div className='space-y-4'>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Profile Higlights</h3>
+                    <div className='space-y-4'>
+                      {Highlights.map((post:PostType) => (
+                        <PostCard
+                          key={post.id}
+                          postId={post.id}
+                          avatar={UserInfo.avatar}
+                          username={UserInfo.name}
+                          handle={UserInfo.username}
+                          timestamp={post.postedAt}
+                          content={post.content}
+                          media={post.mediaUrls || []}
+                          likes={post.likes}
+                          retweets={post.reposts}
+                          replies={post.comments}
+                          shares={0}
+                          views={post.views}
+                          bookmarked={post.bookmarks}
+                          highlighted={true}
                         />
                       ))}
                     </div>
@@ -908,7 +1013,7 @@ export default function UserProfilePage() {
         <ReportPop closeReportModal={() => { setOpenReportPop(false) }} username={UserInfo.username} />
       )}
       { showBlockPop && (
-        <BlockUser closeBlockPop={() => { setshowBlockPop(false) }} username={UserInfo.username} updateblockState={() => { setIsBlocked(true) }} />
+        <BlockUser closeBlockPop={() => { setshowBlockPop(false) }} username={UserInfo.username} updateblockState={() => { setIsBlocked(!IsBlocked) }} isBlocked={IsBlocked} />
       )}
     </div>
   );

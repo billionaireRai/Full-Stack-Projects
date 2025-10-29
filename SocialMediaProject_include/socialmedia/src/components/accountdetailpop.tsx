@@ -51,7 +51,7 @@ export default function AccountDetailPop({
             src={user.cover}
             alt={`${user.name} cover`}
             fill
-            className="object-cover"
+            className="object-cover rounded-lg"
           />
         )}
       </div>
@@ -76,7 +76,7 @@ export default function AccountDetailPop({
           <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base truncate">
             {user.name}
           </h3>
-          <span><Image src='/svg/blue-tick.svg' width={20} height={20} alt='blue-tick' /></span>
+          <span><Image src='/images/yellow-tick.png' width={20} height={20} alt='blue-tick' /></span>
           <span className='text-gray-700'>.</span>
           <p className="text-gray-500 dark:text-gray-400 text-sm truncate">@{user.handle}</p>
         </div>
@@ -90,22 +90,22 @@ export default function AccountDetailPop({
 
         {/* Stats */}
         <div className="flex items-center gap-4 mt-3">
-          <div className="flex items-center gap-2">
+          <Link href={`/@${user.handle}/followings`} className="flex items-center group gap-2">
             <span className="font-bold text-gray-900 dark:text-gray-100">
               {user.following.toLocaleString()}
             </span>
-            <span className="text-gray-500 dark:text-gray-400 text-sm">
-              <Link href='/username/followings'>Following</Link>
+            <span className="text-gray-500 group-hover:underline dark:text-gray-400 text-sm">
+              Following
             </span>
-          </div>
-          <div className="flex items-center gap-2">
+          </Link>
+          <Link href={`/@${user.handle}/followers`} className="flex items-center group gap-2">
             <span className="font-bold text-gray-900 dark:text-gray-100">
               {user.followers.toLocaleString()}
             </span>
-            <span className="text-gray-500 dark:text-gray-400 text-sm">
-              <Link href='/username/followers'>Followers</Link>
+            <span className="text-gray-500 group-hover:underline dark:text-gray-400 text-sm">
+              Followers
             </span>
-          </div>
+          </Link>
         </div>
 
         {/* Joined */}
@@ -113,7 +113,7 @@ export default function AccountDetailPop({
              Joined{' '}
              {user.joined || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short'})}
            </p>
-           <Link href='/username'>
+           <Link href={`/@${user.handle}`}>
              <button className='cursor-pointer w-full font-semibold m-1 py-2 px-4 rounded-lg hover:opacity-80 bg-yellow-400 dark:bg-blue-600'>View Profile</button>
            </Link>
       </div>

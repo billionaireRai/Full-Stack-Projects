@@ -5,15 +5,16 @@ interface BlockUserProp {
   closeBlockPop: () => void,
   updateblockState: () => void,
   username: string,
+  isBlocked: boolean,
 }
 
-export default function BlockUser({ closeBlockPop , username , updateblockState }: BlockUserProp) {
+export default function BlockUser({ closeBlockPop , username , updateblockState, isBlocked }: BlockUserProp) {
 
-  // function handling logic of blocking...
-  const handleUserBlock = (toBlock:string) => { 
+  // function handling logic of blocking/unblocking...
+  const handleUserBlock = (toBlock:string) => {
     updateblockState();
     closeBlockPop();
-    toast.success('Successfully blocked user !!');
+    toast.success(`Successfully ${isBlocked ? 'unblocked' : 'blocked'} user !!`);
   }
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
@@ -21,11 +22,14 @@ export default function BlockUser({ closeBlockPop , username , updateblockState 
       <div className="relative flex items-center justify-center">
         <div className="bg-white dark:bg-black rounded-lg p-6 max-w-md mx-6 shadow-xl border border-gray-300 dark:border-gray-800">
           {/* Title */}
-          <h2 className="text-black dark:text-white text-xl font-bold mb-3">Confirm Block</h2>
+          <h2 className="text-black dark:text-white text-xl font-bold mb-3">Confirm {isBlocked ? 'Unblock' : 'Block'}</h2>
 
           {/* Description */}
           <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
-            Are you sure you want to block this user? If unblocked later, you will have to send a follow request again to the user.
+            {isBlocked
+              ? 'Are you sure you want to unblock this user? You can follow them again after unblocking.'
+              : 'Are you sure you want to block this user? If unblocked later, you will have to send a follow request again to the user.'
+            }
           </p>
 
           {/* Buttons */}
@@ -40,7 +44,7 @@ export default function BlockUser({ closeBlockPop , username , updateblockState 
               onClick={() => {handleUserBlock(username)}}
               className="cursor-pointer flex-1 bg-red-600 hover:bg-red-700 text-white rounded-md py-2 text-sm font-medium transition-colors"
             >
-              Block
+              {isBlocked ? 'Unblock' : 'Block'}
             </button>
           </div>
         </div>
