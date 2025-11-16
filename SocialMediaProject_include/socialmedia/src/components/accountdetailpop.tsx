@@ -83,7 +83,7 @@ export default function AccountDetailPop({
 
         {/* Bio */}
         {user.bio && (
-          <p className="mt-2 text-gray-900 dark:text-gray-200 text-sm leading-relaxed">
+          <p className="mt-2 text-gray-900 dark:text-gray-500 text-xs leading-relaxed">
             {user.bio}
           </p>
         )}

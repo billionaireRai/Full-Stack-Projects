@@ -24,7 +24,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Briezly - Connecting made easy",
+  title: "Briezl - Connecting made easy",
   description: "Its a social media website made for connecting people to their loved ones...",
   icons: {
     icon: '/favicon.ico',

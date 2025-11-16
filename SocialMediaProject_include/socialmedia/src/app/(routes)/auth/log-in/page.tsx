@@ -13,7 +13,7 @@ export default function LogIn() {
             height={80}
             width={80}
             alt="letter-B"
-            className="dark:invert"
+            className="rounded-full"
           />
         </div>
 

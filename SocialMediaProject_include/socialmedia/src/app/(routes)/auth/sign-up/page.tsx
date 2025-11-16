@@ -16,7 +16,7 @@ export default function SignUp() {
             height={80}
             width={80}
             alt="Social Media Logo"
-            className="mt-10 dark:invert"
+            className="mt-10 rounded-full"
           />
           <h1 className="font-bold text-3xl text-gray-800 mb-2 dark:text-white">
             Get Started Now...

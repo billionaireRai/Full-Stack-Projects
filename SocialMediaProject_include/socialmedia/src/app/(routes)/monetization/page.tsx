@@ -37,7 +37,7 @@ export default function MonetizationPage() {
         className="flex flex-col items-center gap-2 text-center pt-16 px-6"
       >
         <h1 className="text-4xl flex flex-row gap-3 md:text-5xl font-bold mb-3">
-          <span>Make money on</span><Image className="rounded-full dark:invert" src='/images/letter-B.png' width={50} height={30} alt="logo" /> 
+          <span>Make money on</span><Image className="rounded-full" src='/images/letter-B.png' width={50} height={30} alt="logo" /> 
         </h1>
         <p className="text-gray-600 dark:text-gray-400 max-w-lg">
           The first step to monetization is getting Verified with X Premium.

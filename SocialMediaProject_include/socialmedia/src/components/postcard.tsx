@@ -244,7 +244,7 @@ export default function PostCard({
       className={`bg-white cursor-pointer dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl transition-all duration-300 border border-gray-100 ${!showActions ? ' shadow-none m-0 p-2 cursor-none' : 'my-3 sm:p-4'}`}>
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <Link href='/username'>
+        <Link href={`/@${handle}`}>
         <img
           ref={avatarRef}
           src={avatar}
@@ -263,9 +263,11 @@ export default function PostCard({
               {username}
             </span>
             <span><Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/></span>
-            <span className={`text-gray-500 dark:text-gray-400 text-xs sm:text-base truncate`}>
+            <Link 
+            href={`/@${handle}`}
+            className={`text-gray-500 dark:text-gray-400 text-xs sm:text-base truncate`}>
               @{handle}
-            </span>
+            </Link>
             <span className="text-gray-400">·</span>
             <span className={`text-gray-500 dark:text-gray-400 ${!showActions ? 'text-xs' : 'text-sm'} truncate`}>
               {timestamp}

@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white dark:bg-black">
       {/* Left Section */}
-      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-10 bg-black">
+      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-10 dark:bg-black">
         <Image
           src="/images/forgot-password.jpg"
           alt="Forgot Password"
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
               width={60}
               height={60}
               alt="logo"
-              className="mb-3 dark:invert rounded-xl"
+              className="mb-3 rounded-full"
             />
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
               Reset Password

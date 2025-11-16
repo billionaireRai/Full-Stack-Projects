@@ -41,7 +41,7 @@ export default function HomePage() {
         )}
         <div className="mainBox font-poppins flex flex-col gap-4 items-center border-none h-full rounded-lg border-black">
           <div>
-            <Image src='/images/letter-B.png' className="dark:invert rounded-full" width={120} height={120} alt="letter-B" />
+            <Image src='/images/letter-B.png' className="rounded-full" width={120} height={120} alt="letter-B" />
           </div>
           <span className="text-[30px] sm:text-[50px] font-extrabold cursor-pointer">Happening Now !!!</span>
           <p className="text-center text-sm w-full sm:max-w-2xl sm:text-lg">

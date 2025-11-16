@@ -67,12 +67,12 @@ export default function usercard({ decodedHandle,name ,content , heading, user}:
                </Link>
 
                {/* User Info */}
-               <div className="flex flex-col justify-center flex-1">
+               <div className="flex flex-col justify-center flex-1 gap-1">
                  <div className="flex items-center gap-1">
                    <Link href={`/${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-user'/>
                  </div>
-                 <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-sm">{decodedHandle}</Link>
+                   <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-sm">{decodedHandle}</Link>
                  <p className="text-xs w-full text-gray-500 mt-1">
                    {content || "CS Grad ‘25 | MERN • GenAI • SD • Web3 • DSA | Code Coffee Commits, Deadlifts & Deployments"}
                  </p>
@@ -95,7 +95,7 @@ export default function usercard({ decodedHandle,name ,content , heading, user}:
                <AccountDetailPop
                  user={{
                    name: user.name,
-                   handle: user.username,
+                   handle: user.username.substring(1),
                    avatar: user.avatar,
                    bio: user.bio,
                    joined: user.joinDate,

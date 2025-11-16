@@ -86,7 +86,7 @@ export default function SideNavbar() {
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           w-72 bg-white dark:bg-black rounded-md`}
         >
-          <div className="flex flex-col h-full p-4">
+          <div className="flex flex-col h-full p-3">
             <div className='flex flex-row items-center justify-between'>
             {/* Logo */}
             <Tooltip>
@@ -96,15 +96,15 @@ export default function SideNavbar() {
               >
                 <TooltipTrigger>
                   <Image
-                    className="rounded-full cursor-pointer dark:invert"
-                    width={45}
-                    height={45}
-                    src="/images/letter-B.png"
+                    className="rounded-full cursor-pointer shadow-xl dark:shadow-gray-950"
+                    width={100}
+                    height={50}
+                    src="/images/socialmedialogo.png"
                     alt="logo"
                   />
                 </TooltipTrigger>
               </Link>
-              <TooltipContent>Briezly.com</TooltipContent>
+              <TooltipContent>Briezl.com</TooltipContent>
             </Tooltip>
           {mounted && (
           <div className="themetoggler border-none flex items-center justify-end">
@@ -264,12 +264,7 @@ export default function SideNavbar() {
                   className="rounded-full w-13 h-13"
                 />
                 <Link
-                  href="/username/settings/profile"
-                  className={`${
-                    pathname === '/username/settings/profile'
-                      ? 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900'
-                      : ''
-                  } flex flex-col`}
+                  href="/@amritansh_coder"
                 >
                   <span className="flex items-center font-medium text-gray-900 dark:text-gray-100 gap-1">
                     AMRITANSH RAI

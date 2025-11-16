@@ -138,7 +138,7 @@ export default function PostMetricsPage({postId}:{ postId:string }) {
     <div className="min-h-screen dark:bg-black px-6 py-2 rounded-lg">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex flex-col items-center justify-center">
+        <div className="m-5 flex flex-col items-center justify-center">
           <h1 className="text-lg font-bold text-gray-900 dark:text-white">Post Analytics</h1>
           <p className="text-gray-600 text-sm dark:text-gray-400 mt-2">Detailed insights and metrics for this post</p>
         </div>
