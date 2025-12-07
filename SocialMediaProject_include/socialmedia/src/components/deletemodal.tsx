@@ -3,9 +3,10 @@ import React from 'react'
 interface deleteModalProp {
   closePopUp?: () => void
   onDelete?: () => void
+  itemType?:string
 }
 
-export default function DeleteModal({ closePopUp, onDelete }: deleteModalProp) {
+export default function DeleteModal({closePopUp, onDelete , itemType = 'item'}: deleteModalProp) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       {/* Modal */}
@@ -16,7 +17,7 @@ export default function DeleteModal({ closePopUp, onDelete }: deleteModalProp) {
 
           {/* Description */}
           <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
-            Are you sure you want to delete this item? This action cannot be undone.
+            Are you sure you want to <b>delete</b> this {itemType} ? <b>This action cannot be undone.</b>
           </p>
 
           {/* Buttons */}
@@ -28,7 +29,7 @@ export default function DeleteModal({ closePopUp, onDelete }: deleteModalProp) {
               Cancel
             </button>
             <button
-              onClick={closePopUp}
+              onClick={onDelete}
               className="cursor-pointer flex-1 bg-red-600 hover:bg-red-700 text-white rounded-md px-4 py-2 text-sm font-medium transition-colors"
             >
               Delete

@@ -47,10 +47,9 @@ export default function AccountDetailPop({
       {/* Header Cover */}
       <div className="relative h-30 w-full rounded-md bg-gray-100 dark:bg-gray-950">
         {user.cover && (
-          <Image
+          <img
             src={user.cover}
             alt={`${user.name} cover`}
-            fill
             className="object-cover rounded-lg"
           />
         )}
@@ -65,7 +64,7 @@ export default function AccountDetailPop({
             className="rounded-full w-18 h-18 border-4 border-white dark:border-black object-cover"
           />
           <button
-            className="rounded-xl border bg-yellow-400 cursor-pointer dark:bg-blue-600 border-gray-300 dark:border-gray-700 py-2 px-5 text-sm font-semibold text-gray-900 dark:text-white hover:opacity-80 transition"
+            className="rounded-xl border bg-yellow-400 cursor-pointer dark:bg-blue-600 border-gray-300 dark:border-gray-700 py-2 px-5 text-sm font-semibold text-gray-900 dark:text-white hover:scale-105 transition"
           >
             Follow
           </button>

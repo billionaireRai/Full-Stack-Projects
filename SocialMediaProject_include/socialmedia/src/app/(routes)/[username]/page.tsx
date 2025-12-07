@@ -589,9 +589,9 @@ export default function UserProfilePage() {
                   </div>
 
                   <div className="flex space-x-4 text-sm">
-                    <Link href={`/@${UserInfo.username}/following`} className="hover:underline">
+                    <Link href={`/@${UserInfo.username}/followings`} className="hover:underline">
                       <span className="font-bold text-black dark:text-white">{UserInfo.following}</span>
-                      <span className="text-gray-500 dark:text-gray-400"> Following</span>
+                      <span className="text-gray-500 dark:text-gray-400"> Followings</span>
                     </Link>
                     <Link href={`/@${UserInfo.username}/followers`} className="hover:underline">
                       <span className="font-bold text-black dark:text-white">{UserInfo.followers}</span>

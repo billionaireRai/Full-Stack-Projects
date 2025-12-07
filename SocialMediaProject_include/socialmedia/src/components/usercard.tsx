@@ -6,7 +6,7 @@ import AccountDetailPop from './accountdetailpop';
 
 interface userInfoType {
   name:string ,
-  username:string ,
+  handle:string ,
   bio:string ,
   location:string,
   website:string,
@@ -19,16 +19,32 @@ interface userInfoType {
   avatar:string
 }
 
-interface userCardProp {
-  decodedHandle:string | null ;
-  name:string | null;
-  content:string | null ;
+export interface userCardProp {
+  decodedHandle?:string | null ;
+  name?:string | null;
+  content?:string | null ;
+  IsFollowing?:boolean
   heading?:React.ReactElement;
   user?: userInfoType;
 }
 
-export default function usercard({ decodedHandle,name ,content , heading, user}:userCardProp) {
-  const [isFollowing, setisFollowing] = useState<boolean>(false);
+const User : userInfoType = {
+  name: "Alex Rivera",
+  handle: "@alexrivera",
+  bio: "Tech enthusiast | Coffee lover | Building the future one line at a time",
+  location: "San Francisco, CA",
+  website: "https://alexrivera.dev",
+  joinDate: "March 2019",
+  following: "342",
+  followers: "1,247",
+  Posts: "89",
+  isVerified: true,
+  coverImage: "https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg",
+  avatar: "/images/myProfile.jpg"
+}
+
+export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,IsFollowing=false,content='CS Grad ‘25 | MERN • GenAI • SD • Web3 • DSA | Code Coffee Commits, Deadlifts & Deployments' , heading, user = User}:userCardProp) {
+  const [isFollowing, setisFollowing] = useState<boolean>(IsFollowing);
   const [showAccountPopup, setShowAccountPopup] = useState<boolean>(false);
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const avatarRef = useRef<HTMLImageElement>(null);
@@ -50,7 +66,7 @@ export default function usercard({ decodedHandle,name ,content , heading, user}:
   };
 
   return (
-  <div className="shadow-sm dark:shadow-gray-900 dark:bg-black dark:text-white rounded-xl p-4 w-full mb-1 flex flex-col gap-3">
+  <div className="shadow-sm hover:shadow-md transition-shadow duration-300 dark:shadow-gray-900 dark:bg-black dark:text-white rounded-xl p-4 w-full mb-1 flex flex-col gap-3">
         {heading}
              {/* Profile section */}
              <div className="flex items-start gap-2 rounded-lg p-2 transition-colors">
@@ -72,14 +88,14 @@ export default function usercard({ decodedHandle,name ,content , heading, user}:
                    <Link href={`/${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-user'/>
                  </div>
-                   <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-sm">{decodedHandle}</Link>
+                   <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-xs">{decodedHandle}</Link>
                  <p className="text-xs w-full text-gray-500 mt-1">
-                   {content || "CS Grad ‘25 | MERN • GenAI • SD • Web3 • DSA | Code Coffee Commits, Deadlifts & Deployments"}
+                   {content ? content : ''}
                  </p>
                </div>
 
                {/* Follow button */}
-               <button
+               <div
                onClick={() => { setisFollowing(!isFollowing) }}
                className={`text-sm font-semibold px-4 py-2
                ${isFollowing
@@ -87,7 +103,7 @@ export default function usercard({ decodedHandle,name ,content , heading, user}:
                : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 cursor-pointer'
                } rounded-full transition`}>
                  { isFollowing ? 'Following' : 'Follow' }
-               </button>
+               </div>
              </div>
 
              {/* Account Detail Popup */}
@@ -95,7 +111,7 @@ export default function usercard({ decodedHandle,name ,content , heading, user}:
                <AccountDetailPop
                  user={{
                    name: user.name,
-                   handle: user.username.substring(1),
+                   handle: user.handle.substring(1),
                    avatar: user.avatar,
                    bio: user.bio,
                    joined: user.joinDate,

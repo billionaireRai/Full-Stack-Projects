@@ -3,9 +3,42 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import axios from "axios";
+import toast from "react-hot-toast"; 
+// import isAuth from '@/app/states/isAuth';
+// import user from '@/app/states/userinfo';
+import z, { success } from 'zod'
+import { usernameRegex, emailRegex } from "@/app/controllers/regex";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from "react-hook-form";
 import { User, Mail, Lock , AtSign} from "lucide-react"; // lightweight icons
 
+// applying ZOD validation on form feilds...
+const signUpDataType = z.object({
+  Name:z.string().nonempty("Name is required"),
+  Username:z.string().toLowerCase().min(8).nonempty("Essential for first account creation").regex(new RegExp(usernameRegex)),
+  Email:z.string().nonempty("Email is required for notifications").regex(new RegExp(emailRegex)),
+  Password:z.string().min(10).nonempty("Password is required for security")
+})
+
 export default function SignUp() {
+  // initializing the react-hook-form...
+  const { register , handleSubmit , formState:{ errors , isSubmitting}} = useForm({resolver:zodResolver(signUpDataType)}) ;
+  // function for handling form submittion...
+  const handleSignUpLogic = async (data: z.infer<typeof signUpDataType>) : Promise<string> => {
+    const parsed = signUpDataType.safeParse(data) ; // double validation of data from zod...
+    if (!parsed) {
+      toast.error('Form data validation failed!!')
+      return 'ZOD validation failed...';
+    }
+    const apiRes = await axios.post('/api/auth/register',data);
+    if (apiRes.status === 200) {
+      toast.success('Account creation successfull !!');
+      // will update the value of isAuth and user state
+      return 'success';
+    }
+    return 'failure'
+  }
   return (
     <div className="w-full h-screen flex flex-col-reverse md:flex-row font-poppins overflow-y-scroll p-4 bg-gradient-to-r from-white to-gray-100 dark:bg-black dark:bg-none">
       {/* Left Section - Form */}
@@ -28,17 +61,21 @@ export default function SignUp() {
         </div>
 
         {/* Form Card */}
-        <form className="w-full max-w-lg bg-white p-6 my-10 mx-5 rounded-xl shadow-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-700 dark:shadow-2xl dark:shadow-blue-900/30">
+        <form
+        onSubmit={handleSubmit(handleSignUpLogic)}
+        className="w-full max-w-lg bg-white p-6 my-10 mx-5 rounded-xl shadow-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-700 dark:shadow-2xl dark:shadow-blue-900/30">
           <div className="mb-4">
             <label className="block text-sm text-black mb-1 dark:text-white">Name</label>
             <div className="flex items-center border border-gray-300 rounded-md group px-3 transition-all duration-300 focus-within:border-yellow-500 focus-within:ring-3 focus-within:ring-yellow-200 dark:focus-within:border-blue-500 dark:focus-within:ring-4 dark:focus-within:ring-blue-600/50 dark:border-gray-600">
               <User className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-amber-400 dark:group-focus-within:stroke-blue-400 dark:stroke-white" />
               <input
                 type="text"
+                {...register('Name')}
                 placeholder="enter your name"
-                className="w-full py-2 px-1 outline-none bg-transparent dark:text-white"
+                className="w-full py-2 text-sm px-1 outline-none bg-transparent dark:text-white"
               />
             </div>
+            {errors.Name && <p className="text-red-500 text-xs p-1 flex items-center"><Image src='/images/warning.png' width={20} height={20} alt="warning"/><span className="ml-2">{errors.Name.message}</span></p>}
           </div>
 
           <div className="mb-4">
@@ -47,10 +84,13 @@ export default function SignUp() {
               <AtSign className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-amber-400 dark:group-focus-within:stroke-blue-400 dark:stroke-white" />
               <input
                 type="text"
-                placeholder="enter your account name"
-                className="w-full py-2 px-1 outline-none bg-transparent dark:text-white"
+                {...register('Username')}
+                onChange={(e) => {  }}
+                placeholder="enter your username"
+                className="w-full py-2 text-sm px-1 outline-none bg-transparent dark:text-white"
               />
             </div>
+            {errors.Username && <p className="text-red-500 text-xs p-1 flex items-center"><Image src='/images/warning.png' width={20} height={20} alt="warning"/><span className="ml-2">{errors.Username.message}</span></p>}
           </div>
 
           <div className="mb-4">
@@ -59,10 +99,12 @@ export default function SignUp() {
               <Mail className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-amber-400 dark:group-focus-within:stroke-blue-400 dark:stroke-white" />
               <input
                 type="email"
+                {...register('Email')}
                 placeholder="enter your email"
-                className="w-full py-2 px-1 outline-none bg-transparent dark:text-white"
+                className="w-full py-2 text-sm px-1 outline-none bg-transparent dark:text-white"
               />
             </div>
+            {errors.Email && <p className="text-red-500 text-xs p-1 flex items-center"><Image src='/images/warning.png' width={20} height={20} alt="warning"/><span className="ml-2">{errors.Email.message}</span></p>}
           </div>
 
           <div className="mb-6">
@@ -71,14 +113,17 @@ export default function SignUp() {
               <Lock className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-amber-400 dark:group-focus-within:stroke-blue-400 dark:stroke-white" />
               <input
                 type="password"
+                {...register('Password')}
                 placeholder="enter your password"
-                className="w-full py-2 px-1 outline-none bg-transparent dark:text-white"
+                className="w-full py-2 text-sm px-1 outline-none bg-transparent dark:text-white"
               />
             </div>
+            {errors.Password && <p className="text-red-500 text-xs p-1 flex items-center"><Image src='/images/warning.png' width={20} height={20} alt="warning"/><span className="ml-2">{errors.Password.message}</span></p>}
           </div>
 
           <button
-            type="button"
+            disabled={isSubmitting}
+            type="submit"
             className="w-full cursor-pointer border-none py-3 my-3 rounded-lg bg-yellow-300 hover:bg-yellow-300 transition-all duration-300 font-semibold text-gray-900 shadow-yellow-400 hover:shadow-sm active:bg-yellow-400 dark:bg-blue-700 dark:hover:bg-blue-800
             dark:active:bg-blue-700 dark:shadow-lg dark:shadow-blue-800/50 dark:text-white"
           >
@@ -99,7 +144,7 @@ export default function SignUp() {
 
       <div className="flex flex-col md:flex-row-reverse w-full h-screen lg:w-1/2 justify-center items-center bg-contain bg-gradient-to-r
       from-white to-gray-100 dark:bg-black dark:bg-none">
-       <Image src='/images/signup-banner.png' width={800}  height={800} alt="banner" className="dark:invert border-none outline-none rounded-full shadow-lg dark:shadow-gray-200" />
+       <Image src='/images/signup-banner.png' width={800}  height={800} alt="banner" className="dark:invert border-none outline-none rounded-full" />
       </div>
     </div>
   );

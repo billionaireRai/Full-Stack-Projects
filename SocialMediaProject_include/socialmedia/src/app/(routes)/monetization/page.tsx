@@ -64,7 +64,7 @@ export default function MonetizationPage() {
           </div>
           <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm leading-relaxed">
             Earn from sharing high-quality content. The more you engage users on
-            X, the more you earn.
+            Briezl, the more you earn.
           </p>
           <motion.div
             initial={{ opacity: 0, y: -20, scale: 0.85 }}
@@ -183,7 +183,7 @@ export default function MonetizationPage() {
       {/* Footer */}
       <footer className="border-t rounded-lg flex flex-row items-center gap-2 justify-evenly border-gray-200 dark:border-gray-800 py-6 text-center text-gray-500 dark:text-gray-400 text-sm">
         <div className="flex flex-row items-center gap-2 justify-center">
-           <Image src='/images/letter-B.png' className="dark:invert rounded-full" width={30} height={30} alt="logo" /><span>© {new Date().getFullYear()} Monetization — Earn from your posts <b className="px-3">|</b> Content creation starts here </span>
+           <Image src='/images/letter-B.png' className="rounded-full" width={30} height={30} alt="logo" /><span>© {new Date().getFullYear()} Monetization — Earn from your posts <b className="px-3">|</b> Content creation starts here </span>
         </div>
         <Link 
           href='/subscription?utm_source=monetization-page'

@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 interface PostCardProps {
   postId:string;
   avatar?: string;
+  cover?:string
   username?: string;
   handle?: string;
   timestamp?: string;
@@ -40,6 +41,7 @@ interface actionType {
 export default function PostCard({
   postId = '#EWR$%^FGH*(8uyg',
   avatar = '/images/myProfile.jpg',
+  cover='https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg',
   username = 'Amritansh Rai',
   handle = 'amritansh_coder',
   timestamp = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).toLocaleLowerCase(),
@@ -259,7 +261,7 @@ export default function PostCard({
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="relative flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className={`font-semibold text-gray-900 dark:text-gray-100 text-base ${!showActions ? 'text-sm' : 'sm:text-md'} truncate`}>
+            <span className={`font-semibold text-gray-900 dark:text-gray-100 text-base ${!showActions ? 'text-md' : 'sm:text-lg'} truncate`}>
               {username}
             </span>
             <span><Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/></span>
@@ -365,6 +367,7 @@ export default function PostCard({
         user={{
           name: username,
           handle: handle,
+          cover:cover,
           avatar: avatar,
           bio: 'This is a sample bio for the user.', // Default bio, can be passed as prop later
           joined: timestamp,

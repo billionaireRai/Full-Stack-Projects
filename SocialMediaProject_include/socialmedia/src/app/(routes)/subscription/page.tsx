@@ -1,6 +1,8 @@
 'use client'
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { MdMoney } from "react-icons/md";
+import { CreditCard } from "lucide-react";
 
 
 export interface subsPlanType {
@@ -44,7 +46,7 @@ export const plans : subsPlanType[] = [
     },
     {
       name: "Creator",
-      price: "₹30 /month",
+      price: "$30 /month",
       desc: "For influencers and developers building community",
       features: [
         "Monetize your posts (ad revenue + tips)",
@@ -59,7 +61,7 @@ export const plans : subsPlanType[] = [
     },
     {
       name: "Enterprise",
-      price: "₹50 /month",
+      price: "$50 /month",
       desc: "For agencies and social brands",
       features: [
         "Multiple account management",
@@ -97,6 +99,16 @@ export default function SubscriptionPage() {
   return (
     <div className="min-h-screen flex flex-col items-center md:ml-72 justify-start py-10 px-6 md:px-20 bg-white dark:bg-black transition-all duration-300 font-poppins">
       {/* Header Section */}
+      <div className="relative w-full p-1 rounded-lg">
+        {selectedPlan && (
+          <Link 
+           href={`/payment-page?plan=${selectedPlan?.name}`}
+           className="fixed cursor-pointer text-white right-25 top-4 bg-gradient-to-r from-yellow-400 to-yellow-500 dark:from-blue-400 dark:to-blue-500 border-none outline-none font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2 border border-transparent hover:border-white">
+             <CreditCard className="w-5 h-5" />
+             <span>Proceed To Pay</span>
+          </Link>
+        )}
+      </div>
       <div className="text-center mb-14 mt-6">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-gray-100 mb-3 tracking-tight">
           Choose Your Plan
@@ -113,8 +125,8 @@ export default function SubscriptionPage() {
       key={index}
       className={`flex flex-col justify-between border rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 w-full h-[480px] sm:h-[520px] ${
         selectedPlan === plan
-          ? "border-blue-600 bg-blue-50 dark:bg-blue-950/30"
-          : "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-neutral-900"
+          ? "border-yellow-500 dark:border-blue-600"
+          : "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black"
       }`}
     >
       {/* Plan Header */}
@@ -159,17 +171,16 @@ export default function SubscriptionPage() {
       </ul>
 
       {/* Button */}
-      <Link
-        href={`/payment-page?plan=${plan.name}`}
+      <button
         onClick={() => setSelectedPlan(plan)}
         className={`w-full cursor-pointer py-3 rounded-xl font-semibold text-center transition-colors duration-300 ${
           selectedPlan === plan
-            ? "bg-blue-600 text-white hover:bg-blue-700"
-            : "bg-black text-white dark:bg-white dark:text-black hover:bg-yellow-500 dark:hover:bg-blue-500 hover:text-white"
+            ? "dark:bg-blue-600 bg-yellow-500 text-white hover:opacity-80"
+            : "bg-black text-white dark:bg-white dark:text-black hover:bg-yellow-500 dark:hover:opacity-80 hover:text-white"
         }`}
       >
-        {selectedPlan === plan ? "Selected" : "Choose Plan"}
-      </Link>
+        {selectedPlan === plan ? "selected" : "Choose Plan"}
+      </button>
     </div>
   ))}
       </div>
@@ -218,7 +229,7 @@ export default function SubscriptionPage() {
           Crafted by{" "}
           <Link 
           href='/@amritansh_coder'
-          className="text-blue-600 dark:text-blue-400 hover:bg-blue-100 py-1 px-3 rounded-lg font-semibold">
+          className="text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-gray-950 py-1 px-3 rounded-lg font-semibold">
             Amritansh Rai
           </Link>
         </p>

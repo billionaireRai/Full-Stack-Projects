@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   User,
   Lock,
@@ -15,10 +15,16 @@ import {
   CheckCircle,
   Settings,
   Upload,
+  CheckCircleIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
+import LogoutModal from '@/components/logoutmodal';
+import toast from 'react-hot-toast';
+import DeactivateModal from '@/components/deactivatemodal';
+import DeleteModal from '@/components/deletemodal';
+import TwoFAModal from '@/components/twoFAmodal';
 
 export interface userInfoType {
   name:string ,
@@ -39,6 +45,11 @@ export interface userInfoType {
 
 
 export default function AccountSettings() {
+  const [showLogoutModal, setshowLogoutModal] = useState<boolean>(false) ;
+  const [showDeactivateModal, setshowDeactivateModal] = useState<boolean>(false) ;
+  const [showDeleteModal, setshowDeleteModal] = useState<boolean>(false) ;
+  const [TwoFAEnabled, setTwoFAEnabled] = useState<boolean>(false) ;
+  const [TwoFAInfoModal, setTwoFAInfoModal] = useState<boolean>(false) ;
   const [formData, setFormData] = useState<userInfoType>({
     name: '',
     username: '',
@@ -66,12 +77,12 @@ export default function AccountSettings() {
   };
 
   // handling each input change...
-  const handleInputChange = (field: keyof userInfoType, value: string) => {
+  const handleInputChange = (field: keyof userInfoType, value: string) : void => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   // handling image manipulation...
-  const handleImageManipulation = (e: React.ChangeEvent<HTMLInputElement>,imageFor:string) => {
+  const handleImageManipulation = (e: React.ChangeEvent<HTMLInputElement>,imageFor:string) : void => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -85,9 +96,32 @@ export default function AccountSettings() {
   };
 
   // handle logout
-  const handleLogout = () => {
+  const handleLogout = () : void => {
+    toast.loading('logging out in proccess , wait !!');
     signOut({ redirect:true , callbackUrl:'/auth/log-in' });
   };
+
+  // function handling deactivation logic...
+  const handleAccountDeactivation = () : void => { 
+    setshowDeactivateModal(false)
+    toast.success('Account Deactivated !!');
+  }
+
+  // function handling account deletion..
+  const handleAccoutDeletion = () : void => { 
+    setshowDeleteModal(false)
+    toast.success('Account Successfully Deleted !!');
+  }
+
+  // useffect for 2FA modal
+  useEffect(() => {
+    if (TwoFAEnabled.valueOf() === true) {
+      setTimeout(() => {
+        setTwoFAInfoModal(true)
+      }, 3000);
+    }
+  }, [TwoFAEnabled])
+  
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black py-8 px-4 sm:px-6 lg:px-8">
@@ -124,7 +158,7 @@ export default function AccountSettings() {
                 </Link>
               </Button>
             )}
-            <Link href='/@amritansh_coder'>
+            <Link href='/@amritansh_coder?utm_source=account-settings'>
               <Button
                 variant="outline"
                 className="inline-flex shadow-sm hover:text-blue-600 hover:shadow-md items-center gap-2 border bg-blue-50 dark:bg-blue-900/20 text-blue-600 cursor-pointer dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50"
@@ -134,7 +168,7 @@ export default function AccountSettings() {
               </Button>
             </Link>
             <Button
-              onClick={handleLogout}
+              onClick={() => { setshowLogoutModal(true) }}
               variant="outline"
               className="inline-flex shadow-sm hover:text-red-600 hover:shadow-md items-center gap-2 border bg-red-50 dark:bg-red-900/20 text-red-600 cursor-pointer dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
             >
@@ -153,7 +187,7 @@ export default function AccountSettings() {
                 placeholder="Enter full name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
             <div>
@@ -165,7 +199,7 @@ export default function AccountSettings() {
                 placeholder="@username"
                 value={formData.username}
                 onChange={(e) => handleInputChange('username', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
             <div>
@@ -178,7 +212,7 @@ export default function AccountSettings() {
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
             <div>
@@ -191,7 +225,7 @@ export default function AccountSettings() {
                 placeholder="+1 (555) 123-4567"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
             <div>
@@ -204,7 +238,7 @@ export default function AccountSettings() {
                 placeholder="www.yourwebsite.com"
                 value={formData.website}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
             <div>
@@ -215,7 +249,7 @@ export default function AccountSettings() {
                 type="date"
                 value={formData.joinDate}
                 onChange={(e) => handleInputChange('joinDate', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
             <div>
@@ -227,7 +261,7 @@ export default function AccountSettings() {
                 placeholder="City, Country"
                 value={formData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
           </div>
@@ -240,7 +274,7 @@ export default function AccountSettings() {
               placeholder="Tell us about yourself..."
               value={formData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
-              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
             />
           </div>
           <div className="mt-6 grid grid-cols-3 gap-4">
@@ -252,7 +286,7 @@ export default function AccountSettings() {
                 type="text"
                 value={formData.following}
                 readOnly
-                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
             <div>
@@ -263,7 +297,7 @@ export default function AccountSettings() {
                 type="text"
                 value={formData.followers}
                 readOnly
-                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
             <div>
@@ -274,7 +308,7 @@ export default function AccountSettings() {
                 type="text"
                 value={formData.Posts}
                 readOnly
-                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
           </div>
@@ -296,7 +330,7 @@ export default function AccountSettings() {
               type="file"
               accept="image/*"
               onChange={(e) => { handleImageManipulation(e,'avatar')}}
-              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
             />
           </div>
           <div className="mt-6">
@@ -317,7 +351,7 @@ export default function AccountSettings() {
               type="file"
               accept="image/*"
               onChange={(e) => { handleImageManipulation(e,'coverImage')}}
-              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
             />
           </div>
           <div className="mt-6 flex justify-end">
@@ -339,11 +373,11 @@ export default function AccountSettings() {
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-white">Private Account</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Only approved followers can see your posts</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Only approved user (followers) can see your posts</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500 dark:peer-checked:bg-blue-600"></div>
               </label>
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -353,7 +387,7 @@ export default function AccountSettings() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500 dark:peer-checked:bg-blue-600"></div>
               </label>
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -363,7 +397,7 @@ export default function AccountSettings() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500 dark:peer-checked:bg-blue-600"></div>
               </label>
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -373,7 +407,7 @@ export default function AccountSettings() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500 dark:peer-checked:bg-blue-600"></div>
               </label>
             </div>
           </div>
@@ -392,17 +426,17 @@ export default function AccountSettings() {
                 <input
                   type="password"
                   placeholder="Current password"
-                  className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                  className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
                 />
                 <input
                   type="password"
                   placeholder="New password"
-                  className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                  className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
                 />
                 <input
                   type="password"
                   placeholder="Confirm new password"
-                  className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+                  className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
                 />
               </div>
               <Button className="cursor-pointer shadow-sm hover:shadow-md mt-4 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-all">
@@ -414,8 +448,10 @@ export default function AccountSettings() {
                <h3 className="font-medium text-gray-900 dark:text-white mb-2">Two-Factor Authentication</h3>
                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Add an extra layer of security to your account</p>
               </div>
-              <Button className="cursor-pointer shadow-sm hover:shadow-md bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all">
-                Enable 2FA
+              <Button 
+              onClick={() => { setTwoFAEnabled(!TwoFAEnabled) }}
+              className={`cursor-pointer ${TwoFAEnabled  ? 'animate-none' : 'animate-bounce hover:animate-none'} shadow-sm hover:shadow-md bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-all`}>
+                {TwoFAEnabled ? <CheckCircleIcon/> : 'Enable 2FA' }
               </Button>
             </div>
             <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -451,7 +487,7 @@ export default function AccountSettings() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500 dark:peer-checked:bg-blue-600"></div>
               </label>
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -461,7 +497,7 @@ export default function AccountSettings() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500 dark:peer-checked:bg-blue-600"></div>
               </label>
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -471,7 +507,7 @@ export default function AccountSettings() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500 dark:peer-checked:bg-blue-600"></div>
               </label>
             </div>
             <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -492,6 +528,26 @@ export default function AccountSettings() {
                 <label className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer">
                   <input type="checkbox" className="mr-3" defaultChecked />
                   <span className="text-sm text-gray-700 dark:text-gray-300">Mentions and tags</span>
+                </label>
+                <label className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer">
+                  <input type="checkbox" className="mr-3" defaultChecked />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">New posts from accounts you follow</span>
+                </label>
+                <label className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer">
+                  <input type="checkbox" className="mr-3" defaultChecked />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Reposts and quotes of your posts</span>
+                </label>
+                <label className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer">
+                  <input type="checkbox" className="mr-3" defaultChecked />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Account security alerts</span>
+                </label>
+                <label className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer">
+                  <input type="checkbox" className="mr-3" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Weekly activity summary</span>
+                </label>
+                <label className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer">
+                  <input type="checkbox" className="mr-3" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Platform updates and tips</span>
                 </label>
               </div>
             </div>
@@ -515,14 +571,18 @@ export default function AccountSettings() {
             <div className="p-4 border border-yellow-200 dark:border-yellow-700 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
               <h3 className="font-medium text-gray-900 dark:text-white mb-2">Deactivate Account</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Temporarily disable your account</p>
-              <button className="cursor-pointer border border-yellow-600 dark:border-yellow-500 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-100 bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/50 dark:text-yellow-400 px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md focus:outline-nonefocus:ring-yellow-500">
+              <button 
+              onClick={() => { setshowDeactivateModal(true) }}
+              className="cursor-pointer border border-yellow-600 dark:border-yellow-500 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-100 bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/50 dark:text-yellow-400 px-6 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md focus:outline-nonefocus:ring-yellow-500">
                 <EyeOff className="w-4 h-4" /> Deactivate
               </button>
             </div>
             <div className="p-4 border border-red-200 dark:border-red-700 rounded-lg bg-red-50 dark:bg-red-900/20">
               <h3 className="font-medium text-gray-900 dark:text-white mb-2">Delete Account</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Permanently delete your account and all data</p>
-              <button className="cursor-pointer border border-red-600 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/50 dark:text-red-400 px-6 py-2 rounded-lg font-medium transition-all shadow-sm hover:shadow-md focus:outline-none flex items-center gap-2">
+              <button 
+              onClick={() => { setshowDeleteModal(true) }}
+              className="cursor-pointer border border-red-600 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/50 dark:text-red-400 px-6 py-2 rounded-lg font-medium transition-all shadow-sm hover:shadow-md focus:outline-none flex items-center gap-2">
                 <Trash2 className="w-4 h-4" /> Delete Account
               </button>
             </div>
@@ -543,6 +603,27 @@ export default function AccountSettings() {
           </p>
         </div>
       </div>
+      {showLogoutModal && 
+      <>
+      <LogoutModal closePopUp={() => { setshowLogoutModal(false) }} onLogout={() => { handleLogout() }}/> 
+      </>
+      }
+      {showDeactivateModal && 
+      <>
+      <DeactivateModal closePopUp={() => { setshowDeactivateModal(false) }} onDeactivate={() => { handleAccountDeactivation() }} /> 
+      </>
+      }
+      {showDeleteModal && 
+      <>
+      <DeleteModal itemType={'Account'} closePopUp={() => { setshowDeleteModal(false) }} onDelete={() => { handleAccoutDeletion() }} /> 
+      </>
+      }
+      {TwoFAInfoModal && 
+      <>
+      <TwoFAModal closePopUp={() => { setTwoFAInfoModal(false) }} /> 
+      </>
+      }
     </div>
+
   );
 }

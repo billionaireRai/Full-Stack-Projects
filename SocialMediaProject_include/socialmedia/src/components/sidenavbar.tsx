@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import useUnreadMessage from '@/app/states/unreadmessage';
 import useNotificationNum from '@/app/states/notificationsnum' 
 import useCreatePost from '@/app/states/createpost'
+import useSwitchAccount from '@/app/states/swithaccount'
+import { signOut, useSession } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
@@ -30,16 +31,17 @@ import {
 export default function SideNavbar() {
   const { setCreatePop } = useCreatePost()
   const { numOfNotification } = useNotificationNum() ;
-  const [DotClick, setDotClick] = useState(false)
-  const [isOpen, setIsOpen] = useState(true)
+  const [DotClick, setDotClick] = useState<boolean>(false)
+  const { setisPopOpen } = useSwitchAccount() ; // initializing the switchaccount state...
+  const [isOpen, setIsOpen] = useState<boolean>(true)
   const { data: session } = useSession()
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const isDark = theme === 'dark'
-  const [mounted, setMounted] = useState(false)
+  const [mounted, setMounted] = useState<boolean>(false)
 
   const shouldShowSidebar =
-    !pathname.startsWith('/auth/') && pathname !== '/'
+    !pathname.startsWith('/auth/') && pathname !== '/' && !pathname.startsWith('/username/create-account');
 
   // auto-collapse sidebar on small screens...
   useEffect(() => {
@@ -64,11 +66,11 @@ export default function SideNavbar() {
     }
 
     if (DotClick) {
-      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('click', handleClickOutside)
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('click', handleClickOutside)
     }
   }, [DotClick])
 
@@ -255,7 +257,7 @@ export default function SideNavbar() {
               </button>
 
               {/* Profile dropdown trigger */}
-              <div className="dropdown-container flex items-center relative gap-2 mt-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
+              <div className="dropdown-container flex items-center relative gap-2 mt-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-black">
                 <Image
                   src="/images/myProfile.jpg"
                   height={40}
@@ -284,28 +286,35 @@ export default function SideNavbar() {
                     setDotClick(!DotClick)
                   }}
                   className={`ml-auto cursor-pointer rounded-full p-1 w-7 h-7 text-gray-600 dark:text-gray-300 ${
-                    DotClick ? 'bg-amber-200 dark:bg-gray-950' : ''
+                    DotClick ? 'bg-gray-200 dark:bg-gray-950' : ''
                   }`}
                 />
               </div>
+              
 
               {/* Dropdown */}
               {DotClick && (
-                <div className="absolute left-0 bottom-0 sm:left-73 sm:bottom-0 w-70 mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl z-[60] dark:shadow-gray-950">
+                <div className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-70 mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl z-[60] dark:shadow-gray-950">
                   <div className="p-2 font-medium">
-                    <button className="w-full rounded-md cursor-pointer text-left px-4 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors flex items-center gap-3">
+                    <Link  
+                     href={`/${'username'}/create-account?userId=TDF^%$%@^G&#@H`}
+                     className="w-full rounded-md cursor-pointer text-left px-4 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors flex items-center gap-3">
                       <UserPlusIcon className="w-5 h-5" />
                       <span>Add new account</span>
-                    </button>
-                    <button className="w-full rounded-md cursor-pointer text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors flex items-center gap-3">
+                    </Link>
+                    <button
+                    onClick={() => { setDotClick(false); setisPopOpen(true) }}
+                    className={`w-full rounded-md cursor-pointer text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors flex items-center gap-3`}>
                       <UserIcon className="w-5 h-5" />
-                      <span>Add an existing account</span>
+                      <span>Switch another account</span>
                     </button>
-                    <button className="w-full rounded-md cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center gap-3">
+                    <button
+                     onClick={() => { signOut() }}
+                     className="w-full rounded-md cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/40 transition-colors flex items-center gap-3">
                       <LogOutIcon className="w-5 h-5" />
-                      <span>
-                        Log out @{session?.user?.name || 'Amritansh_Coder'}
-                      </span>
+                      <div className='flex flex-row items-center gap-1'>
+                        <span>Logout</span><b>@{session?.user?.name || 'amritansh_coder'}</b>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -313,6 +322,7 @@ export default function SideNavbar() {
             </div>
           </div>
         </aside>
+
       )}
 
       {/* Hamburger Button */}

@@ -54,21 +54,20 @@ const PaymentFormInner = () => {
 
   if (!plan) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white text-gray-900 font-poppins">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-black text-gray-900 dark:text-white font-poppins">
         <motion.div
-          className="flex flex-col items-center gap-4"
+          className="flex flex-row justify-center items-center gap-4"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
           <motion.div
-            className="w-12 h-12 border-4 border-green-200 border-t-green-500 rounded-full"
+            className="w-12 h-12 border-4 border-green-200 dark:border-green-300 border-t-green-500 dark:border-t-green-400 rounded-full"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
           <div className="flex items-center gap-2">
-            <Image src="/images/letter-B.png" width={24} height={24} alt="Logo" className="rounded-full" />
-            <span className="text-lg font-semibold text-gray-700">Loading plan details...</span>
+            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">Loading plan details...</span>
           </div>
         </motion.div>
       </div>
@@ -76,42 +75,42 @@ const PaymentFormInner = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start md:ml-72 bg-white text-gray-900 font-poppins py-10 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-start md:ml-72 bg-white dark:bg-black text-gray-900 dark:text-white font-poppins py-10 px-4">
       {/* Header */}
       <div className="w-full max-w-5xl flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
           <button
            onClick={() => { router.back() }}
-           className="text-gray-600 p-1 rounded-full hover:text-black hover:bg-gray-100 cursor-pointer transition">
+           className="text-gray-600 dark:text-gray-400 p-1 rounded-full hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer transition">
             <MdArrowBack size={26} />
           </button>
           <h1 className="text-3xl cursor-default font-semibold tracking-tight">
             Complete Your Payment
           </h1>
         </div>
-        <p className="text-sm text-gray-500 flex items-center cursor-default gap-1">
-          <MdSecurity className="text-green-600" /> Secure Payment Gateway
+        <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center cursor-default gap-1">
+          <MdSecurity className="text-green-600 dark:text-green-400" /> Secure Payment Gateway
         </p>
       </div>
 
       {/* Main Section */}
       <motion.div
-        className="w-full max-w-5xl bg-gray-50 rounded-2xl shadow-md grid md:grid-cols-3 gap-6 p-6 border border-gray-200"
+        className="w-full max-w-5xl bg-gray-50 dark:bg-black rounded-2xl shadow-md grid md:grid-cols-3 gap-6 p-6 border dark:border-gray-800 border-gray-200"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Left - Plan Details */}
-        <div className="col-span-1 bg-white rounded-xl border p-5 flex flex-col justify-between shadow-sm">
+        <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 flex flex-col justify-between shadow-sm">
           <div>
             <h2 className="text-xl font-semibold mb-2">Selected Plan</h2>
-            <p className="text-gray-500 mb-3 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 mb-3 text-sm">
               Review your plan before proceeding to payment.
             </p>
             <div className="border-t border-gray-200 my-2" />
             <h3 className="text-lg mt-3 font-semibold">{plan!.name}</h3> {/* plan! this is called non-null checking  */}
-            <p className="text-gray-600 text-sm mb-3 font-semibold">1 Month - Auto Recurring Payment</p>
-            <ul className="space-y-2 text-sm text-gray-700">
+            <p className="text-gray-600 dark:text-gray-200 text-sm mb-3 font-semibold">1 Month - Auto Recurring Payment</p>
+            <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-400">
               {plan!.features.map((f, i) => (
                 <li key={i} className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -121,7 +120,7 @@ const PaymentFormInner = () => {
             </ul>
           </div>
           <div className="mt-5 flex items-center justify-between border-t pt-3">
-            <span className="text-gray-600 font-medium">Total</span>
+            <span className="text-gray-600 dark:text-gray-200 font-medium">Total</span>
             <span className="text-lg font-semibold text-green-600">
               {plan!.price}
             </span>
@@ -129,9 +128,9 @@ const PaymentFormInner = () => {
         </div>
 
         {/* Middle - Payment Form */}
-        <div className="col-span-1 bg-white rounded-xl border p-5 shadow-sm">
+        <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 shadow-sm">
           <h2 className="text-xl font-semibold mb-2">Payment Details</h2>
-          <p className="text-gray-500 mb-4 text-sm">
+          <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">
             Enter your payment information securely.
           </p>
           <form onSubmit={handleSubmit}>
@@ -148,14 +147,14 @@ const PaymentFormInner = () => {
         </div>
 
         {/* Right - Order Summary */}
-        <div className="col-span-1 bg-white rounded-xl border p-5 flex flex-col justify-between shadow-sm">
+        <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 flex flex-col justify-between shadow-sm">
           <div>
             <h2 className="text-xl font-semibold mb-2">Order Summary</h2>
-            <p className="text-gray-500 text-sm mb-4">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
               Verify all details before confirming.
             </p>
             <div className="border-t border-gray-200 my-2" />
-            <div className="space-y-2 text-sm text-gray-700">
+            <div className="space-y-2 text-sm text-gray-700 dark:text-gray-400">
               <div className="flex justify-between">
                 <span>Plan:</span>
                 <span>{plan!.name}</span>
@@ -173,10 +172,10 @@ const PaymentFormInner = () => {
                 <span>${(parseInt((plan!.price).split(' ')[0].substring(1)) * 0.18).toFixed(0)}</span>
               </div>
               <div className="border-t border-gray-200 my-2" />
-              <div className="flex justify-between font-semibold">
+              <div className="flex justify-between font-semibold dark:text-white border border-green-500 p-2 rounded-lg">
                 <span>Total:</span>
-                <span className="text-green-600">
-                  ₹{(parseInt((plan!.price).split(' ')[0].substring(1)) * 1.18).toFixed(0)}
+                <span className="text-green-600 dark:text-green-400">
+                  ${(parseInt((plan!.price).split(' ')[0].substring(1)) * 1.18).toFixed(0)}
                 </span>
               </div>
             </div>
@@ -229,9 +228,9 @@ export default function PaymentPage() {
 
   if (!clientSecret) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white">
+      <div className="flex h-screen items-center justify-center bg-white dark:bg-black">
         <motion.div
-          className="flex flex-col items-center gap-4"
+          className="flex flex-row justify-center items-center gap-4"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
@@ -242,7 +241,6 @@ export default function PaymentPage() {
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
           <div className="flex items-center gap-2">
-            <Image src="/images/letter-B.png" width={24} height={24} alt="Logo" className="rounded-full" />
             <span className="text-lg font-semibold text-gray-700">Preparing secure payment...</span>
           </div>
         </motion.div>
