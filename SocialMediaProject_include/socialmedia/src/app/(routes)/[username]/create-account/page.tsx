@@ -1,11 +1,24 @@
 'use client'
 
-import React from "react";
+import React,{ JSX, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { User, AtSign} from "lucide-react"; // lightweight icons
+import { User, AtSign, Lock, Globe, Palette, Briefcase } from "lucide-react"; // lightweight icons
 
+interface Option {
+  value:string,
+  label:string,
+  icon:JSX.Element
+}
 export default function createNewAccount() {
+  const [accOptions, setaccOptions] = useState<Option[]>([
+    { value:'Private Account' , label:'Private' , icon:<Lock width={15} height={15}/> },
+    { value:'Public Account' , label:'Public' , icon:<Globe width={15} height={15}/> },
+    { value:'Creator Account' , label:'Creator',icon:<Palette width={15} height={15}/> },
+    { value:'Business Account' , label:'Business' , icon:<Briefcase width={15} height={15}/> }
+  ])
+  const [currAccType, setcurrAccType] = useState<Option>({ value:'Private Account' , label:'Private', icon:<Lock/> }); // will get this from the accounts array state...
+
   return (
     <div className="w-full h-screen flex flex-col-reverse md:flex-row-reverse font-poppins overflow-y-scroll p-4 dark:bg-black dark:bg-none">
       {/* Left Section - Form */}
@@ -52,7 +65,20 @@ export default function createNewAccount() {
               />
             </div>
           </div>
-
+          <div className="mb-3">
+            <label className="block text-sm text-black mb-1 dark:text-white">Account Type</label>
+            <div className="flex items-center justify-evenly p-1 rounded-md">
+              {accOptions.map((option,index) => (
+                  <div 
+                  onClick={() => { setcurrAccType(option) }}
+                  key={index} className={`border border-gray-300 text-sm cursor-pointer py-1 px-4 rounded-full flex items-center gap-1 ${(currAccType.label === option.label) && 'border-yellow-500 bg-yellow-50 text-yellow-500'} shadow-sm hover:shadow-md`}>
+                    <span>{option.icon}</span>
+                    <span>{option.label}</span>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
           <button
             type="button"
             className="w-full cursor-pointer border-none py-3 my-3 rounded-lg bg-yellow-300 hover:bg-yellow-300 transition-all duration-300 font-semibold text-gray-900 shadow-yellow-400 hover:shadow-sm active:bg-yellow-400 dark:bg-blue-700 dark:hover:bg-blue-800

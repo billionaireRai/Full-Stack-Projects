@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
 // defining some of the interfaces...
-
 interface Option {
   value: string;
   label: string;
@@ -17,7 +16,7 @@ interface CustomDropdownProps {
 }
 
 export default function CustomDropdown({ selectedValue, onChange, options }: CustomDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const selectedOption = options.find(option => option.value === selectedValue.value);
   
   const handleSelect = (option: Option) => {
@@ -45,14 +44,14 @@ export default function CustomDropdown({ selectedValue, onChange, options }: Cus
     <div className="relative dropdown-container">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full px-4 py-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm dark:shadow-gray-800 hover:shadow-md transition-shadow duration-200 text-gray-900 dark:text-gray-100 font-medium"
+        className="flex items-center justify-between w-full px-4 py-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-600 rounded-md shadow-sm dark:shadow-gray-800 hover:shadow-md transition-shadow duration-200 text-gray-900 dark:text-gray-100 font-medium"
       >
         <span>{selectedOption?.label || 'Select option'}</span>
         <FiChevronDown className={`ml-2 transition-transform cursor-pointer duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full p-1 bg-white dark:bg-black rounded-lg dark:shadow-gray-900 shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-10 mt-1 w-full p-1 bg-white dark:bg-black rounded-md dark:shadow-gray-900 shadow-lg max-h-60 overflow-auto">
           {options.map((option) => (
             <div
               key={option.value}

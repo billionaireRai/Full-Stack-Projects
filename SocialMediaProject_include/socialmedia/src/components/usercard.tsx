@@ -111,12 +111,12 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
                <AccountDetailPop
                  user={{
                    name: user.name,
-                   handle: user.handle.substring(1),
+                   handle: user.handle?.substring(1) || 'default',
                    avatar: user.avatar,
                    bio: user.bio,
                    joined: user.joinDate,
-                   following: parseInt(user.following),
-                   followers: parseInt(user.followers),
+                   following: parseInt(user.following || '0'),
+                   followers: parseInt(user.followers || '0'),
                    cover: user.coverImage
                  }}
                  visible={showAccountPopup}

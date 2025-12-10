@@ -5,9 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import axios from "axios";
 import toast from "react-hot-toast"; 
-// import isAuth from '@/app/states/isAuth';
-// import user from '@/app/states/userinfo';
-import z, { success } from 'zod'
+import useUserInfo from "@/app/states/userinfo";
+import useAuthenticationState from "@/app/states/isAuth";
+import z from 'zod'
+import { useRouter } from "next/navigation";
 import { usernameRegex, emailRegex } from "@/app/controllers/regex";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
@@ -22,21 +23,32 @@ const signUpDataType = z.object({
 })
 
 export default function SignUp() {
+  // initializing some neccessary state function...
+  const { setUserInfo } = useUserInfo() ;
+  const { setisAuth } = useAuthenticationState(); 
+  const router = useRouter() ; // useRouter hook...
   // initializing the react-hook-form...
-  const { register , handleSubmit , formState:{ errors , isSubmitting}} = useForm({resolver:zodResolver(signUpDataType)}) ;
+  const { register , handleSubmit , formState:{ errors , isSubmitting }} = useForm({ resolver:zodResolver(signUpDataType) }) ;
   // function for handling form submittion...
   const handleSignUpLogic = async (data: z.infer<typeof signUpDataType>) : Promise<string> => {
+    const loadingToastId = toast.loading('sign-up in proccess wait...');
     const parsed = signUpDataType.safeParse(data) ; // double validation of data from zod...
-    if (!parsed) {
+    if (!parsed.success) {
+      toast.dismiss(loadingToastId);
       toast.error('Form data validation failed!!')
       return 'ZOD validation failed...';
     }
     const apiRes = await axios.post('/api/auth/register',data);
     if (apiRes.status === 200) {
+      toast.dismiss(loadingToastId);
       toast.success('Account creation successfull !!');
-      // will update the value of isAuth and user state
+      setisAuth(true);
+      setUserInfo(apiRes.data.userCred);
+      router.push(`/${apiRes.data.handle}`);
       return 'success';
     }
+    toast.dismiss(loadingToastId);
+    toast.error('registration proccess failed !!!');
     return 'failure'
   }
   return (

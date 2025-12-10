@@ -1,29 +1,15 @@
 'use client'
 
 import React , { useState , useEffect } from 'react';
-import Interestpage from '@/components/interestselection';
 import PostCard from '@/components/postcard';
 import Activebeep from '@/components/activebeep';
 import Trendcancelpop from '@/components/trendcancelpop';
-import Interest from '@/components/interestpop';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Flame, TrendingUp, Gamepad2, Briefcase , MoreHorizontalIcon} from 'lucide-react';
 
 export default function feed() {
     const [hpninPopUp, sethpninPopUp] = useState<number>() ;
-    // const [showInterest, setshowInterest] = useState(false) ;
-    // const [Start, setStart] = useState(false)
-    // useEffect(() => {
-    //   let timer = setTimeout(() => {
-    //     setshowInterest(true)
-    //    }, 2000)
-    //   return () => {
-    //     clearTimeout(timer) ;
-    //   }
-
-    // }, [])
-
      useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
           if (hpninPopUp && !(event.target as Element).closest('.happening-dropdown')) {
@@ -42,19 +28,7 @@ export default function feed() {
 
     return (
         <div className='h-full flex flex-col md:ml-72 font-poppins'>
-            {/* interest popup modal... */}
-            {/* {showInterest && (
-                <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
-                    <Interest getStarted={() => { setshowInterest(false) ; setStart(true) }} onClose={() => setshowInterest(false)} />
-                </div>
-            )} */}
-            {/* main selection popup... */}
-            {/* {Start && (
-                <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
-                    <Interestpage />
-                </div>
-            )} */}
-            <div className='mainbox dark:bg-black w-full h-fit rounded-lg flex flex-col lg:flex-row-reverse gap-8 p-6 max-w-7xl mx-auto font-poppins shadow-lg'>
+            <div className='mainbox dark:bg-black w-full h-fit rounded-lg flex flex-col lg:flex-row-reverse gap-5 p-1 max-w-7xl mx-auto font-poppins shadow-lg'>
                 {/* Right Sidebar */}
                 <div className='right w-full lg:w-80 xl:w-96 hidden xl:block space-y-2'>
                     {/* Search Box */}
@@ -277,7 +251,7 @@ export default function feed() {
                 </div>
                 {/* Main Feed Area - Left Side */}
                 <div className='left flex-1 h-fit bg-white dark:bg-black rounded-xl'>
-                    <div className='py-2 px-1 flex flex-col'>
+                    <div className='px-1 flex flex-col gap-0'>
                         <PostCard />
                         <PostCard />
                     </div>

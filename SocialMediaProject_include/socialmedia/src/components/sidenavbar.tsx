@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import useUnreadMessage from '@/app/states/unreadmessage';
-import useNotificationNum from '@/app/states/notificationsnum' 
+// import useUnreadMessage from '@/app/states/unreadmessage';
+import useNotificationValue from '@/app/states/globalnotifications'; 
+import useUserInfo from '@/app/states/userinfo';
 import useCreatePost from '@/app/states/createpost'
 import useSwitchAccount from '@/app/states/swithaccount'
 import { signOut, useSession } from 'next-auth/react'
@@ -30,7 +31,8 @@ import {
 
 export default function SideNavbar() {
   const { setCreatePop } = useCreatePost()
-  const { numOfNotification } = useNotificationNum() ;
+  const { User } = useUserInfo();
+  const { value } = useNotificationValue() ;
   const [DotClick, setDotClick] = useState<boolean>(false)
   const { setisPopOpen } = useSwitchAccount() ; // initializing the switchaccount state...
   const [isOpen, setIsOpen] = useState<boolean>(true)
@@ -163,8 +165,8 @@ export default function SideNavbar() {
                   href="/username/notifications"
                 >
                   <NavItem icon={<BellIcon className={`${pathname === '/username/notifications' ? 'fill-black dark:fill-white' : ''}`} />} label="Notifications" />
-                  { numOfNotification !== 0 && (
-                  <span className='px-2 rounded-full text-black dark:text-white bg-yellow-400 dark:bg-blue-500'>{numOfNotification}</span>
+                  { value !== 0 && (
+                  <span className='px-2 rounded-full text-black dark:text-white bg-yellow-400 dark:bg-blue-500'>{value}</span>
                   )}
                 </Link>
                 <Link
@@ -297,7 +299,7 @@ export default function SideNavbar() {
                 <div className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-70 mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl z-[60] dark:shadow-gray-950">
                   <div className="p-2 font-medium">
                     <Link  
-                     href={`/${'username'}/create-account?userId=TDF^%$%@^G&#@H`}
+                     href={`/${'username'}/create-account?userId=${User.userId}`}
                      className="w-full rounded-md cursor-pointer text-left px-4 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors flex items-center gap-3">
                       <UserPlusIcon className="w-5 h-5" />
                       <span>Add new account</span>
@@ -356,14 +358,14 @@ function NavItem({
   icon: React.ReactNode
   label: string
 }) {
-  const { unreadMessage } = useUnreadMessage() ; // getting the state...
+  // const { unreadMessage } = useUnreadMessage() ; // getting the state...
   return (
     <li className="flex items-center group w-full dark:text-white gap-3 p-3 rounded-md text-black hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer transition-all">
       <span className="w-5 h-5 group-hover:fill-black">{icon}</span>
       <span className="font-medium">{label}</span>
-       { unreadMessage !== 0 && label ==='Messages' && (
+       {/* { unreadMessage !== 0 && label ==='Messages' && (
           <span className='px-2 rounded-full text-black dark:text-white bg-yellow-400 dark:bg-blue-500'>{unreadMessage}</span>
-       )}
+       )} */}
     </li>
   )
 }

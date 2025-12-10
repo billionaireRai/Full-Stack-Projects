@@ -21,7 +21,7 @@ interface PostCardProps {
   content?: string;
   media?: string[];
   likes?: number;
-  retweets?: number;
+  reposts?: number;
   replies?: number;
   shares?: number;
   views?: number;
@@ -35,7 +35,7 @@ interface PostCardProps {
 interface actionType {
   icon:ReactElement ,
   label:string ,
-  value:number
+  value?:number
 }
 
 export default function PostCard({
@@ -48,11 +48,9 @@ export default function PostCard({
   content = 'I am planning to buy a new laptop, as my old one has become trash. Wants recommendation of you guys',
   media=[],
   likes = 0,
-  retweets = 0,
+  reposts = 0,
   replies = 0,
-  shares = 0,
   views = 0,
-  bookmarked = 0,
   hashTags = [],
   mentions = [],
   showActions = true,
@@ -88,21 +86,21 @@ export default function PostCard({
   // states related to actions of each post...
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [localLikes, setLocalLikes] = useState<number>(likes);
+  const [isReposted, setIsReposted] = useState<boolean>(false);
+  const [localReposts, setLocalReposts] = useState<number>(reposts);
   const [isCommented, setIsCommented] = useState<boolean>(false);
   const [localComments, setLocalComments] = useState<number>(replies);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
-  const [localBookmarks, setLocalBookmarks] = useState<number>(bookmarked);
   const [isShared, setIsShared] = useState<boolean>(false);
-  const [localShares, setLocalShares] = useState<number>(shares);
 
 
-  const actions = [
+  const actions : actionType[] = [
       { icon: <MessageCircle className={`w-5 h-5 group-active:animate-caret-blink ${isCommented ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''}`} />, label: "Comment", value: localComments },
-      { icon: <Repeat className={`w-5 h-5 group-active:animate-accordion-down transition-all duration-500`} />, label: "Repost", value: retweets },
+      { icon: <Repeat className={`w-5 h-5 group-active:animate-accordion-down transition-all duration-500 ${isReposted ? 'stroke-yellow-500 dark:stroke-blue-500' : ''}`} />, label: "Repost", value: localReposts },
       { icon: <Heart className={`w-5 h-5 group-active:animate-ping ${isLiked ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''}`} />, label: "Like", value: localLikes },
       { icon: <Eye className="w-5 h-5 group-active:scale-125 transition-all duration-300" />, label: "Views", value: views },
-      { icon: <Bookmark className={`w-5 h-5 group-active:animate-ping ${isBookmarked ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''} `} />, label: "Bookmark", value: localBookmarks },
-      { icon: <Share2 className={`w-5 h-5 ${isShared ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''}`} />, label: "Share", value: localShares }
+      { icon: <Bookmark className={`w-5 h-5 group-active:animate-ping ${isBookmarked ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''} `} />, label: "Bookmark" },
+      { icon: <Share2 className={`w-5 h-5 ${isShared ? 'fill-yellow-500 text-yellow-500 dark:fill-blue-500 dark:text-blue-500' : ''}`} />, label: "Share", }
   ]
   const generalImage = '/images/broken-laptop.jpg';
 
@@ -148,8 +146,6 @@ export default function PostCard({
       }
       else if (action.label === 'Bookmark') {
         setIsBookmarked(!isBookmarked);
-        setLocalBookmarks(isBookmarked ? localBookmarks - 1 : localBookmarks + 1);
-
       }
       else if (action.label === 'Views') setviewPop(true) ;
       else if (action.label === 'Share') { // same with share as well...
@@ -168,8 +164,9 @@ export default function PostCard({
          setShareDropDown(true);
 
       }
-      else if (action.label === 'Repost') {
-        // repost logic
+      else {
+        setIsReposted(!isReposted);
+        setLocalReposts(isReposted ? localReposts - 1 : localReposts + 1);
       }
    }
 
@@ -243,7 +240,7 @@ export default function PostCard({
   return (
     <div 
       onClick={() => { router.push(`/@${handle}/post/${postId}`) }}
-      className={`bg-white cursor-pointer dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl transition-all duration-300 border border-gray-100 ${!showActions ? ' shadow-none m-0 p-2 cursor-none' : 'my-3 sm:p-4'}`}>
+      className={`bg-white cursor-pointer dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl transition-all duration-300 border border-gray-100 ${!showActions ? ' shadow-none m-0 p-2 cursor-none' : 'my-1 sm:p-4'}`}>
       <div className="flex items-start gap-3">
         {/* Avatar */}
         <Link href={`/@${handle}`}>
@@ -350,7 +347,7 @@ export default function PostCard({
                   onClick={(event) => { actionClick(event, action) }}
                   className="flex items-center group py-1.5 sm:py-1 sm:px-3 rounded-lg text-gray-500 dark:text-white hover:text-yellow-500 dark:hover:text-blue-500 transition-all text-sm cursor-pointer">
                     <span className='p-2 rounded-full group-hover:bg-yellow-100 dark:group-hover:bg-gray-950'>{action.icon}</span>
-                    <span className={`hidden sm:inline ${(action.label === 'Like' && isLiked) || (action.label === 'Comment' && isCommented) || (action.label === 'Bookmark' && isBookmarked) || (action.label === 'share' && isShared) ? 'text-yellow-500 dark:text-blue-500' : ''}`}>{action.value}</span>
+                    <span className={`hidden sm:inline ${(action.label === 'Like' && isLiked) || (action.label ==='Repost' && isReposted) || (action.label === 'Comment' && isCommented) || (action.label === 'Bookmark' && isBookmarked) || (action.label === 'share' && isShared) ? 'text-yellow-500 dark:text-blue-500' : ''}`}>{action.value}</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>

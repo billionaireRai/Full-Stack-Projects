@@ -1,19 +1,38 @@
 "use client"
 
-import React, { useEffect } from "react"
+import React, { useEffect , useState } from "react"
 import { SessionProvider } from "next-auth/react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from 'react-hot-toast'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import CreatePost from '@/components/createpost'
-import useCreatePost from '@/app/states/createpost'
+import Interest from "@/components/interestpop"
+import Interestpage from '@/components/interestselection';
 import SwitchAccountPopUp from '@/components/swithaccount'
+import useCreatePost from '@/app/states/createpost'
 import useSwitchAccount from '@/app/states/swithaccount'
+import useAllAccounts from "./states/useraccounts"
+import useUserInfo from "./states/userinfo"
+import useAuthenticationState from "./states/isAuth"
+import AccCompletionPop from "@/components/acccompletionpop"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const { isCreatePop } = useCreatePost()
-  const { isPopOpen, setisPopOpen } = useSwitchAccount()
+  const router = useRouter() ;
+  const { User } = useUserInfo();
+  const { isCreatePop } = useCreatePost();
+  const { Accounts } = useAllAccounts() ;
+  const { isAuth } = useAuthenticationState();
+  const { isPopOpen, setisPopOpen } = useSwitchAccount();
+  const [isCompleted, setisCompleted] = useState<boolean>(false); // will get this state from current account feild... 
+  const [showInterest, setshowInterest] = useState<boolean>(false) ;
+  const [Start, setStart] = useState<boolean>(false)
   const searchParams = useSearchParams()
+
+  // function for checking account completion...
+  const checkAccountCompletion = () : boolean => { 
+    // will check the completion state of account with 'active' true from Accounts array...
+    return true ;
+   } 
 
   useEffect(() => {
     if (searchParams) {
@@ -22,6 +41,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     }
   }, [searchParams, setisPopOpen])
 
+  useEffect(() => {
+    let timer = setTimeout(() => {
+       setshowInterest(true)
+    }, 2000)
+    return () => {
+      clearTimeout(timer) ;
+    }
+  }, [])
   return (
     <TooltipProvider>
       <SessionProvider>
@@ -29,6 +56,19 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <Toaster position="top-center" />
         { isCreatePop && <CreatePost /> }
         { isPopOpen && <SwitchAccountPopUp /> }
+        { isAuth && !isCompleted && <AccCompletionPop onClose={() => { setisCompleted(true) }} onContinue={() => { router.push(`/username?userId=${User.userId}`) }}/> }
+        {/* interest popup modal... */}
+        { isAuth && showInterest && (
+            <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
+                 <Interest getStarted={() => { setshowInterest(false) ; setStart(true) }} onClose={() => setshowInterest(false)} />
+            </div>
+         )}
+        {/* main selection popup... */}
+        {Start && (
+             <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
+                 <Interestpage />
+             </div>
+         )}
       </SessionProvider>
     </TooltipProvider>
   )

@@ -3,7 +3,7 @@
 import React,{ useState , useEffect }from 'react'
 import Chatusercard from '@/components/chatusercard'
 import { useTheme } from 'next-themes'
-import useUnreadMessage from '@/app/states/unreadmessage'; 
+// import useUnreadMessage from '@/app/states/unreadmessage'; 
 import Image from 'next/image';
 import AudioRecordModal from '@/components/audioRecordModal';
 import MessageCard from '@/components/messagecard';
@@ -54,7 +54,7 @@ export default function Messages() {
   const [shareContact, setshareContact] = useState<boolean>(false);
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false) ;
   const [showAudioModal, setShowAudioModal] = useState<boolean>(false) ;
-  const { setUnreadMessage } = useUnreadMessage() ; // getting the unread message state...
+ // const { setUnreadMessage } = useUnreadMessage() ; // getting the unread message state...
   const [cardInfo, setcardInfo] = useState<infoForChatCard[]>([
     {
       id: '1',
@@ -224,7 +224,7 @@ export default function Messages() {
   // function for calculating total unread message...
   function calculateTotalUnread(arrOfCardInfo : infoForChatCard[]) : void{
     let total = arrOfCardInfo.reduce((acc, obj) => acc + obj.unreadCount , 0);
-    setUnreadMessage(total) ; // updating the total unread messages...
+    // setUnreadMessage(total) ; // updating the total unread messages...
   }
 
   const handleSearch = (searchedText: string) => {
@@ -380,6 +380,7 @@ export default function Messages() {
         {/* section for main messages... */}
         <div className='overflow-y-auto p-2 flex flex-col flex-1 rounded-md'>
           {/* Component handling all the message related logic... */}
+          {/* will pass the card details for current open chat and further proccessing inside the components... */}
           <MessageCard /> 
         </div>
 
