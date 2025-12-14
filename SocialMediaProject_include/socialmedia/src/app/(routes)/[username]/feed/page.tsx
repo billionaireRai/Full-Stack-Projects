@@ -252,8 +252,8 @@ export default function feed() {
                 {/* Main Feed Area - Left Side */}
                 <div className='left flex-1 h-fit bg-white dark:bg-black rounded-xl'>
                     <div className='px-1 flex flex-col gap-0'>
-                        <PostCard />
-                        <PostCard />
+                        <PostCard postId='' />
+                        <PostCard postId=''/>
                     </div>
                 </div>
 
