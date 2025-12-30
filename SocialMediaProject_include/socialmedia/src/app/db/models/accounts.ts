@@ -17,6 +17,7 @@ const accountSchema = new mongoose.Schema({
         type:String,
         required: [true, 'Username is required for unique account identification'],
         trim:true,
+        lowercase:true,
         minLength:[8,'Minimum length should be 8'],
         match: [usernameRegex, 'Please enter a valid username/handle']
     },
@@ -34,16 +35,21 @@ const accountSchema = new mongoose.Schema({
         match:[urlRegex,'URL format is incorrect'],
         maxlength: [500, 'Avatar URL cannot exceed 500 characters']
     },
+    website:{
+        type:String,
+        trim:true,
+        default:'',
+        match:[urlRegex,'URL format is incorrect'],
+        maxlength: [500, 'website URL cannot exceed 500 characters']
+    },
     followers:{
-        type:Number,
-        default:0,
-        min:0,
+        type:String,
+        default:'0',
         match:[numRegex,'Value format is incorrect']
     },
     followings:{
-        type:Number,
-        default:0,
-        min:0,
+        type:String,
+        default:'0',
         match:[numRegex,'Value format is incorrect']
     },
     bio:{
@@ -87,8 +93,8 @@ const accountSchema = new mongoose.Schema({
         },
         ageRange: {
             type: String,
-            enum: ['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
-            default: ''
+            enum: ['0-13','13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
+            default: '0-13'
         },
         topicsLoved: {
             type: [String],
@@ -97,12 +103,12 @@ const accountSchema = new mongoose.Schema({
         networkPreference: {
             type: String,
             enum: ['close-friends', 'professional-network', 'public-audience'],
-            default: ''
+            default: 'close-friends'
         },
         timeAvailability: {
             type: String,
             enum: ['morning', 'afternoon', 'evening', 'night-owl'],
-            default: ''
+            default: 'morning'
         }
     }
 }, {timestamps: true})

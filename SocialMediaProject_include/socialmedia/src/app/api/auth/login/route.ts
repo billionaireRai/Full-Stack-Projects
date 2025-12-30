@@ -1,5 +1,7 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { logginUserController } from '@/app/controllers/auth';
 
-export async function GET(request:NextRequest) {
-    
-}
+// POST request handler for user registeration...
+export const POST = (request:NextRequest) : Promise<NextResponse> => {
+    return logginUserController(request);
+};

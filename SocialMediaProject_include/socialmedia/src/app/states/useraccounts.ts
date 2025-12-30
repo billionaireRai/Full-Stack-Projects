@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 
-export interface userType {
+export interface accountType {
   name:string ,
   handle:string ,
   bio:string ,
@@ -14,6 +14,7 @@ export interface userType {
   following:string,
   followers:string,
   Posts:string,
+  isCompleted:boolean,
   isVerified:boolean,
   coverImage:string,
   avatar:string
@@ -24,23 +25,23 @@ interface userCardProp {
   name?:string | null;
   content?:string | null ;
   heading?:React.ReactElement;
-  user?: userType;
+  account?: accountType;
   IsFollowing?:boolean;
 } 
 
-interface userAccountState {
-  Accounts:userCardProp[];
-  setAccounts: (account:userCardProp[] ) => void;
+interface userActiveAccountState {
+  Account:userCardProp ;
+  setAccount: (account:userCardProp ) => void;
 }
 
-const useAllAccounts = create<userAccountState>()( persist( (set) => ({
-      Accounts: [{}],
-      setAccounts: (account: userCardProp[]) => set({ Accounts: account }),
+const useActiveAccount = create<userActiveAccountState>()( persist( (set) => ({
+      Account: {},
+      setAccount: (account: userCardProp) => set({ Account: account }),
     }),
     {
-      name: "user-all-accounts",
+      name: "user-active-account",
     }
   )
 );
 
-export default useAllAccounts ;
+export default useActiveAccount ;

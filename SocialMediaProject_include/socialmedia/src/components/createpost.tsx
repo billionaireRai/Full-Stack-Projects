@@ -10,7 +10,7 @@ import { MoreHorizontalIcon , UserPlusIcon , LucideGlobe} from 'lucide-react' ;
 import { TooltipContent, TooltipTrigger , Tooltip } from "./ui/tooltip";
 
 export default function CreatePost() {
-  const maxPostLenght = 28 ; // state holding max character lenght for post...
+  const maxPostLenght = 200 ; // state holding max character lenght for post...
   const [post, setPost] = useState('');
   const [openOptions, setopenOptions] = useState(false);
   const [whoCanReply, setWhoCanReply] = useState<'everyone' | 'following' | 'mentioned' | 'verified'>('everyone');
@@ -123,7 +123,7 @@ export default function CreatePost() {
         <div className="flex items-center justify-between mt-6">
           <div className="flex items-center gap-1">
             {/* Mobile dropdown */}
-            <div className="dropdown-container relative top-0 sm:hidden">
+            <div className="dropdown-container relative top-0 md:hidden">
               <button
                 onClick={() => setopenOptions(!openOptions)}
                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -131,7 +131,7 @@ export default function CreatePost() {
                 <MoreHorizontalIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
               {openOptions && (
-                <div className="absolute bottom-full left-0 mb-2 bg-white dark:bg-black rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-3 z-50 min-w-[280px]">
+                <div className="absolute top-1/5 left-10 mb-2 bg-white dark:bg-black rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-2 z-50 min-w-[280px]">
                   <div className="grid grid-cols-2 gap-2">
                     <button className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
                       <Image className="dark:invert" src='/images/insert-picture-icon.png' width={24} height={24} alt='insert-pic' unoptimized />
@@ -167,7 +167,7 @@ export default function CreatePost() {
             </div>
 
             {/* Desktop buttons */}
-            <div className="hidden sm:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
@@ -241,7 +241,7 @@ export default function CreatePost() {
                 </span>
               </button>
               {openReplyOptions && (
-                <div className="absolute top-full left-0 mt-3 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
+                <div className="absolute -top-10 -right-50 md:right-full mt-3 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
                   <div className="mb-4">
                     <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-2">Who can reply?</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Choose who can reply to this post</p>

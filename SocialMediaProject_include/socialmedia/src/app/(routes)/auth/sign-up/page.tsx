@@ -6,6 +6,7 @@ import Image from "next/image";
 import axios from "axios";
 import toast from "react-hot-toast"; 
 import useUserInfo from "@/app/states/userinfo";
+import useActiveAccount from "@/app/states/useraccounts";
 import useAuthenticationState from "@/app/states/isAuth";
 import z from 'zod'
 import { useRouter } from "next/navigation";
@@ -26,6 +27,7 @@ export default function SignUp() {
   // initializing some neccessary state function...
   const { setUserInfo } = useUserInfo() ;
   const { setisAuth } = useAuthenticationState(); 
+  const { setAccount } = useActiveAccount() ;
   const router = useRouter() ; // useRouter hook...
   // initializing the react-hook-form...
   const { register , handleSubmit , formState:{ errors , isSubmitting }} = useForm({ resolver:zodResolver(signUpDataType) }) ;
@@ -40,10 +42,12 @@ export default function SignUp() {
     }
     const apiRes = await axios.post('/api/auth/register',data);
     if (apiRes.status === 200) {
+      const userInfo = { email:apiRes.data.userCred.email , userId:apiRes.data.userCred.userId } // making separate objet for userInfo...
       toast.dismiss(loadingToastId);
       toast.success('Account creation successfull !!');
       setisAuth(true);
-      setUserInfo(apiRes.data.userCred);
+      setAccount(apiRes.data.userCred.activeAccount)
+      setUserInfo(userInfo);
       router.push(`/${apiRes.data.handle}`);
       return 'success';
     }
@@ -82,7 +86,7 @@ export default function SignUp() {
               <User className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-amber-400 dark:group-focus-within:stroke-blue-400 dark:stroke-white" />
               <input
                 type="text"
-                {...register('Name')}
+                
                 placeholder="enter your name"
                 className="w-full py-2 text-sm px-1 outline-none bg-transparent dark:text-white"
               />

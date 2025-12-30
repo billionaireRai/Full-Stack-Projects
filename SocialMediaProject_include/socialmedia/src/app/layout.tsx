@@ -40,12 +40,12 @@ export default function RootLayout({children, params}: {children: React.ReactNod
         <div className="flex h-screen">
           <ThemeProvider>
             <Providers>
+              <UnAuthorize>
               <Sidenavbar/>
-              <div className="flex-1 overflow-auto">
-                {/* <UnAuthorize> */}
-                  {children}
-                {/* </UnAuthorize> */}
-              </div>
+                <div className="flex-1 overflow-auto">
+                 {children}
+                </div>
+              </UnAuthorize>
             </Providers>
           </ThemeProvider>
         </div>

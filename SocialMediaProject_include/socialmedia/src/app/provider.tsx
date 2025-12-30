@@ -9,21 +9,19 @@ import CreatePost from '@/components/createpost'
 import Interest from "@/components/interestpop"
 import Interestpage from '@/components/interestselection';
 import SwitchAccountPopUp from '@/components/swithaccount'
+import useActiveAccount from "./states/useraccounts"
 import useCreatePost from '@/app/states/createpost'
 import useSwitchAccount from '@/app/states/swithaccount'
-import useAllAccounts from "./states/useraccounts"
-import useUserInfo from "./states/userinfo"
 import useAuthenticationState from "./states/isAuth"
 import AccCompletionPop from "@/components/acccompletionpop"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter() ;
-  const { User } = useUserInfo();
+  const { Account } = useActiveAccount() ;
   const { isCreatePop } = useCreatePost();
-  const { Accounts } = useAllAccounts() ;
   const { isAuth } = useAuthenticationState();
   const { isPopOpen, setisPopOpen } = useSwitchAccount();
-  const [isCompleted, setisCompleted] = useState<boolean>(false); // will get this state from current account feild... 
+  const [isCompleted, setisCompleted] = useState<boolean | undefined>(Account.account?.isCompleted); // will get this state from current account feild... 
   const [showInterest, setshowInterest] = useState<boolean>(false) ;
   const [Start, setStart] = useState<boolean>(false)
   const searchParams = useSearchParams()
@@ -56,7 +54,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <Toaster position="top-center" />
         { isCreatePop && <CreatePost /> }
         { isPopOpen && <SwitchAccountPopUp /> }
-        { isAuth && !isCompleted && <AccCompletionPop onClose={() => { setisCompleted(true) }} onContinue={() => { router.push(`/username?userId=${User.userId}`) }}/> }
+        { isAuth && !isCompleted && <AccCompletionPop onClose={() => { setisCompleted(true) }} onContinue={() => { router.push(`/@${Account.decodedHandle}`) }}/> }
         {/* interest popup modal... */}
         { isAuth && showInterest && (
             <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>

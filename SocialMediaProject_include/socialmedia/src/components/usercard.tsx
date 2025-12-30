@@ -4,7 +4,7 @@ import Image from 'next/image';
 import React, { useState, useRef } from 'react'
 import AccountDetailPop from './accountdetailpop';
 
-interface userInfoType {
+interface accountInfoType {
   name:string ,
   handle:string ,
   bio:string ,
@@ -14,6 +14,7 @@ interface userInfoType {
   following:string,
   followers:string,
   Posts:string,
+  isCompleted:boolean,
   isVerified:boolean,
   coverImage:string,
   avatar:string
@@ -25,10 +26,10 @@ export interface userCardProp {
   content?:string | null ;
   IsFollowing?:boolean
   heading?:React.ReactElement;
-  user?: userInfoType;
+  account?: accountInfoType;
 }
 
-const User : userInfoType = {
+const defaultAccount : accountInfoType = {
   name: "Alex Rivera",
   handle: "@alexrivera",
   bio: "Tech enthusiast | Coffee lover | Building the future one line at a time",
@@ -38,12 +39,13 @@ const User : userInfoType = {
   following: "342",
   followers: "1,247",
   Posts: "89",
+  isCompleted:false,
   isVerified: true,
   coverImage: "https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg",
   avatar: "/images/myProfile.jpg"
 }
 
-export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,IsFollowing=false,content='CS Grad ‘25 | MERN • GenAI • SD • Web3 • DSA | Code Coffee Commits, Deadlifts & Deployments' , heading, user = User}:userCardProp) {
+export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,IsFollowing=false,content='CS Grad ‘25 | MERN • GenAI • SD • Web3 • DSA | Code Coffee Commits, Deadlifts & Deployments' , heading, account = defaultAccount }:userCardProp) {
   const [isFollowing, setisFollowing] = useState<boolean>(IsFollowing);
   const [showAccountPopup, setShowAccountPopup] = useState<boolean>(false);
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
@@ -51,7 +53,7 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
 
   // functions handling acccount details pop...
   const handleAvatarHover = () => {
-    if (avatarRef.current && user) {
+    if (avatarRef.current && account) {
       const rect = avatarRef.current.getBoundingClientRect();
       setPopupPosition({
         top: rect.bottom + window.scrollY,
@@ -74,7 +76,7 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
                <Link href={`/${decodedHandle}`}>
                  <img
                    ref={avatarRef}
-                   src={user?.avatar || "/images/myProfile.jpg"}
+                   src={account?.avatar || "/images/myProfile.jpg"}
                    alt="profile"
                    className="w-12 h-12 rounded-full object-cover border border-gray-700 cursor-pointer"
                    onMouseEnter={handleAvatarHover}
@@ -107,17 +109,17 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
              </div>
 
              {/* Account Detail Popup */}
-             {user && (
+             {account && (
                <AccountDetailPop
                  user={{
-                   name: user.name,
-                   handle: user.handle?.substring(1) || 'default',
-                   avatar: user.avatar,
-                   bio: user.bio,
-                   joined: user.joinDate,
-                   following: parseInt(user.following || '0'),
-                   followers: parseInt(user.followers || '0'),
-                   cover: user.coverImage
+                   name: account.name,
+                   handle: account.handle?.substring(1) || 'default',
+                   avatar: account.avatar,
+                   bio: account.bio,
+                   joined: account.joinDate,
+                   following: parseInt(account.following || '0'),
+                   followers: parseInt(account.followers || '0'),
+                   cover: account.coverImage
                  }}
                  visible={showAccountPopup}
                  onOpen={() => setShowAccountPopup(true)}

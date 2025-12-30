@@ -1,10 +1,31 @@
 import mongoose from "mongoose";
-import jsonwebtoken from 'jsonwebtoken';
-import bcrypt from 'bcryptjs'; 
+import jsonwebtoken, { Secret } from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { emailRegex } from "@/app/controllers/regex";
+import { Document } from "mongoose";
+export interface IUser extends Document {
+  email: string;
+  password: string;
+  o_auth:string;
+  refreshToken?: {
+    value: string;
+    rfExpiry: Date;
+  };
+  generateAccessToken(): string;
+  generateRefreshToken(): {
+    token: string;
+    expiry: Date;
+  };
+}
+
+const ACCESS_TOKEN_SECRET = process.env.SECRET_FOR_ACCESS_TOKEN as Secret;
+const REFRESH_TOKEN_SECRET = process.env.SECRET_FOR_REFRESH_TOKEN as Secret;
+
+const ACCESS_TOKEN_EXPIRY = process.env.EXPIRY_FOR_ACCESS_TOKEN as string;
+const REFRESH_TOKEN_EXPIRY = process.env.EXPIRY_FOR_REFRESH_TOKEN as string;
 
 
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<IUser>(
   {
     email: {
       type: String,
@@ -59,18 +80,26 @@ userSchema.methods.isPasswordValid = function (incomingPassword:string) {
   return bcrypt.compare(incomingPassword, this.password); // will going to return a boolean value...
 }
 // generating access token..
-userSchema.methods.generateAccessToken = function () {
-  const userDataToEncode = { id: this._id, email: this.email };
-  const accessToken = jsonwebtoken.sign(userDataToEncode, process.env.SECRET_FOR_ACCESS_TOKEN!, { expiresIn: process.env.EXPIRY_FOR_ACCESS_TOKEN! });
-  return accessToken;
-}
+userSchema.methods.generateAccessToken = function (): string {
+  const payload = { id: this._id , email: this.email };
+  return jsonwebtoken.sign(payload, ACCESS_TOKEN_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRY,
+  });
+};
 
 // generating refresh token
 userSchema.methods.generateRefreshToken = function () {
-  const dataToInclude = { id:this._id } ;
-  const refreshToken = jsonwebtoken.sign(dataToInclude, process.env.SECRET_FOR_REFRESH_TOKEN!, { expiresIn: process.env.EXPIRY_FOR_REFRESH_TOKEN! });
-  return refreshToken ;
-}
+  const payload = { id: this._id };
+  const token = jsonwebtoken.sign(payload, REFRESH_TOKEN_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRY,
+  });
 
-const users = mongoose.model('users',userSchema);
+  return {
+    token,
+    expiry: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+  };
+};
+
+
+const users = mongoose.model('users', userSchema);
 export default users
