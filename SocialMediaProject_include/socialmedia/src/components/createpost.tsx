@@ -4,7 +4,7 @@ import Image from "next/image";
 import useCreatePost from '@/app/states/createpost';
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import useActiveAccount from "@/app/states/useraccounts";
 import { useRouter } from "next/navigation";
 import { MoreHorizontalIcon , UserPlusIcon , LucideGlobe} from 'lucide-react' ;
 import { TooltipContent, TooltipTrigger , Tooltip } from "./ui/tooltip";
@@ -12,10 +12,10 @@ import { TooltipContent, TooltipTrigger , Tooltip } from "./ui/tooltip";
 export default function CreatePost() {
   const maxPostLenght = 200 ; // state holding max character lenght for post...
   const [post, setPost] = useState('');
+  const { Account } = useActiveAccount() ;
   const [openOptions, setopenOptions] = useState(false);
   const [whoCanReply, setWhoCanReply] = useState<'everyone' | 'following' | 'mentioned' | 'verified'>('everyone');
   const [openReplyOptions, setOpenReplyOptions] = useState(false);
-  const { data:Session } = useSession() ; // initializing the session hook...
   const { setCreatePop } = useCreatePost();
   const router = useRouter();
 
@@ -78,7 +78,7 @@ export default function CreatePost() {
                 Create Post
               </h2>
               <span className="text-gray-600 dark:text-gray-400 text-xs font-medium truncate">
-                @{Session?.user?.name || 'amritansh_coder'}
+                @{Account.decodedHandle}
               </span>
             </div>
           </div>

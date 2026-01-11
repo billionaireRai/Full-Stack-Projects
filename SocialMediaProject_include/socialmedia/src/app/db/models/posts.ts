@@ -34,8 +34,7 @@ const postSchema = new mongoose.Schema(
     replyToPostId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
-      default: null,
-      index: true
+      default: null
     },
 
     /* Repost / Quote support */
@@ -49,8 +48,7 @@ const postSchema = new mongoose.Schema(
     originalPostId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
-      default: null,
-      index: true
+      default: null
     },
 
     /* Used only when postType === "quote" */
@@ -95,12 +93,12 @@ const postSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-/* Indexes for feed & conversation performance */
+// Indexes for feed & conversation performance...
 postSchema.index({ authorId: 1, createdAt: -1 });
 postSchema.index({ originalPostId: 1 });
 postSchema.index({ replyToPostId: 1 });
 postSchema.index({ postType: 1, createdAt: -1 });
 
-const Post = mongoose.model("Post", postSchema);
+const Post = mongoose.models.Post || mongoose.model("Post", postSchema);
 
 export default Post;

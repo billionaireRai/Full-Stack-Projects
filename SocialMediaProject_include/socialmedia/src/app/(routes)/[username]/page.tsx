@@ -6,26 +6,14 @@ import ReportPop from '@/components/reportPop';
 import BlockUser from '@/components/blockUser';
 import Link from 'next/link';
 import Image from 'next/image';
+import Usercard from '@/components/usercard';
 import PostCard from '@/components/postcard';
 import ProfileEditor from '@/components/profileeditor';
-import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , } from 'lucide-react';
+import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
+import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-// definging the type for user information...
-export interface userInfoType {
-  name:string ,
-  username:string ,
-  bio:string ,
-  location:string,
-  website:string,
-  joinDate:string,
-  following:string,
-  followers:string,
-  Posts:string,
-  isVerified:boolean,
-  coverImage:string,
-  avatar:string
-}
+import { useParams } from 'next/navigation';
 
 interface PostType {
     id: string,
@@ -80,32 +68,38 @@ interface tabsTypes {
 }
 
 export default function UserProfilePage() {
+  const { Account,setAccount } = useActiveAccount() ; // active account hook...
+  const { username } = useParams() ; // taking the username from URL...
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  const [isSelf, setisSelf] = useState<boolean>(false) ;
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
   const [OpenReportPop, setOpenReportPop] = useState<boolean>(false)
   const [showBlockPop, setshowBlockPop] = useState<Boolean>(false)
   const [IsBlocked, setIsBlocked] = useState<boolean>(false);
-
   const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
   
   // random user data
   let user = {
     name: "John Doe",
-    username: "johndoe",
+    handle: "johndoe",
     bio: "Digital creator • Photography enthusiast • Coffee lover • Building amazing things one line of code at a time",
-    location: "San Francisco, CA",
+    location: {
+       text:'San Francisco, CA',
+       coordinates: [28.450637197292124, 77.14711048980648],
+    },
     website: "https://www.johndoe-portfolio.com",
     joinDate: "Joined March 2012",
     following: '542',
     followers: '187k',
     Posts: "3,245",
+    isCompleted:false,
     isVerified: false,
-    coverImage: "data:image/webp;base64,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",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+    bannerUrl: "/images/default-banner.jpg",
+    avatarUrl: "/images/default-profile-pic.png"
   };
 
-  const [UserInfo, setUserInfo] = useState<userInfoType>(user) ;
+  const [AccountInfo,setAccountInfo] = useState<accountType>(user) ;
   const tabs = [
     {id:'all' , label:'All'},
     { id: 'posts', label: 'Posts' },
@@ -127,28 +121,6 @@ export default function UserProfilePage() {
       likes: 128,
       views: 1000,
       bookmarks: 50
-    },
-    {
-      id: "2",
-      content: "Beautiful sunset from the Golden Gate Bridge today. Sometimes you just have to stop and appreciate the moment. 📸",
-      postedAt: "1d ago",
-      comments: 8,
-      reposts: 23,
-      likes: 156,
-      views: 800,
-      bookmarks: 30
-    },
-    {
-      id: "3",
-      content: "Working on a new open source project. Can't wait to share it with the community!",
-      postedAt: "3d ago",
-      hashTags:['coding','opensource'],
-      mentions:['saketghokhale','notsofit','vedantchoudhary'],
-      comments: 34,
-      reposts: 67,
-      likes: 289,
-      views: 1500,
-      bookmarks: 100
     }
   ];
 
@@ -176,78 +148,6 @@ export default function UserProfilePage() {
       likes: 289,
       views: 500,
       bookmarks: 20
-    },
-    {
-      id: "4",
-      postId: '4224',
-      postAuthorInfo: {
-        name: "Saket Ghokhale",
-        username: "saketghokhale",
-        followers:'150k',
-        following:'180',
-        isVerified: false,
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        content: "Excited to share my latest blog post on React performance optimization techniques!",
-        postedAt: "1d ago"
-      },
-      commentedText: "Great insights! I've been implementing similar optimizations in my projects.",
-      mediaUrls: ["https://picsum.photos/400/300?random=20"],
-      mentions:['amritansh_coder','ezsnippet'],
-      hashTags:['React','Performance'],
-      repliedAt: "1d ago",
-      comments: 15,
-      reposts: 23,
-      likes: 89,
-      views: 320,
-      bookmarks: 5
-    },
-    {
-      id: "5",
-      postId: '4225',
-      postAuthorInfo: {
-        name: "Vedant Choudhary",
-        username: "vedantchoudhary",
-        followers:'89.2k',
-        following:'95',
-        isVerified: true,
-        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        content: "Just finished a 10k run! 🏃‍♂️ Feeling accomplished and ready for the next challenge.",
-        postedAt: "5h ago"
-      },
-      commentedText: "Congrats! That's impressive. What's your training routine like?",
-      mediaUrls: [],
-      mentions:['fitnessguru','runningclub'],
-      hashTags:['Running','Fitness'],
-      repliedAt: "4h ago",
-      comments: 8,
-      reposts: 12,
-      likes: 67,
-      views: 250,
-      bookmarks: 3
-    },
-    {
-      id: "6",
-      postId: '4226',
-      postAuthorInfo: {
-        name: "Not So Fit",
-        username: "notsofit",
-        followers:'45.8k',
-        following:'120',
-        isVerified: false,
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-        content: "Exploring the world of machine learning. Just built my first neural network model!",
-        postedAt: "2d ago"
-      },
-      commentedText: "Awesome! Which framework did you use? TensorFlow or PyTorch?",
-      mediaUrls: ["https://picsum.photos/400/300?random=21", "https://picsum.photos/400/300?random=22"],
-      mentions:['ml_expert','data_science'],
-      hashTags:['MachineLearning','AI'],
-      repliedAt: "2d ago",
-      comments: 22,
-      reposts: 18,
-      likes: 145,
-      views: 680,
-      bookmarks: 15
     }
   ]
 
@@ -264,94 +164,18 @@ export default function UserProfilePage() {
       mediaUrls: ["https://picsum.photos/400/300?random=10"],
       hashTags: ["webdev", "react"],
       mentions: ["developer1"]
-    },
-    {
-      id: "liked2",
-      content: "Beautiful sunrise this morning. Nature's way of saying good morning! 🌅",
-      postedAt: "3h ago",
-      comments: 8,
-      reposts: 12,
-      likes: 89,
-      views: 320,
-      bookmarks: 5,
-      mediaUrls: ["https://picsum.photos/400/300?random=11"]
-    },
-    {
-      id: "liked3",
-      content: "Just finished reading an amazing book on AI ethics. Highly recommend it to everyone interested in tech!",
-      postedAt: "5h ago",
-      comments: 22,
-      reposts: 18,
-      likes: 145,
-      views: 680,
-      bookmarks: 15,
-      hashTags: ["AI", "ethics", "books"]
-    },
-    {
-      id: "liked4",
-      content: "Coffee and code - the perfect combination for a productive day! ☕💻",
-      postedAt: "8h ago",
-      comments: 6,
-      reposts: 9,
-      likes: 67,
-      views: 250,
-      bookmarks: 3
-    },
-    {
-      id: "liked5",
-      content: "Team collaboration at its finest! Grateful to work with such talented people.",
-      postedAt: "1d ago",
-      comments: 12,
-      reposts: 20,
-      likes: 98,
-      views: 450,
-      bookmarks: 8,
-      mentions: ["teamlead", "colleague1"]
-    },
-    {
-      id: "liked6",
-      content: "Exploring new technologies and frameworks. The dev world never stops evolving!",
-      postedAt: "2d ago",
-      comments: 18,
-      reposts: 14,
-      likes: 112,
-      views: 600,
-      bookmarks: 12,
-      hashTags: ["tech", "innovation"]
-    },
-    {
-      id: "liked7",
-      content: "Weekend project complete! Built a cool weather app using Next.js and OpenWeather API.",
-      postedAt: "3d ago",
-      comments: 25,
-      reposts: 30,
-      likes: 156,
-      views: 750,
-      bookmarks: 20,
-      mediaUrls: ["https://picsum.photos/400/300?random=12", "https://picsum.photos/400/300?random=13"],
-      hashTags: ["nextjs", "weatherapp"]
     }
   ]
 
   let userMedia = {
     images: [
-      "https://picsum.photos/400/300?random=1",
-      "https://picsum.photos/400/300?random=2",
-      "https://picsum.photos/400/300?random=3",
-      "https://picsum.photos/400/300?random=4",
-      "https://picsum.photos/400/300?random=5",
-      "https://picsum.photos/400/300?random=6"
+      "https://picsum.photos/400/300?random=1"
     ],
     videos: [
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
     ],
     docs: [
-      "https://res.cloudinary.com/demo/image/upload/v1698765432/documents/sample_doc_1.pdf",
-      "https://res.cloudinary.com/demo/image/upload/v1698765433/documents/sample_doc_2.pdf",
-      "https://res.cloudinary.com/demo/image/upload/v1698765434/documents/sample_doc_3.pdf",
-      "https://res.cloudinary.com/demo/image/upload/v1698765435/documents/sample_doc_4.pdf"
+      "https://res.cloudinary.com/demo/image/upload/v1698765432/documents/sample_doc_1.pdf"
     ]
   }
 
@@ -368,49 +192,6 @@ export default function UserProfilePage() {
       mediaUrls: ["https://picsum.photos/400/300?random=10"],
       hashTags: ["webdev", "react"],
       mentions: ["developer1"]
-    },
-    {
-      id: "highlight2",
-      content: "Beautiful sunrise this morning. Nature's way of saying good morning! 🌅",
-      postedAt: "3h ago",
-      comments: 8,
-      reposts: 12,
-      likes: 89,
-      views: 320,
-      bookmarks: 5,
-      mediaUrls: ["https://picsum.photos/400/300?random=11"]
-    },
-    {
-      id: "highlight3",
-      content: "Just finished reading an amazing book on AI ethics. Highly recommend it to everyone interested in tech!",
-      postedAt: "5h ago",
-      comments: 22,
-      reposts: 18,
-      likes: 145,
-      views: 680,
-      bookmarks: 15,
-      hashTags: ["AI", "ethics", "books"]
-    },
-    {
-      id: "highlight4",
-      content: "Coffee and code - the perfect combination for a productive day! ☕💻",
-      postedAt: "8h ago",
-      comments: 6,
-      reposts: 9,
-      likes: 67,
-      views: 250,
-      bookmarks: 3
-    },
-    {
-      id: "highlight5",
-      content: "Team collaboration at its finest! Grateful to work with such talented people.",
-      postedAt: "1d ago",
-      comments: 12,
-      reposts: 20,
-      likes: 98,
-      views: 450,
-      bookmarks: 8,
-      mentions: ["teamlead", "colleague1"]
     }
   ]
 
@@ -420,6 +201,27 @@ export default function UserProfilePage() {
   const [Highlights, setHighlights] = useState<PostType[]>(highLightPosts);
   const [LikedPost, setLikedPost] = useState<PostType[]>(likedPosts);
 
+  useEffect(() => {
+    const fetchAccountData = async () => {
+      const handle = decodeURIComponent(username as string)?.slice(1);
+      if (Account.account && Account.account?.handle === handle) {
+        setisSelf(true);
+        const acc = await getlatestprofileInfo(Account.account?.handle);
+        if (acc !== 'failed' && acc?.account) {
+          setAccount(acc);
+          setAccountInfo(acc.account);
+        }
+      } else {
+        // fetching account info of other user...
+        const acc = await getlatestprofileInfo(handle);
+        if (acc !== 'failed' && acc?.account) {
+          setAccountInfo(acc.account);
+        }
+      }
+    };
+    fetchAccountData();
+  }, [Account.account, username])
+  
   // useeffect for more popup closing...
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -439,8 +241,8 @@ export default function UserProfilePage() {
 
   // funtion for profile link copy...
   const handleProfileLinkCopy = () => {
-    navigator.clipboard.writeText(`http://localhost:3000/@${UserInfo.username}`)
-    .then(() => { 
+    navigator.clipboard.writeText(`http://localhost:3000/${AccountInfo.handle}`)
+    .then(() => {
       console.log('profile url copied');
       toast.success('Profile URL is copied...');
      })
@@ -460,8 +262,8 @@ export default function UserProfilePage() {
                      <Image src='/images/up-arrow.png' width={30} height={30} alt='back-arrow' className='-rotate-90 dark:invert' />
                     </button>
                     <div className="ml-4">
-                      <h1 className="text-xl font-bold">{UserInfo.name}</h1>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{Posts.length} Posts</p>
+                      <h1 className="text-xl font-semibold">{AccountInfo.name}</h1>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{Posts.length} Posts</p>
                     </div>
                       {IsBlocked ? (
                         <div className={`flex items-center justify-center flex-row flex-1 ml-5 p-2 gap-1 rounded-md ${IsBlocked ? 'bg-red-50 dark:bg-red-950' : 'bg-white/80 dark:bg-black/80'}`}>
@@ -472,7 +274,6 @@ export default function UserProfilePage() {
                         </div>
                       ):(
                         <div>
-
                         </div>
                       )
                       }
@@ -481,11 +282,11 @@ export default function UserProfilePage() {
               </header>
 
               {/* Cover Photo */}
-              <div className={`relative h-48 rounded-lg bg-gradient-to-r from-blue-400 to-purple-500`}>
-                <img 
-                  src={UserInfo.coverImage} 
-                  alt="Cover" 
-                  className="w-full h-full object-cover rounded-lg"
+              <div className={`relative h-1/5 rounded-lg bg-gradient-to-r from-yellow-100 to-yellow-300`}>
+                <img
+                  src={AccountInfo.bannerUrl}
+                  alt="Cover"
+                  className="object-cover h-fit rounded-lg"
                 />
               </div>
 
@@ -494,10 +295,13 @@ export default function UserProfilePage() {
                 {/* Avatar */}
                 <div className="absolute -top-16 left-4">
                   <div className="relative">
-                    <img 
-                      src={UserInfo.avatar} 
-                      alt={UserInfo.name}
-                      className={`w-32 h-32 rounded-full border-2 bg-white dark:bg-black ${IsBlocked ? 'border-red-500' : 'border-4 border-white dark:border-black'}`}/>
+                    <img
+                      src={AccountInfo.avatarUrl}
+                      width={125}
+                      height={125}
+                      alt='avatar'
+                      className={`rounded-full object-contain border-2 bg-white dark:bg-black ${IsBlocked ? 'border-red-500' : 'border-yellow-100 dark:border-black'}`}
+                    />
                   </div>
                 </div>
 
@@ -524,20 +328,25 @@ export default function UserProfilePage() {
                           className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                            <span>Copy Link</span><CopyIcon size={15}/>
                           </li>
-                          <li 
-                          onClick={() => { setshowBlockPop(!showBlockPop) }}
-                          className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors ${IsBlocked ? 'dark:bg-red-950/50 bg-red-100 text-red-500' : ''}`}>
-                            <span>{IsBlocked ? 'UnBlock' : 'Block User'}</span><BanIcon size={15}/>
-                          </li>
-                          <li 
-                          onClick={() => { setOpenReportPop(true) }}
-                          className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
-                            <span>Report User</span><Flag size={15} />
-                          </li>
+                          { !isSelf && (
+                            <>
+                               <li 
+                               onClick={() => { setshowBlockPop(!showBlockPop) }}
+                               className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors ${IsBlocked ? 'dark:bg-red-950/50 bg-red-100      text-red-500' : ''}`}>
+                                 <span>{IsBlocked ? 'UnBlock' : 'Block User'}</span><BanIcon size={15}/>
+                               </li>
+                               <li 
+                               onClick={() => { setOpenReportPop(true) }}
+                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-gray-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
+                                 <span>Report User</span><Flag size={15} />
+                               </li>
+                            </>
+                          )}
                         </ul>
                       </div>
                     )}
                   </button>
+                  {!isSelf && (
                   <button
                     disabled={IsBlocked}
                     onClick={() => setIsFollowing(!isFollowing)}
@@ -551,50 +360,51 @@ export default function UserProfilePage() {
                   >
                     {IsBlocked ? 'Blocked' : isFollowing ? 'Following' : 'Follow' }
                   </button>
+                  )}
                 </div>
 
                 {/* User Details */}
                 <div className="space-y-3 pb-3">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h1 className="text-xl font-bold">{UserInfo.name}</h1>
+                      <h1 className="text-xl font-bold">{AccountInfo.name}</h1>
                       <h1 className="text-sm font-bold">.</h1>
-                      <p className="text-gray-500 text-sm dark:text-gray-400">@{UserInfo.username}</p>
-                      { UserInfo.isVerified ? (
+                      <p className="text-gray-500 text-sm dark:text-gray-400">@{AccountInfo.handle}</p>
+                      { AccountInfo.isVerified ? (
                        <Image src='/images/yellow-tick.png' width={25} height={25} alt='yellow-tick' />
                        ) : (
                         <Link href='/subscription?utm_source=profile-page' className='border border-gray-400 hover:bg-gray-100 dark:hover:bg-gray-950 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full'>
-                          <span>Get Verified</span><Image src='/images/yellow-tick.png' width={18} height={18} alt='blue-tick' />
+                          <span>Get Verified</span><Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' />
                         </Link>
                       )}
                     </div>
                   </div>
 
-                  <p className="text-sm">{UserInfo.bio}</p>
+                  <p className="text-sm">{AccountInfo.bio}</p>
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    <Link href={`https://www.google.com/maps?q=37.7749,-122.4194`}  // lat,lng
+                    <Link href={`https://www.google.com/maps?q=${AccountInfo.location?.coordinates[0]},${AccountInfo.location?.coordinates[1]}`}  // lat,lng
                     className={`flex items-center space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <MapPin className="w-4 h-4 stroke-black dark:stroke-white" />
-                      <span>{UserInfo.location}</span>
+                      <span>{AccountInfo.location?.text}</span>
                     </Link>
-                    <div className={`flex items-center space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
+                    <div className={`flex items-center cursor-pointer space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <LinkIcon className="w-4 h-4 stroke-black dark:stroke-white" />
-                      <Link href={`${UserInfo.website}?utm_source=briezly-profile-page`} className="text-blue-500 hover:underline">{UserInfo.website}</Link>
+                      <Link href={`${AccountInfo.website}?utm_source=briezly-profile-page`} className="text-blue-500 hover:underline">{AccountInfo.website}</Link>
                     </div>
                     <div className={`flex items-center space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <Calendar className="w-4 h-4 stroke-black dark:stroke-white" />
-                      <span>{UserInfo.joinDate}</span>
+                      <span>Joined On {new Date(AccountInfo.joinDate).toDateString()}</span>
                     </div>
                   </div>
 
                   <div className="flex space-x-4 text-sm">
-                    <Link href={`/@${UserInfo.username}/followings`} className="hover:underline">
-                      <span className="font-bold text-black dark:text-white">{UserInfo.following}</span>
+                    <Link href={`/@${AccountInfo.handle}/followings`} className="hover:underline">
+                      <span className="font-bold text-black dark:text-white">{AccountInfo.following}</span>
                       <span className="text-gray-500 dark:text-gray-400"> Followings</span>
                     </Link>
-                    <Link href={`/@${UserInfo.username}/followers`} className="hover:underline">
-                      <span className="font-bold text-black dark:text-white">{UserInfo.followers}</span>
+                    <Link href={`/@${AccountInfo.handle}/followers`} className="hover:underline">
+                      <span className="font-bold text-black dark:text-white">{AccountInfo.followers}</span>
                       <span className="text-gray-500 dark:text-gray-400"> Followers</span>
                     </Link>
                   </div>
@@ -631,14 +441,14 @@ export default function UserProfilePage() {
                         <PostCard
                           key={post.id}
                           postId={post.id}
-                          avatar={UserInfo.avatar}
-                          username={UserInfo.name}
-                          handle={UserInfo.username}
+                          avatar={AccountInfo.avatarUrl}
+                          username={AccountInfo.name}
+                          handle={AccountInfo.handle}
                           timestamp={post.postedAt}
                           content={post.content}
                           media={post.mediaUrls || []}
                           likes={post.likes}
-                          retweets={post.reposts}
+                          reposts={post.reposts}
                           replies={post.comments}
                           shares={0}
                           views={post.views}
@@ -657,18 +467,22 @@ export default function UserProfilePage() {
                       {RepliedPosts.map((post: RepliedPostsType) => (
                         <div key={post.id} className="dark:bg-black rounded-xl p-4 border border-gray-200 dark:border-gray-900 transition-shadow">
                           <div className="flex space-x-3">
+                           <div>
                             <img
-                              src={UserInfo.avatar}
-                              alt={UserInfo.name}
-                              className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                              src={AccountInfo.avatarUrl}
+                              alt={AccountInfo.name}
+                              width={48}
+                              height={48}
+                              className="rounded-full object-cover flex-shrink-0"
                             />
+                           </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center space-x-2 mb-3">
-                                <span className="font-bold text-sm">{UserInfo.name}</span>
-                                {UserInfo.isVerified && (
-                                  <Image src='/svg/blue-tick.svg' width={20} height={20} alt='blue-tick' />
+                                <span className="font-bold text-sm">{AccountInfo.name}</span>
+                                {AccountInfo.isVerified && (
+                                  <Image src='/svg/yellow-tick.svg' width={20} height={20} alt='yellow-tick' />
                                 )}
-                                <span className="text-gray-500 dark:text-gray-400 text-sm">@{UserInfo.username}</span>
+                                <span className="text-gray-500 dark:text-gray-400 text-sm">@{AccountInfo.handle}</span>
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">·</span>
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">{post.repliedAt}</span>
                               </div>
@@ -686,7 +500,7 @@ export default function UserProfilePage() {
                                     mentions={['saketghokhale','ezsnippet']}
                                     media={[]}
                                     likes={0}
-                                    retweets={0}
+                                    reposts={0}
                                     replies={0}
                                     shares={0}
                                     views={0}
@@ -696,14 +510,14 @@ export default function UserProfilePage() {
                                 </div>
                                 <PostCard
                                   postId={post.id}
-                                  avatar={UserInfo.avatar}
-                                  username={UserInfo.name}
-                                  handle={UserInfo.username}
+                                  avatar={AccountInfo.avatarUrl}
+                                  username={AccountInfo.name}
+                                  handle={AccountInfo.handle}
                                   timestamp={post.repliedAt}
                                   content={post.commentedText}
                                   media={post.mediaUrls}
                                   likes={post.likes}
-                                  retweets={post.reposts}
+                                  reposts={post.reposts}
                                   replies={post.comments}
                                   shares={0}
                                   views={post.views}
@@ -729,10 +543,13 @@ export default function UserProfilePage() {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                           {Medias.images.map((image, index) => (
                             <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition-shadow">
-                              <img
+                              <Image
                                 src={image}
                                 alt={`Media ${index + 1}`}
+                                width={300}
+                                height={300}
                                 className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                                unoptimized
                               />
                             </div>
                           ))}
@@ -819,14 +636,14 @@ export default function UserProfilePage() {
                         <PostCard
                           key={post.id}
                           postId={post.id}
-                          avatar={UserInfo.avatar}
-                          username={UserInfo.name}
-                          handle={UserInfo.username}
+                          avatar={AccountInfo.avatarUrl}
+                          username={AccountInfo.name}
+                          handle={AccountInfo.handle}
                           timestamp={post.postedAt}
                           content={post.content}
                           media={post.mediaUrls || []}
                           likes={post.likes}
-                          retweets={post.reposts}
+                          reposts={post.reposts}
                           replies={post.comments}
                           shares={0}
                           views={post.views}
@@ -847,14 +664,14 @@ export default function UserProfilePage() {
                         <PostCard
                           key={post.id}
                           postId={post.id}
-                          avatar={UserInfo.avatar}
-                          username={UserInfo.name}
-                          handle={UserInfo.username}
+                          avatar={AccountInfo.avatarUrl}
+                          username={AccountInfo.name}
+                          handle={AccountInfo.handle}
                           timestamp={post.postedAt}
                           content={post.content}
                           media={post.mediaUrls || []}
                           likes={post.likes}
-                          retweets={post.reposts}
+                          reposts={post.reposts}
                           replies={post.comments}
                           shares={0}
                           views={post.views}
@@ -873,147 +690,45 @@ export default function UserProfilePage() {
           {/* some other widgets... */}
           <div className='hidden lg:block flex-1 overflow-y-auto'>
             <div className='space-y-4'>
-              {/* What's happening */}
-              <div className='bg-gray-50 dark:bg-black rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm'>
-                <div className='p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center'>
-                  <h2 className='text-xl font-bold text-gray-900 dark:text-white'>What's happening</h2>
-                  <svg className='h-5 w-5 text-gray-500 dark:text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
-                  </svg>
-                </div>
-                <div className='p-3'>
-                  <Link href={`/explore?q=${encodeURIComponent('#TechInnovation')}&utm_source=trend-click`} className='happening-dropdown hover:bg-gray-100 dark:hover:bg-gray-950 p-3 rounded-lg cursor-pointer transition-colors inline-block w-full'>
-                    <div className='flex items-start space-x-3'>
-                      <div className='w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center'>
-                        <Flame className="w-4 h-4 text-white" />
-                      </div>
-                      <div className='flex-1 min-w-0'>
-                        <p className='text-sm text-gray-500 dark:text-gray-400'>Trending</p>
-                        <p className='font-bold text-gray-900 dark:text-white'>#TechInnovation</p>
-                        <p className='text-xs text-gray-500 dark:text-gray-400'>42.1K posts</p>
-                      </div>
-                      <div onClick={(e) => { e.stopPropagation(); sethpninPopUp(1) }} className="relative">
-                        <MoreHorizontalIcon className='w-4 h-4 cursor-pointer' />
-                        { hpninPopUp === 1 && (
-                          <Trendcancelpop setNumber={() =>  {sethpninPopUp(0) }}/>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                  <Link href={`/explore?q=${encodeURIComponent('#ClimateAction')}&utm_source=trend-click`} className='happening-dropdown hover:bg-gray-100 dark:hover:bg-gray-950 p-3 rounded-lg cursor-pointer transition-colors inline-block w-full'>
-                    <div className='flex items-start space-x-3'>
-                      <div className='w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center'>
-                        <TrendingUp className="w-4 h-4 text-white" />
-                      </div>
-                      <div className='flex-1 min-w-0'>
-                        <p className='text-sm text-gray-500 dark:text-gray-400'>Trending</p>
-                        <p className='font-bold text-gray-900 dark:text-white'>#ClimateAction</p>
-                        <p className='text-xs text-gray-500 dark:text-gray-400'>28.7K posts</p>
-                      </div>
-                      <div onClick={(e) => { e.stopPropagation(); sethpninPopUp(2) }} className='relative'>
-                        <MoreHorizontalIcon className='w-4 h-4 cursor-pointer' />
-                        { hpninPopUp === 2 && (
-                          <Trendcancelpop setNumber={() =>  {sethpninPopUp(0) }}/>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                  <Link href={`/explore?q=${encodeURIComponent('#Gaming')}&utm_source=trend-click`} className='happening-dropdown hover:bg-gray-100 dark:hover:bg-gray-950 p-3 rounded-lg cursor-pointer transition-colors inline-block w-full'>
-                    <div className='flex items-start space-x-3'>
-                      <div className='w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center'>
-                        <Gamepad2 className="w-4 h-4 text-white" />
-                      </div>
-                      <div className='flex-1 min-w-0'>
-                        <p className='text-sm text-gray-500 dark:text-gray-400'>Trending</p>
-                        <p className='font-bold text-gray-900 dark:text-white'>#Gaming</p>
-                        <p className='text-xs text-gray-500 dark:text-gray-400'>156K posts</p>
-                      </div>
-                      <div onClick={(e) => { e.stopPropagation(); sethpninPopUp(3) }} className='relative'>
-                        <MoreHorizontalIcon className='w-4 h-4 cursor-pointer' />
-                        { hpninPopUp === 3 && (
-                          <Trendcancelpop setNumber={() =>  {sethpninPopUp(0) }}/>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                  <Link href={`/explore?q=${encodeURIComponent('#Business')}&utm_source=trend-click`} className='happening-dropdown hover:bg-gray-100 dark:hover:bg-gray-950 p-3 rounded-lg cursor-pointer transition-colors inline-block w-full'>
-                    <div className='flex items-start space-x-3'>
-                      <div className='w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center'>
-                        <Briefcase className="w-4 h-4 text-white" />
-                      </div>
-                      <div className='flex-1 min-w-0'>
-                        <p className='text-sm text-gray-500 dark:text-gray-400'>Trending</p>
-                        <p className='font-bold text-gray-900 dark:text-white'>#Business</p>
-                        <p className='text-xs text-gray-500 dark:text-gray-400'>89.3K posts</p>
-                      </div>
-                      <div onClick={(e) => { e.stopPropagation(); sethpninPopUp(4) }} className='relative'> 
-                        <MoreHorizontalIcon className='w-4 h-4 cursor-pointer' />
-                        { hpninPopUp === 4 && (
-                          <Trendcancelpop setNumber={() =>  {sethpninPopUp(0) }}/>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-                <div className='p-4 border-t border-gray-200 dark:border-gray-700'>
-                  <Link  href={`/explore?q=${encodeURIComponent('trend-nowdays')}&utm_source=show-more`} className='cursor-pointer text-blue-500 hover:text-blue-600 text-sm font-medium'>
-                  Show more
-                  </Link>
-                </div>
-              </div>
-
               {/* Who to Follow */}
-              <div className='bg-gray-50 dark:bg-black rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm'>
-                <div className='p-4 border-b border-gray-200 dark:border-gray-700'>
-                  <h2 className='text-xl font-bold text-gray-900 dark:text-white'>Who to follow</h2>
+                {/* account suggestions according to this USER profile respective...*/}
+              <div className='bg-white dark:bg-black rounded-xl'>
+                <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center border-gray-200 dark:border-gray-700'>
+                  <Users size={20} /><h2 className='text-xl font-bold text-gray-900 dark:text-white'>Suggestions</h2>
                 </div>
-                <div className='p-4 space-y-4'>
+                <div className='p-4'>
                   <div className='flex items-center justify-between'>
-                    <div className='flex items-center space-x-3'>
-                      <div className='w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold'>
-                        JD
-                      </div>
-                      <div>
-                        <p className='font-bold text-gray-900 dark:text-white text-sm'>John Doe</p>
-                        <p className='text-gray-500 dark:text-gray-400 text-sm'>@johndoe</p>
-                      </div>
-                    </div>
-                    <button className='cursor-pointer bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-full text-sm font-bold hover:opacity-80 transition-opacity'>
-                      Follow
-                    </button>
+                   <Usercard content={null} />
                   </div>
                   <div className='flex items-center justify-between'>
-                    <div className='flex items-center space-x-3'>
-                      <div className='w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold'>
-                        JS
-                      </div>
-                      <div>
-                        <p className='font-bold text-gray-900 dark:text-white text-sm'>Jane Smith</p>
-                        <p className='text-gray-500 dark:text-gray-400 text-sm'>@janesmith</p>
-                      </div>
-                    </div>
-                    <button className='cursor-pointer bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-full text-sm font-bold hover:opacity-80 transition-opacity'>
-                      Follow
-                    </button>
+                   <Usercard content={null}/>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                   <Usercard content={null}/>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                   <Usercard content={null}/>
                   </div>
                 </div>
-                <div className='p-4 border-t border-gray-200 dark:border-gray-700'>
-                  <button className='cursor-pointer text-blue-500 hover:text-blue-600 text-sm font-medium'>
+                <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
+                  <Link 
+                   href='/explore'
+                   className='cursor-pointer text-blue-500 hover:text-blue-600 text-sm font-medium'>
                     Show more
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </div>
       { OpenProfileEditor && (
-        <ProfileEditor credentials={UserInfo} closePop={() => { setOpenProfileEditor(false) }}/>
+        <ProfileEditor credentials={AccountInfo} closePop={() => { setOpenProfileEditor(false) }}/>
       )}
       { OpenReportPop && (
-        <ReportPop closeReportModal={() => { setOpenReportPop(false) }} username={UserInfo.username} />
+        <ReportPop closeReportModal={() => { setOpenReportPop(false) }} username={AccountInfo.handle} />
       )}
       { showBlockPop && (
-        <BlockUser closeBlockPop={() => { setshowBlockPop(false) }} username={UserInfo.username} updateblockState={() => { setIsBlocked(!IsBlocked) }} isBlocked={IsBlocked} />
+        <BlockUser closeBlockPop={() => { setshowBlockPop(false) }} username={AccountInfo.handle} updateblockState={() => { setIsBlocked(!IsBlocked) }} isBlocked={IsBlocked} />
       )}
     </div>
   );

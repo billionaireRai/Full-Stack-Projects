@@ -1,51 +1,108 @@
+import { NextRequest , NextResponse } from "next/server";
+import { o_authGoogleController } from "@/app/controllers/auth";
 
-// redirecting to googles authentication page...
+// https://localhost:3000/api/auth/register/google
+// User clicks "Continue with Google" get route trigger...
 
-// https://accounts.google.com/o/oauth2/v2/auth
-//   ?client_id=GOOGLE_CLIENT_ID
-//   &redirect_uri=https://yourapp.com/api/auth/google/callback
-//   &response_type=code
-//   &scope=email profile
-//   &state=randomString
-
-
-// callback getting back to my server with a code...
-// https://yourapp.com/api/auth/google/callback?code=AUTH_CODE&state=randomString
-
-// backend exchanges code with acccess-token...
-
-// POST https://oauth2.googleapis.com/token
-// Content-Type: application/x-www-form-urlencoded
-
-// code=AUTH_CODE
-// &client_id=GOOGLE_CLIENT_ID
-// &client_secret=GOOGLE_CLIENT_SECRET
-// &redirect_uri=https://yourapp.com/api/auth/google/callback
-// &grant_type=authorization_code
-
-
-// google response in exchange... 
-
-// {
-//   "access_token": "ya29.a0AfH6SMC...",
-//   "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI...",
-//   "refresh_token": "1//0gkF... ",
-//   "expires_in": 3600,
-//   "token_type": "Bearer"
-// }
-
-
-// fetching user profile with the help of access-token...
-// GET https://www.googleapis.com/oauth2/v2/userinfo
-// Authorization: Bearer ACCESS_TOKEN
-
-// Backend creates/updates user in DB
-
-
-// Backend sends session/JWT to frontend
-
-import { NextRequest } from "next/server";
-
-export async function GET(request:NextRequest) {
-    
+export async function GET(request:NextRequest) : Promise<NextResponse> {
+    return o_authGoogleController(request)
 }
+
+
+// ================================
+// Google → Backend (OAuth Callback)
+// ================================
+
+// ================================
+// Backend → Google (Token Exchange)
+// ================================
+
+// Backend exchanges authorization code for tokens
+
+// ================================
+// Google → Backend (Token Response)
+// ================================
+
+// Backend validates ID token
+
+// ================================
+// Backend (User Identity Resolution)
+// ================================
+
+// Backend extracts from ID token:
+// - sub (Google user ID)
+// - email
+// - email_verified
+// - name
+// - picture
+
+// Backend checks:
+// - existing user with google_sub
+// - existing user with same email
+// - account status (banned / deleted)
+
+// Backend decision:
+// - login existing Google-linked user
+// - link Google provider to existing email account
+// - create new user account
+
+
+// ================================
+// Backend (User Creation / Update)
+// ================================
+
+// If new user:
+// - create user record
+// - mark email as verified
+// - generate unique username
+// - initialize profile defaults
+// - set onboarding flags
+
+// If existing user:
+// - update last_login_at
+// - update profile image (if allowed)
+
+
+// ================================
+// Backend (Session & Auth)
+// ================================
+
+// Backend creates:
+// - access token (short-lived)
+// - refresh token (long-lived)
+
+// Backend stores:
+// - hashed refresh token
+// - device / IP / user-agent metadata
+// - token rotation metadata
+
+// Backend sets:
+// - HttpOnly, Secure cookies (web)
+// - OR returns tokens (SPA/mobile)
+
+
+// ================================
+// Backend (Post-Auth Side Effects)
+// ================================
+
+// Emit events:
+// - USER_LOGIN
+// - USER_SIGNUP (if new)
+
+// Trigger:
+// - analytics tracking
+// - fraud / abuse detection
+// - login counters
+// - last_active timestamp
+
+
+// ================================
+// Backend → Frontend (Final Redirect)
+// ================================
+
+// Backend redirects user to:
+// - intended route (stored during OAuth start)
+// - OR onboarding
+// - OR home feed
+
+// Frontend hydrates authenticated user state

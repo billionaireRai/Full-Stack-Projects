@@ -3,19 +3,19 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import useAuthenticationState from "@/app/states/isAuth" ;
 import { usePathname } from "next/navigation";
 
 export default function UnAuthorize({ children }: { children: React.ReactNode }) {
-  const { data: session } = useSession();
   const pathname = usePathname(); // Getting the current page URL...
-  const isSecuredUrl = !pathname.startsWith('/auth') && pathname !== '/';
+  const { isAuth } = useAuthenticationState() ;
+  const isSecuredUrl = !pathname.startsWith('/auth') && pathname !== '/' ;
 
   // Conditional rendering => if user is authenticated or on a non-secured page, render children...
-  if ((session && isSecuredUrl) || (!session && !isSecuredUrl) || (session && !isSecuredUrl)) {  return <>{children}</>  }
+  if ((isAuth && isSecuredUrl) || (!isAuth && !isSecuredUrl) || (isAuth && !isSecuredUrl)) {  return <>{children}</>  }
 
   return (
-    <div className="min-h-screen min-w-screen rounded-md flex flex-col items-center justify-center text-foreground dark:text-foreground px-4 py-8 relative">
+    <div className="min-h-screen min-w-screen animate-in fade-in-0 zoom-in-95 duration-200 rounded-md flex flex-col items-center justify-center text-foreground dark:text-foreground px-4 py-8 relative">
       {/* Background blur layer */}
       <div className="absolute inset-0 dark:blur-sm dark:bg-black/30"></div>
 

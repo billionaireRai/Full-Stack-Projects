@@ -1,5 +1,6 @@
 "use client"
 
+import mongoose from "mongoose";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -8,7 +9,10 @@ export interface accountType {
   name:string ,
   handle:string ,
   bio:string ,
-  location:string,
+  location:{
+    text:string,
+    coordinates:number[] // lat,long
+  },
   website:string,
   joinDate:string,
   following:string,
@@ -16,11 +20,11 @@ export interface accountType {
   Posts:string,
   isCompleted:boolean,
   isVerified:boolean,
-  coverImage:string,
-  avatar:string
+  bannerUrl:string,
+  avatarUrl:string
 }
 
-interface userCardProp {
+export interface userCardProp {
   decodedHandle?:string | null ;
   name?:string | null;
   content?:string | null ;

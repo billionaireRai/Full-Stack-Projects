@@ -21,6 +21,16 @@ const accountSchema = new mongoose.Schema({
         minLength:[8,'Minimum length should be 8'],
         match: [usernameRegex, 'Please enter a valid username/handle']
     },
+    location: {
+      text: {
+        type: String,
+        default: 'location'
+      },
+      coordinates: {
+        type: [Number],
+        default: [0.0, 0.0] // lat,long
+      }
+    },
     avatarUrl:{
         type:String,
         trim:true,
@@ -85,7 +95,7 @@ const accountSchema = new mongoose.Schema({
             enum:['Free','Pro','Creator','Enterprise']
         },
     },
-    interests:{
+    interests: {
         gender: {
             type: String,
             enum: ['male', 'female', 'none'],
@@ -110,8 +120,7 @@ const accountSchema = new mongoose.Schema({
             enum: ['morning', 'afternoon', 'evening', 'night-owl'],
             default: 'morning'
         }
-    }
-}, {timestamps: true})
+    }}, {timestamps: true})
 
-const accounts = mongoose.model('accounts',accountSchema);
+const accounts = mongoose.models.accounts || mongoose.model('accounts',accountSchema);
 export default accounts ; 

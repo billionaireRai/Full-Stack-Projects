@@ -8,7 +8,10 @@ interface accountInfoType {
   name:string ,
   handle:string ,
   bio:string ,
-  location:string,
+  location:{
+    text:string,
+    coordinates:[number,number],
+  },
   website:string,
   joinDate:string,
   following:string,
@@ -30,11 +33,14 @@ export interface userCardProp {
 }
 
 const defaultAccount : accountInfoType = {
-  name: "Alex Rivera",
-  handle: "@alexrivera",
+  name: "Jhon Doe",
+  handle: "@jhondoe",
   bio: "Tech enthusiast | Coffee lover | Building the future one line at a time",
-  location: "San Francisco, CA",
-  website: "https://alexrivera.dev",
+  location: {
+      text:'San Francisco, CA',
+      coordinates: [28.450637197292124, 77.14711048980648],
+  },
+  website: "https://jhondoe.dev",
   joinDate: "March 2019",
   following: "342",
   followers: "1,247",
@@ -68,7 +74,7 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
   };
 
   return (
-  <div className="shadow-sm hover:shadow-md transition-shadow duration-300 dark:shadow-gray-900 dark:bg-black dark:text-white rounded-xl p-4 w-full mb-1 flex flex-col gap-3">
+  <div className="shadow-sm hover:shadow-md transition-shadow duration-300 dark:shadow-gray-900 dark:bg-black dark:text-white rounded-xl py-3 px-2 w-full mb-1 flex flex-col gap-3">
         {heading}
              {/* Profile section */}
              <div className="flex items-start gap-2 rounded-lg p-2 transition-colors">

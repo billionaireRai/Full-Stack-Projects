@@ -1,5 +1,7 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getUserAccountController } from "@/app/controllers/user";
 
-export async function GET(request:NextRequest) {
-    
+export const GET = (request:NextRequest) : Promise<NextResponse> => { 
+    return getUserAccountController(request) ;
+
 }

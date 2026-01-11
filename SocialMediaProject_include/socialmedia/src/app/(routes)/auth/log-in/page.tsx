@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import axios from "axios";
+import axiosInstance from "@/lib/interceptor";
 import toast from "react-hot-toast"; 
 import useUserInfo from "@/app/states/userinfo";
 import useActiveAccount from "@/app/states/useraccounts";
@@ -32,7 +32,7 @@ export default function LogIn() {
   // function for handling login...
   const handleLogin = async (data: z.infer<typeof loginInfoType>) : Promise<string> => { 
     const initialToast = toast.loading('logging in please wait...');
-    const loginRes = await axios.post('/api/auth/login', data ); // hitting the api route...
+    const loginRes = await axiosInstance.post('/api/auth/login', data ); // hitting the api route...
 
   if (loginRes.status === 200) {
     const userInfo = { email:loginRes.data.userCred.email , userId:loginRes.data.userCred.userId } // making separate objet for userInfo...
@@ -71,8 +71,8 @@ export default function LogIn() {
 
         {/* Social Login */}
         <div className="flex flex-row w-full px-6 gap-4 items-center justify-center mt-4">
-          <Link
-            href="/api/auth/login/google"
+          <a
+            href="/api/auth/register/google?intent=login"
             className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-400 transition-all duration-300 hover:shadow-md bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
           >
             <Image
@@ -83,10 +83,10 @@ export default function LogIn() {
               alt="google-icon"
             />
             <span className="dark:font-bold">Google</span>
-          </Link>
+          </a>
 
-          <Link
-            href="/api/auth/login/facebook"
+          <a
+            href="/api/auth/register/facebook?intent=login"
             className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-400 transition-all duration-300 hover:shadow-md bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
           >
             <Image
@@ -97,7 +97,7 @@ export default function LogIn() {
               alt="facebook-icon"
             />
             <span className="dark:font-bold">Facebook</span>
-          </Link>
+          </a>
         </div>
 
         {/* Divider */}
@@ -142,6 +142,7 @@ export default function LogIn() {
           {/* Submit Button */}
           <button
             type='submit'
+            disabled={isSubmitting}
             className="w-full cursor-pointer py-3 rounded-lg bg-yellow-300 hover:bg-yellow-400 active:bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 dark:active:bg-blue-700 dark:text-white transition-all duration-300 font-semibold text-gray-900 hover:shadow-md"
           >
             Log In

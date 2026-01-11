@@ -240,7 +240,7 @@ export default function PostCard({
   return (
     <div 
       onClick={() => { router.push(`/@${handle}/post/${postId}`) }}
-      className={`bg-white cursor-pointer dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl transition-all duration-300 border border-gray-100 ${!showActions ? ' shadow-none m-0 p-2 cursor-none' : 'my-1 sm:p-4'}`}>
+      className={`bg-white cursor-pointer dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-2 cursor-none' : 'my-1 sm:p-4'}`}>
       <div className="flex items-start gap-3">
         {/* Avatar */}
         <Link href={`/@${handle}`}>

@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect , useState } from "react"
-import { SessionProvider } from "next-auth/react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from 'react-hot-toast'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -21,7 +20,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const { isCreatePop } = useCreatePost();
   const { isAuth } = useAuthenticationState();
   const { isPopOpen, setisPopOpen } = useSwitchAccount();
-  const [isCompleted, setisCompleted] = useState<boolean | undefined>(Account.account?.isCompleted); // will get this state from current account feild... 
+  const [isCompleted, setisCompleted] = useState<boolean | undefined>(Account.account?.isCompleted); // will get this state from current account feild...
   const [showInterest, setshowInterest] = useState<boolean>(false) ;
   const [Start, setStart] = useState<boolean>(false)
   const searchParams = useSearchParams()
@@ -49,25 +48,23 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }, [])
   return (
     <TooltipProvider>
-      <SessionProvider>
         {children}
         <Toaster position="top-center" />
         { isCreatePop && <CreatePost /> }
         { isPopOpen && <SwitchAccountPopUp /> }
-        { isAuth && !isCompleted && <AccCompletionPop onClose={() => { setisCompleted(true) }} onContinue={() => { router.push(`/@${Account.decodedHandle}`) }}/> }
+        {/* { isAuth && !isCompleted && <AccCompletionPop onClose={() => { setisCompleted(true) }} onContinue={() => { router.push(`/@${Account.decodedHandle}`) }}/> } */}
         {/* interest popup modal... */}
-        { isAuth && showInterest && (
+        {/* { isAuth && showInterest && (
             <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
                  <Interest getStarted={() => { setshowInterest(false) ; setStart(true) }} onClose={() => setshowInterest(false)} />
             </div>
-         )}
+         )} */}
         {/* main selection popup... */}
         {Start && (
              <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
                  <Interestpage />
              </div>
          )}
-      </SessionProvider>
     </TooltipProvider>
   )
 }

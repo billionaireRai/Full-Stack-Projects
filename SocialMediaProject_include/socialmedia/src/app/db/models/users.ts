@@ -7,6 +7,10 @@ export interface IUser extends Document {
   email: string;
   password: string;
   o_auth:string;
+  location?: {
+    type: string;
+    coordinates: [number, number];
+  };
   refreshToken?: {
     value: string;
     rfExpiry: Date;
@@ -56,7 +60,9 @@ const userSchema = new mongoose.Schema<IUser>(
         default:Date.now()
       }
     }
-},{ timestamps:true }) ;
+},{ timestamps:true });
+
+userSchema.index({ location: '2dsphere' });
 
 // pre function to HASH password before saving...
 const encryptionSalt = 12 ; // same for password hashing of every user...
@@ -75,10 +81,6 @@ userSchema.pre("save", async function (next) {
 });
 
 
-// pre function for checking password validity...
-userSchema.methods.isPasswordValid = function (incomingPassword:string) {
-  return bcrypt.compare(incomingPassword, this.password); // will going to return a boolean value...
-}
 // generating access token..
 userSchema.methods.generateAccessToken = function (): string {
   const payload = { id: this._id , email: this.email };
@@ -101,5 +103,5 @@ userSchema.methods.generateRefreshToken = function () {
 };
 
 
-const users = mongoose.model('users', userSchema);
+const users = mongoose.models.users || mongoose.model('users', userSchema);
 export default users

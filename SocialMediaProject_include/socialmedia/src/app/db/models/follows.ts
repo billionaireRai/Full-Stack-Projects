@@ -26,6 +26,6 @@ followSchema.pre('save', function(next) {
     next();
 });
 
-const follows = mongoose.model('follows', followSchema);
+const follows = mongoose.models.follows || mongoose.model('follows', followSchema);
 
 export default follows;

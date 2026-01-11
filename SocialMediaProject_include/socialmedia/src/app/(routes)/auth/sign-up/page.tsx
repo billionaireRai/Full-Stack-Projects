@@ -3,17 +3,17 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import axios from "axios";
 import toast from "react-hot-toast"; 
 import useUserInfo from "@/app/states/userinfo";
 import useActiveAccount from "@/app/states/useraccounts";
 import useAuthenticationState from "@/app/states/isAuth";
 import z from 'zod'
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { usernameRegex, emailRegex } from "@/app/controllers/regex";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
 import { User, Mail, Lock , AtSign} from "lucide-react"; // lightweight icons
+import axiosInstance from "@/lib/interceptor";
 
 // applying ZOD validation on form feilds...
 const signUpDataType = z.object({
@@ -29,6 +29,10 @@ export default function SignUp() {
   const { setisAuth } = useAuthenticationState(); 
   const { setAccount } = useActiveAccount() ;
   const router = useRouter() ; // useRouter hook...
+  const searchParam = useSearchParams();
+  const lat = searchParam.get('latitude');
+  const long = searchParam.get('longitude');
+  const text = searchParam.get('text');
   // initializing the react-hook-form...
   const { register , handleSubmit , formState:{ errors , isSubmitting }} = useForm({ resolver:zodResolver(signUpDataType) }) ;
   // function for handling form submittion...
@@ -40,7 +44,7 @@ export default function SignUp() {
       toast.error('Form data validation failed!!')
       return 'ZOD validation failed...';
     }
-    const apiRes = await axios.post('/api/auth/register',data);
+    const apiRes = await axiosInstance.post(`/api/auth/register?lat=${lat}&long=${long}&text=${text}`, data);
     if (apiRes.status === 200) {
       const userInfo = { email:apiRes.data.userCred.email , userId:apiRes.data.userCred.userId } // making separate objet for userInfo...
       toast.dismiss(loadingToastId);
@@ -86,7 +90,7 @@ export default function SignUp() {
               <User className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-amber-400 dark:group-focus-within:stroke-blue-400 dark:stroke-white" />
               <input
                 type="text"
-                
+                {...register('Name')}    
                 placeholder="enter your name"
                 className="w-full py-2 text-sm px-1 outline-none bg-transparent dark:text-white"
               />
@@ -101,7 +105,6 @@ export default function SignUp() {
               <input
                 type="text"
                 {...register('Username')}
-                onChange={(e) => {  }}
                 placeholder="enter your username"
                 className="w-full py-2 text-sm px-1 outline-none bg-transparent dark:text-white"
               />

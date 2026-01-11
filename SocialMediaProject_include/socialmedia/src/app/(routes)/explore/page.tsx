@@ -93,6 +93,7 @@ export default function explore() {
                     </div>
 
                     {/* Who to Follow */}
+                    {/* account suggestions according to my preference... */}
                     <div className='bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm'>
                         <div className='p-4 border-b border-gray-200 dark:border-slate-700'>
                             <h2 className='text-xl font-bold text-gray-900 dark:text-white'>Who to follow</h2>
