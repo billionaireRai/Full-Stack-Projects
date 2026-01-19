@@ -1,0 +1,9 @@
+- [x] Update userCardProp interface to include optional 'id' field
+- [x] Modify accountFetchingService: Remove userId from query and add blocking check
+- [x] Modify profileSpecificDataService: Fetch blocked account IDs at start
+- [x] Update returnAccountDataInStructure to include 'id' in returned object
+- [x] Filter mutualFriendAccounts to exclude blocked accounts
+- [x] Modify moreAccounts query to exclude blocked accounts using $nin
+- [x] Filter likedToAcc to exclude blocked accounts
+- [x] Filter accountsWhosPost to exclude blocked accounts
+- [x] Filter likedPosts to exclude posts where author is blocked

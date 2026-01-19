@@ -15,11 +15,11 @@ export const getDecodedDataFromCookie = async (cookieName:string) => {
     const Token = userCookie.get(cookieName)?.value ;
     if (!Token) {
         console.log('token is missing !!');
-        throw new Error("TOKEN_MISSING")
+        return new Error("TOKEN_MISSING")
     }
     if (!accessTokenSecret || !refreshTokenSecret) {
         console.log('Some of the secret is missing !!');
-        throw new Error("SECRET_MISSING")
+        return new Error("SECRET_MISSING")
     }
     try {
         const decodedToken = jsonwebtoken.verify(Token,accessTokenSecret) as JwtPayload;
@@ -30,6 +30,6 @@ export const getDecodedDataFromCookie = async (cookieName:string) => {
         return tokenData;
     } catch (error) {
         console.error('Token verification failed:', error);
-        throw new Error('ACCESS_TOKEN_EXPIRED')
+        return new Error('ACCESS_TOKEN_EXPIRED')
     }
  }

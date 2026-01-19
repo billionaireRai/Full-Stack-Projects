@@ -17,6 +17,15 @@ interface PostCardProps {
   cover?:string
   username?: string;
   handle?: string;
+  bio?:string
+  userliked?:boolean,
+  usereposted?:boolean,
+  usercommented?:boolean,
+  userbookmarked?:boolean,
+  isPinned?:boolean,
+  isVerified?:boolean
+  followers?:string,
+  following?:string,
   timestamp?: string;
   content?: string;
   media?: string[];
@@ -43,7 +52,16 @@ export default function PostCard({
   avatar = '/images/myProfile.jpg',
   cover='https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg',
   username = 'Amritansh Rai',
+  bio='Emma just hehe my way thru life...',
   handle = 'amritansh_coder',
+  followers='327k',
+  following='177',
+  userliked=false,
+  usereposted=false,
+  usercommented=false,
+  userbookmarked=false,
+  isPinned=false,
+  isVerified=false,
   timestamp = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).toLocaleLowerCase(),
   content = 'I am planning to buy a new laptop, as my old one has become trash. Wants recommendation of you guys',
   media=[],
@@ -78,19 +96,16 @@ export default function PostCard({
       { label: "Add/remove from Lists", icon: <List className="w-4 h-4" /> },
       { label: "Change who can reply", icon: <MessageCircle className="w-4 h-4" /> },
       { label: "View engagements", icon: <BarChart3 className="w-4 h-4" /> },
-      { label: "Embed post", icon: <Code className="w-4 h-4" /> },
-      { label: "View analytics", icon: <TrendingUp className="w-4 h-4" /> },
-      { label: "Request Community Note", icon: <FileText className="w-4 h-4" /> }
   ], [isHighlighted])
 
   // states related to actions of each post...
-  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(userliked);
   const [localLikes, setLocalLikes] = useState<number>(likes);
-  const [isReposted, setIsReposted] = useState<boolean>(false);
+  const [isReposted, setIsReposted] = useState<boolean>(usereposted);
   const [localReposts, setLocalReposts] = useState<number>(reposts);
-  const [isCommented, setIsCommented] = useState<boolean>(false);
+  const [isCommented, setIsCommented] = useState<boolean>(usercommented);
   const [localComments, setLocalComments] = useState<number>(replies);
-  const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(userbookmarked);
   const [isShared, setIsShared] = useState<boolean>(false);
 
 
@@ -136,7 +151,7 @@ export default function PostCard({
   }
 
   // function handling action click...
-  const actionClick = (event: React.MouseEvent, action : actionType) => {
+  const actionClick = (event: React.MouseEvent<HTMLSpanElement, MouseEvent>, action : actionType) => {
     event.stopPropagation();
     if (action.label === 'Comment') setCommentCardPop(true)  ; // after successfull commmenting , will edit comment ui...
       else if (action.label === 'Like') {
@@ -237,6 +252,11 @@ export default function PostCard({
     setLocalComments(isCommented ? localComments - 1 : localComments + 1)
   }
 
+  function functionMoreOptions(event:React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    event.stopPropagation() ; 
+    setPostOptions(!postOptions) ;
+  }
+
   return (
     <div 
       onClick={() => { router.push(`/@${handle}/post/${postId}`) }}
@@ -261,7 +281,9 @@ export default function PostCard({
             <span className={`font-semibold text-gray-900 dark:text-gray-100 text-base ${!showActions ? 'text-md' : 'sm:text-lg'} truncate`}>
               {username}
             </span>
-            <span><Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/></span>
+            {isVerified && (
+              <span><Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/></span>
+            )}
             <Link 
             href={`/@${handle}`}
             className={`text-gray-500 dark:text-gray-400 text-xs sm:text-base truncate`}>
@@ -277,7 +299,7 @@ export default function PostCard({
             <Tooltip>
               <TooltipTrigger asChild>
             <button
-              onClick={() => setPostOptions(!postOptions)}
+              onClick={(event) => functionMoreOptions(event) }
               className={`ml-auto rounded-full p-1.5 cursor-pointer transition-colors ${postOptions ? 'bg-gray-100 dark:bg-gray-950' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}
             >
               <MoreVerticalIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -340,20 +362,14 @@ export default function PostCard({
           {/* Actions */}
           <div className={`flex justify-between items-center mt-3 pt-2 ${!showActions ? "border-none" : ''} border-t border-gray-100 dark:border-gray-700`}>
             {showActions && actions.map((action, i) => (
-              <Tooltip key={i}>
-                <TooltipTrigger asChild>
-                  <button
-                  ref={action.label === 'Share' ? shareRef : null}
-                  onClick={(event) => { actionClick(event, action) }}
-                  className="flex items-center group py-1.5 sm:py-1 sm:px-3 rounded-lg text-gray-500 dark:text-white hover:text-yellow-500 dark:hover:text-blue-500 transition-all text-sm cursor-pointer">
-                    <span className='p-2 rounded-full group-hover:bg-yellow-100 dark:group-hover:bg-gray-950'>{action.icon}</span>
-                    <span className={`hidden sm:inline ${(action.label === 'Like' && isLiked) || (action.label ==='Repost' && isReposted) || (action.label === 'Comment' && isCommented) || (action.label === 'Bookmark' && isBookmarked) || (action.label === 'share' && isShared) ? 'text-yellow-500 dark:text-blue-500' : ''}`}>{action.value}</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{action.label}</p>
-                </TooltipContent>
-              </Tooltip>
+              <button
+              key={i}
+              ref={action.label === 'Share' ? shareRef : null}
+              className="flex items-center group py-1.5 sm:py-1 sm:px-3 rounded-lg text-gray-500 dark:text-white hover:text-yellow-500 dark:hover:text-blue-500 transition-all text-sm cursor-pointer"
+              title={action.label}>
+                <span onClick={(event) => { actionClick(event, action) }} className='p-2 rounded-full group-hover:bg-yellow-100 dark:group-hover:bg-gray-950'>{action.icon}</span>
+                <span className={`hidden sm:inline ${(action.label === 'Like' && isLiked) || (action.label ==='Repost' && isReposted) || (action.label === 'Comment' && isCommented) || (action.label === 'Bookmark' && isBookmarked) || (action.label === 'share' && isShared) ? 'text-yellow-500 dark:text-blue-500' : ''}`}>{action.value}</span>
+              </button>
             ))}
           </div>
         </div>
@@ -366,10 +382,10 @@ export default function PostCard({
           handle: handle,
           cover:cover,
           avatar: avatar,
-          bio: 'This is a sample bio for the user.', // Default bio, can be passed as prop later
+          bio:bio, // Default bio, can be passed as prop later
           joined: timestamp,
-          following: 123, // Default values, can be passed as props
-          followers: 456
+          following: following, // Default values, can be passed as props
+          followers: followers
         }}
         visible={showAccountPopup}
         onOpen = {() => { setShowAccountPopup(true)}}

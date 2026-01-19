@@ -7,7 +7,8 @@ export const getlatestprofileInfo = async (handle:string) => {
       const profileRes = await axiosInstance.get(`/api/profile?handle=${handle}`) ; // making request to profile api...
       if (profileRes.status === 200) {
         const data : userCardProp = profileRes.data.accountData ; // extracting the data...
-        return data ;
+        const Blocked : boolean = profileRes.data.blocked ; 
+        return { data , Blocked } ;
       }
       return 'failed' ;
     } catch (error) {

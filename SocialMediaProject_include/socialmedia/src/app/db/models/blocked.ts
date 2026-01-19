@@ -2,22 +2,17 @@ import mongoose from "mongoose";
 
 const blockSchema = new mongoose.Schema(
   {
-    blockedBy: {
+    blockedByAcc: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "account",
       required: true,
       index: true
     },
-    blockedUser: {
+    blockedAcc: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "account",
       required: true,
       index: true
-    },
-    reason: {
-      type: String,
-      trim: true,
-      maxlength: 2000
     },
     source: {
       type: String,

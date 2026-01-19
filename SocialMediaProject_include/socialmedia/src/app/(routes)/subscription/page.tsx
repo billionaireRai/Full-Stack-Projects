@@ -26,7 +26,7 @@ export const plans: SubsPlanType[] = [
     name: "Free",
     price: "$0 / month",
     desc: "Explore Echofox and understand the ecosystem",
-    highlight: "Start here",
+    highlight: "Started here",
     features: [
       "Access public content feed",
       "Create up to 50 posts per month",
@@ -39,7 +39,7 @@ export const plans: SubsPlanType[] = [
   },
   {
     name: "Pro",
-    price: "$9 / month",
+    price: "$19 / month",
     desc: "For professionals who want predictable visibility",
     highlight: "Most popular",
     features: [
@@ -54,7 +54,7 @@ export const plans: SubsPlanType[] = [
   },
   {
     name: "Creator",
-    price: "$19 / month",
+    price: "$39 / month",
     desc: "Turn content into authority and income",
     highlight: "Best for creators",
     features: [
@@ -112,7 +112,7 @@ export default function SubscriptionPage() {
       {selectedPlan && (
         <Link
           href={`/payment-page?plan=${selectedPlan.name}`}
-          className="fixed right-6 top-6 z-50 flex items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-500 dark:from-blue-500 dark:to-blue-600 px-6 py-3 font-semibold text-white shadow-lg hover:scale-105 transition"
+          className="fixed right-6 top-6 z-50 flex items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-500 px-6 py-3 font-semibold text-white shadow-lg hover:scale-105 transition"
         >
           <CreditCard className="w-5 h-5" />
           Proceed to Pay
@@ -143,7 +143,7 @@ export default function SubscriptionPage() {
               key={plan.name}
               className={`flex flex-col justify-between rounded-2xl border p-6 shadow-lg transition-all duration-500 h-[520px]
                 ${isSelected
-                  ? "border-yellow-500 dark:border-blue-600 bg-white dark:bg-black"
+                  ? "border-yellow-500 bg-white dark:bg-black"
                   : "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black"
                 }`}
             >
@@ -153,8 +153,10 @@ export default function SubscriptionPage() {
                   <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     {plan.name}
                   </h2>
-                  <span className="text-xs px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                    {plan.highlight}
+                  <span className={`text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-900/40 text-black dark:text-gray-300 ${plan.highlight === 'Most popular' ? 'animate-bounce' : ''}`}>
+                    <div className="bg-gray-200 dark:bg-gray-900/40 rounded-full">
+                      {plan.highlight}
+                    </div>
                   </span>
                 </div>
 
@@ -184,7 +186,7 @@ export default function SubscriptionPage() {
                 onClick={() => setSelectedPlan(plan)}
                 className={`mt-6 w-full cursor-pointer rounded-xl py-3 font-semibold transition
                   ${isSelected
-                    ? "bg-yellow-500 dark:bg-blue-600 text-white"
+                    ? "bg-yellow-500 text-white"
                     : "bg-black dark:bg-white text-white dark:text-black hover:bg-yellow-500 hover:text-white"
                   }`}
               >

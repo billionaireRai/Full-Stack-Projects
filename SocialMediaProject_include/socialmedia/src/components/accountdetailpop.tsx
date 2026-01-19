@@ -3,7 +3,12 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
+import axiosInstance from '@/lib/interceptor'
+import { AxiosResponse } from 'axios'
+import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
+import Spinner from './spinner'
 
 interface UserDetails {
   name: string
@@ -11,8 +16,8 @@ interface UserDetails {
   avatar: string
   bio?: string
   joined?: string
-  following: number
-  followers: number
+  following: string
+  followers: string
   cover?: string
 }
 
@@ -22,16 +27,33 @@ interface AccountDetailPopProps {
   onOpen?: () => void
   onClose?: () => void
   position?: { top: number; left: number }
+  isFollowing:boolean
 }
 
-export default function AccountDetailPop({
-  user,
-  visible,
-  onOpen,
-  onClose,
-  position = { top: 0, left: 0 }
-}: AccountDetailPopProps) {
-  if (!visible) return null
+export default function AccountDetailPop({ user,visible,onOpen,onClose,position = { top: 0, left: 0 } , isFollowing }: AccountDetailPopProps) {
+  const [Loading, setLoading] = useState<boolean>(false);
+  const [IsFollowing, setIsFollowing] = useState(isFollowing);
+  
+  // function handling toggle follow logic...
+  async function handleFollowToggleLogic() {
+    setLoading(true); // from the starting...
+      const newFollowing = !IsFollowing; // determine the new state...
+      try {
+        const apires: AxiosResponse = await axiosInstance.get(`/api/user/follow?accounthandle=${user.handle}&follow=${newFollowing}`); // api response instance...
+          if (apires.status === 200) {
+            setIsFollowing(newFollowing); // update state immediately on success...
+            toast.success(`${newFollowing ? 'Added to your following...' : 'Removed from following !!'}`);
+          } else {
+            toast.error('Failed with action...');
+          }
+      } catch (error) {
+        toast.error('Failed with action...');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+  if (!visible) return null ;
 
   return (
     <motion.div
@@ -61,12 +83,17 @@ export default function AccountDetailPop({
           <img
             src={user.avatar}
             alt={`${user.name} avatar`}
-            className="rounded-full w-18 h-18 border-4 border-white dark:border-black object-cover"
+            className="rounded-full w-18 h-18 border-2 border-white dark:border-black object-cover"
           />
           <button
-            className="rounded-xl border bg-yellow-400 cursor-pointer dark:bg-blue-600 border-gray-300 dark:border-gray-700 py-2 px-5 text-sm font-semibold text-gray-900 dark:text-white hover:scale-105 transition"
+            onClick={(e) => { e.stopPropagation(); handleFollowToggleLogic(); }}
+            className={`text-sm font-semibold px-4 py-2
+               ${IsFollowing
+               ? 'bg-white border border-gray-300 dark:border-gray-600 dark:bg-gray-950 dark:text-blue-500 hover:bg-yellow-100        dark:hover:bg-gray-950 hover:text-yellow-400 dark:hover:text-blue-700 cursor-pointer'
+               : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 cursor-pointer'
+               } rounded-full`}
           >
-            Follow
+            { Loading ? <Spinner/> : (IsFollowing ? 'following' : 'follow') }
           </button>
         </div>
 
@@ -113,7 +140,7 @@ export default function AccountDetailPop({
              {user.joined || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short'})}
            </p>
            <Link href={`/@${user.handle}`}>
-             <button className='cursor-pointer w-full font-semibold m-1 py-2 px-4 rounded-lg hover:opacity-80 bg-yellow-400 dark:bg-blue-600'>View Profile</button>
+             <button className='cursor-pointer w-full font-semibold mb-2 py-2 px-4 rounded-lg hover:opacity-80 bg-yellow-400'>View Profile</button>
            </Link>
       </div>
     </motion.div>

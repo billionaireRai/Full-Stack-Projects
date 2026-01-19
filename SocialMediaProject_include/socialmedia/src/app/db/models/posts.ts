@@ -1,11 +1,24 @@
 import mongoose from "mongoose";
 import { urlRegex } from "@/app/controllers/regex";
 
+const mediaUrlSchema = new mongoose.Schema({
+  url: {
+    type: String,
+    trim: true,
+    default: '',
+    maxlength: [500, 'URL cannot exceed 500 characters']
+  },
+  public_id: {
+    type: String,
+    default: ''
+  }
+});
+
 const postSchema = new mongoose.Schema(
   {
     authorId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "account",
       required: true,
       index: true
     },
@@ -19,9 +32,14 @@ const postSchema = new mongoose.Schema(
     },
 
     mediaUrls: {
-      type: [String],
+      type: [mediaUrlSchema],
       default: [],
-      match: [urlRegex, "Incorrect URL format..."]
+      validate: {
+        validator: function(v: any[]) {
+          return v.every((item: any) => urlRegex.test(item.url));
+        },
+        message: "Incorrect URL format..."
+      }
     },
 
     replyAllowedBy:{
@@ -30,36 +48,21 @@ const postSchema = new mongoose.Schema(
       enum:['everyone','following','mentioned','verified']
     },
 
-    /* Replies */
+    // Replies 
     replyToPostId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
       default: null
     },
-
-    /* Repost / Quote support */
+    // Repost / Quote support 
     postType: {
       type: String,
-      enum: ["original", "repost", "quote"],
+      enum: ["original", "repost", "comment"],
       default: "original",
       index: true
     },
 
-    originalPostId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
-      default: null
-    },
-
-    /* Used only when postType === "quote" */
-    quoteText: {
-      type: String,
-      trim: true,
-      maxlength: 280,
-      default: null
-    },
-
-    /* Discovery */
+    // Discovery
     hashtags: {
       type: [String],
       default: [],

@@ -1,9 +1,7 @@
 "use client"
 
-import mongoose from "mongoose";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
 
 export interface accountType {
   name:string ,
@@ -11,7 +9,7 @@ export interface accountType {
   bio:string ,
   location:{
     text:string,
-    coordinates:number[] // lat,long
+    coordinates:[number,number] // lat,long
   },
   website:string,
   joinDate:string,

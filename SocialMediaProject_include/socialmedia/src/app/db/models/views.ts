@@ -8,9 +8,9 @@ const viewSchema = new mongoose.Schema(
       required: true,
       index: true, // Faster lookups for post analytics
     },
-    userId: {
+    accountId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      ref: "account",
       required:[true,'Required for tracking....'],
       index: true,
     },
@@ -30,5 +30,5 @@ viewSchema.index({ postId: 1, userId: 1 }, { unique: true, sparse: true });
 viewSchema.index({ postId: 1, ipAddress: 1 },{ unique: true, sparse: true });
 
 
-const Views = mongoose.model("Views", viewSchema);
+const Views = mongoose.models.Views || mongoose.model("Views", viewSchema);
 export default Views;

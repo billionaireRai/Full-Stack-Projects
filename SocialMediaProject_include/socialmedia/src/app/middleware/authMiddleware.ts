@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
-export const config = {
-  matcher: ["/username","/explore","/payment-page","/subscription","/api/profile"],
-  runtime: 'nodejs'
-};
+const PUBLIC_ROUTES = ["/","/auth/log-in","/auth/sign-up","/auth/forgot-password","/auth/reset-password"];
 
-export default async function authMiddleware(request: NextRequest) {
-  const cookiess = await cookies() ;
-  const accessToken = cookiess.get("accessToken")?.value || request.headers.get("authorization")?.replace("Bearer ", "");
-  const refreshToken = cookiess.get("refreshToken")?.value || request.headers.get("authorization")?.replace("Bearer ", "");
+export default function authMiddleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  if (!accessToken || !refreshToken) return NextResponse.redirect(new URL("/login", request.url));
+  if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) return NextResponse.next();
+
+  // checking tokens in cookies...
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
+
+  // no existed session...
+  if (!accessToken && !refreshToken) return NextResponse.redirect(new URL("/auth/log-in", request.url));
 
   return NextResponse.next();
 }

@@ -1,19 +1,25 @@
-'use client'
+ 'use client'
 
-import React, { useState , useEffect } from 'react';
+import React, { useState , useEffect, useRef } from 'react';
 import Trendcancelpop from '@/components/trendcancelpop';
 import ReportPop from '@/components/reportPop';
 import BlockUser from '@/components/blockUser';
 import Link from 'next/link';
 import Image from 'next/image';
 import Usercard from '@/components/usercard';
+import Spinner from '@/components/spinner';
 import PostCard from '@/components/postcard';
 import ProfileEditor from '@/components/profileeditor';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
-import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users } from 'lucide-react';
+import { handleScrollToTop } from '@/lib/windowtopscroll';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
+import axiosInstance from '@/lib/interceptor';
+import { AxiosResponse } from 'axios';
+import DeleteModal from '@/components/deletemodal';
+import SharePopup from '@/components/sharePopUp';
 
 interface PostType {
     id: string,
@@ -23,10 +29,13 @@ interface PostType {
     reposts: number,
     likes: number,
     views: number,
-    bookmarks: number,
     mediaUrls?:string[],
     hashTags?:string[],
-    mentions?:string[]
+    mentions?:string[],
+    userliked?: boolean,
+    usereposted?: boolean,
+    usercommented?: boolean,
+    userbookmarked?: boolean
 }
 
 interface innerPostAuthorInfo {
@@ -35,7 +44,12 @@ interface innerPostAuthorInfo {
   isVerified: boolean;
   followers:string,
   following:string,
-  avatar: string;
+  bio:string,
+  avatar: string,
+  banner:string
+  mediaUrls:string[]
+  mentions:string[]
+  hashTags:string[]
   content: string;
   postedAt: string;
 }
@@ -53,7 +67,10 @@ interface RepliedPostsType {
   reposts:number,
   likes:number,
   views:number,
-  bookmarks:number
+  userliked?: boolean,
+  usereposted?: boolean,
+  usercommented?: boolean,
+  userbookmarked?: boolean
 }
 
 interface userAllMedias {
@@ -70,12 +87,17 @@ interface tabsTypes {
 export default function UserProfilePage() {
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
   const { username } = useParams() ; // taking the username from URL...
-  const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  const fetchedHandlesRef = useRef<Set<string>>(new Set()); // ref to track fetched handles
+  const [isFollowing, setisFollowing] = useState<boolean>(false);
   const [isSelf, setisSelf] = useState<boolean>(false) ;
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
+  const [suggesstionNum, setsuggesstionNum] = useState<number>(5);
+  const [showDeleteAccPop,setshowDeleteAccPop] = useState<boolean>(false);
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
+  const [Loading, setLoading] = useState(false);
   const [OpenReportPop, setOpenReportPop] = useState<boolean>(false)
   const [showBlockPop, setshowBlockPop] = useState<Boolean>(false)
+  const [SharePop, setSharePop] = useState<boolean>(false)
   const [IsBlocked, setIsBlocked] = useState<boolean>(false);
   const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
   
@@ -86,7 +108,7 @@ export default function UserProfilePage() {
     bio: "Digital creator • Photography enthusiast • Coffee lover • Building amazing things one line of code at a time",
     location: {
        text:'San Francisco, CA',
-       coordinates: [28.450637197292124, 77.14711048980648],
+       coordinates: [28.450637197292124, 77.14711048980648] as [number, number],
     },
     website: "https://www.johndoe-portfolio.com",
     joinDate: "Joined March 2012",
@@ -110,8 +132,126 @@ export default function UserProfilePage() {
   ];
   const [activeTab, setActiveTab] = useState<tabsTypes>({id:'all',label:'All'}); // current active tab state...
 
-  // random post data of UI checking...
-  const posts = [
+  // random follow suggestions data
+  const [FollowSuggesstions, setFollowSuggesstions] = useState<userCardProp[]>([
+    {
+      decodedHandle: 'alice_dev',
+      name: 'Alice Developer',
+      IsFollowing: true,
+      account: {
+        name: 'Alice Developer',
+        handle: 'alice_dev',
+        bio: 'Full-stack developer | React enthusiast | Building the future one commit at a time.',
+        location: {
+          text: 'New York, NY',
+          coordinates: [40.7128, -74.0060] as [number, number]
+        },
+        website: 'https://alice-dev.com',
+        joinDate: '2020-05-15',
+        following: '234',
+        followers: '1.2k',
+        Posts: '456',
+        isCompleted: true,
+        isVerified: true,
+        bannerUrl: '/images/default-banner.jpg',
+        avatarUrl: '/images/default-profile-pic.png'
+      }
+    },
+    {
+      decodedHandle: 'bob_designer',
+      name: 'Bob Designer',
+      IsFollowing: false,
+      account: {
+        name: 'Bob Designer',
+        handle: 'bob_designer',
+        bio: 'Creative designer | Minimalist | Coffee addict | Turning ideas into beautiful interfaces.',
+        location: {
+          text: 'Los Angeles, CA',
+          coordinates: [34.0522, -118.2437] as [number, number]
+        },
+        website: 'https://bob-designs.com',
+        joinDate: '2019-08-22',
+        following: '567',
+        followers: '3.4k',
+        Posts: '789',
+        isCompleted: true,
+        isVerified: false,
+        bannerUrl: '/images/default-banner.jpg',
+        avatarUrl: '/images/default-profile-pic.png'
+      }
+    },
+    {
+      decodedHandle: 'charlie_writer',
+      name: 'Charlie Writer',
+      IsFollowing: false,
+      account: {
+        name: 'Charlie Writer',
+        handle: 'charlie_writer',
+        bio: 'Tech writer | Blogger | Sharing insights on the latest in technology and development.',
+        location: {
+          text: 'Austin, TX',
+          coordinates: [30.2672, -97.7431] as [number, number]
+        },
+        website: 'https://charlie-writes.com',
+        joinDate: '2018-11-10',
+        following: '123',
+        followers: '5.6k',
+        Posts: '1,234',
+        isCompleted: true,
+        isVerified: true,
+        bannerUrl: '/images/default-banner.jpg',
+        avatarUrl: '/images/default-profile-pic.png'
+      }
+    },
+    {
+      decodedHandle: 'diana_startup',
+      name: 'Diana Entrepreneur',
+      IsFollowing: true,
+      account: {
+        name: 'Diana Entrepreneur',
+        handle: 'diana_startup',
+        bio: 'Entrepreneur | AI enthusiast | Founder of innovative tech solutions.',
+        location: {
+          text: 'Seattle, WA',
+          coordinates: [47.6062, -122.3321] as [number, number]
+        },
+        website: 'https://diana-startup.com',
+        joinDate: '2021-02-28',
+        following: '345',
+        followers: '890',
+        Posts: '234',
+        isCompleted: true,
+        isVerified: false,
+        bannerUrl: '/images/default-banner.jpg',
+        avatarUrl: '/images/default-profile-pic.png'
+      }
+    },
+    {
+      decodedHandle: 'eve_photographer',
+      name: 'Eve Photographer',
+      IsFollowing: false,
+      account: {
+        name: 'Eve Photographer',
+        handle: 'eve_photographer',
+        bio: 'Professional photographer | Nature lover | Sharing visual stories through lenses.',
+        location: {
+          text: 'Denver, CO',
+          coordinates: [39.7392, -104.9903] as [number, number]
+        },
+        website: 'https://eve-photography.com',
+        joinDate: '2017-07-04',
+        following: '678',
+        followers: '7.8k',
+        Posts: '2,345',
+        isCompleted: true,
+        isVerified: true,
+        bannerUrl: '/images/default-banner.jpg',
+        avatarUrl: '/images/default-profile-pic.png'
+      }
+    }
+  ])
+
+  const [posts,setposts] = useState<PostType[]>([
     {
       id: "1",
       content: "Just launched my new portfolio website! Built with Next.js and Tailwind CSS. The developer experience is amazing! 🚀",
@@ -120,11 +260,14 @@ export default function UserProfilePage() {
       reposts: 45,
       likes: 128,
       views: 1000,
-      bookmarks: 50
+      userliked:true,
+      usereposted:true,
+      usercommented:false,
+      userbookmarked:false
     }
-  ];
+  ]);
 
-   const repliedPostData: RepliedPostsType[] = [
+   const [repliedPostData,setrepliedPostData] = useState<RepliedPostsType[]>([
     {
       id: "3",
       postId: '4223',
@@ -133,12 +276,17 @@ export default function UserProfilePage() {
         username: "amritansh_coder",
         followers:'352.7k',
         following:'242',
+        bio:'love you guys...',
         isVerified: true,
         avatar: "/images/myProfile.jpg",
+        banner:'',
+        mediaUrls:[],
+        mentions:['notsofit','vedantchoudhary'],
+        hashTags:['GSOC','opensource'],
         content: "Working on a new open source project. Can't wait to share it with the community!",
         postedAt: "3d ago"
       },
-      commentedText: "Working on a new open source project. Can't wait to share it with the community!",
+      commentedText: "Thats the spirit bro , just dont stop and keep upscaling!!!",
       mediaUrls: [],
       mentions:['notsofit','vedantchoudhary'],
       hashTags:['GSOC','opensource'],
@@ -147,11 +295,14 @@ export default function UserProfilePage() {
       reposts: 67,
       likes: 289,
       views: 500,
-      bookmarks: 20
+      userliked:true,
+      usereposted:false,
+      usercommented:true,
+      userbookmarked:false
     }
-  ]
+  ]);
 
-  let likedPosts = [
+  let [likedPosts,setlikedPosts] = useState([
     {
       id: "liked1",
       content: "Excited to announce my new project! It's been a journey of learning and growth.",
@@ -163,23 +314,27 @@ export default function UserProfilePage() {
       bookmarks: 10,
       mediaUrls: ["https://picsum.photos/400/300?random=10"],
       hashTags: ["webdev", "react"],
-      mentions: ["developer1"]
+      mentions: ["developer1"],
+      userliked:true,
+      usereposted:false,
+      usercommented:true,
+      userbookmarked:false
     }
-  ]
+  ])
 
-  let userMedia = {
+  let [userMedia,setuserMedia] = useState<userAllMedias>({
     images: [
-      "https://picsum.photos/400/300?random=1"
+      "https://res.cloudinary.com/demo/image/upload/v1698765432/sample_image_1.jpg"
     ],
     videos: [
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      "https://res.cloudinary.com/demo/video/upload/v1698765432/sample_video_1.mp4"
     ],
     docs: [
       "https://res.cloudinary.com/demo/image/upload/v1698765432/documents/sample_doc_1.pdf"
     ]
-  }
+  });
 
-  let highLightPosts = [
+  let [highLightPosts,sethighLightPosts] = useState([
     {
       id: "highlight1",
       content: "Excited to share my latest project! It's been a journey of learning and growth.",
@@ -188,12 +343,15 @@ export default function UserProfilePage() {
       reposts: 25,
       likes: 120,
       views: 500,
-      bookmarks: 10,
       mediaUrls: ["https://picsum.photos/400/300?random=10"],
       hashTags: ["webdev", "react"],
-      mentions: ["developer1"]
+      mentions: ["developer1"],
+      userliked:false,
+      usereposted:false,
+      usercommented:false,
+      userbookmarked:true
     }
-  ]
+  ]);
 
   const [Posts, setPosts] = useState<PostType[]>(posts) ; // rendering some random posts...
   const [RepliedPosts, setRepliedPosts] = useState<RepliedPostsType[]>(repliedPostData) ; // rendering some random replied posts...
@@ -204,23 +362,65 @@ export default function UserProfilePage() {
   useEffect(() => {
     const fetchAccountData = async () => {
       const handle = decodeURIComponent(username as string)?.slice(1);
+      if (fetchedHandlesRef.current.has(handle)) return ; // Skip if already fetched
+
       if (Account.account && Account.account?.handle === handle) {
         setisSelf(true);
         const acc = await getlatestprofileInfo(Account.account?.handle);
-        if (acc !== 'failed' && acc?.account) {
-          setAccount(acc);
-          setAccountInfo(acc.account);
+        if (acc !== 'failed' && acc?.data?.account) {
+          setAccount(acc.data.account);
+          setAccountInfo(acc.data.account);
+          setIsBlocked(acc.Blocked);
+          fetchedHandlesRef.current.add(handle);
         }
       } else {
         // fetching account info of other user...
         const acc = await getlatestprofileInfo(handle);
-        if (acc !== 'failed' && acc?.account) {
-          setAccountInfo(acc.account);
+        if (acc !== 'failed' && acc?.data.account) {
+          setAccountInfo(acc.data.account);
+          setIsBlocked(acc.Blocked);
+          fetchedHandlesRef.current.add(handle);
         }
       }
     };
-    fetchAccountData();
+    // fetchAccountData();
   }, [Account.account, username])
+
+  useEffect(() => {
+    async function functionToGetData() : Promise<void> {
+      const specificData : AxiosResponse = await axiosInstance.post('/api/profile',{ handle:AccountInfo.handle });
+      if (specificData.status === 200) {
+        const data = specificData.data.Infos;
+        if (data.posts) setPosts(data.posts);
+        if (data.likedPosts) setLikedPost(data.likedPosts);
+        if (data.medias) setuserMedia(data.medias) ;
+        if (data.suggestions) setFollowSuggesstions(data.suggestions) ;
+        if (data.replies) setrepliedPostData(data.replies) ;
+        if (data.highlights) setrepliedPostData(data.highlights) ;
+        
+      }
+    }
+    // functionToGetData();
+  }, [AccountInfo.handle])
+  
+  // toggleing follow logic...
+  async function handleFollowToggleLogic() {
+    setLoading(true); // from the starting...
+    const newFollowing = !isFollowing; // determine the new state...
+    try {
+      const apires: AxiosResponse = await axiosInstance.get(`/api/user/follow?accounthandle=${AccountInfo.handle}&follow=${newFollowing}`); // api response instance...
+        if (apires.status === 200) {
+          setisFollowing(newFollowing); // update state immediately on success...
+          toast.success(`${newFollowing ? 'Added to your following...' : 'Removed from following !!'}`);
+        } else {
+          toast.error('Failed with action...');
+        }
+    } catch (error) {
+      toast.error('Failed with action...');
+    } finally {
+      setLoading(false);
+    }
+  }
   
   // useeffect for more popup closing...
   useEffect(() => {
@@ -241,15 +441,22 @@ export default function UserProfilePage() {
 
   // funtion for profile link copy...
   const handleProfileLinkCopy = () => {
-    navigator.clipboard.writeText(`http://localhost:3000/${AccountInfo.handle}`)
-    .then(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+    console.log()
       console.log('profile url copied');
       toast.success('Profile URL is copied...');
      })
   }
+
+  // function handling account deletion logic...
+  const handleProfileDeleteLogic = async (handle:string) => { 
+    const deleteApi = await axiosInstance.delete(`/api/profile?profileHandle=${handle}`);
+
+  }
   
   return (
-    <div className='h-fit flex flex-col md:ml-72 font-poppins rounded-md p-2 dark:bg-black'>
+    <>
+      <div className='h-fit flex flex-col md:ml-72 font-poppins rounded-md p-2 dark:bg-black'>
         <div className='flex gap-2'>
           {/* Main Content - Profile */}
           <div className='flex-2 overflow-y-auto'>
@@ -282,7 +489,7 @@ export default function UserProfilePage() {
               </header>
 
               {/* Cover Photo */}
-              <div className={`relative h-1/5 rounded-lg bg-gradient-to-r from-yellow-100 to-yellow-300`}>
+              <div className={`relative h-full rounded-lg bg-gradient-to-r from-yellow-100 to-yellow-300`}>
                 <img
                   src={AccountInfo.bannerUrl}
                   alt="Cover"
@@ -320,13 +527,20 @@ export default function UserProfilePage() {
                            className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                             <span>Edit Profile</span><Edit2Icon size={15} />
                           </li>
-                          <li className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                          <li 
+                          onClick={() => { setSharePop(true) }}
+                          className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                             <span>Share Profile</span><Share2Icon size={15} />
                           </li>
                           <li 
                           onClick={() => { handleProfileLinkCopy() }}
                           className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                            <span>Copy Link</span><CopyIcon size={15}/>
+                          </li>
+                          <li 
+                          onClick={() => { setshowDeleteAccPop(true)  }}
+                          className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
+                           <span>Delete Account</span><Delete size={15}/>
                           </li>
                           { !isSelf && (
                             <>
@@ -337,7 +551,7 @@ export default function UserProfilePage() {
                                </li>
                                <li 
                                onClick={() => { setOpenReportPop(true) }}
-                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-gray-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
+                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
                                  <span>Report User</span><Flag size={15} />
                                </li>
                             </>
@@ -349,7 +563,7 @@ export default function UserProfilePage() {
                   {!isSelf && (
                   <button
                     disabled={IsBlocked}
-                    onClick={() => setIsFollowing(!isFollowing)}
+                    onClick={() => handleFollowToggleLogic()}
                     className={`px-4 py-2 rounded-full font-bold text-sm transition-colors ${
                       IsBlocked
                         ? 'border border-red-600 bg-red-200 dark:bg-gray-950 text-red-600 dark:text-red-700 cursor-not-allowed'
@@ -358,7 +572,7 @@ export default function UserProfilePage() {
                           : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 cursor-pointer'
                     }`}
                   >
-                    {IsBlocked ? 'Blocked' : isFollowing ? 'Following' : 'Follow' }
+                    {IsBlocked ? 'Blocked' : Loading ? <Spinner/> : (isFollowing ? 'Following' : 'Follow') }
                   </button>
                   )}
                 </div>
@@ -450,9 +664,11 @@ export default function UserProfilePage() {
                           likes={post.likes}
                           reposts={post.reposts}
                           replies={post.comments}
-                          shares={0}
                           views={post.views}
-                          bookmarked={post.bookmarks}
+                          userliked={post.userliked}
+                          usereposted={post.usereposted}
+                          usercommented={post.usercommented}
+                          userbookmarked={post.userbookmarked}
                         />
                       ))}
                     </div>
@@ -490,21 +706,20 @@ export default function UserProfilePage() {
                                 <Link href={`@${post.postAuthorInfo.username}/post/${post.postId}`} className="text-blue-500 hover:underline text-sm inline-block">Replied to post</Link>
                                 <div className="ml-4 border-l-2 rounded-md border-gray-300 dark:border-gray-600 pl-4">
                                   <PostCard
-                                    postId={post.id}
+                                    postId={post.postId}
                                     avatar={post.postAuthorInfo.avatar}
                                     username={post.postAuthorInfo.name}
+                                    followers={post.postAuthorInfo.followers}
+                                    following={post.postAuthorInfo.following}
+                                    // cover={post.postAuthorInfo.banner}                                    
                                     handle={post.postAuthorInfo.username}
                                     timestamp={post.postAuthorInfo.postedAt}
                                     content={post.postAuthorInfo.content}
-                                    hashTags={['opensource','webdevproject']}
-                                    mentions={['saketghokhale','ezsnippet']}
-                                    media={[]}
-                                    likes={0}
-                                    reposts={0}
-                                    replies={0}
-                                    shares={0}
-                                    views={0}
-                                    bookmarked={0}
+                                    media={post.postAuthorInfo.mediaUrls}
+                                    hashTags={post.postAuthorInfo.hashTags}
+                                    mentions={post.postAuthorInfo.mentions}
+                                    bio={post.postAuthorInfo.bio}
+                                    // media={post.postAuthorInfo.mediaUrls}
                                     showActions={false}
                                   />
                                 </div>
@@ -514,14 +729,19 @@ export default function UserProfilePage() {
                                   username={AccountInfo.name}
                                   handle={AccountInfo.handle}
                                   timestamp={post.repliedAt}
+                                  isVerified={AccountInfo.isVerified}
                                   content={post.commentedText}
+                                  mentions={post.mentions}
+                                  hashTags={post.hashTags}                  
                                   media={post.mediaUrls}
                                   likes={post.likes}
                                   reposts={post.reposts}
                                   replies={post.comments}
-                                  shares={0}
                                   views={post.views}
-                                  bookmarked={post.bookmarks}
+                                  userliked={post.userliked}
+                                  usereposted={post.usereposted}
+                                  usercommented={post.usercommented}
+                                  userbookmarked={post.userbookmarked}
                                 />
                               </div>
                             </div>
@@ -543,14 +763,16 @@ export default function UserProfilePage() {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                           {Medias.images.map((image, index) => (
                             <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition-shadow">
-                              <Image
-                                src={image}
-                                alt={`Media ${index + 1}`}
-                                width={300}
-                                height={300}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                                unoptimized
-                              />
+                              <Link href={image} target="_blank" key={index}  >
+                                <Image
+                                  src={image}
+                                  alt={`Media ${index + 1}`}
+                                  width={300}
+                                  height={300}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                                  unoptimized
+                                />
+                              </Link>
                             </div>
                           ))}
                         </div>
@@ -645,11 +867,13 @@ export default function UserProfilePage() {
                           likes={post.likes}
                           reposts={post.reposts}
                           replies={post.comments}
-                          shares={0}
                           views={post.views}
-                          bookmarked={post.bookmarks}
                           hashTags={post.hashTags}
                           mentions={post.mentions}
+                          userliked={post.userliked}
+                          usereposted={post.usereposted}
+                          usercommented={post.usercommented}
+                          userbookmarked={post.userbookmarked}
                         />
                       ))}
                     </div>
@@ -658,7 +882,7 @@ export default function UserProfilePage() {
 
                 {(activeTab.label === 'Highlights' || activeTab.label === 'All') && Posts.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Profile Higlights</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Profile Highlights</h3>
                     <div className='space-y-4'>
                       {Highlights.map((post:PostType) => (
                         <PostCard
@@ -673,10 +897,12 @@ export default function UserProfilePage() {
                           likes={post.likes}
                           reposts={post.reposts}
                           replies={post.comments}
-                          shares={0}
                           views={post.views}
-                          bookmarked={post.bookmarks}
                           highlighted={true}
+                          userliked={post.userliked}
+                          usereposted={post.usereposted}
+                          usercommented={post.usercommented}
+                          userbookmarked={post.userbookmarked}
                         />
                       ))}
                     </div>
@@ -692,44 +918,49 @@ export default function UserProfilePage() {
             <div className='space-y-4'>
               {/* Who to Follow */}
                 {/* account suggestions according to this USER profile respective...*/}
-              <div className='bg-white dark:bg-black rounded-xl'>
+              <div className='relative bg-white dark:bg-black rounded-xl'>
                 <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center border-gray-200 dark:border-gray-700'>
                   <Users size={20} /><h2 className='text-xl font-bold text-gray-900 dark:text-white'>Suggestions</h2>
                 </div>
                 <div className='p-4'>
-                  <div className='flex items-center justify-between'>
-                   <Usercard content={null} />
-                  </div>
-                  <div className='flex items-center justify-between'>
-                   <Usercard content={null}/>
-                  </div>
-                  <div className='flex items-center justify-between'>
-                   <Usercard content={null}/>
-                  </div>
-                  <div className='flex items-center justify-between'>
-                   <Usercard content={null}/>
+                  {FollowSuggesstions.map((usercard,index) =>
+                    (index+1) <= suggesstionNum && (
+                    <div key={index + 1} className='flex items-center justify-between'>
+                     <Usercard content={null} decodedHandle={usercard.decodedHandle} name={usercard.name} IsFollowing={usercard.IsFollowing}
+                     account={usercard.account} />
+                    </div>)
+                  )}
                   </div>
                 </div>
                 <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
-                  <Link 
-                   href='/explore'
-                   className='cursor-pointer text-blue-500 hover:text-blue-600 text-sm font-medium'>
+                  <button 
+                    className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'>
                     Show more
-                  </Link>
+                  </button>
                 </div>
+                <button onClick={() => { handleScrollToTop(window) }} className='fixed right-5 bottom-10 rounded-full p-1 hover:bg-yellow-100 dark:hover:bg-gray-950 cursor-pointer z-50'>
+                  <ArrowBigUpIcon width={40} height={40} stroke='5' className='fill-yellow-400'/>
+                </button>
               </div>
             </div>
           </div>
         </div>
-      { OpenProfileEditor && (
-        <ProfileEditor credentials={AccountInfo} closePop={() => { setOpenProfileEditor(false) }}/>
-      )}
-      { OpenReportPop && (
-        <ReportPop closeReportModal={() => { setOpenReportPop(false) }} username={AccountInfo.handle} />
-      )}
-      { showBlockPop && (
-        <BlockUser closeBlockPop={() => { setshowBlockPop(false) }} username={AccountInfo.handle} updateblockState={() => { setIsBlocked(!IsBlocked) }} isBlocked={IsBlocked} />
-      )}
-    </div>
-  );
-}
+      <>
+        { OpenProfileEditor && (
+          <ProfileEditor credentials={AccountInfo} closePop={() => { setOpenProfileEditor(false) }}/>
+        )}
+        { OpenReportPop && (
+          <ReportPop closeReportModal={() => { setOpenReportPop(false) }} username={AccountInfo.handle} />
+        )}
+        { showBlockPop && (
+          <BlockUser closeBlockPop={() => { setshowBlockPop(false) }} username={AccountInfo.handle} updateblockState={() => { setIsBlocked(!IsBlocked) }} isBlocked={IsBlocked} />
+        )}
+        { showDeleteAccPop && (
+          <DeleteModal closePopUp={() => { setshowDeleteAccPop(false) }} itemType={`Account @${AccountInfo.handle}`} onDelete={() => { handleProfileDeleteLogic(AccountInfo.handle) }}/>
+        )}
+        { SharePop && (
+          <SharePopup onClose={() => { setSharePop(false) }} open={SharePop} onCopy={() => { handleProfileLinkCopy() }} link={window.location.href} followerCount={AccountInfo.followers} followingCount={AccountInfo.following} text={`@${AccountInfo.handle}.${AccountInfo.bio}`}/>
+        )}
+      </>
+  </>
+)}

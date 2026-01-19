@@ -1,4 +1,5 @@
 import React from 'react'
+import axiosInstance from '@/lib/interceptor';
 import toast from 'react-hot-toast';
 
 interface BlockUserProp {
@@ -11,7 +12,8 @@ interface BlockUserProp {
 export default function BlockUser({ closeBlockPop , username , updateblockState, isBlocked }: BlockUserProp) {
 
   // function handling logic of blocking/unblocking...
-  const handleUserBlock = (toBlock:string) => {
+  const handleUserBlock = async (handle:string) => {
+    const blockApi = await axiosInstance.patch('/api/profile',{ handle:handle , isBlock:isBlocked }) ;
     updateblockState();
     closeBlockPop();
     toast.success(`Successfully ${isBlocked ? 'unblocked' : 'blocked'} user !!`);

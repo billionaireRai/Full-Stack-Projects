@@ -87,7 +87,7 @@ export default function paticularPost() {
   const [currentFilter, setcurrentFilter] = useState<string>('Relevency');
   const [PostInfo, setPostInfo] = useState<postInfoType | null>(null);
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
-  const [activeNav, setactiveNav] = useState<navOptionsType>({ label:'comments',value:'Comments'}) ; // state for handling active navs...
+  const [activeNav, setactiveNav] = useState<navOptionsType>({ label:'all',value:'All'}) ; // state for handling active navs...
   const [NavOptions, setNavOptions] = useState<navOptionsType[]>([
     { label:'all',value:'All'},
     { label: 'bookmark', value: 'Bookmark' },
@@ -910,11 +910,9 @@ export default function paticularPost() {
                                     mentions={['saketghokhale','ezsnippet']}
                                     media={[]}
                                     likes={0}
-                                    retweets={0}
+                                    reposts={0}
                                     replies={0}
-                                    shares={0}
                                     views={0}
-                                    bookmarked={0}
                                   />
                                 </div>
                                 <PostCard
@@ -926,7 +924,7 @@ export default function paticularPost() {
                                   content={post.commentedText}
                                   media={post.mediaUrls}
                                   likes={post.likes}
-                                  retweets={post.reposts}
+                                  reposts={post.reposts}
                                   replies={post.comments}
                                   shares={0}
                                   views={post.views}

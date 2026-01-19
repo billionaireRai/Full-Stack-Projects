@@ -31,19 +31,30 @@ const accountSchema = new mongoose.Schema({
         default: [0.0, 0.0] // lat,long
       }
     },
-    avatarUrl:{
+    avatar:{
+      url: {
         type:String,
         trim:true,
         default:'',
-        match:[urlRegex,'URL format is incorrect'],
         maxlength: [500, 'Avatar URL cannot exceed 500 characters']
+      },
+      public_id : {
+        type: String,
+        default: ''
+      }
+       
     },
-    bannerUrl:{
+    banner:{
+      url: {
         type:String,
         trim:true,
         default:'',
-        match:[urlRegex,'URL format is incorrect'],
-        maxlength: [500, 'Avatar URL cannot exceed 500 characters']
+        maxlength: [500, 'Banner URL cannot exceed 500 characters']
+      },
+      public_id : {
+        type: String,
+        default: ''
+      }
     },
     website:{
         type:String,
@@ -71,6 +82,15 @@ const accountSchema = new mongoose.Schema({
         Active:{
             type:Boolean,
             default:true
+        },
+        status:{
+            type:String,
+            enum:['ACTIVE','DELETION_PENDING', 'DELETED', 'SUSPENDED','DEACTIVATED'],
+            default:'ACTIVE'
+        },
+        scheduledDeletionAt:{
+            type:Date,
+            required:false
         },
         Type:{
             type:String,

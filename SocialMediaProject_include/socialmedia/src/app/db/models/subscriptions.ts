@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const subscriptionSchema = new mongoose.Schema(
   {
-    userId: {
+    accountId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "account",
       required: true,
       index: true
     },
@@ -57,6 +57,6 @@ const subscriptionSchema = new mongoose.Schema(
 // Preventing multiple active subscriptions per user...
 subscriptionSchema.index( { userId: 1, status: 1 }, { partialFilterExpression: { status: "active" } });
 
-const subscriptions = mongoose.model("subscriptions", subscriptionSchema);
+const subscriptions = mongoose.models.subscriptions || mongoose.model("subscriptions", subscriptionSchema);
 
 export default subscriptions;

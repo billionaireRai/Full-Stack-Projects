@@ -118,9 +118,9 @@ export default function SideNavbar() {
             >
               <Tooltip>
                 <TooltipTrigger>
-                  <div className="p-3 m-2 cursor-pointer rounded-full bg-white shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ease-in-out ring-2 ring-transparent hover:ring-gray-500 dark:hover:ring-gray-400">
+                  <div className="p-3 m-2 rounded-full bg-white shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ease-in-out ring-2 ring-transparent">
                     <div className={`transition-transform duration-500 ${isDark ? 'rotate-180' : 'rotate-0'}`}>
-                      {isDark ? <Sun size={20} className="text-black" /> : <Moon size={20} className="text-black" />}
+                      {isDark ? <Sun size={20} className="text-black cursor-pointer" /> : <Moon size={20} className="text-black cursor-pointer" />}
                     </div>
                   </div>
                 </TooltipTrigger>
@@ -259,9 +259,9 @@ export default function SideNavbar() {
               </button>
 
               {/* Profile dropdown trigger */}
-              <div className="dropdown-container flex items-center relative gap-2 mt-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-black">
+              <div className="dropdown-container flex items-center relative gap-2 my-4 p-2 rounded-lg hover:bg-yellow-100 dark:hover:bg-black">
                 <Image
-                  src="/images/myProfile.jpg"
+                  src={Account.account?.avatarUrl || '/images/default-profile-pic.png'}
                   height={40}
                   width={40}
                   alt="profile"
@@ -279,7 +279,7 @@ export default function SideNavbar() {
                       alt="blue-tick"
                     />
                   </span>
-                  <span className="text-gray-500 dark:text-gray-400 text-sm font-semibold">
+                  <span className="text-gray-700 dark:text-gray-400 text-xs font-semibold">
                     @amritansh_coder
                   </span>
                 </Link>

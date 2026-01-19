@@ -3,6 +3,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import React, { useState, useRef } from 'react'
 import AccountDetailPop from './accountdetailpop';
+import axiosInstance from '@/lib/interceptor';
+import { AxiosResponse } from 'axios';
+import Spinner from '@/components/spinner';
+import toast from 'react-hot-toast';
 
 interface accountInfoType {
   name:string ,
@@ -19,8 +23,8 @@ interface accountInfoType {
   Posts:string,
   isCompleted:boolean,
   isVerified:boolean,
-  coverImage:string,
-  avatar:string
+  bannerUrl:string,
+  avatarUrl:string
 }
 
 export interface userCardProp {
@@ -47,13 +51,14 @@ const defaultAccount : accountInfoType = {
   Posts: "89",
   isCompleted:false,
   isVerified: true,
-  coverImage: "https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg",
-  avatar: "/images/myProfile.jpg"
+  bannerUrl: "https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg",
+  avatarUrl: "/images/myProfile.jpg"
 }
 
-export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,IsFollowing=false,content='CS Grad ‘25 | MERN • GenAI • SD • Web3 • DSA | Code Coffee Commits, Deadlifts & Deployments' , heading, account = defaultAccount }:userCardProp) {
+export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,IsFollowing=false,content='CS Grad ‘25 | MERN • GenAI • SD • Web3 • DSA | Code Coffee Commits, Deadlifts & Deployments' , heading, account = defaultAccount }:userCardProp) {
   const [isFollowing, setisFollowing] = useState<boolean>(IsFollowing);
   const [showAccountPopup, setShowAccountPopup] = useState<boolean>(false);
+  const [Loading, setLoading] = useState(false) ; // for UI simulation...
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const avatarRef = useRef<HTMLImageElement>(null);
 
@@ -73,18 +78,37 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
     setShowAccountPopup(false);
   };
 
+  // function handling toggle follow logic...
+  async function handleFollowToggleLogic() {
+    setLoading(true); // from the starting...
+    const newFollowing = !isFollowing; // determine the new state...
+    try {
+      const apires: AxiosResponse = await axiosInstance.get(`/api/user/follow?accounthandle=${decodedHandle}&follow=${newFollowing}`); // api response instance...
+        if (apires.status === 200) {
+          setisFollowing(newFollowing); // update state immediately on success...
+          toast.success(`${newFollowing ? 'Added to your following...' : 'Removed from following !!'}`);
+        } else {
+          toast.error('Failed with action...');
+        }
+    } catch (error) {
+      toast.error('Failed with action...');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-  <div className="shadow-sm hover:shadow-md transition-shadow duration-300 dark:shadow-gray-900 dark:bg-black dark:text-white rounded-xl py-3 px-2 w-full mb-1 flex flex-col gap-3">
+  <div className="shadow-sm hover:shadow-md dark:shadow-gray-900 dark:bg-black dark:text-white rounded-xl py-3 px-2 w-full mb-1 flex flex-col gap-3">
         {heading}
              {/* Profile section */}
              <div className="flex items-start gap-2 rounded-lg p-2 transition-colors">
                {/* Profile Image */}
-               <Link href={`/${decodedHandle}`}>
+               <Link href={`/@${decodedHandle}`}>
                  <img
                    ref={avatarRef}
-                   src={account?.avatar || "/images/myProfile.jpg"}
+                   src={account?.avatarUrl || "/images/myProfile.jpg"}
                    alt="profile"
-                   className="w-12 h-12 rounded-full object-cover border border-gray-700 cursor-pointer"
+                   className="w-12 h-12 rounded-full object-cover cursor-pointer"
                    onMouseEnter={handleAvatarHover}
                    onMouseLeave={handleAvatarLeave}
                  />
@@ -93,10 +117,10 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
                {/* User Info */}
                <div className="flex flex-col justify-center flex-1 gap-1">
                  <div className="flex items-center gap-1">
-                   <Link href={`/${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
+                   <Link href={`/@${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-user'/>
                  </div>
-                   <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-xs">{decodedHandle}</Link>
+                   <Link href={`/@${decodedHandle}`} className="text-gray-600 w-fit text-xs">{decodedHandle}</Link>
                  <p className="text-xs w-full text-gray-500 mt-1">
                    {content ? content : ''}
                  </p>
@@ -104,13 +128,13 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
 
                {/* Follow button */}
                <div
-               onClick={() => { setisFollowing(!isFollowing) }}
+               onClick={() => { handleFollowToggleLogic()}}
                className={`text-sm font-semibold px-4 py-2
                ${isFollowing
-               ? 'bg-transparent border border-gray-300 dark:border-gray-600 dark:bg-gray-950 dark:text-blue-500 hover:bg-yellow-100        dark:hover:bg-gray-950 hover:text-yellow-400 dark:hover:text-blue-700 cursor-pointer'
+               ? 'bg-white border border-gray-300 dark:border-gray-600 dark:bg-gray-950 dark:text-blue-500 hover:bg-yellow-100        dark:hover:bg-gray-950 hover:text-yellow-400 dark:hover:text-blue-700 cursor-pointer'
                : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 cursor-pointer'
-               } rounded-full transition`}>
-                 { isFollowing ? 'Following' : 'Follow' }
+               } rounded-full`}>
+                 { Loading ? <Spinner/> : ( isFollowing ? 'Following' : 'Follow' ) }
                </div>
              </div>
 
@@ -119,18 +143,19 @@ export default function usercard({ decodedHandle = '@jhondoe',name='Jhon Doe' ,I
                <AccountDetailPop
                  user={{
                    name: account.name,
-                   handle: account.handle?.substring(1) || 'default',
-                   avatar: account.avatar,
+                   handle: account.handle ,
+                   avatar: account.avatarUrl,
                    bio: account.bio,
                    joined: account.joinDate,
-                   following: parseInt(account.following || '0'),
-                   followers: parseInt(account.followers || '0'),
-                   cover: account.coverImage
+                   following: account.following,
+                   followers: account.followers,
+                   cover: account.bannerUrl
                  }}
                  visible={showAccountPopup}
                  onOpen={() => setShowAccountPopup(true)}
                  onClose={() => setShowAccountPopup(false)}
                  position={popupPosition}
+                 isFollowing={isFollowing}
                />
              )}
            </div>

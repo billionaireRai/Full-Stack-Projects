@@ -17,10 +17,10 @@ export default function UnAuthorize({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen min-w-screen animate-in fade-in-0 zoom-in-95 duration-200 rounded-md flex flex-col items-center justify-center text-foreground dark:text-foreground px-4 py-8 relative">
       {/* Background blur layer */}
-      <div className="absolute inset-0 dark:blur-sm dark:bg-black/30"></div>
+      <div className="absolute inset-0 dark:blur-sm dark:bg-black"></div>
 
       {/* Pop-up box */}
-      <div className="max-w-lg w-full relative z-10 dark:bg-black shadow-2xl dark:shadow-gray-950 rounded-3xl p-5 text-center dark:text-card-foreground">
+      <div className="max-w-lg w-full relative z-10 dark:bg-black border border-gray-200 dark:border-gray-700 shadow-md rounded-3xl p-5 text-center dark:text-card-foreground">
         <div className="flex flex-col sm:flex-row sm:gap-2 items-center justify-center mb-6">
           <Image
             src="/images/exclamtion-icon.png"
