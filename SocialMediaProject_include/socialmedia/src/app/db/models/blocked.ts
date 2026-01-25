@@ -32,5 +32,5 @@ const blockSchema = new mongoose.Schema(
 // Prevent duplicate blocks....
 blockSchema.index( { blockedBy: 1, blockedUser: 1 }, { unique: true });
 
-const Block = mongoose.model("Block", blockSchema);
+const Block = mongoose.models.Block || mongoose.model("Block", blockSchema);
 export default Block;

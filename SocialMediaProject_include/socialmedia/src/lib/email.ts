@@ -25,4 +25,5 @@ const sendEmailFunction = async ( { to, subject, html } : functionArgType ) => {
   }
 }
 
+
 export default sendEmailFunction ;

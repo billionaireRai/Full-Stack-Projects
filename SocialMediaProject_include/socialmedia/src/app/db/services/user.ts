@@ -2,7 +2,7 @@ import users from "@/app/db/models/users";
 import accounts from "@/app/db/models/accounts";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
-import { functionToTriggerSchedule } from "@/app/cronjob/accDeletionSchedule";
+// import { functionToTriggerSchedule } from "@/app/cronjob/accDeletionSchedule";
 import { connectWithMongoDB } from "@/app/db/dbConnection";
 import { loginDataType, registrationDataType } from "@/app/controllers/auth";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
@@ -59,7 +59,7 @@ export interface userCardProp {
 }
 
 // function for formating the number...
-const fmt = (n: number): string => {
+export const fmt = (n: number): string => {
     if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";  // 1e9 = 1 * math.pow(10,9) where e = 10 ;
     if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
     if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
@@ -711,7 +711,8 @@ export const profileUpdateService = async (data: accountType) => {
                     coordinates: [lat, lon]
                 },
                 website: data.website,
-                bio: data.bio
+                bio: data.bio,
+                'account.completed': true 
             },
             { new: true }
         );
@@ -736,7 +737,7 @@ export const profileDeletionService = async (handle:string) => {
     const scheduledDeletionAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000); // 15 days
     await accounts.findByIdAndUpdate(account._id, {'account.status': 'DELETION_PENDING','account.scheduledDeletionAt': scheduledDeletionAt , 'account.Active':false});
 
-    functionToTriggerSchedule() ; // calling the deletion scheduler...
+   //  functionToTriggerSchedule() ; // calling the deletion scheduler...
  }
 
 export const blockingAccountService = async (handle:string , isBlock:boolean) => { 

@@ -7,6 +7,7 @@ import { FiChevronDown } from 'react-icons/fi';
 interface Option {
   value: string;
   label: string;
+  priority: string;
 }
 
 interface CustomDropdownProps {

@@ -10,6 +10,7 @@ import Usercard from '@/components/usercard';
 import Spinner from '@/components/spinner';
 import PostCard from '@/components/postcard';
 import ProfileEditor from '@/components/profileeditor';
+import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
@@ -86,12 +87,14 @@ interface tabsTypes {
 
 export default function UserProfilePage() {
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
+  const router = useRouter() ;
   const { username } = useParams() ; // taking the username from URL...
   const fetchedHandlesRef = useRef<Set<string>>(new Set()); // ref to track fetched handles
   const [isFollowing, setisFollowing] = useState<boolean>(false);
   const [isSelf, setisSelf] = useState<boolean>(false) ;
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
-  const [suggesstionNum, setsuggesstionNum] = useState<number>(5);
+  const [ShowLess, setShowLess] = useState<boolean>(false);
+  const [suggesstionNum, setsuggesstionNum] = useState<number>(4);
   const [showDeleteAccPop,setshowDeleteAccPop] = useState<boolean>(false);
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
   const [Loading, setLoading] = useState(false);
@@ -371,6 +374,7 @@ export default function UserProfilePage() {
           setAccount(acc.data.account);
           setAccountInfo(acc.data.account);
           setIsBlocked(acc.Blocked);
+          setshowBlockPop(true);
           fetchedHandlesRef.current.add(handle);
         }
       } else {
@@ -379,6 +383,7 @@ export default function UserProfilePage() {
         if (acc !== 'failed' && acc?.data.account) {
           setAccountInfo(acc.data.account);
           setIsBlocked(acc.Blocked);
+          setshowBlockPop(true);
           fetchedHandlesRef.current.add(handle);
         }
       }
@@ -393,11 +398,11 @@ export default function UserProfilePage() {
         const data = specificData.data.Infos;
         if (data.posts) setPosts(data.posts);
         if (data.likedPosts) setLikedPost(data.likedPosts);
-        if (data.medias) setuserMedia(data.medias) ;
+        if (data.medias) setMedias(data.medias) ;
         if (data.suggestions) setFollowSuggesstions(data.suggestions) ;
-        if (data.replies) setrepliedPostData(data.replies) ;
-        if (data.highlights) setrepliedPostData(data.highlights) ;
-        
+        if (data.replies) setRepliedPosts(data.replies) ;
+        if (data.highlights) setHighlights(data.highlights) ;
+
       }
     }
     // functionToGetData();
@@ -450,22 +455,56 @@ export default function UserProfilePage() {
 
   // function handling account deletion logic...
   const handleProfileDeleteLogic = async (handle:string) => { 
-    const deleteApi = await axiosInstance.delete(`/api/profile?profileHandle=${handle}`);
-
+    try {
+      const loadingToast = toast.loading('Deleting you account...');
+      const deleteApi = await axiosInstance.delete(`/api/profile?profileHandle=${handle}`);
+      if (deleteApi.status === 200) {
+        toast.dismiss(loadingToast);
+      const deleteApi = await axiosInstance.delete(`/api/profile?profileHandle=${handle}`);
+      if (deleteApi.status === 200) {  
+        toast.dismiss(loadingToast);
+        toast.success('profile deleted !!')
+        setshowDeleteAccPop(false);
+      } else {
+        toast.dismiss(loadingToast);
+        toast.error('profile deletion failed !!')
+        setshowDeleteAccPop(false);
+      }
+    }
+    } catch (error) {
+      toast.error('Error in profile deletion !!')
+    }
   }
-  
+
+  // function for showing more suggestions...
+  const handleSuggesstionShow = () => {
+    if (ShowLess) {
+      setsuggesstionNum(4);
+      setShowLess(false);
+    } else {
+      if ( ( FollowSuggesstions.length - suggesstionNum ) >= 3 ) {
+        setsuggesstionNum(suggesstionNum + 3);
+        if (suggesstionNum + 3 === FollowSuggesstions.length) {
+          setShowLess(true);
+        }
+      }
+    }
+  }
+    
   return (
     <>
-      <div className='h-fit flex flex-col md:ml-72 font-poppins rounded-md p-2 dark:bg-black'>
+      <div className={`h-fit flex flex-col md:ml-72 font-poppins rounded-md p-2 dark:bg-black`}>
         <div className='flex gap-2'>
           {/* Main Content - Profile */}
           <div className='flex-2 overflow-y-auto'>
-            <div className="bg-white dark:bg-black text-gray-900 dark:text-white">
+      <div className={`bg-white dark:bg-black text-gray-900 dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
               {/* Header */}
               <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
                 <div className="px-4 py-3">
                   <div className="flex items-center gap-0">
-                    <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer rounded-full transition-colors">
+                    <button 
+                     onClick={() => { router.back() }}
+                     className="p-1 hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer rounded-full transition-colors">
                      <Image src='/images/up-arrow.png' width={30} height={30} alt='back-arrow' className='-rotate-90 dark:invert' />
                     </button>
                     <div className="ml-4">
@@ -516,43 +555,56 @@ export default function UserProfilePage() {
                 <div className="flex justify-end pt-4 pb-3">
                   <button
                     onClick={() => setShowProfileOptions(!showProfileOptions)}
-                    className={`relative p-2 ${IsBlocked ? 'hover-' : 'hover:bg-gray-100 dark:hover:bg-gray-950'} cursor-pointer rounded-full transition-colors mr-2`}
+                    className={`relative p-2 hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer rounded-full transition-colors mr-2`}
                   >
                     <MoreHorizontalIcon size={20} />
                     {showProfileOptions && (
-                      <div className='more-dropdown absolute right-5 top-10 w-48 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20'>
+                      <div className={`more-dropdown absolute right-5 top-10 w-48 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
                         <ul className='p-2'>
-                          <li 
-                           onClick={() => { setOpenProfileEditor(true) }}
-                           className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                            <span>Edit Profile</span><Edit2Icon size={15} />
-                          </li>
-                          <li 
-                          onClick={() => { setSharePop(true) }}
-                          className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                            <span>Share Profile</span><Share2Icon size={15} />
-                          </li>
-                          <li 
-                          onClick={() => { handleProfileLinkCopy() }}
-                          className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                           <span>Copy Link</span><CopyIcon size={15}/>
-                          </li>
-                          <li 
-                          onClick={() => { setshowDeleteAccPop(true)  }}
-                          className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
-                           <span>Delete Account</span><Delete size={15}/>
-                          </li>
-                          { !isSelf && (
+                          { isSelf ? (
                             <>
                                <li 
-                               onClick={() => { setshowBlockPop(!showBlockPop) }}
+                              onClick={() => { setOpenProfileEditor(true) }}
+                              className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                <span>Edit Account</span><Edit2Icon size={15} />
+                               </li>
+                               <li 
+                                onClick={() => { setSharePop(true) }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                  <span>Share Account</span><Share2Icon size={15} />
+                                </li>
+                                <li 
+                                onClick={() => { handleProfileLinkCopy() }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Copy Link</span><CopyIcon size={15}/>
+                                </li>
+                                <li 
+                                onClick={() => { setshowDeleteAccPop(true)  }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
+                                 <span>Delete Account</span><Delete size={15}/>
+                                </li>          
+                            </>
+                          ) : (
+                            <>
+                              <li 
+                                onClick={() => { handleProfileLinkCopy() }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Copy Link</span><CopyIcon size={15}/>
+                              </li>
+                              <li 
+                                onClick={() => { setSharePop(true) }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                  <span>Share Account</span><Share2Icon size={15} />
+                              </li>
+                              <li 
+                               onClick={() => { setshowBlockPop(true) }}
                                className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors ${IsBlocked ? 'dark:bg-red-950/50 bg-red-100      text-red-500' : ''}`}>
-                                 <span>{IsBlocked ? 'UnBlock' : 'Block User'}</span><BanIcon size={15}/>
+                                 <span>Block Account</span><BanIcon size={15}/>
                                </li>
                                <li 
                                onClick={() => { setOpenReportPop(true) }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
-                                 <span>Report User</span><Flag size={15} />
+                                 <span>Report Account</span><Flag size={15} />
                                </li>
                             </>
                           )}
@@ -587,7 +639,7 @@ export default function UserProfilePage() {
                       { AccountInfo.isVerified ? (
                        <Image src='/images/yellow-tick.png' width={25} height={25} alt='yellow-tick' />
                        ) : (
-                        <Link href='/subscription?utm_source=profile-page' className='border border-gray-400 hover:bg-gray-100 dark:hover:bg-gray-950 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full'>
+                        <Link href='/subscription?utm_source=profile-page' className='border border-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-950 dark:border-yellow-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full'>
                           <span>Get Verified</span><Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' />
                         </Link>
                       )}
@@ -914,7 +966,7 @@ export default function UserProfilePage() {
           </div>
 
           {/* some other widgets... */}
-          <div className='hidden lg:block flex-1 overflow-y-auto'>
+          <div className={`hidden lg:block flex-1 overflow-y-auto ${IsBlocked ? 'blur-md pointer-events-none cursor-not-allowed' : ''}`}>
             <div className='space-y-4'>
               {/* Who to Follow */}
                 {/* account suggestions according to this USER profile respective...*/}
@@ -934,8 +986,9 @@ export default function UserProfilePage() {
                 </div>
                 <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
                   <button 
+                    onClick={() => { handleSuggesstionShow() }}
                     className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'>
-                    Show more
+                    { ShowLess ? 'Show less' : 'Show more' }
                   </button>
                 </div>
                 <button onClick={() => { handleScrollToTop(window) }} className='fixed right-5 bottom-10 rounded-full p-1 hover:bg-yellow-100 dark:hover:bg-gray-950 cursor-pointer z-50'>
@@ -944,6 +997,14 @@ export default function UserProfilePage() {
               </div>
             </div>
           </div>
+          {IsBlocked && !isSelf && (
+            <button
+              onClick={() => setshowBlockPop(true)}
+              className='fixed flex gap-1 items-center justify-center shadow-lg right-10 top-10 blur-none w-fit py-2 px-4 rounded-full bg-red-500 text-white hover:bg-red-600 cursor-pointer transition-colors'
+            >
+              <span>UN-BLOCK</span><BanIcon size={15} />
+            </button>
+          )}
         </div>
       <>
         { OpenProfileEditor && (
@@ -963,4 +1024,4 @@ export default function UserProfilePage() {
         )}
       </>
   </>
-)}
+)};

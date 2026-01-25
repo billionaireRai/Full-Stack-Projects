@@ -120,7 +120,7 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
                    <Link href={`/@${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-user'/>
                  </div>
-                   <Link href={`/@${decodedHandle}`} className="text-gray-600 w-fit text-xs">{decodedHandle}</Link>
+                   <Link href={`/@${decodedHandle}`} className="text-gray-600 w-fit text-xs">@{decodedHandle}</Link>
                  <p className="text-xs w-full text-gray-500 mt-1">
                    {content ? content : ''}
                  </p>

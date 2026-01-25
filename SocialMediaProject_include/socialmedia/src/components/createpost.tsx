@@ -1,23 +1,44 @@
 "use client";
-import React, { useState , useEffect } from "react";
+import React, { useState , useEffect , useRef } from "react";
 import Image from "next/image";
 import useCreatePost from '@/app/states/createpost';
+import { useTheme } from "next-themes";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { userCardProp } from "./usercard";
+import usePoll from "@/app/states/poll";
+import AccountSearch from "./accountsearch";
+import AccountPoll from "./accountpoll";
+import EmojiPicker ,{ EmojiClickData, Theme } from 'emoji-picker-react';
+import { motion } from "framer-motion";
 import useActiveAccount from "@/app/states/useraccounts";
-import { useRouter } from "next/navigation";
 import { MoreHorizontalIcon , UserPlusIcon , LucideGlobe} from 'lucide-react' ;
 import { TooltipContent, TooltipTrigger , Tooltip } from "./ui/tooltip";
+import CreatePoll from "./createpoll";
+import LocationSearch from "./locationsearch";
 
 export default function CreatePost() {
   const maxPostLenght = 200 ; // state holding max character lenght for post...
   const [post, setPost] = useState('');
+  const [DisablePostButton, setDisablePostButton] = useState<boolean>(false);
   const { Account } = useActiveAccount() ;
+  const { resolvedTheme } = useTheme();
+  const [showEmojiPicker, setshowEmojiPicker] = useState<boolean>(false);
+  const [showTagSomeone, setshowTagSomeone] = useState<boolean>(false);
+  const [showLocationSearchModal, setshowLocationSearchModal] = useState<boolean>(false);
   const [openOptions, setopenOptions] = useState(false);
   const [whoCanReply, setWhoCanReply] = useState<'everyone' | 'following' | 'mentioned' | 'verified'>('everyone');
-  const [openReplyOptions, setOpenReplyOptions] = useState(false);
   const { setCreatePop } = useCreatePost();
-  const router = useRouter();
+  const imageRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+  const gifRef = useRef<HTMLInputElement>(null);
+  const [imageArr, setimageArr] = useState<string[]>([]);
+  const [videoArr, setvideoArr] = useState<string[]>([]);
+  const [gifArr, setgifArr] = useState<string[]>([]);
+  const [MentionedTo, setMentionedTo] = useState<string[]>([]);
+  const [AddLocation, setAddLocation] = useState<string[]>([]);
+  const [openReplyOptions, setOpenReplyOptions] = useState(false);
+  const { poll: PollInfo, isCreateOpen: showPollModal, setIsCreateOpen: setShowPollModal, isDisplayOpen: showDisplayModal, setIsDisplayOpen: setShowDisplayModal, resetPoll } = usePoll(); // extracting all states from usePoll
 
    // Close more options when clicking outside...
     useEffect(() => {
@@ -53,33 +74,126 @@ export default function CreatePost() {
       }
     }, [openReplyOptions])
 
-    // post submission logic here
-    const handlePostSubmission = () => { 
-      console.log('Posting:', post, 'Reply setting:', whoCanReply);
+    // Close mobile emoji picker when clicking outside...
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (showEmojiPicker && !(event.target as Element).closest('.emoji-picker')) {
+          setshowEmojiPicker(false);
+        }
+      };
+
+      if (showEmojiPicker) {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [showEmojiPicker]);
+    // Close tag someone modal when clicking outside...
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (showTagSomeone && !(event.target as Element).closest('.tag-search-modal')) {
+          setshowTagSomeone(false);
+        }
+      };
+
+      if (showTagSomeone) {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [showTagSomeone]);
+
+    // Close createpoll modal when clicking outside...
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (showPollModal && !(event.target as Element).closest('.create-poll')) {
+          setShowPollModal(false);
+        }
+      };
+
+      if (showPollModal) {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [showPollModal]);
+
+    // Close location search modal when clicking outside...
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (showLocationSearchModal && !(event.target as Element).closest('.location-search')) {
+          setshowLocationSearchModal(false);
+        }
+      };
+
+      if (showLocationSearchModal) {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [showLocationSearchModal]);
+
+    // post submission logic here...
+    const handlePostSubmission = () => {
       setCreatePop(false);
       setPost('');
+      resetPoll(); // Reset poll state when post is created
       toast.success('Post successfully created !!')
     }
+
+    useEffect(() => {
+      setDisablePostButton(!post.trim());
+    }, [post])
+    
+
+  // funtion for emojiaddition...
+  const onEmojiClick = (emojiData:EmojiClickData) => {
+    setPost((prev) => prev + emojiData.emoji);
+  };
+
+  // function for handling video, image, and gif url push...
+  const handleMediaInclude = (e:React.ChangeEvent<HTMLInputElement>,type:string) => {
+    const file = (e.target as HTMLInputElement).files?.[0]; // extrating the file...
+    if (file) {
+       const url = URL.createObjectURL(file);
+       if (type === 'image') {
+        setimageArr(prev => [...prev, url]);
+       } else if (type === 'video') {
+        setvideoArr(prev => [...prev, url]);
+       } else if (type === 'gif') {
+        setgifArr(prev => [...prev, url]);
+       }
+    }
+  }
+
   return (
-    <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex z-50 justify-center animate-in fade-in-0 zoom-in-95 duration-300'>
-      <div className="bg-white dark:bg-black rounded-3xl shadow-2xl h-fit w-full max-w-2xl mx-4 my-6 relative border border-gray-100 dark:border-gray-800">
+    <div className='fixed flex flex-col lg:flex-row overflow-y-scroll py-4 inset-0 bg-black/50 backdrop-blur-md z-50 md:items-center md:justify-start lg:justify-center lg:items-start animate-in fade-in-0 zoom-in-95 duration-300'>
+      <div className="bg-white dark:bg-black rounded-3xl shadow-2xl max-h-fit max-w-2xl p-0 mx-4 my-6 relative border border-gray-100 dark:border-gray-800">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between p-4 m-2 rounded-lg border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-3">
-            <Link href='/username'>
               <img
-                className="rounded-full w-12 h-12 ring-5 ring-yellow-100 dark:ring-2 dark:ring-blue-800 transition-transform hover:scale-105"
-                src='/images/myProfile.jpg'
+                className="rounded-full w-16 h-16 ring-5 ring-yellow-100 dark:ring-2 transition-transform"
+                src={Account.account?.avatarUrl}
                 alt="profile-pic"
               />
-            </Link>
             <div className="flex flex-col">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Create Post
+                lets create a post...
               </h2>
-              <span className="text-gray-600 dark:text-gray-400 text-xs font-medium truncate">
+            <Link href={`/@${Account.decodedHandle}`}>
+              <span className="text-gray-600 py-1 px-3 cursor-pointer hover:bg-gray-100 rounded-full dark:text-gray-400 text-xs font-medium truncate">
                 @{Account.decodedHandle}
               </span>
+            </Link>
             </div>
           </div>
           <button
@@ -133,31 +247,45 @@ export default function CreatePost() {
               {openOptions && (
                 <div className="absolute top-1/5 left-10 mb-2 bg-white dark:bg-black rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-2 z-50 min-w-[280px]">
                   <div className="grid grid-cols-2 gap-2">
-                    <button className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
+                    <button 
+                     onClick={() => { imageRef.current?.click() }}
+                     className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
                       <Image className="dark:invert" src='/images/insert-picture-icon.png' width={24} height={24} alt='insert-pic' unoptimized />
                       <span className="text-xs font-medium">Image</span>
                     </button>
-                    <button className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
+                    <button 
+                     onClick={() => { videoRef.current?.click() }}
+                     className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
                       <Image className="dark:invert" src='/images/video-camera.png' width={24} height={24} alt='insert-video' unoptimized />
                       <span className="text-xs font-medium">Video</span>
                     </button>
-                    <button className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
+                    <button
+                      onClick={() => { setshowEmojiPicker(!showEmojiPicker); setopenOptions(false); }}
+                      className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
                       <Image src='/images/smile.png' width={24} height={24} alt='add-emoji' />
                       <span className="text-xs font-medium">Emoji</span>
                     </button>
-                    <button className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
+                    <button
+                      onClick={() => { setshowTagSomeone(!showTagSomeone); setopenOptions(false); }}
+                      className="screen-tag flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
                       <Image className="dark:invert" src='/images/atsign.png' width={24} height={24} alt='tag-user' unoptimized />
                       <span className="text-xs font-medium">Tag</span>
                     </button>
-                    <button className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
+                    <button
+                     onClick={() => { gifRef.current?.click() }}
+                     className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
                       <Image className="dark:invert" src='/images/insert-picture-icon.png' width={24} height={24} alt='add-gif' unoptimized />
                       <span className="text-xs font-medium">GIF</span>
                     </button>
-                    <button className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
+                    <button
+                      onClick={() => { setShowPollModal(true); setopenOptions(false); }}
+                      className="create-poll flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
                       <Image className="dark:invert" src='/images/poll.png' width={24} height={24} alt='create-poll' unoptimized />
                       <span className="text-xs font-medium">Poll</span>
                     </button>
-                    <button className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
+                    <button 
+                    onClick={() => { setshowLocationSearchModal(!showLocationSearchModal) ; setopenOptions(false) }}
+                    className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
                       <Image className="dark:invert" src='/images/location.png' width={24} height={24} alt='add-location' />
                       <span className="text-xs font-medium">Location</span>
                     </button>
@@ -167,10 +295,12 @@ export default function CreatePost() {
             </div>
 
             {/* Desktop buttons */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-1 relative">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
+                  <button 
+                    onClick={() => { imageRef.current?.click() }}
+                    className="p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
                     <Image className="dark:invert group-hover:text-blue-500" src='/images/insert-picture-icon.png' width={20} height={20} alt='insert-pic' />
                   </button>
                 </TooltipTrigger>
@@ -178,7 +308,9 @@ export default function CreatePost() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
+                  <button 
+                    onClick={() => { videoRef.current?.click() }}
+                    className="p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
                     <Image className="dark:invert group-hover:text-blue-500" src='/images/video-camera.png' width={20} height={20} alt='insert-video' />
                   </button>
                 </TooltipTrigger>
@@ -186,23 +318,31 @@ export default function CreatePost() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
+                  <button 
+                   onClick={() => { setshowEmojiPicker(!showEmojiPicker) }}
+                   className="emoji-picker p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
                     <Image src='/images/smile.png' width={20} height={20} alt='add-emoji' className="group-hover:text-blue-500" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>Add Emoji</TooltipContent>
               </Tooltip>
+
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
+                  <button 
+                    onClick={() => { setshowTagSomeone(!showTagSomeone) }}
+                    className="screen-tag p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
                     <Image className="dark:invert group-hover:text-blue-500" src='/images/atsign.png' width={20} height={20} alt='tag-user' />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>Tag Someone</TooltipContent>
               </Tooltip>
+
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
+                  <button
+                    onClick={() => { gifRef.current?.click() }}
+                    className="p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
                     <Image className="dark:invert group-hover:text-blue-500" src='/images/insert-picture-icon.png' width={20} height={20} alt='add-gif' />
                   </button>
                 </TooltipTrigger>
@@ -210,7 +350,9 @@ export default function CreatePost() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
+                  <button
+                    onClick={() => setShowPollModal(!showPollModal)}
+                    className="create-poll p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
                     <Image className="dark:invert group-hover:text-blue-500" src='/images/poll.png' width={20} height={20} alt='create-poll' />
                   </button>
                 </TooltipTrigger>
@@ -218,7 +360,9 @@ export default function CreatePost() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group">
+                  <button 
+                   onClick={() => { setshowLocationSearchModal(!showLocationSearchModal) }}
+                   className="p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
                     <Image className="dark:invert group-hover:text-blue-500" src='/images/location.png' width={20} height={20} alt='add-location' />
                   </button>
                 </TooltipTrigger>
@@ -226,13 +370,54 @@ export default function CreatePost() {
               </Tooltip>
             </div>
           </div>
+
+          {/* responsive modals... */}
+          {showEmojiPicker && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
+              className='emoji-picker absolute z-60 top-0 left-0 transform md:lg:-left-5'>
+              <EmojiPicker onEmojiClick={(emoji) => { onEmojiClick(emoji); setshowEmojiPicker(false); }} theme={resolvedTheme === 'dark' ? Theme.DARK : resolvedTheme === 'light' ? Theme.LIGHT : Theme.AUTO} />
+            </motion.div>
+          )}
+
+          {showTagSomeone && (
+            <motion.div
+              initial={{ opacity: 0, y: 0, x: 0, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
+              className='tag-search-modal absolute z-60 top-0 left-0 transform md:lg:-left-5'>
+              <AccountSearch onSelect={(handle) => { setMentionedTo((prev) => [...prev,handle]); setshowTagSomeone(false); }} placeholder="@ Search someone to tag"/>
+            </motion.div>
+          )}
+          
+          { showPollModal && (
+             <motion.div
+               initial={{ opacity: 0 , y:500 , x:-250, scale: 0.8 }}
+               animate={{ opacity: 1, y: 400 , x:-250, scale: 1}}
+               transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
+               className='create-poll absolute z-60 -right-70 -top-30 sm:left-[35%] w-screen sm:w-lg' >
+                <CreatePoll />
+            </motion.div>
+          )}
+
+          { showLocationSearchModal && (
+             <motion.div
+               initial={{ opacity: 0 , y:500 , x:-250, scale: 0.8 }}
+               animate={{ opacity: 1, y: 400 , x:-250, scale: 1}}
+               transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
+               className='location-search absolute z-60 w-md -right-65 -top-30 sm:w-lg' >
+                <LocationSearch placeholder="search a location to add..." onClose={() => { setshowLocationSearchModal(false) }} visible={showLocationSearchModal} onSelect={(location) => { setAddLocation((prev) => [...prev,location] ) }}/>
+            </motion.div>
+          )}
+
           <div className="flex items-center gap-3">
             <div className="reply-dropdown-container relative">
               <button
                 onClick={() => setOpenReplyOptions(!openReplyOptions)}
                 className="flex items-center cursor-pointer gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                <LucideGlobe className="w-4 h-4" />
                 <span className="hidden sm:inline">
                   {whoCanReply === 'everyone' ? 'Everyone' : whoCanReply === 'following' ? 'Following' : whoCanReply === 'mentioned' ? 'Mentioned' : 'Verified'}
                 </span>
@@ -241,7 +426,11 @@ export default function CreatePost() {
                 </span>
               </button>
               {openReplyOptions && (
-                <div className="absolute -top-10 -right-50 md:right-full mt-3 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
+                <motion.div
+                 initial={{ opacity: 0 , y:500 , x:-250, scale: 0.8 }}
+                 animate={{ opacity: 1, y: 400 , x:-250, scale: 1}}
+                 transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }} 
+                 className="absolute bottom-14 z-60 left-45 sm:-left-10 md:-left-30 mt-3 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4">
                   <div className="mb-4">
                     <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-2">Who can reply?</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Choose who can reply to this post</p>
@@ -319,7 +508,7 @@ export default function CreatePost() {
                       <Image src='/images/yellow-tick.png' width={20} height={20} alt="verified" className="text-blue-500" />
                     </label>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -328,12 +517,12 @@ export default function CreatePost() {
               </span>
             </div>
             <button
-              disabled={!post.trim()}
+              disabled={DisablePostButton}
               onClick={() => {handlePostSubmission()}}
-              className={`px-8 py-2.5 cursor-pointer text-base font-semibold rounded-full transition-all duration-200 ${
+              className={`px-8 py-2.5 text-base font-semibold rounded-full transition-all duration-200 ${
                 post.trim()
-                  ? "bg-blue-500 text-white hover:bg-blue-600 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+                  ? "bg-yellow-500 cursor-pointer text-white hover:bg-yellow-600 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  : "bg-gray-200 cursor-not-allowed text-gray-400 dark:bg-gray-700 dark:text-gray-500"
               }`}
             >
               Post
@@ -342,6 +531,34 @@ export default function CreatePost() {
         </div>
       </div>
     </div>
+
+      {/* Poll Display */}
+      { showDisplayModal && PollInfo && (
+        <div className="mx-6 md:w-lg">
+          <AccountPoll isOpen={showDisplayModal} onClose={resetPoll} poll={PollInfo} />
+        </div>
+      )}
+    <input
+      type="file"
+      accept="image/*"
+      ref={imageRef}
+      onChange={(e) => { handleMediaInclude(e,'image') }}
+      className="hidden"
+    />
+    <input
+      type="file"
+      accept="video/*"
+      ref={videoRef}
+      onChange={(e) => { handleMediaInclude(e,'video') }}
+      className="hidden"
+    />
+    <input
+      type="file"
+      accept="image/gif"
+      ref={gifRef}
+      onChange={(e) => { handleMediaInclude(e,'gif') }}
+      className="hidden"
+    />
     </div>
   );
 }

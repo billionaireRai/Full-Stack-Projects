@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { signOut } from 'next-auth/react';
+// import { signOut } from 'next-auth/react';
 import LogoutModal from '@/components/logoutmodal';
 import toast from 'react-hot-toast';
 import DeactivateModal from '@/components/deactivatemodal';

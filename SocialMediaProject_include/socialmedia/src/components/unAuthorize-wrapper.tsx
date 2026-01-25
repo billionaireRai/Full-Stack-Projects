@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 export default function UnAuthorize({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(); // Getting the current page URL...
   const { isAuth } = useAuthenticationState() ;
-  const isSecuredUrl = !pathname.startsWith('/auth') && pathname !== '/' ;
+  const isSecuredUrl = !pathname.startsWith('/auth') && pathname !== '/' && !pathname.endsWith('/create-account') ;
 
   // Conditional rendering => if user is authenticated or on a non-secured page, render children...
   if ((isAuth && isSecuredUrl) || (!isAuth && !isSecuredUrl) || (isAuth && !isSecuredUrl)) {  return <>{children}</>  }

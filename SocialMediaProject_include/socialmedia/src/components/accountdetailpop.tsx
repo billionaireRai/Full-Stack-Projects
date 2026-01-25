@@ -109,7 +109,7 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
 
         {/* Bio */}
         {user.bio && (
-          <p className="mt-2 text-gray-900 dark:text-gray-500 text-xs leading-relaxed">
+          <p className="mt-2 text-left text-gray-900 dark:text-gray-500 text-xs leading-relaxed">
             {user.bio}
           </p>
         )}
@@ -135,7 +135,7 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
         </div>
 
         {/* Joined */}
-           <p className="text-gray-500 dark:text-gray-400 text-xs mt-3 mb-4">
+           <p className="text-gray-500 dark:text-gray-400 text-xs text-left mt-3 mb-4">
              Joined{' '}
              {user.joined || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short'})}
            </p>

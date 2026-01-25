@@ -58,11 +58,12 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         // If refresh fails, reject all queued requests
         processQueue(refreshError, null);
-        // handle logout & redirect to '/' page...
-        
+        // handle logout & redirect to login page
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('user-active-account'); // clear persisted state
+          window.location.href = '/auth/log-in';
+        }
 
-        return Promise.reject(refreshError);
-      } finally {
         // finally run after promise is resolved or rejected...
         
         isRefreshing = false;

@@ -13,10 +13,19 @@ export default function BlockUser({ closeBlockPop , username , updateblockState,
 
   // function handling logic of blocking/unblocking...
   const handleUserBlock = async (handle:string) => {
-    const blockApi = await axiosInstance.patch('/api/profile',{ handle:handle , isBlock:isBlocked }) ;
-    updateblockState();
-    closeBlockPop();
-    toast.success(`Successfully ${isBlocked ? 'unblocked' : 'blocked'} user !!`);
+    try {
+      const blockApi = await axiosInstance.patch('/api/profile',{ handle:handle , isBlock:isBlocked }) ;
+      if (blockApi.status === 200) {
+        updateblockState();
+        closeBlockPop();
+        toast.success(`Successfully ${isBlocked ? 'unblocked' : 'blocked'} user !!`);
+      } else {
+        toast.error('Failed to perform the action...');
+      }
+    } catch (error) {
+      console.error('Error blocking/unblocking user:', error);
+      toast.error('An error occurred. Please try again.');
+    }
   }
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
@@ -29,8 +38,8 @@ export default function BlockUser({ closeBlockPop , username , updateblockState,
           {/* Description */}
           <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
             {isBlocked
-              ? 'Are you sure you want to unblock this user? You can follow them again after unblocking.'
-              : 'Are you sure you want to block this user? If unblocked later, you will have to send a follow request again to the user.'
+              ? 'Are you sure you want to unblock this Account? You can follow them again after unblocking.'
+              : 'Are you sure you want to block this Account ? If unblocked later, you will have to send a follow request again to the Account.'
             }
           </p>
 

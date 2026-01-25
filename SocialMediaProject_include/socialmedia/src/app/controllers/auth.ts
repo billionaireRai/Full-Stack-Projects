@@ -1,16 +1,17 @@
 import { NextRequest , NextResponse , userAgent } from "next/server";
 import { cookies } from "next/headers";
 import asyncErrorHandler from "@/app/middleware/errorMiddleware";
-import sendEmailFunction from "@/lib/email";
 import { userRegistrationService, userCardProp , logginUserService, creatingUserAfterOauth } from '@/app/db/services/user';
+import sendEmailFunction from "@/lib/email";
 import { generateWelcomeEmailHTML } from '@/components/welcome';
+import { loginemail } from "@/components/loginemail";
 import jsonWebtoken, { JwtPayload } from "jsonwebtoken";
 import users from "../db/models/users";
 import { generateRandomString, generatePKCE } from "@/lib/oauthcrypto";
 import { validateAndConsumeState , findOAuthState , saveOAuthState } from "@/app/db/services/oauth";
 import { OAuth2Client } from "google-auth-library";
 import axios from "axios";
-import { loginemail } from "@/components/loginemail";
+import { activeAccountLogoutService } from "../db/services/auth";
 
 export interface returnDataType {
     userId:string,
@@ -388,3 +389,15 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
     return NextResponse.redirect(profileUrl);
 })
     
+export const accountLogoutController = asyncErrorHandler( async (request:NextRequest) => {
+    const { accountHandle } = await request.json() ; // extracting handle from request body...
+    if (!accountHandle) {
+        console.log('account handle missing !!');
+        return NextResponse.json({ message:'account handle required...' },{ status:400 });
+    }
+
+    // function for logout service...
+    // await activeAccountLogoutService(accountHandle) ;
+
+    return NextResponse.json({ message:'account logout successfull !!'},{ status:200 });
+})

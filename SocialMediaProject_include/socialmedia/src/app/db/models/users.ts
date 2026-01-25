@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema<IUser>(
     refreshToken:{
       value: {
         type:String ,
-        required:[true,'Neccessary for restarting the session!!'],
+        default:'',
         select:false
       },
       rfExpiry:{

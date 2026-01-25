@@ -4,7 +4,7 @@ const reportSchema = new mongoose.Schema(
   {
     reportedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "account",
       required: true,
       index: true
     },
@@ -18,7 +18,7 @@ const reportSchema = new mongoose.Schema(
     reportedEntityType: {
       type: String,
       required: true,
-      enum: ["post", "comment", "message", "user"],
+      enum: ["post", "comment", "message", "account"],
       index: true
     },
 
@@ -56,7 +56,6 @@ const reportSchema = new mongoose.Schema(
     priority: {
       type: String,
       enum: ["low", "medium", "high", "critical"],
-      default: "low",
       index: true
     },
 

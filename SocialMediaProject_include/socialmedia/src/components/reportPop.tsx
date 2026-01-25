@@ -3,12 +3,14 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Customdropdown from '@/components/customdropdown'
-import { X } from 'lucide-react'
+import { Flag, X } from 'lucide-react'
 import toast from 'react-hot-toast'
+import axiosInstance from '@/lib/interceptor'
 
 interface optionsType {
   value:string,
-  label:string
+  label:string,
+  priority: string
 }
 
 interface formDataType {
@@ -25,20 +27,40 @@ export default function reportPop({ closeReportModal , username }:reportModalPro
   const reportForm = useForm<formDataType>() ; // intializing useForm hook...
 
   const [Options, setOptions] = useState<optionsType[]>([
-    {label:'Spam',value:'option-1'},
-    {label:'Harassment',value:'option-2'},
-    {label:'Inappropriate Content',value:'option-3'},
-    {label:'Misinformation',value:'option-4'},
-    {label:'Copyright Violation',value:'option-5'},
-    {label:'Others',value:'option-6'}
+    {label:'Harassment',value:'harassment', priority: 'medium'},
+    {label:'Spam',value:'spam', priority: 'low'},
+    {label:'Misinformation',value:'misinformation', priority: 'low'},
+    {label:'Violence',value:'violence', priority: 'high'},
+    {label:'Sexual',value:'sexual', priority: 'critical'},
+    {label:'Hate',value:'hate', priority: 'high'},
+    {label:'IP Violation',value:'ip_violation', priority: 'medium'},
+    {label:'Privacy',value:'privacy', priority: 'medium'},
+    {label:'Impersonation',value:'impersonation', priority: 'medium'},
+    {label:'Illegal Goods',value:'illegal_goods', priority: 'high'},
+    {label:'Policy Violation',value:'policy_violation', priority: 'medium'},
+    {label:'Child Safety',value:'child_safety', priority: 'critical'}
   ])
-  const [selectedOne, setselectedOne] = useState<optionsType>({label:'Spam',value:'option-1'})
+  const [selectedOne, setselectedOne] = useState<optionsType>({label:'Harassment',value:'harassment', priority: 'medium'})
 
   // report handler function...
-  const reportSubmit = (data:formDataType) => {
-    let finalData = { ...data , selectedOne } ; // data to be send to backend...
-    toast.success(`Report successfull for @${username}`);
-    closeReportModal();
+  const reportSubmit = async (data:formDataType) => {
+    const loadingToast = toast.loading('submitting your report...')
+    try {
+      let finalData = { ...data , selectedOne } ; // data to be send to backend...
+      const repostApi = await axiosInstance.post(`/api/profile/${data.reportedFor}`,{ reportInfo: finalData });
+      if (repostApi.status === 200) {
+        toast.dismiss(loadingToast);
+        toast.success(`Report successfull for @${username}`);
+        closeReportModal();
+  
+      } else {
+        toast.dismiss(loadingToast);
+        toast.error('Report submittion failed !!');
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error('Error occured in submittion !!');
+    }
   }
 
   return (
@@ -51,7 +73,9 @@ export default function reportPop({ closeReportModal , username }:reportModalPro
           <X size={15}/>
         </button>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 pr-8">Report User</h2>
+        <div className='flex items-center gap-4'>
+          <Flag size={40}/><h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Report This Account</h2>
+        </div>
 
         <form onSubmit={reportForm.handleSubmit(reportSubmit)} className="space-y-6">
           <div>

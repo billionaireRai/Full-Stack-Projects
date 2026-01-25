@@ -1,7 +1,21 @@
 import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "@/app/middleware/errorMiddleware";
-import { userFollowService } from "../db/services/follow";
+import { userFollowService , userReportService , newAccountCreationService , fetchingAccountsService , switchAccountService } from "../db/services/follow";
 import { accountFetchingService ,profileSpecificDataService , profileUpdateService , profileDeletionService, blockingAccountService } from "@/app/db/services/user";
+import { gettingAccountService } from "../db/services/account";
+
+export interface reportInfoType {
+  reportedFor: string,
+  description: string
+  selectedOne: { label: string , value: string , priority: string }
+}
+
+export interface newAccType {
+    Name: string,
+    Username: string,
+    accType: { value: string, label: string }
+}
+
 
 export const getUserAccountController = asyncErrorHandler(async (request:NextRequest) => {
     const reqUrl = new URL(request.nextUrl) ;
@@ -14,7 +28,9 @@ export const getUserAccountController = asyncErrorHandler(async (request:NextReq
 
     const data = await accountFetchingService(accountHandle); // getting the account details...
 
-    return NextResponse.json({ message:'profile fetch successfull !!',accountData:data?.formatedOne , blocked:data?.isBlocked },{ status:200 });
+    if (data instanceof NextResponse) return data;
+
+    return NextResponse.json({ message:'profile fetch successfull !!',accountData:data.formatedOne , blocked:data.isBlocked },{ status:200 });
 })
 
 export const getProfileSpecificDataController = asyncErrorHandler( async (request:NextRequest) => { 
@@ -64,7 +80,7 @@ export const userProfileDeletioncontroller = asyncErrorHandler( async (request:N
         return NextResponse.json({message:'Account handle unavailable...'},{ status:404 });
     }
 
-    // profileDeletionService(profilehandle) ; // DB service...
+    // await profileDeletionService(profilehandle) ; // DB service...
     return NextResponse.json({message:'Account deleted successfully !!'},{ status:200 });
 
 })
@@ -77,7 +93,67 @@ export const BlockPaticularAccountController = asyncErrorHandler( async (request
         return NextResponse.json({message:'Account handle unavailable...'},{ status:404 });
     }
 
-    await blockingAccountService(handle,isBlock) ; // triggering the service function...
+    // await blockingAccountService(handle,isBlock) ; // triggering the service function...
     return NextResponse.json({message:'account successfully blocked...'},{ status:200 });
 
+})
+
+export const accountRepostSubmittionController = asyncErrorHandler( async (request:NextRequest) => {
+    const { reportInfo } = await request.json() ; // extracting the ReportInfo...
+
+    if (!reportInfo) {
+        console.log('report info missing !!');
+        return NextResponse.json({ message:'report credential missing...' },{ status:400 });
+    }
+
+    // await userReportService(reportInfo); // calling the database function...
+    return NextResponse.json({ message:'Report submittion successfull...' },{ status:200 });
+})
+
+export const newAccountCreationController = asyncErrorHandler(async (request:NextRequest) => {
+    const { finalData } = await request.json() ;
+    if (!finalData) {
+        console.log('New Account details missing...');
+        return NextResponse.json({ message:'credentials missing !!' },{ status:400 })
+    }
+
+    // await newAccountCreationService(finalData);
+    return NextResponse.json({ message:'New Account Successfully created...' },{ status:200 });
+})
+
+export const getAllAccountsOfUserController = asyncErrorHandler(async (request:NextRequest) => {
+    const requesturl = new URL(request.nextUrl) ;
+    const currentAccHandle = requesturl.username ;
+    if (!currentAccHandle) {
+        console.log('Active Account handle missing...');
+        return NextResponse.json({ message:'Missing handle !!' },{ status:400 })
+    }
+
+    // await fetchingAccountsService(currentAccHandle);
+    return NextResponse.json({ message:'New Account Successfully created...' },{ status:200 });
+})
+
+export const switchTheActiveAccountController = asyncErrorHandler(async (request:NextRequest) => {
+    const { toSwitchAcc } = await request.json() ; // getting the data from req body...
+    if (!toSwitchAcc) {
+        console.log('Counter account credentials missing!!');
+        return NextResponse.json({ message:'Please send neccessary credentials...' },{ status:400 });
+    }
+    
+    // await switchAccountService(toSwitchAcc) ;
+    return NextResponse.json({ message:'New Account Successfully created...' },{ status:200 });
+})
+
+
+export const gettingSearchedAccountController = asyncErrorHandler( async (request:NextRequest) => {
+    const url = new URL(request.nextUrl) ;
+    const search = url.searchParams.get('search') ; // getting the searched value...
+
+    if (!search?.trim()) {
+        console.log('Search text is empty !!');
+        return NextResponse.json({ message:'Search text is neccessary...' },{ status:400 });
+    }
+    
+    // await gettingAccountService(search) ; 
+    return NextResponse.json({ message:'accounts successfully fetched...' },{ status:200 })
 })
