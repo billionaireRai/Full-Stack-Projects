@@ -85,7 +85,16 @@ const postSchema = new mongoose.Schema(
         message: "Mentions must contain valid ObjectIds"
       }
     },
-
+    taggedLocation : {
+      text: {
+        type: String,
+        default: ''
+      },
+      coordinates: {
+        type: [Number],
+        default: [] // lat,long
+      }
+    },
     // for future moderation and visibility....
     isDeleted: {
       type: Boolean,

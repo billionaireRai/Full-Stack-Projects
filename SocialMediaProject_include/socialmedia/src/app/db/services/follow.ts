@@ -179,3 +179,56 @@ export const switchAccountService =  async (toAccount:userCardProp) => {
     
     return NextResponse.json({ message:'Account successfully switched...' },{ status:200 });
 }
+
+export const getAllTheFollowingService = async (handle:string) => {
+    await connectWithMongoDB() ;
+
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+
+    const activeAcc = await accounts.findOne({ username:handle , userId: user.id , 'account.Active':true });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
+        const paticularAcc = await accounts.findById(accountId) ;
+        // getting count of followers and followings...
+        const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
+        const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
+        const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
+        const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+    
+        return {
+            id: paticularAcc._id.toString(),
+            decodedHandle:paticularAcc.username,
+            name:paticularAcc.name,
+            content:paticularAcc.bio,
+            account:{
+                name:paticularAcc.name ,
+                handle:paticularAcc.username ,
+                bio:paticularAcc.bio ,
+                location:{
+                  text:paticularAcc.location.text,
+                  coordinates:paticularAcc.location.coordinates // lat,long
+                },
+                website:paticularAcc.website,
+                joinDate:String(paticularAcc.createdAt),
+                following:fmt(following.length),
+                followers:fmt(followers.length),
+                Posts:fmt(posts.length),
+                isCompleted:paticularAcc.account.completed,
+                isVerified:paticularAcc.isVerified.value,
+                bannerUrl:paticularAcc.banner.url,
+                avatarUrl:paticularAcc.avatar.url
+            },
+            IsFollowing: isfollowing ? true : false
+        }
+    
+    }
+
+    const accountFollowingId = (await follows.find({ $and:[{ followerId:activeAcc._id },{ isDeleted:false }]})).map( obj => obj.followingId );
+    const accountToSend = await Promise.all(accountFollowingId.map((accid) => {
+        return returnAccountDataInStructure(accid)
+     }))
+
+    return NextResponse.json({ message: 'Following accounts fetched successfully', followings: accountToSend }, { status: 200 });
+}

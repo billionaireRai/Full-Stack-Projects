@@ -186,7 +186,7 @@ export default function CreatePoll() {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || !question.trim() || options.filter(opt => opt.trim()).length < 2}
-              className={`px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-medium ${isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer '}`}
+              className={`px-6 py-2 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-medium ${isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer '}`}
             >
               {isSubmitting ? "Creating..." : "Create Poll"}
             </button>

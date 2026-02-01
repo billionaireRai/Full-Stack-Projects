@@ -155,5 +155,5 @@ export const gettingSearchedAccountController = asyncErrorHandler( async (reques
     }
     
     // await gettingAccountService(search) ; 
-    return NextResponse.json({ message:'accounts successfully fetched...' },{ status:200 })
+    return NextResponse.json({ message:'accounts successfully fetched...', searchedAcc:[{}] },{ status:200 })
 })

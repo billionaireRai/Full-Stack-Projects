@@ -12,7 +12,7 @@ import AccountPoll from "./accountpoll";
 import EmojiPicker ,{ EmojiClickData, Theme } from 'emoji-picker-react';
 import { motion } from "framer-motion";
 import useActiveAccount from "@/app/states/useraccounts";
-import { MoreHorizontalIcon , UserPlusIcon , LucideGlobe} from 'lucide-react' ;
+import { MoreHorizontalIcon , UserPlusIcon , LucideGlobe, X, LocateFixed} from 'lucide-react' ;
 import { TooltipContent, TooltipTrigger , Tooltip } from "./ui/tooltip";
 import CreatePoll from "./createpoll";
 import LocationSearch from "./locationsearch";
@@ -143,10 +143,15 @@ export default function CreatePost() {
 
     // post submission logic here...
     const handlePostSubmission = () => {
-      setCreatePop(false);
-      setPost('');
-      resetPoll(); // Reset poll state when post is created
-      toast.success('Post successfully created !!')
+      try {
+        const postSubmitionApi = 
+        setCreatePop(false);
+        setPost('');
+        resetPoll(); 
+        toast.success('Post successfully created !!')
+      } catch (error) {
+        
+      }
     }
 
     useEffect(() => {
@@ -157,6 +162,11 @@ export default function CreatePost() {
   // funtion for emojiaddition...
   const onEmojiClick = (emojiData:EmojiClickData) => {
     setPost((prev) => prev + emojiData.emoji);
+  };
+
+  // functions for removing media/tags/locations...
+  const removeArrayElement = (setter: React.Dispatch<React.SetStateAction<string[]>>, index: number) => {
+    setter(prev => prev.filter((_, i) => i !== index));
   };
 
   // function for handling video, image, and gif url push...
@@ -230,8 +240,147 @@ export default function CreatePost() {
           onChange={(e) => setPost(e.target.value)}
           placeholder="What's happening?"
           rows={4}
-          className="w-full resize-none border-none outline-none text-xl text-gray-900 dark:text-gray-100 bg-transparent placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 focus:outline-none"
+          className="w-full resize-none border-none outline-none text-md text-gray-900 dark:text-gray-100 bg-transparent placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 focus:outline-none"
         />
+
+        <motion.div
+          className="section-for-extra-info flex flex-col gap-1 rounded-lg p-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <div className="img">
+            {imageArr.length > 0 && (
+              <motion.div
+                className="flex flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+              >
+               <span className="font-bold p-2 rounded-lg">Images</span>
+               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 rounded-lg mt-2">
+                {imageArr.map((url, index) => (
+                  <motion.div
+                    key={index}
+                    className="relative group"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: index * 0.05, duration: 0.2 }}
+                  >
+                    <X size={20} className="absolute opacity-0 hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement(setimageArr, index)} />
+                   <img src={url} alt="image" className="w-28 h-28 object-cover rounded-lg" />
+                  </motion.div>
+                ))}
+               </div>
+              </motion.div>
+            )}
+          </div>
+          <div className="video">
+            {videoArr.length > 0 && (
+              <motion.div
+                className="flex flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
+              >
+                <span className="font-bold p-2 rounded-lg">Videos</span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 rounded-lg mt-2">
+                  {videoArr.map((url, index) => (
+                    <motion.div
+                      key={index}
+                      className="relative group rounded-lg"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: index * 0.05, duration: 0.2 }}
+                    >
+                      <X size={20} className="absolute hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement(setvideoArr, index)} />
+                      <video src={url} className="w-28 h-28 object-cover rounded-lg" />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+          <div className="tags">
+            {MentionedTo.length > 0 && (
+              <motion.div
+                className="flex flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+              >
+                <span className="font-bold p-2 rounded-lg">Mentions</span>
+                <div className="flex flex-wrap gap-2 rounded-lg mt-2">
+                  {MentionedTo.map((tag, index) => (
+                    <motion.div
+                      key={index}
+                      className="flex group items-center gap-2 bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400 p-1 rounded-lg"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: index * 0.05, duration: 0.2 }}
+                    >
+                      <Link href={`/@${tag}`} className="p-1 px-3 rounded-lg">@{tag}</Link>
+                      <X size={13} className="hidden group-hover:block hover:scale-105 transition-all duration-300 cursor-pointer text-yellow-500 dark:text-yellow-300" onClick={() => removeArrayElement(setMentionedTo, index)} />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+          <div className="gifs">
+            {gifArr.length > 0 && (
+              <motion.div
+                className="flex flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.3 }}
+              >
+                <span className="font-bold p-2 rounded-lg">GIFs</span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 rounded-lg mt-2">
+                  {gifArr.map((url, index) => (
+                    <motion.div
+                      key={index}
+                      className="relative group"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: index * 0.05, duration: 0.2 }}
+                    >
+                      <img src={url} alt="gif" className="w-24 h-24 object-cover rounded-lg" />
+                      <X size={20} className="absolute hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement(setgifArr, index)} />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+          <div className="locations">
+            {AddLocation.length > 0 && (
+              <motion.div
+                className="flex flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.3 }}
+              >
+                <span className="font-bold p-2 rounded-lg">Locations</span>
+                <div className="flex flex-wrap gap-2 rounded-lg mt-2 p-2">
+                  {AddLocation.map((location, index) => (
+                    <motion.div
+                      key={index}
+                      className="relative group flex flex-row gap-1 items-center bg-yellow-100 py-1 px-3 text-yellow-600 rounded-lg"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: index * 0.05, duration: 0.2 }}
+                    >
+                      <LocateFixed size={18} />
+                      <span className="p-1 rounded-lg">{location}</span>
+                      <X size={20} className="absolute -top-2 -right-2 cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 bg-yellow-100 dark:bg-yellow-900 rounded-full p-1 text-yellow-500 dark:text-red-300" onClick={() => removeArrayElement(setAddLocation, index)} />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
 
         {/* Media Upload Options */}
         <div className="flex items-center justify-between mt-6">
@@ -335,7 +484,7 @@ export default function CreatePost() {
                     <Image className="dark:invert group-hover:text-blue-500" src='/images/atsign.png' width={20} height={20} alt='tag-user' />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Tag Someone</TooltipContent>
+                <TooltipContent>mention someone</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -388,7 +537,7 @@ export default function CreatePost() {
               animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
               transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
               className='tag-search-modal absolute z-60 top-0 left-0 transform md:lg:-left-5'>
-              <AccountSearch onSelect={(handle) => { setMentionedTo((prev) => [...prev,handle]); setshowTagSomeone(false); }} placeholder="@ Search someone to tag"/>
+              <AccountSearch handle={String(Account?.decodedHandle)} onSelect={(handle) => { setMentionedTo((prev) => [...prev,handle]); setshowTagSomeone(false); }} placeholder="@ Search someone to tag"/>
             </motion.div>
           )}
           
@@ -534,7 +683,7 @@ export default function CreatePost() {
 
       {/* Poll Display */}
       { showDisplayModal && PollInfo && (
-        <div className="mx-6 md:w-lg">
+        <div className="m-6 md:w-lg">
           <AccountPoll isOpen={showDisplayModal} onClose={resetPoll} poll={PollInfo} />
         </div>
       )}

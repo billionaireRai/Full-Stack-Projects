@@ -51,9 +51,17 @@ export const gettingAccountService = async (text:string) => {
             
     }
     await connectWithMongoDB() ; // connecting to db...
-    const accountMatched = await accounts.find({
+    const accountsMatched = await accounts.find({
         $and: [
             { $or: [{ name: { $regex: text, $options: 'i' } }, { username: { $regex: text, $options: 'i' } }] },
             { 'account.status': 'ACTIVE' }
         ]
-    })}
+    }) ;
+
+    // getting the accounts information is a structure way...
+    const dataToReturn = await Promise.all(accountsMatched.map((acc) => { 
+        return returnAccountDataInStructure(acc._id) ;
+     }));
+
+     return NextResponse.json({ message:'Matching accounts fethced...' , searchedAcc:dataToReturn },{ status:200 });
+}
