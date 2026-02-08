@@ -8,6 +8,7 @@ import Link from "next/link";
 import { userCardProp } from "./usercard";
 import usePoll from "@/app/states/poll";
 import AccountSearch from "./accountsearch";
+import { useRouter } from "next/navigation";
 import AccountPoll from "./accountpoll";
 import EmojiPicker ,{ EmojiClickData, Theme } from 'emoji-picker-react';
 import { motion } from "framer-motion";
@@ -16,12 +17,15 @@ import { MoreHorizontalIcon , UserPlusIcon , LucideGlobe, X, LocateFixed} from '
 import { TooltipContent, TooltipTrigger , Tooltip } from "./ui/tooltip";
 import CreatePoll from "./createpoll";
 import LocationSearch from "./locationsearch";
+import axiosInstance from "@/lib/interceptor";
 
 export default function CreatePost() {
-  const maxPostLenght = 200 ; // state holding max character lenght for post...
+  const maxPostLenght = 100 ; // state holding max character lenght for post...
   const [post, setPost] = useState('');
   const [DisablePostButton, setDisablePostButton] = useState<boolean>(false);
+  const router = useRouter() ; // for navigation...
   const { Account } = useActiveAccount() ;
+  const { poll } = usePoll() ; // getting the poll state...
   const { resolvedTheme } = useTheme();
   const [showEmojiPicker, setshowEmojiPicker] = useState<boolean>(false);
   const [showTagSomeone, setshowTagSomeone] = useState<boolean>(false);
@@ -35,8 +39,11 @@ export default function CreatePost() {
   const [imageArr, setimageArr] = useState<string[]>([]);
   const [videoArr, setvideoArr] = useState<string[]>([]);
   const [gifArr, setgifArr] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [videoFiles, setVideoFiles] = useState<File[]>([]);
+  const [gifFiles, setGifFiles] = useState<File[]>([]);
   const [MentionedTo, setMentionedTo] = useState<string[]>([]);
-  const [AddLocation, setAddLocation] = useState<string[]>([]);
+  const [AddLocation, setAddLocation] = useState<{name: string, coordinates: number[]}[]>([]);
   const [openReplyOptions, setOpenReplyOptions] = useState(false);
   const { poll: PollInfo, isCreateOpen: showPollModal, setIsCreateOpen: setShowPollModal, isDisplayOpen: showDisplayModal, setIsDisplayOpen: setShowDisplayModal, resetPoll } = usePoll(); // extracting all states from usePoll
 
@@ -142,15 +149,43 @@ export default function CreatePost() {
     }, [showLocationSearchModal]);
 
     // post submission logic here...
-    const handlePostSubmission = () => {
+    const handlePostSubmission = async () => {
       try {
-        const postSubmitionApi = 
-        setCreatePop(false);
-        setPost('');
-        resetPoll(); 
-        toast.success('Post successfully created !!')
+        const formData = new FormData();
+        formData.append('postText', post);
+        formData.append('mentions', JSON.stringify(MentionedTo));
+        formData.append('taggedLocation', JSON.stringify(AddLocation));
+        formData.append('canBeRepliedBy', whoCanReply);
+        formData.append('poll', JSON.stringify(poll));
+
+        imageFiles.forEach(file => formData.append('imgUrls', file));
+        videoFiles.forEach(file => formData.append('videoUrls', file));
+        gifFiles.forEach(file => formData.append('gifsArr', file));
+
+        const postSubmitionApi = await axiosInstance.post('/api/post/create', formData ,{
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          }
+        });
+
+        // if (postSubmitionApi.status === 200) {
+        //   setCreatePop(false);
+        //   toast.success('Post successfully created !!') ; // showing a toast success message...
+        //   router.push(`/@${Account.decodedHandle}`);
+        //   setimageArr([]);
+        //   setImageFiles([])
+        //   setvideoArr([]);
+        //   setVideoFiles([])
+        //   setMentionedTo([]);
+        //   setgifArr([]);
+        //   setGifFiles([])
+        //   setAddLocation([]);
+        //   setPost('');
+        //   resetPoll();
+        // }
       } catch (error) {
-        
+        console.log('An Error Occured : ', error);
+        return error;
       }
     }
 
@@ -165,21 +200,24 @@ export default function CreatePost() {
   };
 
   // functions for removing media/tags/locations...
-  const removeArrayElement = (setter: React.Dispatch<React.SetStateAction<string[]>>, index: number) => {
-    setter(prev => prev.filter((_, i) => i !== index));
+  const removeArrayElement = (setters: React.Dispatch<React.SetStateAction<any[]>>[], index: number) => {
+    setters.forEach(setter => setter(prev => prev.filter((_, i) => i !== index)));
   };
 
   // function for handling video, image, and gif url push...
   const handleMediaInclude = (e:React.ChangeEvent<HTMLInputElement>,type:string) => {
     const file = (e.target as HTMLInputElement).files?.[0]; // extrating the file...
     if (file) {
-       const url = URL.createObjectURL(file);
+       const url = URL.createObjectURL(file); // creating a new url...
        if (type === 'image') {
         setimageArr(prev => [...prev, url]);
+        setImageFiles(prev => [...prev, file]);
        } else if (type === 'video') {
         setvideoArr(prev => [...prev, url]);
+        setVideoFiles(prev => [...prev, file]);
        } else if (type === 'gif') {
         setgifArr(prev => [...prev, url]);
+        setGifFiles(prev => [...prev, file]);
        }
     }
   }
@@ -267,7 +305,7 @@ export default function CreatePost() {
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: index * 0.05, duration: 0.2 }}
                   >
-                    <X size={20} className="absolute opacity-0 hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement(setimageArr, index)} />
+                    <X size={20} className="absolute opacity-0 hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement([setimageArr, setImageFiles], index)} />
                    <img src={url} alt="image" className="w-28 h-28 object-cover rounded-lg" />
                   </motion.div>
                 ))}
@@ -293,7 +331,7 @@ export default function CreatePost() {
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ delay: index * 0.05, duration: 0.2 }}
                     >
-                      <X size={20} className="absolute hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement(setvideoArr, index)} />
+                      <X size={20} className="absolute hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement([setvideoArr, setVideoFiles], index)} />
                       <video src={url} className="w-28 h-28 object-cover rounded-lg" />
                     </motion.div>
                   ))}
@@ -320,7 +358,7 @@ export default function CreatePost() {
                       transition={{ delay: index * 0.05, duration: 0.2 }}
                     >
                       <Link href={`/@${tag}`} className="p-1 px-3 rounded-lg">@{tag}</Link>
-                      <X size={13} className="hidden group-hover:block hover:scale-105 transition-all duration-300 cursor-pointer text-yellow-500 dark:text-yellow-300" onClick={() => removeArrayElement(setMentionedTo, index)} />
+                      <X size={13} className="hidden group-hover:block hover:scale-105 transition-all duration-300 cursor-pointer text-yellow-500 dark:text-yellow-300" onClick={() => removeArrayElement([setMentionedTo], index)} />
                     </motion.div>
                   ))}
                 </div>
@@ -346,7 +384,7 @@ export default function CreatePost() {
                       transition={{ delay: index * 0.05, duration: 0.2 }}
                     >
                       <img src={url} alt="gif" className="w-24 h-24 object-cover rounded-lg" />
-                      <X size={20} className="absolute hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement(setgifArr, index)} />
+                      <X size={20} className="absolute hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement([setgifArr, setGifFiles], index)} />
                     </motion.div>
                   ))}
                 </div>
@@ -371,9 +409,11 @@ export default function CreatePost() {
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ delay: index * 0.05, duration: 0.2 }}
                     >
+                      <Link className="flex items-center" href={`https://www.google.com/maps/@${location?.coordinates[0]},${location?.coordinates[1]},15z`}>
                       <LocateFixed size={18} />
-                      <span className="p-1 rounded-lg">{location}</span>
-                      <X size={20} className="absolute -top-2 -right-2 cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 bg-yellow-100 dark:bg-yellow-900 rounded-full p-1 text-yellow-500 dark:text-red-300" onClick={() => removeArrayElement(setAddLocation, index)} />
+                      <span className="p-1 rounded-lg">{location.name}</span>
+                      </Link>
+                      <X size={20} className="absolute -top-2 -right-2 cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 bg-yellow-100 dark:bg-yellow-900 rounded-full p-1 text-yellow-500 dark:text-red-300" onClick={() => removeArrayElement([setAddLocation], index)} />
                     </motion.div>
                   ))}
                 </div>
@@ -557,7 +597,7 @@ export default function CreatePost() {
                animate={{ opacity: 1, y: 400 , x:-250, scale: 1}}
                transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
                className='location-search absolute z-60 w-md -right-65 -top-30 sm:w-lg' >
-                <LocationSearch placeholder="search a location to add..." onClose={() => { setshowLocationSearchModal(false) }} visible={showLocationSearchModal} onSelect={(location) => { setAddLocation((prev) => [...prev,location] ) }}/>
+                <LocationSearch placeholder="search a location to add..." onClose={() => { setshowLocationSearchModal(false) }} visible={showLocationSearchModal} onSelect={(location) => { setAddLocation((prev) => [...prev,{ name: location.text , coordinates:location.coordinates }] ) }}/>
             </motion.div>
           )}
 

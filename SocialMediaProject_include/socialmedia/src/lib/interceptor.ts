@@ -39,7 +39,11 @@ axiosInstance.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then(() => {
-          return axiosInstance(originalRequest);
+          return axiosInstance.request({
+            ...originalRequest,
+            data: originalRequest.data, // preserve FormData reference
+          });
+
         }).catch(err => {
           return Promise.reject(err);
         });
@@ -53,8 +57,16 @@ axiosInstance.interceptors.response.use(
         await axiosInstance.post('/api/auth/refresh');
         // If successful, process queued requests
         processQueue(null);
+        isRefreshing = false;
+
+        if (originalRequest.data instanceof FormData) {
+          delete originalRequest.headers?.['Content-Type'];
+        }
         // Retry the original request...
-        return axiosInstance(originalRequest);
+          return axiosInstance.request({
+            ...originalRequest,
+            data: originalRequest.data, // preserve FormData reference
+          });
       } catch (refreshError) {
         // If refresh fails, reject all queued requests
         processQueue(refreshError, null);

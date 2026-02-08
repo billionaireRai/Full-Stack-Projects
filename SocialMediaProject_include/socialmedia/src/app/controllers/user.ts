@@ -3,6 +3,7 @@ import asyncErrorHandler from "@/app/middleware/errorMiddleware";
 import { userFollowService , userReportService , newAccountCreationService , fetchingAccountsService , switchAccountService } from "../db/services/follow";
 import { accountFetchingService ,profileSpecificDataService , profileUpdateService , profileDeletionService, blockingAccountService } from "@/app/db/services/user";
 import { gettingAccountService } from "../db/services/account";
+import axios from "axios";
 
 export interface reportInfoType {
   reportedFor: string,
@@ -156,4 +157,27 @@ export const gettingSearchedAccountController = asyncErrorHandler( async (reques
     
     // await gettingAccountService(search) ; 
     return NextResponse.json({ message:'accounts successfully fetched...', searchedAcc:[{}] },{ status:200 })
+})
+
+export const getSearchedLocation = asyncErrorHandler(async (request:NextRequest) => {
+    const reqUrl = new URL(request.nextUrl) ;
+    const locationSearched = reqUrl.searchParams.get('search') ;
+
+    if (!locationSearched?.trim()) {
+        console.log('Location search text is empty !!');
+        return NextResponse.json({ message:'Location search text is necessary...' },{ status:400 });
+    }
+
+    const apiurl = `${process.env.GEOCODING_URL}q=${locationSearched}&limit=5&appid=${process.env.NEXT_PUBLIC_GEOCODING_API_KEY}`;
+    const apiRes = await axios.get(apiurl); // hitting request to api...
+    // { id: '8', name: 'Toronto', region: 'ON', country: 'Canada', coordinates: [43.6532, -79.3832] },
+    const searchedLocation = apiRes.data.map((result: any, index: number) => ({
+        id: (index + 1).toString(),
+        text: result.name,
+        region: result.state,
+        country: result.country,
+        coordinates: [result.lat, result.lon]
+    }));
+
+    return NextResponse.json({ message: 'Locations fetched successfully', searchedLocation: searchedLocation }, { status: 200 });
 })

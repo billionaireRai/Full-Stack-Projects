@@ -70,7 +70,7 @@ const pollSchema = new mongoose.Schema(
 );
 
 // Indexes for performance
-pollSchema.index({ authorId: 1, createdAt: -1 });
+pollSchema.index({ authorPost: 1, createdAt: -1 });
 pollSchema.index({ expiry: 1 });
 pollSchema.index({ isActive: 1, createdAt: -1 });
 

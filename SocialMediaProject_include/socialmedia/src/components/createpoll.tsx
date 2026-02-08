@@ -10,7 +10,7 @@ import CustomDropdown from "./customdropdown";
 
 export interface pollInfoType {
   question: string;
-  options: string[];
+  options: { text: string; votes: number }[];
   duration: number;
 }
 
@@ -25,7 +25,7 @@ export default function CreatePoll() {
   const { resolvedTheme } = useTheme();
   const { setPoll, setIsCreateOpen, setIsDisplayOpen } = usePoll();
   const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState<string[]>(["", ""]);
+  const [options, setOptions] = useState<{ text: string; votes: number }[]>([{ text: "", votes: 0 }, { text: "", votes: 0 }]);
   const [duration, setDuration] = useState(86400); // Default 1 day in seconds
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,21 +40,24 @@ export default function CreatePoll() {
 
   const [selectedDurationOption, setSelectedDurationOption] = useState<Option>(durationOptions[4]); // Default to 1 day
 
+  // function for adding options
   const addOption = () => {
     if (options.length < 4) {
-      setOptions([...options, ""]);
+      setOptions([...options, { text: "", votes: 0 }]);
     }
   };
 
+  // function for removing any option
   const removeOption = (index: number) => {
     if (options.length > 2) {
       setOptions(options.filter((_, i) => i !== index));
     }
   };
 
+  // function for updating any option
   const updateOption = (index: number, text: string) => {
     const newOptions = [...options];
-    newOptions[index] = text;
+    newOptions[index] = { ...newOptions[index], text };
     setOptions(newOptions);
   };
 
@@ -63,8 +66,7 @@ export default function CreatePoll() {
       toast.error("Please enter a question for your poll");
       return;
     }
-
-    const validOptions = options.filter(option => option.trim());
+    const validOptions = options.filter(option => option.text.trim());
     if (validOptions.length < 2) {
       toast.error("Please provide at least 2 options");
       return;
@@ -72,13 +74,12 @@ export default function CreatePoll() {
 
     setIsSubmitting(true);
     try {
-      setPoll({ question: question.trim(), options: validOptions.map(opt => opt.trim()), duration: Number(selectedDurationOption.value) });
-      toast.success("Poll created successfully!");
+      setPoll({ question: question.trim(), options: validOptions.map(opt => ({ text: opt.text.trim(), votes: opt.votes })), duration: Number(selectedDurationOption.value) });
       setIsCreateOpen(false);
       setIsDisplayOpen(true);
       // Reset form
       setQuestion("");
-      setOptions(["", ""]);
+      setOptions([{ text: "", votes: 0 }, { text: "", votes: 0 }]);
       setSelectedDurationOption(durationOptions[4]); // Reset to default
     } catch (error) {
       toast.error("Failed to create poll");
@@ -148,14 +149,14 @@ export default function CreatePoll() {
                     <div className="flex-1 relative">
                       <input
                         type="text"
-                        value={option}
+                        value={option.text}
                         onChange={(e) => updateOption(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
                         maxLength={50}
                         className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-yellow-300/50 focus:border-transparent bg-white dark:bg-gray-950 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
                       />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
-                        {option.length}/50
+                        {option.text.length}/50
                       </div>
                     </div>
                     {options.length > 2 && (
@@ -185,7 +186,7 @@ export default function CreatePoll() {
           <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting || !question.trim() || options.filter(opt => opt.trim()).length < 2}
+              disabled={isSubmitting || !question.trim() || options.filter(opt => opt.text.trim()).length < 2}
               className={`px-6 py-2 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-medium ${isSubmitting ? 'cursor-not-allowed' : 'cursor-pointer '}`}
             >
               {isSubmitting ? "Creating..." : "Create Poll"}

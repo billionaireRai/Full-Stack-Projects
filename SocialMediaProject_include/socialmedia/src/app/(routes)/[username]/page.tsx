@@ -3,7 +3,9 @@
 import React, { useState , useEffect, useRef } from 'react';
 import Trendcancelpop from '@/components/trendcancelpop';
 import ReportPop from '@/components/reportPop';
+import RequireSubscription from "@/components/requireSubscription"
 import BlockUser from '@/components/blockUser';
+import useUpgradePop from "@/app/states/upgradePop";
 import Link from 'next/link';
 import Image from 'next/image';
 import Usercard from '@/components/usercard';
@@ -14,13 +16,18 @@ import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
-import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete} from 'lucide-react';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
 import { AxiosResponse } from 'axios';
 import DeleteModal from '@/components/deletemodal';
 import SharePopup from '@/components/sharePopUp';
+
+interface mediaType {
+  url: string;
+  media_type: string;
+}
 
 interface PostType {
     id: string,
@@ -30,7 +37,7 @@ interface PostType {
     reposts: number,
     likes: number,
     views: number,
-    mediaUrls?:string[],
+    media?: mediaType[],
     hashTags?:string[],
     mentions?:string[],
     userliked?: boolean,
@@ -48,7 +55,7 @@ interface innerPostAuthorInfo {
   bio:string,
   avatar: string,
   banner:string
-  mediaUrls:string[]
+  media:mediaType[]
   mentions:string[]
   hashTags:string[]
   content: string;
@@ -60,7 +67,7 @@ interface RepliedPostsType {
   postId:string,
   postAuthorInfo:innerPostAuthorInfo,
   commentedText:string,
-  mediaUrls:string[],
+  media:mediaType[],
   hashTags?:string[],
   mentions?:string[],
   repliedAt:string,
@@ -88,12 +95,14 @@ interface tabsTypes {
 export default function UserProfilePage() {
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
   const router = useRouter() ;
+  const { isPop , setisPop } = useUpgradePop() ;
   const { username } = useParams() ; // taking the username from URL...
   const fetchedHandlesRef = useRef<Set<string>>(new Set()); // ref to track fetched handles
   const [isFollowing, setisFollowing] = useState<boolean>(false);
   const [isSelf, setisSelf] = useState<boolean>(false) ;
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
+  const [planIntent, setplanIntent] = useState<string>('Pro');
   const [suggesstionNum, setsuggesstionNum] = useState<number>(4);
   const [showDeleteAccPop,setshowDeleteAccPop] = useState<boolean>(false);
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
@@ -133,6 +142,7 @@ export default function UserProfilePage() {
     { id: 'likes', label: 'Likes' },
     { id: 'highlights', label: 'Highlights' }
   ];
+
   const [activeTab, setActiveTab] = useState<tabsTypes>({id:'all',label:'All'}); // current active tab state...
 
   // random follow suggestions data
@@ -263,6 +273,7 @@ export default function UserProfilePage() {
       reposts: 45,
       likes: 128,
       views: 1000,
+      media: [],
       userliked:true,
       usereposted:true,
       usercommented:false,
@@ -283,14 +294,14 @@ export default function UserProfilePage() {
         isVerified: true,
         avatar: "/images/myProfile.jpg",
         banner:'',
-        mediaUrls:[],
+        media:[],
         mentions:['notsofit','vedantchoudhary'],
         hashTags:['GSOC','opensource'],
         content: "Working on a new open source project. Can't wait to share it with the community!",
         postedAt: "3d ago"
       },
       commentedText: "Thats the spirit bro , just dont stop and keep upscaling!!!",
-      mediaUrls: [],
+      media: [],
       mentions:['notsofit','vedantchoudhary'],
       hashTags:['GSOC','opensource'],
       repliedAt: "3d ago",
@@ -305,7 +316,7 @@ export default function UserProfilePage() {
     }
   ]);
 
-  let [likedPosts,setlikedPosts] = useState([
+  let [likedPosts,setlikedPosts] = useState<PostType[]>([
     {
       id: "liked1",
       content: "Excited to announce my new project! It's been a journey of learning and growth.",
@@ -314,8 +325,7 @@ export default function UserProfilePage() {
       reposts: 25,
       likes: 120,
       views: 500,
-      bookmarks: 10,
-      mediaUrls: ["https://picsum.photos/400/300?random=10"],
+      media: [{ url: "https://picsum.photos/400/300?random=10", media_type: "image" }],
       hashTags: ["webdev", "react"],
       mentions: ["developer1"],
       userliked:true,
@@ -346,7 +356,7 @@ export default function UserProfilePage() {
       reposts: 25,
       likes: 120,
       views: 500,
-      mediaUrls: ["https://picsum.photos/400/300?random=10"],
+      media: [{ url: "https://picsum.photos/400/300?random=10", media_type: "image" }],
       hashTags: ["webdev", "react"],
       mentions: ["developer1"],
       userliked:false,
@@ -457,20 +467,27 @@ export default function UserProfilePage() {
   const handleProfileDeleteLogic = async (handle:string) => { 
     try {
       const loadingToast = toast.loading('Deleting you account...');
+
       const deleteApi = await axiosInstance.delete(`/api/profile?profileHandle=${handle}`);
-      if (deleteApi.status === 200) {
-        toast.dismiss(loadingToast);
-      const deleteApi = await axiosInstance.delete(`/api/profile?profileHandle=${handle}`);
+
       if (deleteApi.status === 200) {  
+
         toast.dismiss(loadingToast);
+
         toast.success('profile deleted !!')
+
         setshowDeleteAccPop(false);
+
       } else {
+
         toast.dismiss(loadingToast);
+
         toast.error('profile deletion failed !!')
+
         setshowDeleteAccPop(false);
+
       }
-    }
+
     } catch (error) {
       toast.error('Error in profile deletion !!')
     }
@@ -559,49 +576,93 @@ export default function UserProfilePage() {
                   >
                     <MoreHorizontalIcon size={20} />
                     {showProfileOptions && (
-                      <div className={`more-dropdown absolute right-5 top-10 w-48 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
+                      <div className={`more-dropdown absolute right-5 top-8 w-54 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
                         <ul className='p-2'>
                           { isSelf ? (
                             <>
-                               <li 
+                               <li
                               onClick={() => { setOpenProfileEditor(true) }}
                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                 <span>Edit Account</span><Edit2Icon size={15} />
                                </li>
-                               <li 
+                               <li
                                 onClick={() => { setSharePop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                   <span>Share Account</span><Share2Icon size={15} />
                                 </li>
-                                <li 
+                                <li
                                 onClick={() => { handleProfileLinkCopy() }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>Copy Link</span><CopyIcon size={15}/>
                                 </li>
-                                <li 
+                                <li
+                                onClick={() => { toast.success('View Analytics feature coming soon!') }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>View Analytics</span><BarChart3 size={15}/>
+                                </li>
+                                <li
+                                onClick={() => { toast.success('Manage Notifications feature coming soon!') }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Manage Notifications</span><Bell size={15}/>
+                                </li>
+
+                                <li onClick={() => { toast.success('Privacy Settings feature coming soon!') }} className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Privacy Settings</span><Shield size={15}/>
+                                </li>
+                                <li
+                                onClick={() => { toast.success('Account Settings feature coming soon!') }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Account Settings</span><Settings size={15}/>
+                                </li>
+                                <li
+                                onClick={() => { toast.success('Download Data feature coming soon!') }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Download Data</span><Download size={15}/>
+                                </li>
+                                <li
                                 onClick={() => { setshowDeleteAccPop(true)  }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
                                  <span>Delete Account</span><Delete size={15}/>
-                                </li>          
+                                </li>
                             </>
                           ) : (
                             <>
-                              <li 
+                              <li
                                 onClick={() => { handleProfileLinkCopy() }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>Copy Link</span><CopyIcon size={15}/>
                               </li>
-                              <li 
+                              <li
                                 onClick={() => { setSharePop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                   <span>Share Account</span><Share2Icon size={15} />
                               </li>
-                              <li 
+                              <li
+                               onClick={() => { toast.success('Send Message feature coming soon!') }}
+                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Send Message</span><MessageCircle size={15}/>
+                               </li>
+                               <li
+                               onClick={() => { toast.success('View Mutual Friends feature coming soon!') }}
+                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>View Mutual Friends</span><Users size={15}/>
+                               </li>
+                               <li
+                               onClick={() => { toast.success('Add to List feature coming soon!') }}
+                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Add to favourite</span><List size={15}/>
+                               </li>
+                               <li
+                               onClick={() => { toast.success('Mute Account feature coming soon!') }}
+                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Mute Account</span><VolumeX size={15}/>
+                               </li>
+                              <li
                                onClick={() => { setshowBlockPop(true) }}
                                className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors ${IsBlocked ? 'dark:bg-red-950/50 bg-red-100      text-red-500' : ''}`}>
                                  <span>Block Account</span><BanIcon size={15}/>
                                </li>
-                               <li 
+                               <li
                                onClick={() => { setOpenReportPop(true) }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
                                  <span>Report Account</span><Flag size={15} />
@@ -643,6 +704,10 @@ export default function UserProfilePage() {
                           <span>Get Verified</span><Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' />
                         </Link>
                       )}
+                      <Link href={`/@${AccountInfo.handle}/favourites`} className='border border-black-500 text-white bg-black hover:opacity-85 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full transition-colors'>
+                        <span>favourites</span>
+                        <List className='w-4 h-4 text-white'/>
+                      </Link>
                     </div>
                   </div>
 
@@ -712,7 +777,7 @@ export default function UserProfilePage() {
                           handle={AccountInfo.handle}
                           timestamp={post.postedAt}
                           content={post.content}
-                          media={post.mediaUrls || []}
+                          media={post.media || []}
                           likes={post.likes}
                           reposts={post.reposts}
                           replies={post.comments}
@@ -763,11 +828,11 @@ export default function UserProfilePage() {
                                     username={post.postAuthorInfo.name}
                                     followers={post.postAuthorInfo.followers}
                                     following={post.postAuthorInfo.following}
-                                    // cover={post.postAuthorInfo.banner}                                    
+                                    // cover={post.postAuthorInfo.banner}
                                     handle={post.postAuthorInfo.username}
                                     timestamp={post.postAuthorInfo.postedAt}
                                     content={post.postAuthorInfo.content}
-                                    media={post.postAuthorInfo.mediaUrls}
+                                    media={post.postAuthorInfo.media}
                                     hashTags={post.postAuthorInfo.hashTags}
                                     mentions={post.postAuthorInfo.mentions}
                                     bio={post.postAuthorInfo.bio}
@@ -784,8 +849,8 @@ export default function UserProfilePage() {
                                   isVerified={AccountInfo.isVerified}
                                   content={post.commentedText}
                                   mentions={post.mentions}
-                                  hashTags={post.hashTags}                  
-                                  media={post.mediaUrls}
+                                  hashTags={post.hashTags}
+                                  media={post.media || []}
                                   likes={post.likes}
                                   reposts={post.reposts}
                                   replies={post.comments}
@@ -915,7 +980,7 @@ export default function UserProfilePage() {
                           handle={AccountInfo.handle}
                           timestamp={post.postedAt}
                           content={post.content}
-                          media={post.mediaUrls || []}
+                          media={post.media || []}
                           likes={post.likes}
                           reposts={post.reposts}
                           replies={post.comments}
@@ -945,7 +1010,7 @@ export default function UserProfilePage() {
                           handle={AccountInfo.handle}
                           timestamp={post.postedAt}
                           content={post.content}
-                          media={post.mediaUrls || []}
+                          media={post.media || []}
                           likes={post.likes}
                           reposts={post.reposts}
                           replies={post.comments}
@@ -1007,6 +1072,7 @@ export default function UserProfilePage() {
           )}
         </div>
       <>
+       { isPop && <RequireSubscription isOpen={isPop} onClose={() => { setisPop(false) }} planname={planIntent}  />}
         { OpenProfileEditor && (
           <ProfileEditor credentials={AccountInfo} closePop={() => { setOpenProfileEditor(false) }}/>
         )}

@@ -29,7 +29,14 @@ export async function userFollowService(handle: string, follow: boolean) {
     // Preventing self-following
     if (myAccount._id.equals(targetAcc._id)) return NextResponse.json({ message: 'Cannot follow yourself' }, { status: 400 });
 
-    const followObject = await follows.findOne({ followerId: myAccount._id, followingId: targetAcc._id });
+    // No more than 20 follows for unsubscribed accounts...
+    const accountsFollowedTillNow = await follows.find({ followerId: myAccount._id , isDeleted:false }) ;
+    if (!myAccount.isVerified.value && accountsFollowedTillNow.length === 20) {
+        console.log('Follow action restricted !!');
+        return NextResponse.json({ message: 'Follow restricted , get verified !!' }, { status: 400 });
+    }
+
+    const followObject = await follows.findOne({ followerId: myAccount._id, followingId: targetAcc._id , isDeleted:false });
 
     if (followObject && !follow) {
         console.log('Deleting a follow obj...');

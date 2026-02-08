@@ -5,7 +5,7 @@ import { persist } from "zustand/middleware";
 
 export interface pollInfoType {
   question: string;
-  options: string[];
+  options: { text: string; votes: number }[];
   duration: number;
 }
 

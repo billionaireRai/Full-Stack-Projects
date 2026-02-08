@@ -1,16 +1,62 @@
 'use client'
 
-import React, { useState, useEffect, useRef , ReactElement, useMemo } from 'react';
+import usePoll from '@/app/states/poll';
+import React, { useState, useEffect, useRef , ReactElement } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MoreVerticalIcon, Trash2, Edit3, Pin, Star, List, MessageCircle, BarChart3, Code, TrendingUp, FileText, Share2, Mail, Link as LinkIcon, X , SendHorizontalIcon, Heart, Repeat, Eye, Bookmark} from 'lucide-react';
+import {
+  MoreVerticalIcon,
+  Trash2,
+  Edit3,
+  Pin,
+  Star,
+  List,
+  MessageCircle,
+  BarChart3,
+  Code,
+  TrendingUp,
+  FileText,
+  Share2,
+  Mail,
+  Link as LinkIcon,
+  X,
+  SendHorizontalIcon,
+  Heart,
+  Repeat,
+  Eye,
+  Bookmark,
+  EyeOff,
+  VolumeX,
+  Slash,
+  Flag,
+  Frown,
+  UserPlus,
+  ListPlus,
+  Ban,
+  Code2,
+  Megaphone,
+  PodcastIcon
+} from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { useRouter } from 'next/navigation';
+import useActiveAccount from '@/app/states/useraccounts';
 import Commentpopcard from './Commentpopcard';
+import useUpgradePop from '@/app/states/upgradePop';
 import AccountDetailPop from './accountdetailpop';
+import { pollInfoType } from '@/app/states/poll';
 import ViewClickPop from './viewClickPop';
 import toast from 'react-hot-toast';
+import axiosInstance from '@/lib/interceptor';
+import EditPostPop from './editPostpop';
 
+interface locationTaggedType {
+  text: string,
+  coordinates: number[]
+}
+interface mediaType {
+  url: string;
+  media_type: string;
+}
 interface PostCardProps {
   postId:string;
   avatar?: string;
@@ -28,17 +74,19 @@ interface PostCardProps {
   following?:string,
   timestamp?: string;
   content?: string;
-  media?: string[];
+  media?: mediaType[];
   likes?: number;
   reposts?: number;
   replies?: number;
   shares?: number;
   views?: number;
-  bookmarked?: number;
+  taggedLocation?:locationTaggedType[],
+  poll?:pollInfoType;
   hashTags?: string[];
   mentions?: string[];
   showActions?:boolean;
   highlighted?:boolean
+  isFollowing?:boolean
 }
 
 interface actionType {
@@ -69,34 +117,31 @@ export default function PostCard({
   reposts = 0,
   replies = 0,
   views = 0,
+  taggedLocation=[],
+  poll=undefined,
   hashTags = [],
   mentions = [],
   showActions = true,
-  highlighted = false
+  highlighted = false,
+  isFollowing=false
 }: PostCardProps) {
   const displayMedia = media || [];
 
   const router = useRouter() ;
+  const { Account } = useActiveAccount() ;
+  const { setisPop } = useUpgradePop() ; // upgrade pop handler... 
   const [postOptions, setPostOptions] = useState<boolean>(false);
   const [showAccountPopup, setShowAccountPopup] = useState<boolean>(false);
   const [viewPop, setviewPop] = useState<boolean>(false) ;
   const [isHighlighted, setIsHighlighted] = useState<boolean>(highlighted);
   const [CommentCardPop, setCommentCardPop] = useState<boolean>(false) ;
+  const [showEditPostPop, setshowEditPostPop] = useState<boolean>(false);
   const [shareCardPop, setshareCardPop] = useState<boolean>(false) ;
   const [ShareDropDown, setShareDropDown] = useState<boolean>(false);
   const [popupPosition, setPopupPosition] = useState({ top: 0 , left: 0 });
   const [sharePosition, setSharePosition] = useState({ top: 0, left: 0 });
   const avatarRef = useRef<HTMLImageElement>(null);
   const shareRef = useRef<HTMLButtonElement>(null);
-  const popUpControl = useMemo(() => [
-      { label: "Delete", icon: <Trash2 className="w-4 h-4" />, danger: true },
-      { label: "Edit", icon: <Edit3 className="w-4 h-4" /> },
-      { label: "Pin to profile", icon: <Pin className="w-4 h-4" /> },
-      { label: !isHighlighted ? "Highlight on profile" : 'UnHighlight on Profile', icon: <Star className={`w-4 h-4 ${(isHighlighted) ? 'stroke-yellow-500 fill-yellow-600':''}`} /> },
-      { label: "Add/remove from Lists", icon: <List className="w-4 h-4" /> },
-      { label: "Change who can reply", icon: <MessageCircle className="w-4 h-4" /> },
-      { label: "View engagements", icon: <BarChart3 className="w-4 h-4" /> },
-  ], [isHighlighted])
 
   // states related to actions of each post...
   const [isLiked, setIsLiked] = useState<boolean>(userliked);
@@ -151,8 +196,7 @@ export default function PostCard({
   }
 
   // function handling action click...
-  const actionClick = (event: React.MouseEvent<HTMLSpanElement, MouseEvent>, action : actionType) => {
-    event.stopPropagation();
+  const actionClick = (action : actionType) => {
     if (action.label === 'Comment') setCommentCardPop(true)  ; // after successfull commmenting , will edit comment ui...
       else if (action.label === 'Like') {
         setIsLiked(!isLiked);
@@ -239,6 +283,34 @@ export default function PostCard({
     }
   }, [ShareDropDown])
 
+  // delete post handler...
+  const handleDeletePostLogic = async () => {  
+    const loadingtoast = toast.loading('Deleting your post...');
+    try {
+      const deleteApi = await axiosInstance.delete(`/api/post/control?postId=${postId}&postOwner=${handle}&deleteRequestBy=${Account.decodedHandle}`);
+      if (deleteApi.status === 200) {
+        toast.dismiss(loadingtoast);
+        toast.success('Post deleted successfully !!')
+        router.refresh() ; // reloads the current page...
+      } else {
+        toast.dismiss(loadingtoast);
+        toast.error('Deletion failed try later !!');
+      }
+    } catch (error) {
+      console.log('An error occured :',error);
+      toast.error('An Error Occured !!');
+    }
+  }
+
+  // post edit handler...
+  const handleEditingPost = async () => { 
+    if (!Account.account?.isVerified)  setisPop(true) ; // showing upgrade pop up if not verified...
+
+    else {
+      setshowEditPostPop(true)
+    }
+   }
+
   // useeffect for hightlight change...
   const handleHighlightToggle = () => {
       setIsHighlighted(!isHighlighted) ;
@@ -252,15 +324,10 @@ export default function PostCard({
     setLocalComments(isCommented ? localComments - 1 : localComments + 1)
   }
 
-  function functionMoreOptions(event:React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-    event.stopPropagation() ; 
-    setPostOptions(!postOptions) ;
-  }
 
   return (
     <div 
-      onClick={() => { router.push(`/@${handle}/post/${postId}`) }}
-      className={`bg-white cursor-pointer dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-2 cursor-none' : 'my-1 sm:p-4'}`}>
+      className={`bg-white cursor-pointer dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-4 cursor-none' : 'my-1 sm:p-4'}`}>
       <div className="flex items-start gap-3">
         {/* Avatar */}
         <Link href={`/@${handle}`}>
@@ -293,13 +360,24 @@ export default function PostCard({
             <span className={`text-gray-500 dark:text-gray-400 ${!showActions ? 'text-xs' : 'text-sm'} truncate`}>
               {timestamp}
             </span>
+            { isPinned && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-blue-900/20 rounded-full border     border-yellow-200 dark:border-blue-800/50">
+                    <Pin className="w-5 h-5 rotate-45 fill-yellow-500 dark:fill-blue-500 stroke-yellow-500 dark:stroke-blue-500" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Pinned post
+                </TooltipContent>
+              </Tooltip>
+            )}
 
             {/* Options */}
-          { showActions && 
             <Tooltip>
-              <TooltipTrigger asChild>
+            <TooltipTrigger asChild>
             <button
-              onClick={(event) => functionMoreOptions(event) }
+              onClick={() => { setPostOptions(true) } }
               className={`ml-auto rounded-full p-1.5 cursor-pointer transition-colors ${postOptions ? 'bg-gray-100 dark:bg-gray-950' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}
             >
               <MoreVerticalIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -309,25 +387,119 @@ export default function PostCard({
               More
             </TooltipContent>
             </Tooltip>
-          }
-
+          
+          {/* will add ( Account.decodedHandle === handle ) logic and uncomment other...  */}
             {postOptions && (
               <div className="dropdown-container animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
-                {popUpControl.map((item, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleHighlightToggle()}
-                    className={`w-full ${(isHighlighted && (item.label.toLowerCase().includes('highlight') || item.label.toLowerCase().includes('unhighlight'))) ? 'bg-yellow-100' : ''} flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors
-                    ${item.danger
-                        ? "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
-                        : "text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950"}`}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </button>
-                ))}
+                <button
+                  onClick={() => { handleDeletePostLogic(); }}
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
+                <Link href={`/@${handle}/post/${postId}`}
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                >
+                    <PodcastIcon className="w-4 h-4" />
+                    view full post
+                </Link>
+                <button
+                  onClick={() => { handleEditingPost(); }}
+                  className={`w-full flex items-center justify-between px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                >
+                 <div className='flex items-center gap-3'>
+                  <Edit3 className="w-4 h-4" />
+                  <span>Edit</span>
+                 </div>
+                 <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
+                </button>
+                <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                >
+                  <Pin className="w-4 h-4" />
+                  Pin to profile
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleHighlightToggle(); }}
+                  className={`w-full ${(isHighlighted && ('highlight on profile'.toLowerCase().includes('highlight') || 'unhighlight on profile'.toLowerCase().includes('unhighlight'))) ? 'bg-yellow-100' : ''} flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                >
+                  <Star className={`w-4 h-4 ${(isHighlighted) ? 'stroke-yellow-500 fill-yellow-600':''}`} />
+                  {!isHighlighted ? "Highlight on profile" : 'UnHighlight on Profile'}
+                </button>
+                <button
+                  className={`w-full flex items-center justify-between px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                >
+                 <div className='flex items-center gap-3 mr-3'>
+                  <List className="w-4 h-4" />
+                  <span>Add to favourite</span>
+                 </div>
+                 <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
+                </button>
+                <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  View engagements
+                </button>
               </div>
             )}
+            {/* {postOptions && Account.decodedHandle !== handle && (
+             <div className="dropdown-container animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
+               <button
+                className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+               >
+                 <Frown className="h-4 w-4" />
+                 Not interested in this post
+               </button>
+
+               <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+               >
+                 <UserPlus className="h-4 w-4" />
+                 Follow @{handle}
+               </button>
+
+               <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+               >
+                 <ListPlus className="h-4 w-4" />
+                 Add to Favourite
+               </button>
+
+               <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+               >
+                 <VolumeX className="h-4 w-4" />
+                 Mute
+               </button>
+               <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+               >
+                 <BarChart3 className="h-4 w-4" />
+                 View post engagements
+               </button>
+
+               <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+               >
+                 <Code2 className="h-4 w-4" />
+                 Embed post
+               </button>
+               <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
+               >
+                 <Ban className="h-4 w-4" />
+                 Block @{handle}
+               </button>
+               <button
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
+               >
+                 <Flag className="h-4 w-4" />
+                 Report post
+               </button>
+             </div>
+           )} */}
           </div>
 
           {/* Content */}
@@ -336,23 +508,40 @@ export default function PostCard({
           </div>
 
           {/* Media */}
-          {displayMedia && displayMedia.length > 0 && displayMedia.some(url => url && url.trim() !== '') && (
+          {displayMedia && displayMedia.length > 0 && displayMedia.some(item => item.url && item.url.trim() !== '') && (
             <div className="mt-2 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-              {displayMedia.filter(url => url && url.trim() !== '').length === 1 ? (
-                <img
-                  src={displayMedia.find(url => url && url.trim() !== '')}
-                  alt="Post media"
-                  className="w-full max-h-[28rem] object-cover"
-                />
+              {displayMedia.filter(item => item.url && item.url.trim() !== '').length === 1 ? (
+                displayMedia.filter(item => item.url && item.url.trim() !== '')[0].media_type === 'video' ? (
+                  <video
+                    src={displayMedia.filter(item => item.url && item.url.trim() !== '')[0].url}
+                    controls
+                    className="w-full max-h-[28rem] object-cover"
+                  />
+                ) : (
+                  <img
+                    src={displayMedia.filter(item => item.url && item.url.trim() !== '')[0].url}
+                    alt="Post media"
+                    className="w-full max-h-[28rem] object-cover"
+                  />
+                )
               ) : (
                 <div className="grid grid-cols-2 gap-1">
-                  {displayMedia.filter(url => url && url.trim() !== '').slice(0, 4).map((url,index) => (
-                    <img
-                      key={index}
-                      src={url}
-                      alt={`Post media ${index + 1}`}
-                      className="w-full h-40 sm:h-52 object-cover"
-                    />
+                  {displayMedia.filter(item => item.url && item.url.trim() !== '').slice(0, 4).map((item,index) => (
+                    item.media_type === 'video' ? (
+                      <video
+                        key={index}
+                        src={item.url}
+                        controls
+                        className="w-full h-40 sm:h-52 object-cover"
+                      />
+                    ) : (
+                      <img
+                        key={index}
+                        src={item.url}
+                        alt={`Post media ${index + 1}`}
+                        className="w-full h-40 sm:h-52 object-cover"
+                      />
+                    )
                   ))}
                 </div>
               )}
@@ -360,16 +549,22 @@ export default function PostCard({
           )}
 
           {/* Actions */}
-          <div className={`flex justify-between items-center mt-3 pt-2 ${!showActions ? "border-none" : ''} border-t border-gray-100 dark:border-gray-700`}>
+          <div onClick={(e) => { e.stopPropagation() }} className={`flex justify-between items-center mt-3 pt-2 ${!showActions ? "border-none" : 'border-t border-gray-100 dark:border-gray-700'}`}>
             {showActions && actions.map((action, i) => (
-              <button
-              key={i}
-              ref={action.label === 'Share' ? shareRef : null}
-              className="flex items-center group py-1.5 sm:py-1 sm:px-3 rounded-lg text-gray-500 dark:text-white hover:text-yellow-500 dark:hover:text-blue-500 transition-all text-sm cursor-pointer"
-              title={action.label}>
-                <span onClick={(event) => { actionClick(event, action) }} className='p-2 rounded-full group-hover:bg-yellow-100 dark:group-hover:bg-gray-950'>{action.icon}</span>
-                <span className={`hidden sm:inline ${(action.label === 'Like' && isLiked) || (action.label ==='Repost' && isReposted) || (action.label === 'Comment' && isCommented) || (action.label === 'Bookmark' && isBookmarked) || (action.label === 'share' && isShared) ? 'text-yellow-500 dark:text-blue-500' : ''}`}>{action.value}</span>
-              </button>
+              <Tooltip key={i}>
+               <TooltipTrigger asChild >
+                 <button
+                 key={i}
+                 ref={action.label === 'Share' ? shareRef : null}
+                 className="flex items-center group py-1.5 sm:py-1 sm:px-3 rounded-lg text-gray-500 dark:text-white hover:text-yellow-500    dark:hover:text-blue-500 transition-all text-sm cursor-pointer" >
+                   <span onClick={() => { actionClick(action) }} className='p-2 rounded-full group-hover:bg-yellow-100    dark:group-hover:bg-gray-950'>{action.icon}</span>
+                   <span className={`hidden sm:inline ${(action.label === 'Like' && isLiked) || (action.label ==='Repost' && isReposted) ||    (action.label === 'Comment' && isCommented) || (action.label === 'Bookmark' && isBookmarked) || (action.label === 'share' &&    isShared) ? 'text-yellow-500 dark:text-blue-500' : ''}`}>{action.value}</span>
+                 </button>
+              </TooltipTrigger>
+               <TooltipContent>
+                {action.label}
+               </TooltipContent>
+              </Tooltip>
             ))}
           </div>
         </div>
@@ -391,7 +586,10 @@ export default function PostCard({
         onOpen = {() => { setShowAccountPopup(true)}}
         onClose={() => setShowAccountPopup(false)}
         position={popupPosition}
+        isFollowing={isFollowing}
       />
+
+      { showEditPostPop && <EditPostPop initialContent={content} initialLocations={taggedLocation} postId={postId} initialMentions={mentions} onClose={() => { setshowEditPostPop(false) }} initialMedia={media} initialPoll={poll} /> }
 
       { CommentCardPop && ( <Commentpopcard updateState={() => { handleCommentStateUpdate() }} postId={postId} avatar={avatar} name={username} handle={handle}  timestamp={timestamp} content={content} media={displayMedia} handleClose={() => { setCommentCardPop(false) }}/> )}
 
@@ -399,6 +597,7 @@ export default function PostCard({
 
       { ShareDropDown && (
         <div
+          onClick={(e) => { e.stopPropagation() }}
           className="fixed w-fit z-50 p-2 bg-white dark:bg-black shadow-lg dark:shadow-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl share-dropdown animate-in fade-in-0 zoom-in-95 duration-200"
           style={{ top: `${sharePosition.top}px`, left: `${sharePosition.left}px` }}
         >

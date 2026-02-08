@@ -10,6 +10,10 @@ import toast from 'react-hot-toast';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import Link from 'next/link';
 
+interface mediaType {
+  url: string;
+  media_type: string;
+}
 interface CommentCardInfo {
   postId:string,
   avatar?:string ,
@@ -17,7 +21,7 @@ interface CommentCardInfo {
   handle?:string ,
   timestamp?:string,
   content?:string ,
-  media?: string[],
+  media?: mediaType[],
   updateState?:() => void,
   handleClose?:() => void
 }
@@ -78,24 +82,43 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
                 <span className="text-gray-500 dark:text-gray-400 text-sm truncate">{timestamp}</span>
               </div>
               <p className="text-gray-900 dark:text-white text-sm leading-relaxed mb-2">{content}</p>
-              {(media && media.length > 0 && media[0] ) ? (
-                <img
-                  src={media[0]}
-                  alt="Post media"
-                  className="w-full max-h-48 object-cover rounded-lg"
-                />
-              ):(
-                <div className="grid grid-cols-2 gap-1">
-                  {media?.map((med) => (
-                    <img
-                    src={med}
-                    alt="Post media"
-                    className="w-full max-h-48 object-cover rounded-lg"
+              {(media && media.length > 0) ? (
+                media.length === 1 ? (
+                  media[0].media_type === 'video' ? (
+                    <video
+                      src={media[0].url}
+                      controls
+                      className="w-full max-h-48 object-cover rounded-lg"
                     />
-                   ))}
-                  
-                </div>
-              )
+                  ) : (
+                    <img
+                      src={media[0].url}
+                      alt="Post media"
+                      className="w-full max-h-48 object-cover rounded-lg"
+                    />
+                  )
+                ) : (
+                  <div className="grid grid-cols-2 gap-1">
+                    {media.map((med) => (
+                      med.media_type === 'video' ? (
+                        <video
+                          key={med.url}
+                          src={med.url}
+                          controls
+                          className="w-full max-h-48 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <img
+                          key={med.url}
+                          src={med.url}
+                          alt="Post media"
+                          className="w-full max-h-48 object-cover rounded-lg"
+                        />
+                      )
+                    ))}
+                  </div>
+                )
+              ) : null
             }
               <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Replying to <span className="text-blue-500">@{handle}</span></p>
             </div>

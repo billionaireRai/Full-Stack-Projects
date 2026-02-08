@@ -11,6 +11,11 @@ const mediaUrlSchema = new mongoose.Schema({
   public_id: {
     type: String,
     default: ''
+  },
+  media_type:{
+    type:String,
+    enum:["image","video" ,"raw","auto"],
+    default:'auto'
   }
 });
 
@@ -76,7 +81,7 @@ const postSchema = new mongoose.Schema(
 
     mentions: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "User",
+      ref: "accounts",
       default: [],
       validate: {
         validator: function (v:mongoose.Schema.Types.ObjectId[]) {
@@ -85,7 +90,7 @@ const postSchema = new mongoose.Schema(
         message: "Mentions must contain valid ObjectIds"
       }
     },
-    taggedLocation : {
+    taggedLocation : [{
       text: {
         type: String,
         default: ''
@@ -94,7 +99,7 @@ const postSchema = new mongoose.Schema(
         type: [Number],
         default: [] // lat,long
       }
-    },
+    }],
     // for future moderation and visibility....
     isDeleted: {
       type: Boolean,

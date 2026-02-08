@@ -25,16 +25,16 @@ export const plans: SubsPlanType[] = [
   {
     name: "Free",
     price: "$0 / month",
-    desc: "Explore Echofox and understand the ecosystem",
+    desc: "Explore Briezl and understand the ecosystem",
     highlight: "Started here",
     features: [
       "Access public content feed",
-      "Create up to 50 posts per month",
-      "Basic engagement counts (likes & replies)",
+      "Create up to 10 posts per month",
+      "Basic engagement counts likes & replies every post",
       "Standard feed distribution (no prioritization)",
       "Follow and message up to 20 users",
       "Basic profile customization",
-      "Ad-supported experience",
+      "Self-service support via FAQs",
     ],
   },
   {
@@ -44,12 +44,14 @@ export const plans: SubsPlanType[] = [
     highlight: "Most popular",
     features: [
       "Unlimited posts and comments",
-      "Predictable reach boost (transparent algorithm)",
-      "Advanced analytics dashboard (views, saves, visits)",
-      "High-signal feed mode (reduced noise)",
+      "Get verified badge",
+      "Edit your existing posts anytime",
+      "Predictable content reach via transparent algorithm",
+      "Basic feed recommendation system",
       "Ad-free browsing experience",
       "Enhanced profile credibility indicators",
       "Priority content indexing",
+      "Self-managed analytics dashboard",
     ],
   },
   {
@@ -58,28 +60,32 @@ export const plans: SubsPlanType[] = [
     desc: "Turn content into authority and income",
     highlight: "Best for creators",
     features: [
-      "Monetize posts, threads, and gated content",
-      "Creator Studio with audience insights & heatmaps",
+      "Monetize posts and get paid !",
+      "Get verified badge",
+      "Boost your best post by a click",
+      "Advance feed recommendation feature",
       "Reputation & authority score (expertise-based)",
-      "Priority distribution across relevant feeds",
-      "Audience ownership tools (export & portability)",
+      "Priority distribution across relevant feeds and accounts",
+      "Advanced analytics dashboard (views, saves, visits)",
       "Advanced post scheduling & versioning",
-      "Priority moderation & creator support",
+      "Self-managed moderation tools",
+      "Email support for issues",
     ],
   },
   {
-    name: "Enterprise",
+    name: "Premium",
     price: "$49 / month",
-    desc: "Built for teams, brands, and agencies at scale",
-    highlight: "For organizations",
+    desc: "Ultimate solo control with advanced tools",
+    highlight: "For power users",
     features: [
-      "Multi-user team accounts with role management",
-      "Advanced API access for automation & integrations",
-      "Bulk content scheduling & moderation workflows",
-      "Brand governance & approval pipelines",
-      "White-label profiles for organizations",
-      "Real-time analytics & sentiment tracking",
-      "24/7 SLA-backed priority support",
+      "All Creator features",
+      "Personal API access for custom integrations",
+      "Automated post scheduling with templates",
+      "In-depth analytics & performance insights",
+      "Custom branding options for profile",
+      "Exclusive access to beta features",
+      "Priority email support",
+      "Data export for personal records",
     ],
   },
 ];
@@ -94,19 +100,18 @@ export default function SubscriptionPage() {
   }, [selectedPlan]);
 
   const comparisonFeatures = [
-    { name: "Unlimited Posting", plans: ["Pro", "Creator", "Enterprise"] },
-    { name: "Predictable Reach Boost", plans: ["Pro", "Creator", "Enterprise"] },
-    { name: "Advanced Analytics", plans: ["Pro", "Creator", "Enterprise"] },
-    { name: "Creator Monetization", plans: ["Creator", "Enterprise"] },
-    { name: "Audience Export & Ownership", plans: ["Creator", "Enterprise"] },
-    { name: "Team & Role Management", plans: ["Enterprise"] },
-    { name: "API & Automation Access", plans: ["Enterprise"] },
-    { name: "Ad-Free Experience", plans: ["Pro", "Creator", "Enterprise"] },
-    { name: "Priority Support", plans: ["Creator", "Enterprise"] },
+    { name: "Unlimited Posting", plans: ["Pro", "Creator", "Premium"] },
+    { name: "Predictable Reach Boost", plans: ["Pro", "Creator", "Premium"] },
+    { name: "Advanced Analytics", plans: ["Pro", "Creator", "Premium"] },
+    { name: "Creator Monetization", plans: ["Creator", "Premium"] },
+    { name: "Advanced analytics dashboard", plans: ["Creator", "Premium"] },
+    { name: "Personal API Access", plans: ["Premium"] },
+    { name: "Greater User Credit Score", plans: ["Pro", "Creator", "Premium"] },
+    { name: "Priority Email Support", plans: ["Creator", "Premium"] },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center md:ml-72 py-10 px-6 md:px-20 bg-white dark:bg-black transition-all duration-300 font-poppins">
+    <div className="min-h-screen flex flex-col items-center md:ml-72 py-10 px-6 md:px-20 bg-white dark:bg-black font-poppins">
 
       {/* Floating Payment CTA */}
       {selectedPlan && (
@@ -122,7 +127,7 @@ export default function SubscriptionPage() {
       {/* Header */}
       <div className="flex flex-col items-center gap-2 mb-16 mt-6 max-w-3xl">
         <div>
-          <Image src='/images/letter-B.png' className="dark:invert rounded-full" width={60} height={60} alt="logo" />
+          <Image src='/images/letter-B.png' className="dark:invert rounded-full" width={100} height={100} alt="logo" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Choose the plan that grows with you
@@ -135,13 +140,13 @@ export default function SubscriptionPage() {
 
       {/* Plans Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-6xl">
-        {plans.map((plan) => {
+        {plans.map((plan,i) => {
           const isSelected = selectedPlan?.name === plan.name;
 
           return (
             <div
               key={plan.name}
-              className={`flex flex-col justify-between rounded-2xl border p-6 shadow-lg transition-all duration-500 h-[520px]
+              className={`flex flex-col justify-between rounded-2xl border p-6 shadow-lg h-[520px]
                 ${isSelected
                   ? "border-yellow-500 bg-white dark:bg-black"
                   : "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black"
@@ -169,13 +174,13 @@ export default function SubscriptionPage() {
                 </p>
 
                 <ul className="space-y-3 max-h-56 overflow-y-auto pr-2">
-                  {plan.features.map((feature) => (
+                  {plan.features.map((feature,index) => (
                     <li
                       key={feature}
                       className="flex items-start gap-2 text-gray-700 dark:text-gray-300"
                     >
                       <span className="text-green-500 font-bold">✓</span>
-                      <span>{feature}</span>
+                      <div className="flex items-center gap-1.5"><span>{feature}</span><span>{index === 1 && ( i !== 0 ) && (<Image src='/images/yellow-tick.png' width={20} height={20} alt="verified" className="text-blue-500" />)}</span></div>
                     </li>
                   ))}
                 </ul>

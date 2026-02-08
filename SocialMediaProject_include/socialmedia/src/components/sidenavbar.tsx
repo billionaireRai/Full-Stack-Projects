@@ -28,6 +28,7 @@ import {
   Sun,
   Moon,
   LayoutDashboard,
+  PlusCircleIcon,
 } from 'lucide-react'
 
 export default function SideNavbar() {
@@ -254,9 +255,9 @@ export default function SideNavbar() {
               {/* Post Button */}
               <button
                 onClick={() => { setCreatePop(true) }}
-                className="w-full p-3 cursor-pointer rounded-full shadow-md hover:shadow-lg dark:shadow-gray-700 dark:hover:shadow-gray-900 dark:text-white bg-yellow-400 active:bg-yellow-500 text-black font-bold hover:scale-105 transition-transform duration-150"
+                className="flex items-center justify-center gap-2 w-full p-3 cursor-pointer rounded-full shadow-md hover:shadow-lg dark:shadow-gray-700 dark:hover:shadow-gray-900 dark:text-white bg-yellow-400 active:bg-yellow-500 text-black font-bold hover:scale-105 transition-transform duration-150"
               >
-                CREATE POST
+                <span>CREATE POST</span>
               </button>
 
               {/* Profile dropdown trigger */}
