@@ -1,7 +1,6 @@
  'use client'
 
 import React, { useState , useEffect, useRef } from 'react';
-import Trendcancelpop from '@/components/trendcancelpop';
 import ReportPop from '@/components/reportPop';
 import RequireSubscription from "@/components/requireSubscription"
 import BlockUser from '@/components/blockUser';
@@ -29,6 +28,17 @@ interface mediaType {
   media_type: string;
 }
 
+interface locationTaggedType {
+  text: string,
+  coordinates: number[]
+}
+
+interface pollInfoType {
+  question: string;
+  options: { text: string; votes: number }[];
+  duration: number;
+}
+
 interface PostType {
     id: string,
     content: string,
@@ -40,10 +50,14 @@ interface PostType {
     media?: mediaType[],
     hashTags?:string[],
     mentions?:string[],
+    isPinned:boolean,
+    isHighlighted:boolean,
     userliked?: boolean,
     usereposted?: boolean,
     usercommented?: boolean,
-    userbookmarked?: boolean
+    userbookmarked?: boolean,
+    taggedLocation?: locationTaggedType[],
+    poll?: pollInfoType
 }
 
 interface innerPostAuthorInfo {
@@ -73,6 +87,8 @@ interface RepliedPostsType {
   repliedAt:string,
   comments:number,
   reposts:number,
+  isPinned:false,
+  isHighlighted:boolean,
   likes:number,
   views:number,
   userliked?: boolean,
@@ -113,8 +129,9 @@ export default function UserProfilePage() {
   const [IsBlocked, setIsBlocked] = useState<boolean>(false);
   const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
   
+  const pageCategory : "feed" | "profile" | "direct" | "explore" = "profile" ;
   // random user data
-  let user = {
+  let user : accountType = {
     name: "John Doe",
     handle: "johndoe",
     bio: "Digital creator • Photography enthusiast • Coffee lover • Building amazing things one line of code at a time",
@@ -274,10 +291,25 @@ export default function UserProfilePage() {
       likes: 128,
       views: 1000,
       media: [],
+      hashTags: ["NextJS", "TailwindCSS", "WebDev"],
+      mentions: ["vercel", "reactjs"],
       userliked:true,
+      isPinned:false,
+      isHighlighted:false,
       usereposted:true,
       usercommented:false,
-      userbookmarked:false
+      userbookmarked:false,
+      taggedLocation: [{ text: "San Francisco, CA", coordinates: [37.7749, -122.4194] }],
+      poll: {
+        question: "What's your favorite JavaScript framework?",
+        options: [
+          { text: "React", votes: 150 },
+          { text: "Vue", votes: 80 },
+          { text: "Angular", votes: 45 },
+          { text: "Svelte", votes: 60 }
+        ],
+        duration: 24
+      }
     }
   ]);
 
@@ -308,11 +340,47 @@ export default function UserProfilePage() {
       comments: 34,
       reposts: 67,
       likes: 289,
+      isPinned:false,
+      isHighlighted:false,
       views: 500,
       userliked:true,
       usereposted:false,
       usercommented:true,
       userbookmarked:false
+    },
+    {
+      id: "4",
+      postId: '4224',
+      postAuthorInfo: {
+        name: "Sarah Tech",
+        username: "sarah_dev",
+        followers:'120k',
+        following:'89',
+        bio:'Full-stack developer | Open source contributor',
+        isVerified: true,
+        avatar: "/images/default-profile-pic.png",
+        banner:'',
+        media:[],
+        mentions:['techcommunity'],
+        hashTags:['Coding','JavaScript'],
+        content: "Check out my latest tutorial on building scalable React applications!",
+        postedAt: "5d ago"
+      },
+      commentedText: "Great tutorial! Really helped me understand the concepts better. 👍",
+      media: [],
+      mentions:['sarah_dev'],
+      hashTags:['React','Tutorial'],
+      repliedAt: "4d ago",
+      comments: 56,
+      reposts: 89,
+      likes: 456,
+      isPinned:false,
+      isHighlighted:false,
+      views: 1200,
+      userliked:false,
+      usereposted:true,
+      usercommented:false,
+      userbookmarked:true
     }
   ]);
 
@@ -330,8 +398,50 @@ export default function UserProfilePage() {
       mentions: ["developer1"],
       userliked:true,
       usereposted:false,
+      isPinned:false,
+      isHighlighted:false,
       usercommented:true,
-      userbookmarked:false
+      userbookmarked:false,
+      taggedLocation: [{ text: "New York, NY", coordinates: [40.7128, -74.0060] }],
+      poll: {
+        question: "What do you think about the new features?",
+        options: [
+          { text: "Amazing!", votes: 45 },
+          { text: "Good", votes: 30 },
+          { text: "Could be better", votes: 15 },
+          { text: "Not interested", votes: 10 }
+        ],
+        duration: 12
+      }
+    },
+    {
+      id: "liked2",
+      content: "Just discovered an amazing new feature in TypeScript 5.0! The developer experience keeps getting better.",
+      postedAt: "3h ago",
+      comments: 8,
+      reposts: 12,
+      likes: 89,
+      views: 300,
+      media: [],
+      hashTags: ["TypeScript", "WebDevelopment"],
+      mentions: ["typescript"],
+      userliked:true,
+      usereposted:true,
+      isPinned:false,
+      isHighlighted:false,
+      usercommented:false,
+      userbookmarked:true,
+      taggedLocation: [{ text: "Austin, TX", coordinates: [30.2672, -97.7431] }],
+      poll: {
+        question: "Which TypeScript feature are you most excited about?",
+        options: [
+          { text: "Type inference", votes: 25 },
+          { text: "Generics", votes: 20 },
+          { text: "Decorators", votes: 18 },
+          { text: "All of them", votes: 37 }
+        ],
+        duration: 48
+      }
     }
   ])
 
@@ -347,7 +457,7 @@ export default function UserProfilePage() {
     ]
   });
 
-  let [highLightPosts,sethighLightPosts] = useState([
+  let [highLightPosts,sethighLightPosts] = useState<PostType[]>([
     {
       id: "highlight1",
       content: "Excited to share my latest project! It's been a journey of learning and growth.",
@@ -359,10 +469,52 @@ export default function UserProfilePage() {
       media: [{ url: "https://picsum.photos/400/300?random=10", media_type: "image" }],
       hashTags: ["webdev", "react"],
       mentions: ["developer1"],
+      isPinned:false,
+      isHighlighted:true,
       userliked:false,
       usereposted:false,
       usercommented:false,
-      userbookmarked:true
+      userbookmarked:true,
+      taggedLocation: [{ text: "Los Angeles, CA", coordinates: [34.0522, -118.2437] }],
+      poll: {
+        question: "What's your favorite programming language?",
+        options: [
+          { text: "JavaScript", votes: 120 },
+          { text: "Python", votes: 95 },
+          { text: "TypeScript", votes: 80 },
+          { text: "Go", votes: 45 }
+        ],
+        duration: 24
+      }
+    },
+    {
+      id: "highlight2",
+      content: "My journey from beginner to professional developer in just 2 years. Here's what I learned along the way!",
+      postedAt: "2d ago",
+      comments: 45,
+      reposts: 78,
+      likes: 345,
+      views: 1500,
+      media: [{ url: "https://picsum.photos/400/300?random=20", media_type: "image" }],
+      hashTags: ["Career", "Learning", "Programming"],
+      mentions: ["mentor1", "codingcoach"],
+      isPinned:false,
+      isHighlighted:true,
+      userliked:true,
+      usereposted:false,
+      usercommented:true,
+      userbookmarked:true,
+      taggedLocation: [{ text: "Seattle, WA", coordinates: [47.6062, -122.3321] }],
+      poll: {
+        question: "How long have you been coding?",
+        options: [
+          { text: "Less than 1 year", votes: 30 },
+          { text: "1-3 years", votes: 65 },
+          { text: "3-5 years", votes: 55 },
+          { text: "5+ years", votes: 90 }
+        ],
+        duration: 48
+      }
     }
   ]);
 
@@ -457,7 +609,6 @@ export default function UserProfilePage() {
   // funtion for profile link copy...
   const handleProfileLinkCopy = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
-    console.log()
       console.log('profile url copied');
       toast.success('Profile URL is copied...');
      })
@@ -650,7 +801,7 @@ export default function UserProfilePage() {
                                <li
                                onClick={() => { toast.success('Add to List feature coming soon!') }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Add to favourite</span><List size={15}/>
+                                 <span>Add to favourite</span><List size={15}/><Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                                </li>
                                <li
                                onClick={() => { toast.success('Mute Account feature coming soon!') }}
@@ -773,8 +924,10 @@ export default function UserProfilePage() {
                           key={post.id}
                           postId={post.id}
                           avatar={AccountInfo.avatarUrl}
+                          cover={AccountInfo.bannerUrl}
                           username={AccountInfo.name}
                           handle={AccountInfo.handle}
+                          bio={AccountInfo.bio}
                           timestamp={post.postedAt}
                           content={post.content}
                           media={post.media || []}
@@ -782,10 +935,21 @@ export default function UserProfilePage() {
                           reposts={post.reposts}
                           replies={post.comments}
                           views={post.views}
+                          isPinned={post.isPinned}
+                          isHighlighted={post.isHighlighted}
                           userliked={post.userliked}
                           usereposted={post.usereposted}
                           usercommented={post.usercommented}
                           userbookmarked={post.userbookmarked}
+                          isVerified={AccountInfo.isVerified}
+                          followers={AccountInfo.followers}
+                          following={AccountInfo.following}
+                          hashTags={post.hashTags}
+                          mentions={post.mentions}
+                          isFollowing={isFollowing}
+                          taggedLocation={post.taggedLocation}
+                          poll={post.poll}
+                          fromPage={pageCategory}
                         />
                       ))}
                     </div>
@@ -825,10 +989,8 @@ export default function UserProfilePage() {
                                   <PostCard
                                     postId={post.postId}
                                     avatar={post.postAuthorInfo.avatar}
+                                    cover={post.postAuthorInfo.banner}
                                     username={post.postAuthorInfo.name}
-                                    followers={post.postAuthorInfo.followers}
-                                    following={post.postAuthorInfo.following}
-                                    // cover={post.postAuthorInfo.banner}
                                     handle={post.postAuthorInfo.username}
                                     timestamp={post.postAuthorInfo.postedAt}
                                     content={post.postAuthorInfo.content}
@@ -836,30 +998,42 @@ export default function UserProfilePage() {
                                     hashTags={post.postAuthorInfo.hashTags}
                                     mentions={post.postAuthorInfo.mentions}
                                     bio={post.postAuthorInfo.bio}
-                                    // media={post.postAuthorInfo.mediaUrls}
+                                    followers={post.postAuthorInfo.followers}
+                                    following={post.postAuthorInfo.following}
+                                    isVerified={post.postAuthorInfo.isVerified}
                                     showActions={false}
+                                    taggedLocation={[]}
+                                    poll={undefined}
                                   />
                                 </div>
-                                <PostCard
-                                  postId={post.id}
-                                  avatar={AccountInfo.avatarUrl}
-                                  username={AccountInfo.name}
-                                  handle={AccountInfo.handle}
-                                  timestamp={post.repliedAt}
-                                  isVerified={AccountInfo.isVerified}
-                                  content={post.commentedText}
-                                  mentions={post.mentions}
-                                  hashTags={post.hashTags}
-                                  media={post.media || []}
-                                  likes={post.likes}
-                                  reposts={post.reposts}
-                                  replies={post.comments}
-                                  views={post.views}
-                                  userliked={post.userliked}
-                                  usereposted={post.usereposted}
-                                  usercommented={post.usercommented}
-                                  userbookmarked={post.userbookmarked}
-                                />
+                        <PostCard
+                          postId={post.id}
+                          avatar={AccountInfo.avatarUrl}
+                          cover={AccountInfo.bannerUrl}
+                          username={AccountInfo.name}
+                          handle={AccountInfo.handle}
+                          bio={AccountInfo.bio}
+                          timestamp={post.repliedAt}
+                          isVerified={AccountInfo.isVerified}
+                          content={post.commentedText}
+                          mentions={post.mentions}
+                          hashTags={post.hashTags}
+                          media={post.media || []}
+                          likes={post.likes}
+                          reposts={post.reposts}
+                          replies={post.comments}
+                          views={post.views}
+                          isPinned={post.isPinned}
+                          isHighlighted={post.isHighlighted}
+                          userliked={post.userliked}
+                          usereposted={post.usereposted}
+                          usercommented={post.usercommented}
+                          userbookmarked={post.userbookmarked}
+                          followers={AccountInfo.followers}
+                          following={AccountInfo.following}
+                          isFollowing={isFollowing}
+                          fromPage={pageCategory}
+                        />
                               </div>
                             </div>
                           </div>
@@ -976,8 +1150,10 @@ export default function UserProfilePage() {
                           key={post.id}
                           postId={post.id}
                           avatar={AccountInfo.avatarUrl}
+                          cover={AccountInfo.bannerUrl}
                           username={AccountInfo.name}
                           handle={AccountInfo.handle}
+                          bio={AccountInfo.bio}
                           timestamp={post.postedAt}
                           content={post.content}
                           media={post.media || []}
@@ -985,19 +1161,28 @@ export default function UserProfilePage() {
                           reposts={post.reposts}
                           replies={post.comments}
                           views={post.views}
+                          isPinned={post.isPinned}
+                          isHighlighted={post.isHighlighted}
                           hashTags={post.hashTags}
                           mentions={post.mentions}
                           userliked={post.userliked}
                           usereposted={post.usereposted}
                           usercommented={post.usercommented}
                           userbookmarked={post.userbookmarked}
+                          isVerified={AccountInfo.isVerified}
+                          followers={AccountInfo.followers}
+                          following={AccountInfo.following}
+                          isFollowing={isFollowing}
+                          taggedLocation={undefined}
+                          poll={undefined}
+                          fromPage={pageCategory}
                         />
                       ))}
                     </div>
                   </div>
                 )}
 
-                {(activeTab.label === 'Highlights' || activeTab.label === 'All') && Posts.length > 0 && (
+                {(activeTab.label === 'Highlights' || activeTab.label === 'All') && Highlights.length > 0 && (
                   <div className='space-y-4'>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Profile Highlights</h3>
                     <div className='space-y-4'>
@@ -1006,8 +1191,10 @@ export default function UserProfilePage() {
                           key={post.id}
                           postId={post.id}
                           avatar={AccountInfo.avatarUrl}
+                          cover={AccountInfo.bannerUrl}
                           username={AccountInfo.name}
                           handle={AccountInfo.handle}
+                          bio={AccountInfo.bio}
                           timestamp={post.postedAt}
                           content={post.content}
                           media={post.media || []}
@@ -1015,11 +1202,21 @@ export default function UserProfilePage() {
                           reposts={post.reposts}
                           replies={post.comments}
                           views={post.views}
-                          highlighted={true}
+                          isPinned={post.isPinned}
+                          isHighlighted={post.isHighlighted}
                           userliked={post.userliked}
                           usereposted={post.usereposted}
                           usercommented={post.usercommented}
                           userbookmarked={post.userbookmarked}
+                          isVerified={AccountInfo.isVerified}
+                          followers={AccountInfo.followers}
+                          following={AccountInfo.following}
+                          hashTags={post.hashTags}
+                          mentions={post.mentions}
+                          isFollowing={isFollowing}
+                          taggedLocation={post.taggedLocation}
+                          poll={post.poll}
+                          fromPage={pageCategory}
                         />
                       ))}
                     </div>

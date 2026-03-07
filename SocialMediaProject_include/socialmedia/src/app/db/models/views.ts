@@ -1,34 +1,58 @@
 import mongoose from "mongoose";
 
-const viewSchema = new mongoose.Schema(
+const postViewEventSchema = new mongoose.Schema(
   {
     postId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "post",
       required: true,
-      index: true, // Faster lookups for post analytics
-    },
-    accountId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "account",
-      required:[true,'Required for tracking....'],
       index: true,
     },
-    ipAddress: {
+
+    viewerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "account",
+      index: true,
+    },
+
+    ipHash: {
       type: String,
       required: true,
-      trim: true,
+      index: true,
     },
+
+    userAgentHash: {
+      type: String,
+      required: true,
+    },
+
+    source: {
+      type: String,
+      enum: ["feed", "profile", "direct", "explore"],
+      default: "feed",
+    },
+
+    isQualified: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
   },
   { timestamps: true }
 );
 
-// Prevent multiple views from same user on same post...
-viewSchema.index({ postId: 1, userId: 1 }, { unique: true, sparse: true });
+// For fast analytics by post
+postViewEventSchema.index({ postId: 1, createdAt: -1 });
 
-// Prevent multiple views from same IP...
-viewSchema.index({ postId: 1, ipAddress: 1 },{ unique: true, sparse: true });
+// For duplicate detection per session
+postViewEventSchema.index({ postId: 1, sessionId: 1 });
 
+// For logged-in user duplicate detection
+postViewEventSchema.index({ postId: 1, viewerId: 1 });
 
-const Views = mongoose.models.Views || mongoose.model("Views", viewSchema);
+// For fraud analysis
+postViewEventSchema.index({ ipHash: 1, createdAt: -1 });
+
+const Views = mongoose.models.Views || mongoose.model("Views", postViewEventSchema);
 export default Views;

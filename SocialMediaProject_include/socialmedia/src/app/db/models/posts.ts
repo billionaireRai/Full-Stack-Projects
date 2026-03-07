@@ -59,14 +59,18 @@ const postSchema = new mongoose.Schema(
       ref: "Post",
       default: null
     },
-    // Repost / Quote support 
+    // Repost support
     postType: {
       type: String,
       enum: ["original", "repost", "comment"],
       default: "original",
       index: true
     },
-
+    repostId :{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+      default: null
+    },
     // Discovery
     hashtags: {
       type: [String],

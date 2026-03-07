@@ -12,7 +12,7 @@ import Post from "../models/posts";
 import users from "../models/users";
 import { newAccType } from "@/app/controllers/user";
 import { generateReportEmailHTML } from "@/components/report";
-import asyncErrorHandler from "@/app/middleware/errorMiddleware";
+import { sendFollowNotification } from "./notifications";
 
 export async function userFollowService(handle: string, follow: boolean) {
     await connectWithMongoDB(); // establishing DB connection...
@@ -38,50 +38,92 @@ export async function userFollowService(handle: string, follow: boolean) {
 
     const followObject = await follows.findOne({ followerId: myAccount._id, followingId: targetAcc._id , isDeleted:false });
 
-    if (followObject && !follow) {
+    if (followObject && follow) {
         console.log('Deleting a follow obj...');
         await follows.findByIdAndDelete(followObject._id);
         return NextResponse.json({ message: 'Following removed' }, { status: 200 });
     }
 
-    if (!followObject && follow) {
+    if (!followObject && !follow) {
         const newFollow = new follows({ followerId: myAccount._id, followingId: targetAcc._id });
         await newFollow.save();
+
+        // sending follow notification...
+        sendFollowNotification(targetAcc._id,myAccount._id); 
         return NextResponse.json({ message: 'New following created' }, { status: 200 });
     }
 
     // Handle remaining edge cases...
-    if (followObject && follow) return NextResponse.json({ message: 'Already following' }, { status: 200 });
+    if (!followObject && follow) return NextResponse.json({ message: 'Already following' }, { status: 200 });
 
-    if (!followObject && !follow) return NextResponse.json({ message: 'Not following' }, { status: 200 });
+    if (followObject && !follow) return NextResponse.json({ message: 'Logic failed...' }, { status: 200 });
 }
 
-export async function userReportService(report:reportInfoType) {
-    await connectWithMongoDB() ; // establishing Db connection...
+export async function userReportService(report: reportInfoType) {
+    await connectWithMongoDB();
 
     const user = await getDecodedDataFromCookie("accessToken");
-    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    if (user instanceof Error)
+        return NextResponse.json({ message: user.message }, { status: 401 });
 
-    const myAccount = await accounts.findOne({ userId: user.id , 'account.Active':true});
-    if (!myAccount) return NextResponse.json({ message: 'Your account not found' }, { status: 404 });
+    const myAccount = await accounts.findOne({
+        userId: user.id,
+        'account.Active': true
+    });
 
-    const reportedAccount = await accounts.findOne({ username: (report.reportedFor).substring(1) });
+    if (!myAccount)
+        return NextResponse.json({ message: 'Your account not found' }, { status: 404 });
 
-    const reportEntry = new reports({ reportedBy:myAccount._id, reportedEntityId:reportedAccount._id, reportedEntityType:'account', reasonCategory:report.selectedOne.value, description:report.description, priority:report.selectedOne.priority });
+    let reportedEntityId;
+    let reportedEntityType;
 
-    await reportEntry.save() ; // saving the report doc...
+    if (report.postId) {
+        // POST REPORT FLOW...
+        const reportedPost = await Post.findById(report.postId);
 
-    // sending a report confirmation email...
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+        if (!reportedPost)
+            return NextResponse.json({ message: 'Post not found' }, { status: 404 });
+
+        reportedEntityId = reportedPost._id;
+        reportedEntityType = 'post';
+
+    } else {
+        // ACCOUNT REPORT FLOW...
+        const reportedAccount = await accounts.findOne({
+            username: report.reportedFor.substring(1)
+        });
+
+        if (!reportedAccount)
+            return NextResponse.json({ message: 'Account not found' }, { status: 404 });
+
+        reportedEntityId = reportedAccount._id;
+        reportedEntityType = 'account';
+    }
+
+    const reportEntry = new reports({
+        reportedBy: myAccount._id,
+        reportedEntityId,
+        reportedEntityType,
+        reasonCategory: report.selectedOne.value,
+        description: report.description,
+        priority: report.selectedOne.priority
+    });
+
+    await reportEntry.save();
 
     await sendEmailFunction({
-       to: user.email ,
-       subject: "Report Submitted Successfully - Briezl",
-       html: generateReportEmailHTML({ description: report.description, reason: report.selectedOne.label, reportedFor: report.reportedFor }),
+        to: user.email,
+        subject: "Report Submitted Successfully - Briezl",
+        html: generateReportEmailHTML({
+            description: report.description,
+            reason: report.selectedOne.label,
+            reportedFor: report.reportedFor
+        }),
     });
 
     return NextResponse.json({ message: 'Report submitted successfully' }, { status: 200 });
 }
+
 
 export const newAccountCreationService = async (newAcc:newAccType) => { 
     await connectWithMongoDB() ; // connecting to database...

@@ -3,15 +3,16 @@
 import React, { useState, useEffect } from 'react'
 import { Eye, Heart, MessageCircle, Repeat, Bookmark, TrendingUp, Users, MapPin, Smartphone, Monitor, Clock, BarChart3, PieChart, Activity } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import axiosInstance from '@/lib/interceptor'
 
 interface PostMetrics {
-  views: number
-  likes: number
-  comments: number
-  shares: number
-  bookmarks: number
-  reach: number
-  impressions: number
+  views: string
+  likes: string
+  comments: string
+  shares: string
+  bookmarks: string
+  reach: string
+  impressions: string
   engagementRate: number
   demographics: {
     age: { range: string; percentage: number }[]
@@ -23,20 +24,15 @@ interface PostMetrics {
   topPerformingDays: { day: string; engagement: number }[]
 }
 
-export default function PostMetricsPage({postId}:{ postId:string }) {
-  const [metrics, setMetrics] = useState<PostMetrics | null>(null)
-
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      // will replace this data with acctual one... 
-      const mockMetrics: PostMetrics = {
-        views: 12543,
-        likes: 892,
-        comments: 234,
-        shares: 156,
-        bookmarks: 78,
-        reach: 9876,
-        impressions: 14567,
+export default function PostMetricsPage({ postId }:{ postId:string }) {
+  const [metrics, setMetrics] = useState<PostMetrics>({
+        views: '12543',
+        likes: '892',
+        comments: '234',
+        shares: '156',
+        bookmarks: '78',
+        reach: '9876',
+        impressions: '14567',
         engagementRate: 7.2,
         demographics: {
           age: [
@@ -80,14 +76,16 @@ export default function PostMetricsPage({postId}:{ postId:string }) {
           { day: 'Saturday', engagement: 72 },
           { day: 'Sunday', engagement: 68 }
         ]
-      }
+  })
 
-      setTimeout(() => {
-        setMetrics(mockMetrics)
-      }, 1000)
+  useEffect(() => {
+    // function fetching the data...
+    const fetchMetrics = async () => { 
+      const metricApi = await axiosInstance.get(`/api/post/essentials?postid=${postId}`)
+      if (metricApi.status == 200) setMetrics(metricApi.data.metric) ;
     }
 
-    fetchMetrics()
+    // fetchMetrics() ;
   }, [postId])
 
   if (!metrics) {

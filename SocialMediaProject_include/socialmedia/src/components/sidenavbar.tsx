@@ -45,7 +45,7 @@ export default function SideNavbar() {
   const [mounted, setMounted] = useState<boolean>(false)
 
   const shouldShowSidebar =
-    !pathname.startsWith('/auth/') && pathname !== '/' && !pathname.endsWith('/create-account') ;
+    !pathname.startsWith('/auth/') && pathname !== '/' && !pathname.endsWith('/create-account') && !pathname.startsWith('/embed');
 
   // auto-collapse sidebar on small screens...
   useEffect(() => {
@@ -205,8 +205,8 @@ export default function SideNavbar() {
                   className={`${
                     pathname === `/@${Account.decodedHandle}/user-analytics`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
-                      : ''
-                  }`}
+                       : ''
+                  } 'flex flex-row items-center justify-center' `}
                   href={`/@${Account.decodedHandle}/user-analytics`}
                 >
                   <NavItem icon={<LayoutDashboard className={`${pathname === '/username/user-analytics' ? 'fill-black dark:fill-white' : ''}`} />} label="Dashboard" />
@@ -274,12 +274,14 @@ export default function SideNavbar() {
                 >
                   <span className="flex items-center font-medium text-gray-900 dark:text-gray-100 gap-1">
                     {Account.name?.toUpperCase()}
+                    {Account.account?.isVerified && (
                     <Image
                       src="/images/yellow-tick.png"
                       width={18}
                       height={18}
                       alt="blue-tick"
                     />
+                    )}
                   </span>
                   <span className="text-gray-700 dark:text-gray-400 text-xs font-semibold">
                     @{Account.decodedHandle}
@@ -298,26 +300,28 @@ export default function SideNavbar() {
 
               {/* Dropdown */}
               {DotClick && (
-                <div className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-70 mt-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl z-[60] dark:shadow-gray-950">
-                  <div className="p-2 font-medium">
+                <div className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-72 mt-2 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
+                  <div className="p-1.5 font-medium">
                     <Link  
                      href={`/@${Account.decodedHandle}/create-account?userId=${User.userId}`}
-                     className="w-full rounded-md cursor-pointer text-left px-4 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors flex items-center gap-3">
-                      <UserPlusIcon className="w-5 h-5" />
-                      <span>Add new account</span>
+                     className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">
+                      <UserPlusIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
+                      <span className="font-medium">Add new account</span>
                     </Link>
+                    <div className="my-1 border-t border-gray-200 dark:border-gray-800"></div>
                     <button
                     onClick={() => { setDotClick(false); setisPopOpen(true) }}
-                    className={`w-full rounded-md cursor-pointer text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors flex items-center gap-3`}>
-                      <UserIcon className="w-5 h-5" />
-                      <span>Switch another account</span>
+                    className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">
+                      <UserIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
+                      <span className="font-medium">Switch another account</span>
                     </button>
+                    <div className="my-1 border-t border-gray-200 dark:border-gray-800"></div>
                     <button
                      onClick={() => { handleLogoutAccountLogic(String(Account?.decodedHandle)) }}
-                     className="w-full rounded-md cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/40 transition-colors flex items-center gap-3">
-                      <LogOutIcon className="w-5 h-5" />
+                     className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-200 flex items-center gap-3 group">
+                      <LogOutIcon className="w-5 h-5 text-red-500 dark:text-red-500 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
                       <div className='flex flex-row items-center gap-1'>
-                        <span>Logout</span><b>@{Account.decodedHandle}</b>
+                        <span className="font-medium">Logout</span><span className="text-gray-500 dark:text-gray-500">@{Account.decodedHandle}</span>
                       </div>
                     </button>
                   </div>

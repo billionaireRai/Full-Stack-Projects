@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema({
-    userId:{
+    forAccId:{
         type:mongoose.Types.ObjectId,
-        ref:'user',
+        ref:'account',
         required:[true,'Required for successful action...']
     },
     type:{
@@ -13,7 +13,7 @@ const notificationSchema = new mongoose.Schema({
     },
     actorId:{
         type:mongoose.Types.ObjectId,
-        ref:'user',
+        ref:'account',
         required:[true,'Required for successful action...']
     },
     postId:{

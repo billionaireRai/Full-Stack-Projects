@@ -2,13 +2,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import React, { useState, useRef } from 'react'
+import { createPortal } from 'react-dom';
 import AccountDetailPop from './accountdetailpop';
 import axiosInstance from '@/lib/interceptor';
 import { AxiosResponse } from 'axios';
 import Spinner from '@/components/spinner';
 import toast from 'react-hot-toast';
 
-interface accountInfoType {
+export interface accountInfoType {
   name:string ,
   handle:string ,
   bio:string ,
@@ -28,6 +29,7 @@ interface accountInfoType {
 }
 
 export interface userCardProp {
+  id?:string,
   decodedHandle?:string | null ;
   name?:string | null;
   content?:string | null ;
@@ -67,8 +69,8 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
     if (avatarRef.current && account) {
       const rect = avatarRef.current.getBoundingClientRect();
       setPopupPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX + rect.width / 2
+        top: rect.bottom + 8, // 8px gap from avatar bottom
+        left: rect.left + rect.width / 2 // Center horizontally on avatar
       });
       setShowAccountPopup(true);
     }
@@ -138,8 +140,8 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
                </div>
              </div>
 
-             {/* Account Detail Popup */}
-             {account && (
+             {/* Account Detail Popup , create portal render at body level... */}
+             {account && typeof window !== 'undefined' && createPortal(
                <AccountDetailPop
                  user={{
                    name: account.name,
@@ -156,7 +158,8 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
                  onClose={() => setShowAccountPopup(false)}
                  position={popupPosition}
                  isFollowing={isFollowing}
-               />
+               />,
+               document.body
              )}
            </div>
   )

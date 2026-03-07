@@ -7,6 +7,7 @@ import axios from "axios";
 
 export interface reportInfoType {
   reportedFor: string,
+  postId?:string,
   description: string
   selectedOne: { label: string , value: string , priority: string }
 }
@@ -155,7 +156,7 @@ export const gettingSearchedAccountController = asyncErrorHandler( async (reques
         return NextResponse.json({ message:'Search text is neccessary...' },{ status:400 });
     }
     
-    // await gettingAccountService(search) ; 
+    await gettingAccountService(search) ; 
     return NextResponse.json({ message:'accounts successfully fetched...', searchedAcc:[{}] },{ status:200 })
 })
 

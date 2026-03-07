@@ -29,7 +29,7 @@ export const plans: SubsPlanType[] = [
     highlight: "Started here",
     features: [
       "Access public content feed",
-      "Create up to 10 posts per month",
+      "Create up to 20 posts per month",
       "Basic engagement counts likes & replies every post",
       "Standard feed distribution (no prioritization)",
       "Follow and message up to 20 users",

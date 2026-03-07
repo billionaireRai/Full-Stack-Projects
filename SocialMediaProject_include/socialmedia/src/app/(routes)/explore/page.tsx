@@ -14,6 +14,7 @@ import Trendcancelpop from '@/components/trendcancelpop';
 import FollowOptionCard from '@/components/followoptioncard';
 
 export default function explore() {
+  const pageCategory : "feed" | "profile" | "direct" | "explore" = "explore" ;
   const { isCreatePop } = useCreatePost() ; // create post state...
   const [openSettings, setopenSettings] = useState(false);
   const [LocationSetting, setLocationSetting] = useState(false);

@@ -55,14 +55,19 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
     
   if (!visible) return null ;
 
+  // Fixed width for consistent centering
+  const popupWidth = 340;
+  // Calculate centered position - subtract half of popup width
+  const centeredLeft = position.left - (popupWidth / 2);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.18 }}
-      className="fixed z-50 w-[23%] p-1 rounded-2xl border border-gray-200 dark:shadow-gray-700 dark:border-gray-800 bg-white dark:bg-black shadow-md overflow-hidden"
-      style={{ top: position.top, left: position.left }}
+      className="fixed z-[70] w-[340px] p-1 rounded-2xl border border-gray-200 dark:shadow-gray-700 dark:border-gray-800 bg-white dark:bg-black shadow-md overflow-hidden"
+      style={{ top: position.top, left: centeredLeft }}
       onMouseEnter={onOpen}
       onMouseLeave={onClose}
     >
@@ -104,7 +109,7 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
           </h3>
           <span><Image src='/images/yellow-tick.png' width={20} height={20} alt='blue-tick' /></span>
           <span className='text-gray-700'>.</span>
-          <p className="text-gray-500 dark:text-gray-400 text-sm truncate">@{user.handle}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm truncate">{user.handle}</p>
         </div>
 
         {/* Bio */}
@@ -118,7 +123,7 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
         <div className="flex items-center gap-4 mt-3">
           <Link href={`/@${user.handle}/followings`} className="flex items-center group gap-2">
             <span className="font-bold text-gray-900 dark:text-gray-100">
-              {user.following.toLocaleString()}
+              {user.following}
             </span>
             <span className="text-gray-500 group-hover:underline dark:text-gray-400 text-sm">
               Following
@@ -126,7 +131,7 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
           </Link>
           <Link href={`/@${user.handle}/followers`} className="flex items-center group gap-2">
             <span className="font-bold text-gray-900 dark:text-gray-100">
-              {user.followers.toLocaleString()}
+              {user.followers}
             </span>
             <span className="text-gray-500 group-hover:underline dark:text-gray-400 text-sm">
               Followers

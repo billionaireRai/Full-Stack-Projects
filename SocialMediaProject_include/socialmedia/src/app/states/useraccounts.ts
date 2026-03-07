@@ -34,11 +34,13 @@ export interface userCardProp {
 interface userActiveAccountState {
   Account:userCardProp ;
   setAccount: (account:userCardProp ) => void;
+  setIsVerified: (boolean:boolean) => void ;
 }
 
 const useActiveAccount = create<userActiveAccountState>()( persist( (set) => ({
       Account: {},
       setAccount: (account: userCardProp) => set({ Account: account }),
+      setIsVerified: (value: boolean) => set((state) => ({ Account: { ...state.Account, isVerified: value } }))
     }),
     {
       name: "user-active-account",

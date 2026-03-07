@@ -14,7 +14,9 @@ import mongoose from "mongoose";
 import Block from "../models/blocked";
 import likes from "../models/likes";
 import Views from "../models/views";
+import viewStat from "../models/viewstat";
 import tagged from "../models/tagged";
+import Poll from "../models/polls";
 import axios from "axios";
 
 type Plan = "Free" | "Pro" | "Creator" | "Enterprise";
@@ -481,18 +483,44 @@ export const profileSpecificDataService = async (handle:string) => {
 
     // getting all the posts...
     const accountPosts = await Post.find({ $and:[{ authorId:myAccount._id },{ replyToPostId: null },{ postType:'original' },{ isDeleted:false }]}) ; // getting the posts...
+    
+    // Fetch tagged statuses for all posts
+    const postIds = accountPosts.map(p => p._id);
+    const taggedDocs = await tagged.find({ entityId: { $in: postIds } });
+    const taggedMap = new Map();
+    taggedDocs.forEach(doc => {
+        if (!taggedMap.has(doc.entityId.toString())) {
+            taggedMap.set(doc.entityId.toString(), {});
+        }
+        taggedMap.get(doc.entityId.toString())[doc.taggedAs] = true;
+    });
+
+    // Fetch polls for all posts
+    const polls = await Poll.find({ authorPost: { $in: postIds } });
+    const pollMap = new Map();
+    polls.forEach(poll => {
+        pollMap.set(poll.authorPost.toString(), {
+            question: poll.question,
+            options: poll.options.map((opt :{ text:string , votes:number }) => ({ text: opt.text, votes: opt.votes })),
+            duration: poll.duration
+        });
+    });
+
     const structuredPost = Promise.all(accountPosts.map( async (post) => {
         const commentsOnPost = await Post.find({ $and:[{ replyToPostId:post._id },{ postType:'comment' },{ isDeleted:false }] });
-        const repostsOnPost = await Post.find({ $and:[{ postType:'repost' },{ replyToPostId:post._id },{ isDeleted:false }] });
+        const repostsOnPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:post._id },{ isDeleted:false }] });
         const likesOnPost = await likes.find({ $and:[{ targetType:'post' },{ targetEntity:post._id }]});
-        const viewsOnPost = await Views.find({ postId:post._id }) ; // a single condition required...
+        const viewStatsPost = await viewStat.findOne({ postId: post._id });
+        const viewsOnPostCount = viewStatsPost?.totalViews || 0;
 
         // Calculate user interactions...
         const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: post._id }] });
-        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { replyToPostId: post._id }, { isDeleted: false }] });
+        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: post._id }, { isDeleted: false }] });
         const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: post._id }, { isDeleted: false }] });
-        const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: post._id },{ taggedAs:'bookmarked' }] });
+        const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { entityId: post._id },{ taggedAs:'bookmarked' }] });
 
+        const postTagStatus = taggedMap.get(post._id.toString()) || {};
+        
         return {
             id:post._id,
             content:post.content,
@@ -500,14 +528,18 @@ export const profileSpecificDataService = async (handle:string) => {
             comments:fmt(commentsOnPost.length),
             reposts:fmt(repostsOnPost.length),
             likes:fmt(likesOnPost.length),
-            views:fmt(viewsOnPost.length),
+            views:fmt(viewsOnPostCount),
             mediaUrls: Array(post.mediaUrls).map(urlObj => urlObj.url ),
-            hashTags: post.hashags,
+            hashTags: post.hashtags,
             mentions: post.mentions,
             userliked: userLiked ? true : false,
             usereposted: userReposted ? true : false,
             usercommented: userCommented ? true : false,
-            userbookmarked: userBookmarked ? true : false
+            userbookmarked: userBookmarked ? true : false,
+            taggedLocation: post.taggedLocation || [],
+            poll: pollMap.get(post._id.toString()) || undefined,
+            isPinned: postTagStatus['pinned'] || false,
+            isHighlighted: postTagStatus['highlighted'] || false
         }
     }));
 
@@ -521,12 +553,14 @@ export const profileSpecificDataService = async (handle:string) => {
         const followingOfAuthor = await follows.find({ followerId : accountInfo._id , isDeleted:false })
 
         const commentsPost = await Post.find({ $and:[{ replyToPostId:repliedpost._id },{ postType:'comment' },{ isDeleted:false }] });
-        const repostsPost = await Post.find({ $and:[{ postType:'repost' },{ replyToPostId:repliedpost._id },{ isDeleted:false }] });
+        const repostsPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:repliedpost._id },{ isDeleted:false }] });
         const likesPost = await likes.find({ $and:[{ targetType:'post' },{ targetEntity:repliedpost._id }]});
-        const viewsPost = await Views.find({ postId:repliedpost._id }) ; // a single condition required...
+        const viewStatsReplied = await viewStat.findOne({ postId: repliedpost._id });
+        const viewsRepliedCount = viewStatsReplied?.totalViews || 0;
+
         // Calculate user interactions for repliedpost
         const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: repliedpost._id }] });
-        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { replyToPostId: repliedpost._id }, { isDeleted: false }] });
+        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: repliedpost._id }, { isDeleted: false }] });
         const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: repliedpost._id }, { isDeleted: false }] });
         const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: repliedpost._id },{ taggedAs:'bookmarked' }] });
         
@@ -548,14 +582,14 @@ export const profileSpecificDataService = async (handle:string) => {
                 postedAt:new Date(authorPost.createdAt).toDateString()
             },
             commentedText:repliedpost.content,
-            mediaUrls:Array(repliedpost.mediaUrls).map(urlObj => urlObj.url ),
+            mediaUrls:Array(repliedpost.mediaUrls).map(urlObj => urlObj.url),
             mentions:repliedpost.mentions,
             hashTags:repliedpost.hashtags,
             repliedAt:new Date(repliedpost.createdAt).toDateString(),
             comments:fmt(commentsPost.length),
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
-            views:fmt(viewsPost.length),
+            views:fmt(viewsRepliedCount),
             userliked: userLiked ? true : false,
             usereposted: userReposted ? true : false,
             usercommented: userCommented ? true : false,
@@ -590,15 +624,16 @@ export const profileSpecificDataService = async (handle:string) => {
      // getting the posts user liked... 
      const likedPosts = await Promise.all(myLikes.map( async (likeobj) => { 
         const commentsPost = await Post.find({ $and:[{ replyToPostId:likeobj.targetEntity },{ postType:'comment' },{ isDeleted:false }] });
-        const repostsPost = await Post.find({ $and:[{ postType:'repost' },{ replyToPostId:likeobj.targetEntity },{ isDeleted:false }] });
+        const repostsPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:likeobj.targetEntity },{ isDeleted:false }] });
         const likesPost = await likes.find({ $and:[{ targetType:'post' },{ targetEntity:likeobj.targetEntity }]});
-        const viewsPost = await Views.find({ postId:likeobj.targetEntity }) ; // a single condition required...
+        const viewStatsLiked = await viewStat.findOne({ postId: likeobj.targetEntity });
+        const viewsLikedCount = viewStatsLiked?.totalViews || 0;
 
         const post = await Post.findById(likeobj.targetEntity) ; // getting each post...
 
         // Calculate user interactions for the liked post
         const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: post._id }] });
-        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { replyToPostId: post._id }, { isDeleted: false }] });
+        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: post._id }, { isDeleted: false }] });
         const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: post._id }, { isDeleted: false }] });
         const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: post._id },{ taggedAs:'bookmarked' }] });
         return {
@@ -608,7 +643,7 @@ export const profileSpecificDataService = async (handle:string) => {
             comments:fmt(commentsPost.length),
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
-            views:fmt(viewsPost.length),
+            views:fmt(viewsLikedCount),
             mediaUrls: Array(post.mediaUrls).map(urlObj => urlObj.url ),
             hashTags: post.hashtags,
             mentions: post.mentions,
@@ -626,12 +661,13 @@ export const profileSpecificDataService = async (handle:string) => {
         const reqPost = await Post.findById(taggedobj.postId) ; // getting the exact post...
 
         const commentsPost = await Post.find({ $and:[{ replyToPostId:taggedobj.postId },{ postType:'comment' },{ isDeleted:false }] });
-        const repostsPost = await Post.find({ $and:[{ postType:'repost' },{ replyToPostId:taggedobj.postId },{ isDeleted:false }] });
+        const repostsPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:taggedobj.postId },{ isDeleted:false }] });
         const likesPost = await likes.find({ $and:[{ targetType:'post' },{ targetEntity:taggedobj.postId }]});
-        const viewsPost = await Views.find({ postId:taggedobj.postId }) ; // a single condition required...
+        const viewStatsHighlight = await viewStat.findOne({ postId: taggedobj.postId });
+        const viewsHighlightCount = viewStatsHighlight?.totalViews || 0;
 
         const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: reqPost._id }] });
-        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { replyToPostId: reqPost._id }, { isDeleted: false }] });
+        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'r epost' }, { repostId: reqPost._id }, { isDeleted: false }] });
         const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: reqPost._id }, { isDeleted: false }] });
         const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: reqPost._id },{ taggedAs:'bookmarked' }] });
 
@@ -642,7 +678,7 @@ export const profileSpecificDataService = async (handle:string) => {
             comments:fmt(commentsPost.length),
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
-            views:fmt(viewsPost.length),
+            views:fmt(viewsHighlightCount),
             mediaUrls: Array(reqPost.mediaUrls).map(urlObj => urlObj.url ),
             hashTags: reqPost.hashtags,
             mentions: reqPost.mentions,

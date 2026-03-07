@@ -10,13 +10,12 @@ const taggedSchema = new mongoose.Schema(
     },
     taggedAs:{
       type:String,
-      enum:['bookmarked','highlighted'],
+      enum:['bookmarked','highlighted','pinned','favourite'],
       default:'bookmarked',
       required:true
     },
-    postId: {
+    entityId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
       required: true,
       index: true
     }

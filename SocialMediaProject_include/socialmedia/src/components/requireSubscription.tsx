@@ -12,8 +12,8 @@ export default function RequireSubscription({ isOpen, onClose , planname }: Requ
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-black rounded-lg p-6 max-w-lg w-full mx-4 border border-black-300">
         <div className='flex items-center gap-3 mb-4'>
           <MdLock size={25} />
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Upgrade Subscription to {planname}</h2>

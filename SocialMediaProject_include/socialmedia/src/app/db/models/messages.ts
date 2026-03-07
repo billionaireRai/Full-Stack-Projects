@@ -21,7 +21,11 @@ const messageSchema = new mongoose.Schema(
       maxlength: 5000,
       default: null
     },
-
+    postLink:{
+      type:String ,
+      default:null,
+      trim:true
+    },
     mediaUrls: {
       type: [String],
       default: []

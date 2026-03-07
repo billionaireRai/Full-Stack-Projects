@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Customdropdown from '@/components/customdropdown'
-import { Flag, X } from 'lucide-react'
+import { Flag, X, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
 import axiosInstance from '@/lib/interceptor'
 
@@ -20,10 +20,11 @@ interface formDataType {
 
 interface reportModalProps {
   closeReportModal:() => void,
+  postId?:string,
   username?:string
 }
 
-export default function reportPop({ closeReportModal , username }:reportModalProps) {
+export default function reportPop({ closeReportModal , username , postId }:reportModalProps) {
   const reportForm = useForm<formDataType>() ; // intializing useForm hook...
 
   const [Options, setOptions] = useState<optionsType[]>([
@@ -46,7 +47,7 @@ export default function reportPop({ closeReportModal , username }:reportModalPro
   const reportSubmit = async (data:formDataType) => {
     const loadingToast = toast.loading('submitting your report...')
     try {
-      let finalData = { ...data , selectedOne } ; // data to be send to backend...
+      let finalData = { ...data , selectedOne , postId } ; // data to be send to backend...
       const repostApi = await axiosInstance.post(`/api/profile/${data.reportedFor}`,{ reportInfo: finalData });
       if (repostApi.status === 200) {
         toast.dismiss(loadingToast);
@@ -91,6 +92,22 @@ export default function reportPop({ closeReportModal , username }:reportModalPro
               className="w-full px-3 py-2 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 text-sm"
             />
           </div>
+{ postId && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Related Post
+              </label>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Post ID</p>
+                  <p className="text-sm font-mono font-medium text-gray-900 dark:text-white truncate">{postId}</p>
+                </div>
+              </div>
+            </div>
+          )}
           <div>
             <label htmlFor="reasonCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Reason Category

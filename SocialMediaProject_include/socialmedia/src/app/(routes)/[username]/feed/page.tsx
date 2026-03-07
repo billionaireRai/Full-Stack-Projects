@@ -3,12 +3,12 @@
 import React , { useState , useEffect } from 'react';
 import PostCard from '@/components/postcard';
 import Activebeep from '@/components/activebeep';
-import Trendcancelpop from '@/components/trendcancelpop';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Flame, TrendingUp, Gamepad2, Briefcase , MoreHorizontalIcon} from 'lucide-react';
 
 export default function feed() {
+    const pageCategory : "feed" | "profile" | "direct" | "explore" = "feed" ;
     const [hpninPopUp, sethpninPopUp] = useState<number>() ;
      useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -252,8 +252,32 @@ export default function feed() {
                 {/* Main Feed Area - Left Side */}
                 <div className='left flex-1 h-fit bg-white dark:bg-black rounded-xl'>
                     <div className='px-1 flex flex-col gap-0'>
-                        <PostCard postId='' />
-                        <PostCard postId=''/>
+                        <PostCard 
+                          postId='feed-1'
+                          username="John Doe"
+                          handle="johndoe"
+                          avatar="/images/default-profile-pic.png"
+                          cover="/images/default-banner.jpg"
+                          content="Welcome to your feed! Start connecting with friends and sharing updates."
+                          postedAt={new Date().toISOString()}
+                          likes={0}
+                          reposts={0}
+                          replies={0}
+                          views={0}
+                        />
+                        <PostCard 
+                          postId='feed-2'
+                          username="Jane Smith"
+                          handle="janesmith"
+                          avatar="/images/default-profile-pic.png"
+                          cover="/images/default-banner.jpg"
+                          content="Discover what's happening in your community today!"
+                          postedAt={new Date().toISOString()}
+                          likes={0}
+                          reposts={0}
+                          replies={0}
+                          views={0}
+                        />
                     </div>
                 </div>
 
