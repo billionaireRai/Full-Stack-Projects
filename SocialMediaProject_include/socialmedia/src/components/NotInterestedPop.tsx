@@ -51,7 +51,7 @@ export default function NotInterestedPop({ closePopUp, postId, username , update
           </h2>
           
           <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
-            Are you sure you want to hide this post from <b>@{username}</b> ? You won't see this post in your feed anymore.
+            Are you sure you want to hide this post from <b>{username}</b> ? You won't see this post in your feed anymore.
           </p>
 
           <div className="flex flex-col gap-3 w-full">

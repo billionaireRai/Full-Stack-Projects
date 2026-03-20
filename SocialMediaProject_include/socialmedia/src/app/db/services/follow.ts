@@ -3,7 +3,7 @@ import { connectWithMongoDB } from "@/app/db/dbConnection";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import { reportInfoType } from "@/app/controllers/user";
 import { userCardProp } from "./user";
-import { fmt } from "./user";
+import { fmt } from "@/lib/utils";
 import sendEmailFunction from "@/lib/email";
 import accounts from "@/app/db/models/accounts";
 import follows from "@/app/db/models/follows";
@@ -168,24 +168,25 @@ export const fetchingAccountsService = async (handle:string) => {
     
         return {
             id: paticularAcc._id.toString(),
-            decodedHandle:paticularAcc.username,
+            decodedHandle:'@'+paticularAcc.username,
             name:paticularAcc.name,
             content:paticularAcc.bio,
             account:{
                 name:paticularAcc.name ,
-                handle:paticularAcc.username ,
+                handle:'@'+paticularAcc.username ,
                 bio:paticularAcc.bio ,
                 location:{
                   text:paticularAcc.location.text,
                   coordinates:paticularAcc.location.coordinates // lat,long
                 },
                 website:paticularAcc.website,
-                joinDate:String(paticularAcc.createdAt),
+                joinDate:new Date(paticularAcc.createdAt).toDateString(),
                 following:fmt(following.length),
                 followers:fmt(followers.length),
                 Posts:fmt(posts.length),
                 isCompleted:paticularAcc.account.completed,
                 isVerified:paticularAcc.isVerified.value,
+                plan:paticularAcc.isVerified?.level || 'Free',
                 bannerUrl:paticularAcc.banner.url,
                 avatarUrl:paticularAcc.avatar.url
             },
@@ -248,24 +249,25 @@ export const getAllTheFollowingService = async (handle:string) => {
     
         return {
             id: paticularAcc._id.toString(),
-            decodedHandle:paticularAcc.username,
+            decodedHandle:'@'+paticularAcc.username,
             name:paticularAcc.name,
             content:paticularAcc.bio,
             account:{
                 name:paticularAcc.name ,
-                handle:paticularAcc.username ,
+                handle:'@'+paticularAcc.username ,
                 bio:paticularAcc.bio ,
                 location:{
                   text:paticularAcc.location.text,
                   coordinates:paticularAcc.location.coordinates // lat,long
                 },
                 website:paticularAcc.website,
-                joinDate:String(paticularAcc.createdAt),
+                joinDate:new Date(paticularAcc.createdAt).toDateString(),
                 following:fmt(following.length),
                 followers:fmt(followers.length),
                 Posts:fmt(posts.length),
                 isCompleted:paticularAcc.account.completed,
                 isVerified:paticularAcc.isVerified.value,
+                plan:paticularAcc.isVerified?.level || 'Free',
                 bannerUrl:paticularAcc.banner.url,
                 avatarUrl:paticularAcc.avatar.url
             },

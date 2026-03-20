@@ -12,6 +12,7 @@ import Post from "../models/posts";
 import subscriptions from "../models/subscriptions";
 import mongoose from "mongoose";
 import Block from "../models/blocked";
+import { fmt } from "@/lib/utils";
 import likes from "../models/likes";
 import Views from "../models/views";
 import viewStat from "../models/viewstat";
@@ -46,6 +47,7 @@ export interface accountType {
   Posts:string,
   isCompleted:boolean,
   isVerified:boolean,
+  plan:string,
   bannerUrl:string,
   avatarUrl:string
 }
@@ -59,15 +61,6 @@ export interface userCardProp {
   account?: accountType;
   IsFollowing?:boolean;
 }
-
-// function for formating the number...
-export const fmt = (n: number): string => {
-    if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";  // 1e9 = 1 * math.pow(10,9) where e = 10 ;
-    if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
-    if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
-    return String(n); // number is in hundreds...
-};
-
 
 // DB service related to user registration...
 export async function userRegistrationService(credentials:registrationDataType) : Promise<any> {
@@ -102,20 +95,21 @@ export async function userRegistrationService(credentials:registrationDataType) 
     }
     await firstAccount.save(); // saving account doc to DB...
     let accountData : userCardProp = {
-        decodedHandle:firstAccount.username,
+        decodedHandle:'@' + firstAccount.username,
         name:firstAccount.name,
         account:{
             name:firstAccount.name,
-            handle:firstAccount.username,
+            handle:'@'+firstAccount.username,
             bio:'' ,
             location:firstAccount.location,
             website:'',
-            joinDate:String(firstAccount.createdAt),
+            joinDate:new Date(firstAccount.createdAt).toDateString(),
             following:'0',
             followers:'0',
             Posts:'0',
             isCompleted:false,
             isVerified:false,
+            plan:firstAccount.isVerified?.level || 'Free',
             bannerUrl:firstAccount.banner.url,
             avatarUrl:firstAccount.avatar.url
         }
@@ -165,20 +159,21 @@ export async function logginUserService(data:loginDataType) : Promise<any> {
     const followers = await follows.find({ followingId : account._id , isDeleted:false })
     const following = await follows.find({ followerId : account._id , isDeleted:false })
     let accountData : userCardProp = {
-        decodedHandle:account.username,
+        decodedHandle:'@'+account.username,
         name:account.name,
         account:{
             name:account.name,
-            handle:account.username,
+            handle:'@'+account.username,
             bio:account.bio || ' ',
             location:account.location ,
             website:account.website || ' ',
-            joinDate:String(account.createdAt),
+            joinDate:new Date(account.createdAt).toDateString(),
             following:fmt(following.length),
             followers:fmt(followers.length),
             Posts:fmt(posts.length),
             isCompleted:account.account?.complete || false ,
             isVerified:account.isVerified?.value || false,
+            plan:account.isVerified?.level || 'Free',
             bannerUrl: account.banner.url,
             avatarUrl: account.avatar.url
         }
@@ -215,20 +210,21 @@ export async function creatingUserAfterOauth(email: string, name: string,pic:str
         const following = await follows.find({ followerId : account._id , isDeleted:false });
 
         let accountData: userCardProp = {
-            decodedHandle: account.username,
+            decodedHandle:'@'+account.username,
             name: account.name,
             account: {
                 name: account.name,
-                handle: account.username,
+                handle:'@'+account.username,
                 bio: account.bio,
                 location: account.location,
                 website: account.website,
-                joinDate: String(account.createdAt),
+                joinDate: new Date(account.createdAt).toDateString(),
                 following: fmt(following.length),
                 followers: fmt(followers.length),
                 Posts: fmt(posts.length),
                 isCompleted: account.completed,
                 isVerified: account.isVerified.value,
+                plan:account.isVerified?.level || 'Free',
                 bannerUrl: account.banner.url,
                 avatarUrl: account.avatar.url
             }
@@ -274,20 +270,21 @@ export async function creatingUserAfterOauth(email: string, name: string,pic:str
 
 
     let accountData: userCardProp = {
-        decodedHandle: newAccount.username,
+        decodedHandle:'@'+newAccount.username,
         name: newAccount.name,
         account: {
             name: newAccount.name,
-            handle: newAccount.username,
+            handle:'@'+newAccount.username,
             bio: newAccount.bio || '',
             location: newAccount.location ,
             website: newAccount.website || '',
-            joinDate: String(newAccount.createdAt),
+            joinDate: new Date(newAccount.createdAt).toDateString(),
             following: '0',
             followers: '0',
             Posts:'0',
             isCompleted: newAccount.account?.completed || false,
             isVerified: newAccount.isVerified?.value || false,
+            plan:newAccount.isVerified?.level || 'Free',
             bannerUrl: newAccount.banner.url,
             avatarUrl: newAccount.avatar.url
         }
@@ -331,24 +328,25 @@ export async function accountFetchingService(handle:string) {
     const following = await follows.find({ followerId : account._id , isDeleted:false })
 
     const formatedOne : userCardProp = {
-        decodedHandle:account.username,
+        decodedHandle:'@'+account.username,
         name:account.name,
         content:account.bio,
         account: {
             name:account.name ,
-            handle:account.username ,
+            handle:'@'+account.username ,
             bio:account.bio ,
             location:{
               text:account.location.text,
               coordinates:account.location.coordinates // lat,long
             },
             website:account.website,
-            joinDate:String(account.createdAt),
+            joinDate:new Date(account.createdAt).toDateString(),
             following:fmt(following.length),
             followers:fmt(followers.length),
             Posts:fmt(posts.length),
             isCompleted:account.account?.completed || false,
             isVerified:account.isVerified?.value || false,
+            plan:account.isVerified?.level || 'Free',
             bannerUrl:account.banner.url,
             avatarUrl:account.avatar.url
         }
@@ -389,24 +387,25 @@ export const profileSpecificDataService = async (handle:string) => {
 
         return {
             id: paticularAcc._id.toString(),
-            decodedHandle:paticularAcc.username,
+            decodedHandle:'@'+paticularAcc.username,
             name:paticularAcc.name,
             content:paticularAcc.bio,
             account:{
                 name:paticularAcc.name ,
-                handle:paticularAcc.username ,
+                handle:'@'+paticularAcc.username ,
                 bio:paticularAcc.bio ,
                 location:{
                   text:paticularAcc.location.text,
                   coordinates:paticularAcc.location.coordinates // lat,long
                 },
                 website:paticularAcc.website,
-                joinDate:String(paticularAcc.createdAt),
+                joinDate:new Date(paticularAcc.createdAt).toDateString(),
                 following:fmt(following.length),
                 followers:fmt(followers.length),
                 Posts:fmt(posts.length),
                 isCompleted:paticularAcc.account.completed,
                 isVerified:paticularAcc.isVerified.value,
+                plan:paticularAcc.isVerified?.level || 'Free',
                 bannerUrl:paticularAcc.banner.url,
                 avatarUrl:paticularAcc.avatar.url
             },
@@ -524,7 +523,7 @@ export const profileSpecificDataService = async (handle:string) => {
         return {
             id:post._id,
             content:post.content,
-            postedAt:new Date(post.createdAt).toDateString(),
+            postedAt:new Date(post.createdAt).toUTCString(),
             comments:fmt(commentsOnPost.length),
             reposts:fmt(repostsOnPost.length),
             likes:fmt(likesOnPost.length),
@@ -551,6 +550,7 @@ export const profileSpecificDataService = async (handle:string) => {
         const accountInfo = await accounts.findById(authorPost.authorId) ;
         const followersOfAuthor = await follows.find({ followingId : accountInfo._id , isDeleted:false })
         const followingOfAuthor = await follows.find({ followerId : accountInfo._id , isDeleted:false })
+        const postsOfAuthor = await Post.find({ authorId: accountInfo._id , isDeleted:false })
 
         const commentsPost = await Post.find({ $and:[{ replyToPostId:repliedpost._id },{ postType:'comment' },{ isDeleted:false }] });
         const repostsPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:repliedpost._id },{ isDeleted:false }] });
@@ -562,30 +562,62 @@ export const profileSpecificDataService = async (handle:string) => {
         const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: repliedpost._id }] });
         const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: repliedpost._id }, { isDeleted: false }] });
         const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: repliedpost._id }, { isDeleted: false }] });
+        // Author post computations
+        const authorLikesPost = await likes.find({ $and:[{ targetType:'post' },{ targetEntity:authorPost._id }]});
+        const authorCommentsPost = await Post.find({ $and:[{ replyToPostId:authorPost._id },{ postType:'comment' },{ isDeleted:false }] });
+        const authorRepostsPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:authorPost._id },{ isDeleted:false }] });
+        const authorViewStats = await viewStat.findOne({ postId: authorPost._id });
+        const authorViewsCount = authorViewStats?.totalViews || 0;
+        const authorUserLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: authorPost._id }] });
+        const authorUserReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: authorPost._id }, { isDeleted: false }] });
+        const authorUserCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: authorPost._id }, { isDeleted: false }] });
+        const authorUserBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { entityId: authorPost._id },{ taggedAs:'bookmarked' }] });
+        const authorIsFollowing = await follows.exists({$and:[{ followerId:myAccount._id },{ followingId:accountInfo._id },{ isDeleted:false }]} );
+        const authorPostTagStatus = taggedMap.get(authorPost._id.toString()) || {};
+
         const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: repliedpost._id },{ taggedAs:'bookmarked' }] });
         
         return {
+
             id:repliedpost._id,
             postId:repliedpost.replyToPostId,
             postAuthorInfo : {
-                name :accountInfo.name,
-                username:accountInfo.username,
-                followers:fmt(followersOfAuthor.length),
-                following:fmt(followingOfAuthor.length),
-                isVerified:accountInfo.isVerified.value,
-                avatar:accountInfo.avatar.url,
-                banner:accountInfo.banner.url,
-                mediaUrls:Array(authorPost.mediaUrls).map(urlObj => urlObj.url ),
-                mentions:authorPost.mentions,
-                hashTags:authorPost.hashTags,
-                content:authorPost.content,
-                postedAt:new Date(authorPost.createdAt).toDateString()
+                postId: authorPost._id.toString(),
+                username: accountInfo.username,
+                handle: '@'+accountInfo.username,
+                cover: accountInfo.banner.url,
+                bio: accountInfo.bio || '',
+                isVerified: accountInfo.isVerified.value,
+                plan: accountInfo.isVerified?.level || 'Free',
+                followers: fmt(followersOfAuthor.length),
+                following: fmt(followingOfAuthor.length),
+                timestamp: new Date(authorPost.createdAt).toUTCString(),
+                avatar: accountInfo.avatar.url,
+                content: authorPost.content,
+                media: Array(authorPost.mediaUrls).map(urlObj => urlObj.url ),
+                mentions: authorPost.mentions || [],
+                hashTags: authorPost.hashTags || [],
+                taggedLocation: authorPost.taggedLocation || [],
+                poll: pollMap.get(authorPost._id.toString()) || undefined,
+                likes: fmt(authorLikesPost.length),
+                reposts: fmt(authorRepostsPost.length),
+                replies: fmt(authorCommentsPost.length),
+                shares: fmt(authorRepostsPost.length),
+                views: fmt(authorViewsCount),
+                userliked: authorUserLiked ? true : false,
+                usereposted: authorUserReposted ? true : false,
+                usercommented: authorUserCommented ? true : false,
+                userbookmarked: authorUserBookmarked ? true : false,
+                isPinned: authorPostTagStatus['pinned'] || false,
+                isHighlighted: authorPostTagStatus['highlighted'] || false,
+                isFollowing: authorIsFollowing ? true : false
+
             },
             commentedText:repliedpost.content,
             mediaUrls:Array(repliedpost.mediaUrls).map(urlObj => urlObj.url),
             mentions:repliedpost.mentions,
             hashTags:repliedpost.hashtags,
-            repliedAt:new Date(repliedpost.createdAt).toDateString(),
+            repliedAt:new Date(repliedpost.createdAt).toUTCString(),
             comments:fmt(commentsPost.length),
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
@@ -639,7 +671,7 @@ export const profileSpecificDataService = async (handle:string) => {
         return {
             id:post._id,
             content:post.content,
-            postedAt:new Date(post.createdAt).toDateString(),
+            postedAt:new Date(post.createdAt).toUTCString(),
             comments:fmt(commentsPost.length),
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
@@ -674,7 +706,7 @@ export const profileSpecificDataService = async (handle:string) => {
         return {
             id:reqPost._id,
             content:reqPost.content,
-            postedAt:new Date(reqPost.createdAt).toDateString(),
+            postedAt:new Date(reqPost.createdAt).toUTCString(),
             comments:fmt(commentsPost.length),
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),

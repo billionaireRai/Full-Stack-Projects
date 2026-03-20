@@ -4,7 +4,7 @@ import { userCardProp } from "./user";
 import follows from "../models/follows";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import Post from "../models/posts";
-import { fmt } from "./user";
+import { fmt } from "@/lib/utils";
 import accounts from "../models/accounts";
 
 export const gettingAccountService = async (text:string) => {
@@ -25,24 +25,25 @@ export const gettingAccountService = async (text:string) => {
         
          return {
                 id: paticularAcc._id.toString(),
-                decodedHandle:paticularAcc.username,
+                decodedHandle:'@'+paticularAcc.username,
                 name:paticularAcc.name,
                 content:paticularAcc.bio,
                 account:{
                     name:paticularAcc.name ,
-                    handle:paticularAcc.username ,
+                    handle:'@'+paticularAcc.username ,
                     bio:paticularAcc.bio ,
                     location:{
                         text:paticularAcc.location.text,
                       coordinates:paticularAcc.location.coordinates // lat,long
                     },
                     website:paticularAcc.website,
-                    joinDate:String(paticularAcc.createdAt),
+                    joinDate:new Date(paticularAcc.createdAt).toDateString(),
                     following:fmt(following.length),
                     followers:fmt(followers.length),
                     Posts:fmt(posts.length),
                     isCompleted:paticularAcc.account.completed,
                     isVerified:paticularAcc.isVerified.value,
+                    plan:paticularAcc.isVerified?.level || 'Free',
                     bannerUrl:paticularAcc.banner.url,
                     avatarUrl:paticularAcc.avatar.url
                 },

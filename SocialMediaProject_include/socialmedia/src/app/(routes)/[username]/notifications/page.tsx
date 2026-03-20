@@ -112,7 +112,7 @@ export default function notifications() {
     };
   }, []);
   return (
-    <div className='h-fit flex flex-row-reverse md:ml-72 font-poppins rounded-lg dark:bg-black'>
+    <div className='h-fit flex flex-row-reverse font-poppins rounded-lg dark:bg-black'>
       <div className='mainbox hidden lg:flex flex-col lg:flex-row-reverse gap-8 p-6 max-w-7xl mx-auto font-poppins shadow-lg dark:bg-black w-fit h-fit rounded-lg'>
         <div className='right w-fit lg:w-80 xl:w-96 space-y-2'>
 

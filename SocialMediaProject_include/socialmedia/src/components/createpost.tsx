@@ -250,9 +250,9 @@ export default function CreatePost() {
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 Create Post
               </h2>
-              <Link href={`/@${Account.decodedHandle}`} className="hover:opacity-80 transition-opacity">
+              <Link href={`/${Account.decodedHandle}`} className="hover:opacity-80 transition-opacity">
                 <span className="text-sm text-gray-500 dark:text-zinc-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
-                  @{Account.decodedHandle}
+                  {Account.decodedHandle}
                 </span>
               </Link>
             </div>

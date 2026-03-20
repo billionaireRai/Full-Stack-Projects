@@ -22,8 +22,9 @@ export interface accountInfoType {
   following:string,
   followers:string,
   Posts:string,
-  isCompleted:boolean,
   isVerified:boolean,
+  isCompleted:boolean,
+  plan: string,
   bannerUrl:string,
   avatarUrl:string
 }
@@ -52,7 +53,8 @@ const defaultAccount : accountInfoType = {
   followers: "1,247",
   Posts: "89",
   isCompleted:false,
-  isVerified: true,
+  isVerified:true,
+  plan: 'Pro',
   bannerUrl: "https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg",
   avatarUrl: "/images/myProfile.jpg"
 }
@@ -69,7 +71,7 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
     if (avatarRef.current && account) {
       const rect = avatarRef.current.getBoundingClientRect();
       setPopupPosition({
-        top: rect.bottom + 8, // 8px gap from avatar bottom
+        top: rect.bottom , // from avatar bottom...
         left: rect.left + rect.width / 2 // Center horizontally on avatar
       });
       setShowAccountPopup(true);
@@ -105,7 +107,7 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
              {/* Profile section */}
              <div className="flex items-start gap-2 rounded-lg p-2 transition-colors">
                {/* Profile Image */}
-               <Link href={`/@${decodedHandle}`}>
+               <Link href={`/${decodedHandle}`}>
                  <img
                    ref={avatarRef}
                    src={account?.avatarUrl || "/images/myProfile.jpg"}
@@ -119,10 +121,10 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
                {/* User Info */}
                <div className="flex flex-col justify-center flex-1 gap-1">
                  <div className="flex items-center gap-1">
-                   <Link href={`/@${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
+                   <Link href={`/${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-user'/>
                  </div>
-                   <Link href={`/@${decodedHandle}`} className="text-gray-600 w-fit text-xs">@{decodedHandle}</Link>
+                   <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-xs">{decodedHandle}</Link>
                  <p className="text-xs w-full text-gray-500 mt-1">
                    {content ? content : ''}
                  </p>

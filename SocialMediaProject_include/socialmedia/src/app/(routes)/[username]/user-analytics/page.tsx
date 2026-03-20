@@ -332,7 +332,7 @@ export default function UserAnalytics() {
   }
 
   return (
-  <div className='h-full flex flex-col md:ml-72 font-poppins'>
+  <div className='h-full flex flex-col font-poppins'>
     <div className="h-fit p-4 bg-white dark:bg-black text-gray-900 dark:text-white font-poppins rounded-lg shadow-md">
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}

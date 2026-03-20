@@ -15,13 +15,13 @@ const postViewEventSchema = new mongoose.Schema(
       index: true,
     },
 
-    ipHash: {
+    ip: {
       type: String,
       required: true,
       index: true,
     },
 
-    userAgentHash: {
+    userAgent: {
       type: String,
       required: true,
     },

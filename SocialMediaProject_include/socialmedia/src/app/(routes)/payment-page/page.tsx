@@ -75,7 +75,7 @@ const PaymentFormInner = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start md:ml-72 bg-white dark:bg-black text-gray-900 dark:text-white font-poppins py-10 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-white dark:bg-black text-gray-900 dark:text-white font-poppins py-10 px-4">
       {/* Header */}
       <div className="w-full max-w-5xl flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">

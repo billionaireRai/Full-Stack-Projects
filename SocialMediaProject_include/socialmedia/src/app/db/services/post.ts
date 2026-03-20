@@ -2,11 +2,12 @@ import { connectWithMongoDB } from "../dbConnection";
 import { NextResponse } from "next/server";
 import { uploadMediaOnCloudinary } from "@/app/controllers/cloudinary";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
+import mongoose from "mongoose";
 import accounts from "../models/accounts";
 import Post from "../models/posts";
 import Poll from "../models/polls";
 import tagged from "../models/tagged";
-import { fmt } from "./user";
+import { fmt } from "@/lib/utils";
 import Views from "../models/views";
 import viewStat from "../models/viewstat";
 import likes from "../models/likes";
@@ -19,6 +20,7 @@ import subscriptions from "../models/subscriptions";
 import { userCardProp } from "./user";
 
 type Plan = "Free" | "Pro" | "Creator" | "Enterprise";
+
 interface uploadedObj {
      success: boolean;
      url: string;
@@ -401,7 +403,7 @@ export const getPostByIdService = async (postId: string) => {
             post: {
                 id: post._id.toString(),
                 content: post.content,
-                postedAt: post.createdAt,
+                postedAt: new Date(post.createdAt).toUTCString(),
                 comments: commentsCount,
                 reposts: repostsCount,
                 likes: likesCount,
@@ -410,10 +412,12 @@ export const getPostByIdService = async (postId: string) => {
                 hashTags: post.hashTags || [],
                 mentions: Array(post.mentions).map((u:string)=> u.trim()),
                 isPinned: false,
-                username: author.account?.name || author.username,
-                handle: author.username,
+                username: author.account?.name ,
+                handle: '@'+author.username,
                 avatar: author.account?.avatar || '/images/default-profile-pic.png',
+                isCompleted: author.account?.completed ?? false ,
                 isVerified: author.isVerified?.value || false,
+                plan: author.isVerified?.level || 'Free',
                 taggedLocation: post.taggedLocation || [],
                 poll: poll
             }
@@ -717,6 +721,7 @@ export const postBookmarkingService = async (data:{ postId:string , isBookmarked
 //     Posts: '0',
 //     isCompleted: false,
 //     isVerified: false,
+//     plan:'Free',
 //     bannerUrl: '',
 //     avatarUrl: ''
 //   }
@@ -789,24 +794,25 @@ export const getBookmarkAndSuggestionService = async () => {
 
         return {
             id: particularAcc._id.toString(),
-            decodedHandle: particularAcc.username,
+            decodedHandle:'@'+particularAcc.username,
             name: particularAcc.name,
             content: particularAcc.bio,
             account: {
                 name: particularAcc.name,
-                handle: particularAcc.username,
+                handle:'@'+particularAcc.username,
                 bio: particularAcc.bio || '',
                 location: {
                     text: particularAcc.location?.text || '',
                     coordinates: particularAcc.location?.coordinates || [0, 0]
                 },
                 website: particularAcc.website || '',
-                joinDate: particularAcc.createdAt ? new Date(particularAcc.createdAt).toISOString().split('T')[0] : '',
+                joinDate: particularAcc.createdAt ? new Date(particularAcc.createdAt).toDateString() : '',
                 following: fmt(following.length),
                 followers: fmt(followers.length),
                 Posts: fmt(posts.length),
                 isCompleted: particularAcc.account?.completed || false,
                 isVerified: particularAcc.isVerified?.value || false,
+                plan: particularAcc.isVerified?.level || 'Free',
                 bannerUrl: particularAcc.banner?.url || '/images/default-banner.jpg',
                 avatarUrl: particularAcc.avatar?.url || '/images/default-profile-pic.png'
             },
@@ -817,7 +823,7 @@ export const getBookmarkAndSuggestionService = async () => {
     // getting the bookmarked posts
     const bookmarks = await tagged.find({ $and: [{ accountId: activeAcc._id }, { taggedAs: 'bookmarked' }] });
 
-    const posts = await Promise.all(bookmarks.map(async (bookmark) => {
+    const posts = await Promise.all(bookmarks.map(async (bookmark: any) => {
         const postMarked = await Post.findById(bookmark.entityId);
         if (!postMarked || postMarked.isDeleted) return null;
 
@@ -862,9 +868,9 @@ export const getBookmarkAndSuggestionService = async () => {
             avatar: postOwner.account?.avatar || '/images/default-profile-pic.png',
             cover: postOwner.account?.bannerUrl || '/images/default-banner.jpg',
             username: postOwner.account?.name,
-            handle: postOwner.username,
+            handle: '@'+postOwner.username,
             bio: postOwner.account?.bio || '',
-            timestamp: postMarked.createdAt,
+            timestamp: new Date(postMarked.createdAt).toUTCString(),
             content: postMarked.content,
             media: postMarked.mediaUrls || [],
             likes: likesCount,
@@ -877,7 +883,9 @@ export const getBookmarkAndSuggestionService = async () => {
             usereposted: !!userReposted,
             usercommented: !!userCommented,
             userbookmarked: !!userBookmarked,
+            isCompleted: postOwner.account?.completed ?? false ,
             isVerified: postOwner.isVerified?.value || false,
+            plan: postOwner.isVerified?.level || 'Free',
             followers: fmt(postOwner.followers) || '0',
             following: fmt(postOwner.following) || '0',
             hashTags: postMarked.hashTags || [],
@@ -892,32 +900,33 @@ export const getBookmarkAndSuggestionService = async () => {
     const filteredPosts = posts.filter(Boolean);
 
     // getting account suggestions from bookmarked posts...
-    const suggestedAccountsPromises = filteredPosts.map(async (post) => {
+    const suggestedAccountsPromises = filteredPosts.map(async (post: any) => {
         const account = await accounts.findOne({ username: post?.handle, 'account.status': 'ACTIVE' });
         if (!account) return null;
         const posts = await Post.find({ authorId: account._id, isDeleted: false });
         const isFoll = await follows.exists({ followerId: activeAcc._id, followingId: account._id, isDeleted: false });
         return {
             id:account._id.toString(),
-            decodedHandle: account.username,
+            decodedHandle:'@'+account.username,
             name: account.name,
             content:account.bio,
             IsFollowing: isFoll ? true : false ,
             account: {
                 name: account.name,
-                handle: account.username,
+                handle: '@'+account.username,
                 bio: account.bio || '',
                 location: {
                     text: account.location?.text || '',
                     coordinates: account.location?.coordinates || [0, 0]
                 },
                 website: account.website || '',
-                joinDate: account.createdAt ? new Date(account.createdAt).toISOString().split('T')[0] : '',
+                joinDate: account.createdAt ? new Date(account.createdAt).toDateString() : '',
                 following: fmt(account.followings) || '0',
                 followers: fmt(account.followers) || '0',
                 Posts: fmt(posts.length),
                 isCompleted: account.account?.completed || false,
                 isVerified: account.isVerified?.value || false,
+                plan: account.isVerified?.level || 'Free',
                 bannerUrl: account.banner?.url || '/images/default-banner.jpg',
                 avatarUrl: account.avatar?.url || '/images/default-profile-pic.png'
             }
@@ -956,13 +965,13 @@ export const getBookmarkAndSuggestionService = async () => {
     const allSuggestions = [new Set([...filteredSuggestedFromMarked, ...filteredMutualFriendAccounts])];
 
     // sorting the array based on subscription level...
-    const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Enterprise: 3 };
+    const planOrder: Record<Plan, number> = { "Free": 0, "Pro": 1, "Creator": 2, "Enterprise": 3 };
 
-    const accountsWithSubs = await Promise.all(allSuggestions.map(async (acc: any) => {
-        const account = await accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
-        const sub = account ? await subscriptions.findOne({ accountId: account._id, status: 'active' }) : null;
-        return { acc, plan: (sub?.plan as Plan) || 'free', isVerified: acc.account?.isVerified || false };
-    }));
+    const accountsWithSubs = Array.from(allSuggestions).map((acc: any) => {
+        const account = accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
+        const plan = acc.plan as Plan;
+        return { acc, plan, isVerified: acc.account?.isVerified || false };
+    });
 
     // sorting logic...
     accountsWithSubs.sort((a, b) => {
@@ -1038,7 +1047,7 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
     const postdata = {
         id: pagePost._id.toString(),
         content: pagePost.content,
-        postedAt: pagePost.createdAt,
+        postedAt: new Date(pagePost.createdAt).toUTCString(),
         comments: commentsCount,
         reposts: repostsCount,
         likes: likesCount,
@@ -1053,11 +1062,13 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
         usercommented: !!userCommented,
         userbookmarked: !!userBookmarked,
         username: author.name ,
-        handle: author.username,
+        handle: '@'+author.username,
         avatar: author.avatar.url || '/images/default-profile-pic.png',
         cover: author.banner.url || '/images/default-banner.jpg',
         bio: author.bio || '',
+        isCompleted: author.account?.completed ?? false ,
         isVerified: author.isVerified?.value || false,
+        plan: author.isVerified?.level || 'Free',
         followers: fmt(followersCount.length),
         following: fmt(followingCount.length),
         isFollowing: !!isFollowing,
@@ -1080,24 +1091,25 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
         
         return {
             id: particularAcc._id.toString(),
-            decodedHandle: particularAcc.username,
+            decodedHandle:'@'+particularAcc.username,
             name: particularAcc.name,
             content: particularAcc.bio,
             account: {
                 name: particularAcc.name,
-                handle: particularAcc.username,
+                handle: '@'+particularAcc.username,
                 bio: particularAcc.bio || '',
                 location: {
                     text: particularAcc.location?.text || '',
                     coordinates: particularAcc.location?.coordinates || [0, 0]
                 },
                 website: particularAcc.website || '',
-                joinDate: particularAcc.createdAt ? new Date(particularAcc.createdAt).toISOString().split('T')[0] : '',
+                joinDate: particularAcc.createdAt ? new Date(particularAcc.createdAt).toDateString() : '',
                 following: fmt(following.length),
                 followers: fmt(followers.length),
                 Posts: fmt(posts.length),
                 isCompleted: particularAcc.account?.completed || false,
                 isVerified: particularAcc.isVerified?.value || false,
+                plan: particularAcc.isVerified?.level || 'Free',
                 bannerUrl: particularAcc.banner?.url || '/images/default-banner.jpg',
                 avatarUrl: particularAcc.avatar?.url || '/images/default-profile-pic.png'
             },
@@ -1191,5 +1203,81 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
     // Final sorted suggestions array...
     const suggestions = accountsWithSubs.map((item: { acc: userCardProp }) => item.acc);
     return NextResponse.json({ success: true, mainPost: postdata , releventAcc:postAuthor, suggestions : suggestions }, { status: 200 });
+}
+
+export const getAccountsBookmarkedAPostService = async ({ postid , page , pagesize } : { postid: string , page: number , pagesize: number }) => {
+    await connectWithMongoDB() ; // establishing connection to DB...
+
+    // extracting cookies data...
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    // getting my active account...
+    const activeAcc = await accounts.findOne({ userId: user.id, 'account.Active': true, 'account.status': 'ACTIVE' });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+     // checking post existence...
+     const postExists = await Post.findById(postid) ;
+     if (!postExists) return NextResponse.json({ message:'Post not found !!' },{ status:404 }) ;
+
+     const totalResult = await tagged.aggregate([
+          { $match: { entityId: new mongoose.Types.ObjectId(postid), taggedAs: 'Bookmarked' } },
+          { $group: { _id: '$accountId' } },
+          { $count: 'total' }
+        ]);
+        const total = totalResult[0]?.total || 0; // total distinct views...
+        
+        // skip configuration and fetching bookmarks...
+        const toSkip = ( page - 1 ) * pagesize ;
+        const hasNext = toSkip + pagesize < total;
+
+        if (total === 0)  return NextResponse.json({ message: 'likes not found !!', navdata: [] , hasNext }, { status: 200 }) ;
+        
+
+     // Helper function to return account data in structure
+    async function returnAccountDataInStructure(accountId: string): Promise<userCardProp> {
+        const particularAcc = await accounts.findById(accountId);
+        if (!particularAcc) return {} as userCardProp ;
+        
+        // getting count of followers and followings...
+          const postCategory = ['original','repost'] ;
+        const followers = await follows.find({ followingId: particularAcc._id, isDeleted: false });
+        const following = await follows.find({ followerId: particularAcc._id, isDeleted: false });
+        const posts = await Post.find({ authorId:particularAcc._id , postType: { $in:postCategory } ,isDeleted:false }) ;
+        const isFollowing = await follows.exists({ followerId: activeAcc._id, followingId: particularAcc._id, isDeleted: false });
+        
+        return {
+            id: particularAcc._id.toString(),
+            decodedHandle: '@'+particularAcc.username,
+            name: particularAcc.name,
+            content: particularAcc.bio,
+            account: {
+                name: particularAcc.name,
+                handle:'@'+particularAcc.username,
+                bio: particularAcc.bio || '',
+                location: {
+                    text: particularAcc.location?.text || '',
+                    coordinates: particularAcc.location?.coordinates || [0, 0]
+                },
+                website: particularAcc.website || '',
+                joinDate: particularAcc.createdAt ? new Date(particularAcc.createdAt).toDateString() : '',
+                following: fmt(following.length),
+                followers: fmt(followers.length),
+                Posts: fmt(posts.length),
+                isCompleted: particularAcc.account?.completed || false,
+                isVerified: particularAcc.isVerified?.value || false,
+                plan: particularAcc.isVerified?.level || 'Free',
+                bannerUrl: particularAcc.banner?.url || '/images/default-banner.jpg',
+                avatarUrl: particularAcc.avatar?.url || '/images/default-profile-pic.png'
+            },
+            IsFollowing: isFollowing ? true : false
+        };
+    }
+
+    const taggedObjs =  await tagged.find({ $and :[{ entityId:postid },{ taggedAs:'bookmarked' }] }).skip(toSkip).limit(pagesize) ;
+    const accns = await Promise.all(taggedObjs.map((obj) => { 
+        return returnAccountDataInStructure(obj.accountId) ;
+     }))
+
+     return NextResponse.json({ message:'Bookmarked by accounts fetched !!' , navdata:accns , hasNext:hasNext },{ status:200 })
 }
 

@@ -7,6 +7,7 @@ import BlockUser from '@/components/blockUser';
 import useUpgradePop from "@/app/states/upgradePop";
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import Usercard from '@/components/usercard';
 import Spinner from '@/components/spinner';
 import PostCard from '@/components/postcard';
@@ -61,19 +62,35 @@ interface PostType {
 }
 
 interface innerPostAuthorInfo {
-  name: string;
+  postId?: string;
   username: string;
+  handle: string;
+  cover?: string;
+  bio: string;
   isVerified: boolean;
-  followers:string,
-  following:string,
-  bio:string,
-  avatar: string,
-  banner:string
-  media:mediaType[]
-  mentions:string[]
-  hashTags:string[]
+  plan?: string;
+  followers: string;
+  following: string;
+  timestamp: string;
+  userliked?: boolean;
+  usereposted?: boolean;
+  usercommented?: boolean;
+  userbookmarked?: boolean;
+  isPinned?: boolean;
+  isHighlighted?: boolean;
+  isFollowing?: boolean;
+  avatar: string;
   content: string;
-  postedAt: string;
+  media: mediaType[];
+  likes?: number;
+  reposts?: number;
+  replies?: number;
+  shares?: number;
+  views?: number;
+  hashTags: string[];
+  mentions: string[];
+  taggedLocation?: locationTaggedType[];
+  poll?: pollInfoType;
 }
 
 interface RepliedPostsType {
@@ -87,14 +104,15 @@ interface RepliedPostsType {
   repliedAt:string,
   comments:number,
   reposts:number,
-  isPinned:false,
-  isHighlighted:boolean,
   likes:number,
   views:number,
+  plan?:string,
   userliked?: boolean,
   usereposted?: boolean,
   usercommented?: boolean,
-  userbookmarked?: boolean
+  userbookmarked?: boolean,
+  isPinned?:boolean,
+  isHighlighted?:boolean
 }
 
 interface userAllMedias {
@@ -133,7 +151,7 @@ export default function UserProfilePage() {
   // random user data
   let user : accountType = {
     name: "John Doe",
-    handle: "johndoe",
+    handle: "@johndoe",
     bio: "Digital creator • Photography enthusiast • Coffee lover • Building amazing things one line of code at a time",
     location: {
        text:'San Francisco, CA',
@@ -144,8 +162,9 @@ export default function UserProfilePage() {
     following: '542',
     followers: '187k',
     Posts: "3,245",
-    isCompleted:false,
+    isCompleted:true,
     isVerified: false,
+    plan:'Free',
     bannerUrl: "/images/default-banner.jpg",
     avatarUrl: "/images/default-profile-pic.png"
   };
@@ -165,12 +184,12 @@ export default function UserProfilePage() {
   // random follow suggestions data
   const [FollowSuggesstions, setFollowSuggesstions] = useState<userCardProp[]>([
     {
-      decodedHandle: 'alice_dev',
+      decodedHandle: '@alice_dev',
       name: 'Alice Developer',
       IsFollowing: true,
       account: {
         name: 'Alice Developer',
-        handle: 'alice_dev',
+        handle: '@alice_dev',
         bio: 'Full-stack developer | React enthusiast | Building the future one commit at a time.',
         location: {
           text: 'New York, NY',
@@ -181,19 +200,20 @@ export default function UserProfilePage() {
         following: '234',
         followers: '1.2k',
         Posts: '456',
-        isCompleted: true,
+        isCompleted:true,
         isVerified: true,
+        plan:'Pro',
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'bob_designer',
+      decodedHandle: '@bob_designer',
       name: 'Bob Designer',
       IsFollowing: false,
       account: {
         name: 'Bob Designer',
-        handle: 'bob_designer',
+        handle: '@bob_designer',
         bio: 'Creative designer | Minimalist | Coffee addict | Turning ideas into beautiful interfaces.',
         location: {
           text: 'Los Angeles, CA',
@@ -204,19 +224,20 @@ export default function UserProfilePage() {
         following: '567',
         followers: '3.4k',
         Posts: '789',
-        isCompleted: true,
+        isCompleted:true,
         isVerified: false,
+        plan:'Free',
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'charlie_writer',
+      decodedHandle: '@charlie_writer',
       name: 'Charlie Writer',
       IsFollowing: false,
       account: {
         name: 'Charlie Writer',
-        handle: 'charlie_writer',
+        handle: '@charlie_writer',
         bio: 'Tech writer | Blogger | Sharing insights on the latest in technology and development.',
         location: {
           text: 'Austin, TX',
@@ -227,19 +248,20 @@ export default function UserProfilePage() {
         following: '123',
         followers: '5.6k',
         Posts: '1,234',
-        isCompleted: true,
+        isCompleted:true,
         isVerified: true,
+        plan:'Pro',
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'diana_startup',
+      decodedHandle: '@diana_startup',
       name: 'Diana Entrepreneur',
       IsFollowing: true,
       account: {
         name: 'Diana Entrepreneur',
-        handle: 'diana_startup',
+        handle: '@diana_startup',
         bio: 'Entrepreneur | AI enthusiast | Founder of innovative tech solutions.',
         location: {
           text: 'Seattle, WA',
@@ -250,19 +272,20 @@ export default function UserProfilePage() {
         following: '345',
         followers: '890',
         Posts: '234',
-        isCompleted: true,
+        isCompleted:true,
         isVerified: false,
+        plan:'Free',
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'eve_photographer',
+      decodedHandle: '@eve_photographer',
       name: 'Eve Photographer',
       IsFollowing: false,
       account: {
         name: 'Eve Photographer',
-        handle: 'eve_photographer',
+        handle: '@eve_photographer',
         bio: 'Professional photographer | Nature lover | Sharing visual stories through lenses.',
         location: {
           text: 'Denver, CO',
@@ -273,8 +296,9 @@ export default function UserProfilePage() {
         following: '678',
         followers: '7.8k',
         Posts: '2,345',
-        isCompleted: true,
+        isCompleted:true,
         isVerified: true,
+        plan:'Pro',
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
@@ -318,19 +342,42 @@ export default function UserProfilePage() {
       id: "3",
       postId: '4223',
       postAuthorInfo: {
-        name: "Amritansh Rai",
-        username: "amritansh_coder",
-        followers:'352.7k',
-        following:'242',
-        bio:'love you guys...',
+        postId: "4223",
+        username: "Amritansh Rai",
+        handle: "@amritansh_coder",
+        cover: "",
+        bio: 'love you guys...',
         isVerified: true,
+        plan: "Pro",
+        followers: '352.7k',
+        following: '242',
+        timestamp: "3d ago",
+        userliked: true,
+        usereposted: false,
+        usercommented: false,
+        userbookmarked: true,
+        isPinned: false,
+        isHighlighted: true,
+        isFollowing: true,
         avatar: "/images/myProfile.jpg",
-        banner:'',
-        media:[],
-        mentions:['notsofit','vedantchoudhary'],
-        hashTags:['GSOC','opensource'],
         content: "Working on a new open source project. Can't wait to share it with the community!",
-        postedAt: "3d ago"
+        media: [],
+        likes: 1287,
+        reposts: 456,
+        replies: 234,
+        shares: 89,
+        views: 12500,
+        hashTags: ['GSOC','opensource'],
+        mentions: ['notsofit','vedantchoudhary'],
+        taggedLocation: [{ text: "Remote", coordinates: [28.4506, 77.1471] }],
+        poll: {
+          question: "Interested in open source?",
+          options: [
+            { text: "Yes", votes: 1200 },
+            { text: "No", votes: 87 }
+          ],
+          duration: 7
+        }
       },
       commentedText: "Thats the spirit bro , just dont stop and keep upscaling!!!",
       media: [],
@@ -352,19 +399,35 @@ export default function UserProfilePage() {
       id: "4",
       postId: '4224',
       postAuthorInfo: {
-        name: "Sarah Tech",
-        username: "sarah_dev",
-        followers:'120k',
-        following:'89',
-        bio:'Full-stack developer | Open source contributor',
+        postId: "4224",
+        username: "Sarah Tech",
+        handle: "@sarah_dev",
+        cover: "",
+        bio: 'Full-stack developer | Open source contributor',
         isVerified: true,
+        plan: "Pro",
+        followers: '120k',
+        following: '89',
+        timestamp: "5d ago",
+        userliked: false,
+        usereposted: true,
+        usercommented: true,
+        userbookmarked: false,
+        isPinned: true,
+        isHighlighted: false,
+        isFollowing: false,
         avatar: "/images/default-profile-pic.png",
-        banner:'',
-        media:[],
-        mentions:['techcommunity'],
-        hashTags:['Coding','JavaScript'],
         content: "Check out my latest tutorial on building scalable React applications!",
-        postedAt: "5d ago"
+        media: [],
+        likes: 2456,
+        reposts: 789,
+        replies: 567,
+        shares: 234,
+        views: 45000,
+        hashTags: ['Coding','JavaScript'],
+        mentions: ['techcommunity'],
+        taggedLocation: [{ text: "San Francisco", coordinates: [37.7749, -122.4194] }],
+        poll: undefined
       },
       commentedText: "Great tutorial! Really helped me understand the concepts better. 👍",
       media: [],
@@ -661,7 +724,7 @@ export default function UserProfilePage() {
     
   return (
     <>
-      <div className={`h-fit flex flex-col md:ml-72 font-poppins rounded-md p-2 dark:bg-black`}>
+      <div className={`h-fit flex flex-col font-poppins rounded-md p-2 dark:bg-black`}>
         <div className='flex gap-2'>
           {/* Main Content - Profile */}
           <div className='flex-2 overflow-y-auto'>
@@ -727,7 +790,11 @@ export default function UserProfilePage() {
                   >
                     <MoreHorizontalIcon size={20} />
                     {showProfileOptions && (
-                      <div className={`more-dropdown absolute right-5 top-8 w-54 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }} 
+                        className={`more-dropdown absolute right-5 top-8 w-54 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
                         <ul className='p-2'>
                           { isSelf ? (
                             <>
@@ -821,7 +888,7 @@ export default function UserProfilePage() {
                             </>
                           )}
                         </ul>
-                      </div>
+                      </motion.div>
                     )}
                   </button>
                   {!isSelf && (
@@ -847,7 +914,7 @@ export default function UserProfilePage() {
                     <div className="flex items-center space-x-2">
                       <h1 className="text-xl font-bold">{AccountInfo.name}</h1>
                       <h1 className="text-sm font-bold">.</h1>
-                      <p className="text-gray-500 text-sm dark:text-gray-400">@{AccountInfo.handle}</p>
+                      <p className="text-gray-500 text-sm dark:text-gray-400">{AccountInfo.handle}</p>
                       { AccountInfo.isVerified ? (
                        <Image src='/images/yellow-tick.png' width={25} height={25} alt='yellow-tick' />
                        ) : (
@@ -855,7 +922,7 @@ export default function UserProfilePage() {
                           <span>Get Verified</span><Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' />
                         </Link>
                       )}
-                      <Link href={`/@${AccountInfo.handle}/favourites`} className='border border-black-500 text-white bg-black hover:opacity-85 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full transition-colors'>
+                      <Link href={`/${AccountInfo.handle}/favourites`} className='border border-black-500 text-white bg-black hover:opacity-85 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full transition-colors'>
                         <span>favourites</span>
                         <List className='w-4 h-4 text-white'/>
                       </Link>
@@ -881,11 +948,11 @@ export default function UserProfilePage() {
                   </div>
 
                   <div className="flex space-x-4 text-sm">
-                    <Link href={`/@${AccountInfo.handle}/followings`} className="hover:underline">
+                    <Link href={`/${AccountInfo.handle}/followings`} className="hover:underline">
                       <span className="font-bold text-black dark:text-white">{AccountInfo.following}</span>
                       <span className="text-gray-500 dark:text-gray-400"> Followings</span>
                     </Link>
-                    <Link href={`/@${AccountInfo.handle}/followers`} className="hover:underline">
+                    <Link href={`/${AccountInfo.handle}/followers`} className="hover:underline">
                       <span className="font-bold text-black dark:text-white">{AccountInfo.followers}</span>
                       <span className="text-gray-500 dark:text-gray-400"> Followers</span>
                     </Link>
@@ -979,31 +1046,44 @@ export default function UserProfilePage() {
                                 {AccountInfo.isVerified && (
                                   <Image src='/svg/yellow-tick.svg' width={20} height={20} alt='yellow-tick' />
                                 )}
-                                <span className="text-gray-500 dark:text-gray-400 text-sm">@{AccountInfo.handle}</span>
+                                <span className="text-gray-500 dark:text-gray-400 text-sm">{AccountInfo.handle}</span>
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">·</span>
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">{post.repliedAt}</span>
                               </div>
                               <div className="space-y-3">
-                                <Link href={`@${post.postAuthorInfo.username}/post/${post.postId}`} className="text-blue-500 hover:underline text-sm inline-block">Replied to post</Link>
+                                <Link href={`${post.postAuthorInfo.username}/post/${post.postId}`} className="text-blue-500 hover:underline text-sm inline-block">Replied to post</Link>
                                 <div className="ml-4 border-l-2 rounded-md border-gray-300 dark:border-gray-600 pl-4">
                                   <PostCard
-                                    postId={post.postId}
+                                    postId={post.postAuthorInfo.postId || post.postId}
                                     avatar={post.postAuthorInfo.avatar}
-                                    cover={post.postAuthorInfo.banner}
-                                    username={post.postAuthorInfo.name}
-                                    handle={post.postAuthorInfo.username}
-                                    timestamp={post.postAuthorInfo.postedAt}
-                                    content={post.postAuthorInfo.content}
-                                    media={post.postAuthorInfo.media}
-                                    hashTags={post.postAuthorInfo.hashTags}
-                                    mentions={post.postAuthorInfo.mentions}
+                                    cover={post.postAuthorInfo.cover }
+                                    username={post.postAuthorInfo.username}
+                                    handle={post.postAuthorInfo.handle || post.postAuthorInfo.username}
                                     bio={post.postAuthorInfo.bio}
                                     followers={post.postAuthorInfo.followers}
                                     following={post.postAuthorInfo.following}
+                                    timestamp={post.postAuthorInfo.timestamp }
+                                    content={post.postAuthorInfo.content}
+                                    likes={post.postAuthorInfo.likes || 0}
+                                    reposts={post.postAuthorInfo.reposts || 0}
+                                    replies={post.postAuthorInfo.replies || 0}
+                                    views={post.postAuthorInfo.views || 0}
+                                    shares={post.postAuthorInfo.shares || 0}
+                                    media={post.postAuthorInfo.media}
+                                    hashTags={post.postAuthorInfo.hashTags}
+                                    mentions={post.postAuthorInfo.mentions}
+                                    userliked={post.postAuthorInfo.userliked ?? false}
+                                    usereposted={post.postAuthorInfo.usereposted ?? false}
+                                    usercommented={post.postAuthorInfo.usercommented ?? false}
+                                    userbookmarked={post.postAuthorInfo.userbookmarked ?? false}
                                     isVerified={post.postAuthorInfo.isVerified}
-                                    showActions={false}
-                                    taggedLocation={[]}
-                                    poll={undefined}
+                                    isHighlighted={post.postAuthorInfo.isHighlighted ?? false}
+                                    isPinned={post.postAuthorInfo.isPinned ?? false}
+                                    isFollowing={post.postAuthorInfo.isFollowing ?? false}
+                                    fromPage={pageCategory}
+                                    taggedLocation={post.postAuthorInfo.taggedLocation || []}
+                                    poll={post.postAuthorInfo.poll}
+                                    plan={post.postAuthorInfo.plan}
                                   />
                                 </div>
                         <PostCard
@@ -1016,6 +1096,7 @@ export default function UserProfilePage() {
                           timestamp={post.repliedAt}
                           isVerified={AccountInfo.isVerified}
                           content={post.commentedText}
+                          plan={AccountInfo.plan || 'Free'}
                           mentions={post.mentions}
                           hashTags={post.hashTags}
                           media={post.media || []}
@@ -1033,6 +1114,8 @@ export default function UserProfilePage() {
                           following={AccountInfo.following}
                           isFollowing={isFollowing}
                           fromPage={pageCategory}
+                          taggedLocation={[]}
+                          poll={undefined}
                         />
                               </div>
                             </div>

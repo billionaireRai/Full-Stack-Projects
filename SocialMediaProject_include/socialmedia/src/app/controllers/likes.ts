@@ -1,9 +1,9 @@
 import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "../middleware/errorMiddleware";
-import { getCommentsOfAPostService } from "../db/services/comments";
+import { getAllTheLikesOfPostService } from "../db/services/likes";
 
-export const getPostCommentsController = asyncErrorHandler( async (request:NextRequest) => {
-     const url = new URL(request.nextUrl) ;
+export const getAllLikesOfPostController = asyncErrorHandler(async (request:NextRequest) => {
+    const url = new URL(request.nextUrl) ;
     const postid = url.searchParams.get('postid');
     
     const page =  parseInt(String(url.searchParams.get('page')));
@@ -14,6 +14,6 @@ export const getPostCommentsController = asyncErrorHandler( async (request:NextR
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
     } 
 
-    // await getCommentsOfAPostService({ postid , page , size }) ;
-    return NextResponse.json({ message:'View fetched successfully !!' },{ status:200 });
-}) 
+    // await getAllTheLikesOfPostService({ postid , page , size });
+    return NextResponse.json({ message:'Post likes fetched !!' },{ status:200 });
+})

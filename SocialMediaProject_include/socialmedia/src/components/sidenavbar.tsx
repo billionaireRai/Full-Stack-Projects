@@ -6,6 +6,7 @@ import Link from 'next/link'
 // import useUnreadMessage from '@/app/states/unreadmessage';
 import useNotificationValue from '@/app/states/globalnotifications'; 
 import useActiveAccount from '@/app/states/useraccounts';
+import { motion } from 'framer-motion';
 import useUserInfo from '@/app/states/userinfo';
 import useCreatePost from '@/app/states/createpost'
 import useSwitchAccount from '@/app/states/swithaccount'
@@ -50,7 +51,7 @@ export default function SideNavbar() {
   // auto-collapse sidebar on small screens...
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) setIsOpen(false)
+      if (window.innerWidth < 1024) setIsOpen(false)
       else setIsOpen(true)
     }
     handleResize()
@@ -140,11 +141,11 @@ export default function SideNavbar() {
               <ul className="flex flex-col">
                 <Link
                   className={`${
-                    pathname === `/@${Account.decodedHandle}/feed`
+                    pathname === `/${Account.decodedHandle}/feed`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                       : ''
                   }`}
-                  href={`/@${Account.decodedHandle}/feed`}
+                  href={`/${Account.decodedHandle}/feed`}
                 >
                   <NavItem icon={<HomeIcon className={`${pathname === `/@${Account.decodedHandle}/feed` ? 'fill-black dark:fill-white' : ''}`} />} label="Feed" />
                 </Link>
@@ -160,11 +161,11 @@ export default function SideNavbar() {
                 </Link>
                 <Link
                   className={`${
-                    pathname === `/@${Account.decodedHandle}/notifications`
+                    pathname === `/${Account.decodedHandle}/notifications`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                       : ''
                   }`}
-                  href={`/@${Account.decodedHandle}/notifications`}
+                  href={`/${Account.decodedHandle}/notifications`}
                 >
                   <NavItem icon={<BellIcon className={`${pathname === `/@${Account.decodedHandle}/notifications` ? 'fill-black dark:fill-white' : ''}`} />} label="Notifications" />
                   { value !== 0 && (
@@ -173,11 +174,11 @@ export default function SideNavbar() {
                 </Link>
                 <Link
                   className={`${
-                    pathname === `/@${Account.decodedHandle}/messages`
+                    pathname === `/${Account.decodedHandle}/messages`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                       : ''
                   } flex items-center gap-2`}
-                  href={`/@${Account.decodedHandle}/messages`}
+                  href={`/${Account.decodedHandle}/messages`}
                 >
                   <NavItem icon={<MessageCircleIcon className={`${pathname === '/username/messages' ? 'fill-black dark:fill-white' : ''}`} />} label="Messages" />
                 </Link>
@@ -193,31 +194,31 @@ export default function SideNavbar() {
                 </Link>
                 <Link
                   className={`${
-                    pathname === `/@${Account.decodedHandle}`
+                    pathname === `/${Account.decodedHandle}`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                       : ''
                   }`}
-                  href={`/@${Account.decodedHandle}`}
+                  href={`/${Account.decodedHandle}`}
                 >
                   <NavItem icon={<UserIcon className={`${pathname === `/@${Account.decodedHandle}` ? 'fill-black dark:fill-white' : ''}`} />} label="Profile" />
                 </Link>
                 <Link
                   className={`${
-                    pathname === `/@${Account.decodedHandle}/user-analytics`
+                    pathname === `/${Account.decodedHandle}/user-analytics`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                        : ''
                   } 'flex flex-row items-center justify-center' `}
-                  href={`/@${Account.decodedHandle}/user-analytics`}
+                  href={`/${Account.decodedHandle}/user-analytics`}
                 >
                   <NavItem icon={<LayoutDashboard className={`${pathname === '/username/user-analytics' ? 'fill-black dark:fill-white' : ''}`} />} label="Dashboard" />
                 </Link>
                 <Link
                   className={`${
-                    pathname === `/@${Account.decodedHandle}/bookmarked`
+                    pathname === `/${Account.decodedHandle}/bookmarked`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                       : ''
                   }`}
-                  href={`/@${Account.decodedHandle}/bookmarked`}
+                  href={`/${Account.decodedHandle}/bookmarked`}
                 >
                   <NavItem icon={<BookmarkIcon className={`${pathname === `/@${Account.decodedHandle}/bookmarked` ? 'fill-black dark:fill-white' : ''}`} />} label="Bookmarked" />
                 </Link>
@@ -236,14 +237,14 @@ export default function SideNavbar() {
                 </Link>
                 <Link
                   className={`${
-                    pathname === `/@${Account.decodedHandle}/settings/account`
+                    pathname === `/${Account.decodedHandle}/settings/account`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                       : ''
                   }`}
-                  href={`/@${Account.decodedHandle}/settings/account`}
+                  href={`/${Account.decodedHandle}/settings/account`}
                 >
                   <NavItem
-                    icon={<SettingsIcon className={`${pathname === `/@${Account.decodedHandle}/settings/account` ? 'fill-black dark:fill-white' : ''}`} />}
+                    icon={<SettingsIcon className={`${pathname === `/${Account.decodedHandle}/settings/account` ? 'fill-black dark:fill-white' : ''}`} />}
                     label="Settings & Privacy"
                   />
                 </Link>
@@ -270,7 +271,7 @@ export default function SideNavbar() {
                   className="rounded-full w-13 h-13"
                 />
                 <Link
-                  href={`/@${Account.decodedHandle}`}
+                  href={`/${Account.decodedHandle}`}
                 >
                   <span className="flex items-center font-medium text-gray-900 dark:text-gray-100 gap-1">
                     {Account.name?.toUpperCase()}
@@ -284,7 +285,7 @@ export default function SideNavbar() {
                     )}
                   </span>
                   <span className="text-gray-700 dark:text-gray-400 text-xs font-semibold">
-                    @{Account.decodedHandle}
+                    {Account.decodedHandle}
                   </span>
                 </Link>
                 <MoreHorizontalIcon
@@ -300,10 +301,14 @@ export default function SideNavbar() {
 
               {/* Dropdown */}
               {DotClick && (
-                <div className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-72 mt-2 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
+                <motion.div                         
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}  
+                  className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-72 mt-2 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
                   <div className="p-1.5 font-medium">
                     <Link  
-                     href={`/@${Account.decodedHandle}/create-account?userId=${User.userId}`}
+                     href={`/${Account.decodedHandle}/create-account?userId=${User.userId}`}
                      className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">
                       <UserPlusIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
                       <span className="font-medium">Add new account</span>
@@ -321,11 +326,11 @@ export default function SideNavbar() {
                      className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-200 flex items-center gap-3 group">
                       <LogOutIcon className="w-5 h-5 text-red-500 dark:text-red-500 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
                       <div className='flex flex-row items-center gap-1'>
-                        <span className="font-medium">Logout</span><span className="text-gray-500 dark:text-gray-500">@{Account.decodedHandle}</span>
+                        <span className="font-medium">Logout</span><span className="text-gray-500 dark:text-gray-500">{Account.decodedHandle}</span>
                       </div>
                     </button>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
           </div>
@@ -339,7 +344,7 @@ export default function SideNavbar() {
           {shouldShowSidebar && (
             <div
               onClick={() => setIsOpen(!isOpen)}
-              className="fixed top-4 cursor-e-resize left-4 z-50 p-2 rounded-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow-md transition-all duration-300 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800 md:hidden"
+              className="fixed top-4 cursor-e-resize left-4 z-50 p-2 rounded-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow-md transition-all duration-300 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
             >
               <Image
                 src="/svg/hamburger.svg"

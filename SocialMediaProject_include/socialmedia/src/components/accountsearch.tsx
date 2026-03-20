@@ -13,7 +13,7 @@ interface AccountSearchProps {
 
 const sampleAcc: userCardProp[] = [
   {
-    decodedHandle: "alice",
+    decodedHandle: "@alice",
     name: "Alice Johnson",
     content: "Software Engineer at TechCorp",
     IsFollowing: false,
@@ -29,12 +29,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "45",
       isCompleted: true,
       isVerified: false,
+      plan:'Free',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "bob",
+    decodedHandle: "@bob",
     name: "Bob Smith",
     content: "Designer and Illustrator",
     IsFollowing: true,
@@ -50,12 +51,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "78",
       isCompleted: true,
       isVerified: true,
+      plan:'Pro',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "charlie",
+    decodedHandle: "@charlie",
     name: "Charlie Brown",
     content: "Data Scientist",
     IsFollowing: false,
@@ -71,12 +73,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "32",
       isCompleted: false,
       isVerified: false,
+      plan:'Free',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "diana",
+    decodedHandle: "@diana",
     name: "Diana Prince",
     content: "Marketing Specialist",
     IsFollowing: true,
@@ -92,12 +95,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "56",
       isCompleted: true,
       isVerified: true,
+      plan:'Creator',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "eve",
+    decodedHandle: "@eve",
     name: "Eve Adams",
     content: "Product Manager",
     IsFollowing: false,
@@ -113,12 +117,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "90",
       isCompleted: true,
       isVerified: false,
+      plan:'Free',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "frank",
+    decodedHandle: "@frank",
     name: "Frank Miller",
     content: "UX Researcher",
     IsFollowing: true,
@@ -134,12 +139,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "67",
       isCompleted: true,
       isVerified: true,
+      plan:'Pro',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "grace",
+    decodedHandle: "@grace",
     name: "Grace Lee",
     content: "Full Stack Developer",
     IsFollowing: false,
@@ -155,12 +161,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "28",
       isCompleted: false,
       isVerified: false,
+      plan:'Free',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "henry",
+    decodedHandle: "@henry",
     name: "Henry Wilson",
     content: "DevOps Engineer",
     IsFollowing: true,
@@ -176,12 +183,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "120",
       isCompleted: true,
       isVerified: true,
+      plan:'Pro',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "ivy",
+    decodedHandle: "@ivy",
     name: "Ivy Chen",
     content: "AI Researcher",
     IsFollowing: false,
@@ -197,12 +205,13 @@ const sampleAcc: userCardProp[] = [
       Posts: "40",
       isCompleted: true,
       isVerified: false,
+      plan:'Free',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }
   },
   {
-    decodedHandle: "jack",
+    decodedHandle: "@jack",
     name: "Jack Taylor",
     content: "Cybersecurity Expert",
     IsFollowing: true,
@@ -218,6 +227,7 @@ const sampleAcc: userCardProp[] = [
       Posts: "95",
       isCompleted: true,
       isVerified: true,
+      plan:'Pro',
       bannerUrl: "/images/default-banner.jpg",
       avatarUrl: "/images/default-profile-pic.png"
     }

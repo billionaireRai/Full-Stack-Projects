@@ -284,7 +284,7 @@ export default function Messages() {
   }
 
   return (
-    <div className='h-full flex flex-col lg:flex-row md:ml-72 p-1 gap-1 font-poppins rounded-md dark:bg-black'>
+    <div className='h-full flex flex-col lg:flex-row p-1 gap-1 font-poppins rounded-md dark:bg-black'>
         <div className={`relative chatList h-full flex-2 flex-col gap-1 rounded-md overflow-y-scroll overflow-x-hidden ${chatSlideOpen ? 'hidden lg:flex' : 'flex'}`}>
             <div className='sticky top-0 searchSection backdrop-blur-md flex items-center w-full max-w-md mx-auto p-2 mb-3 rounded-lg bg-gray-100/80 dark:bg-gray-950/80 shadow-md border border-gray-300 dark:border-gray-700'>
                 <span 

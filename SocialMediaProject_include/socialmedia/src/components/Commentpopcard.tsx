@@ -160,7 +160,7 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="font-bold text-gray-900 dark:text-white text-[15px] truncate">{name}</span>
-                  <span className="text-gray-500 dark:text-zinc-400 text-[15px] truncate">@{handle}</span>
+                  <span className="text-gray-500 dark:text-zinc-400 text-[15px] truncate">{handle}</span>
                   <span className="text-gray-400">·</span>
                   <span className="text-gray-500 dark:text-zinc-400 text-[15px] truncate">{timestamp}</span>
                 </div>
@@ -212,7 +212,7 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
                   </div>
                 )}
                 <p className="text-gray-500 dark:text-zinc-500 text-sm">Replying to 
-                  <Link href={`/@${handle}`} className="text-yellow-500 cursor-pointer ml-1">@{handle}</Link>
+                  <Link href={`/${handle}`} className="text-yellow-500 cursor-pointer ml-1">{handle}</Link>
                 </p>
               </div>
             </div>
@@ -223,16 +223,16 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
             <div className="flex gap-3">
               <div className="relative flex-shrink-0">
                 <img
-                  src="/images/myProfile.jpg" // User's avatar
+                  src={Account.account?.avatarUrl} // User's avatar
                   alt="Your avatar"
                   className="w-11 h-11 rounded-full object-cover ring-2 ring-yellow-400/30"
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <div className={`relative rounded-xl border-2 transition-all duration-200 ${
+                <div className={`relative rounded-xl border-1 transition-all duration-200 ${
                   isFocused 
-                    ? 'border-yellow-400 dark:border-yellow-500 bg-white dark:bg-zinc-800 shadow-md' 
-                    : 'border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50'
+                    ? 'border-yellow-400 dark:border-yellow-500 bg-white dark:bg-gray-950 shadow-md' 
+                    : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black'
                 }`}>
                   <textarea
                     ref={textareaRef}
@@ -241,7 +241,7 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     placeholder="Post your reply..."
-                    className="w-full bg-transparent text-gray-900 dark:text-white text-[15px] resize-none border-none outline-none placeholder-gray-400 dark:placeholder-black p-3 min-h-[80px] max-h-[150px]"
+                    className="w-full text-gray-600 dark:text-white text-[13px] resize-none border-none outline-none placeholder-gray-950 dark:placeholder-gray-600 p-3 min-h-[120px] max-h-[150px]"
                     rows={3}
                     maxLength={maxChars}
                   />
@@ -455,7 +455,7 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
         <div className="px-5 py-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-black rounded-2xl">
           <div className="flex items-center justify-between gap-3">
             <Link 
-              href={`/@${handle}/post/${postId}?section=Comments`}
+              href={`/${handle}/post/${postId}?section=Comments`}
               className='flex items-center gap-2 cursor-pointer text-gray-600 dark:text-zinc-400 hover:text-yellow-500 dark:hover:text-yellow-400 px-4 py-2 rounded-full font-medium text-sm hover:bg-yellow-50 dark:hover:bg-yellow-500/10 transition-all duration-200'
             >
               <span>View Comments</span>

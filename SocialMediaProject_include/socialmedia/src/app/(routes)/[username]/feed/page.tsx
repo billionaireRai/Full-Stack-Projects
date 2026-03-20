@@ -27,7 +27,7 @@ export default function feed() {
     }, [hpninPopUp])
 
     return (
-        <div className='h-full flex flex-col md:ml-72 font-poppins'>
+        <div className='h-full flex flex-col font-poppins'>
             <div className='mainbox dark:bg-black w-full h-fit rounded-lg flex flex-col lg:flex-row-reverse gap-5 p-1 max-w-7xl mx-auto font-poppins shadow-lg'>
                 {/* Right Sidebar */}
                 <div className='right w-full lg:w-80 xl:w-96 hidden xl:block space-y-2'>

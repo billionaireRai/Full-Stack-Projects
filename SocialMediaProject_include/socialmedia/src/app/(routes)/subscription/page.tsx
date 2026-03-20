@@ -111,7 +111,7 @@ export default function SubscriptionPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center md:ml-72 py-10 px-6 md:px-20 bg-white dark:bg-black font-poppins">
+    <div className="min-h-screen flex flex-col items-center py-10 px-6 md:px-20 bg-white dark:bg-black font-poppins">
 
       {/* Floating Payment CTA */}
       {selectedPlan && (

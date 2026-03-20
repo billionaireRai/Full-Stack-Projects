@@ -23,12 +23,12 @@ export default function adduserinchatlist ({ closePop, onAddUser } : addUserInLi
   // stroing the user data in array...
   useEffect(() => {
     const mockUsers: USER[] = [
-      { id: '16', name: 'John Doe', handle: 'johndoe', avatarUrl: '/images/myProfile.jpg' },
-      { id: '17', name: 'Jane Smith', handle: 'janesmith', avatarUrl: '/images/myProfile.jpg' },
-      { id: '18', name: 'Mike Johnson', handle: 'mikej', avatarUrl: '/images/myProfile.jpg' },
-      { id: '19', name: 'Sarah Wilson', handle: 'sarahw', avatarUrl: '/images/myProfile.jpg' },
-      { id: '20', name: 'Tom Brown', handle: 'tombrown', avatarUrl: '/images/myProfile.jpg' },
-      { id: '21', name: 'David lee', handle: 'davidlee', avatarUrl: '/images/myProfile.jpg' },
+      { id: '16', name: 'John Doe', handle: '@johndoe', avatarUrl: '/images/myProfile.jpg' },
+      { id: '17', name: 'Jane Smith', handle: '@janesmith', avatarUrl: '/images/myProfile.jpg' },
+      { id: '18', name: 'Mike Johnson', handle: '@mikej', avatarUrl: '/images/myProfile.jpg' },
+      { id: '19', name: 'Sarah Wilson', handle: '@sarahw', avatarUrl: '/images/myProfile.jpg' },
+      { id: '20', name: 'Tom Brown', handle: '@tombrown', avatarUrl: '/images/myProfile.jpg' },
+      { id: '21', name: 'David lee', handle: '@davidlee', avatarUrl: '/images/myProfile.jpg' },
     ];
     setUsers(mockUsers);
     setFilteredUsers(mockUsers);
@@ -104,7 +104,7 @@ export default function adduserinchatlist ({ closePop, onAddUser } : addUserInLi
                 />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">@{user.handle}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{user.handle}</p>
                 </div>
                 {selectedUser?.id === user.id && (
                   <div className="w-4 h-4 bg-yellow-400 dark:bg-blue-500 rounded-full flex items-center justify-center">

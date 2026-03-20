@@ -138,7 +138,7 @@ export default function IframeOfEmbed({
   };
 
   // Generate share URL
-  const shareUrl = `http://localhost:3000/@${handle}/post/${postId}`;
+  const shareUrl = `http://localhost:3000/${handle}/post/${postId}`;
 
   // Function to parse content and make hashtags and mentions clickable
   const parseHashAndMentions = () => {
@@ -233,7 +233,7 @@ export default function IframeOfEmbed({
           <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-4">
             <div className="flex items-start gap-3">
               {/* Avatar */}
-              <Link href={`/@${handle}`}>
+              <Link href={`/${handle}`}>
                 <img
                   src={avatar}
                   alt={`${username}'s avatar`}
@@ -254,10 +254,10 @@ export default function IframeOfEmbed({
                     </span>
                   )}
                   <Link 
-                    href={`/@${handle}`}
+                    href={`/${handle}`}
                     className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm truncate"
                   >
-                    @{handle}
+                    {handle}
                   </Link>
                   <span className="text-gray-400">·</span>
                   <span className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm truncate">

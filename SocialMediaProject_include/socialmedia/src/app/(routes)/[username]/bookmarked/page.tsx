@@ -4,6 +4,7 @@ import React, { useState , useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import PostCard from '@/components/postcard'
 import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontal, Bookmark, ArrowDownUp, Shuffle, ArrowDown, ArrowUp, Heart, MessageCircle, Repeat, Eye, Check, Users} from 'lucide-react'
 import TrendingCard from '@/components/trendingcard'
@@ -48,7 +49,9 @@ interface PostType {
     avatar?: string,
     cover?: string,
     bio?: string,
+    isCompleted?:boolean,
     isVerified?: boolean,
+    plan:string,
     followers?: string,
     following?: string,
     isFollowing?: boolean,
@@ -71,12 +74,12 @@ export default function Bookmarkedpage(){
   // sample follow suggesstions...
   const [whoToFollow, setWhoToFollow] = useState([
     {
-      decodedHandle: 'alice_dev',
+      decodedHandle: '@alice_dev',
       name: 'Alice Developer',
       IsFollowing: true,
       account: {
         name: 'Alice Developer',
-        handle: 'alice_dev',
+        handle: '@alice_dev',
         bio: 'Full-stack developer | React enthusiast | Building the future one commit at a time.',
         location: {
           text: 'New York, NY',
@@ -89,17 +92,18 @@ export default function Bookmarkedpage(){
         Posts: '456',
         isCompleted: true,
         isVerified: true,
+        plan:'Pro',
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'bob_designer',
+      decodedHandle: '@bob_designer',
       name: 'Bob Designer',
       IsFollowing: false,
       account: {
         name: 'Bob Designer',
-        handle: 'bob_designer',
+        handle: '@bob_designer',
         bio: 'Creative designer | Minimalist | Coffee addict | Turning ideas into beautiful interfaces.',
         location: {
           text: 'Los Angeles, CA',
@@ -112,17 +116,18 @@ export default function Bookmarkedpage(){
         Posts: '789',
         isCompleted: true,
         isVerified: false,
+        plan:'Free',
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'charlie_writer',
+      decodedHandle: '@charlie_writer',
       name: 'Charlie Writer',
       IsFollowing: false,
       account: {
         name: 'Charlie Writer',
-        handle: 'charlie_writer',
+        handle: '@charlie_writer',
         bio: 'Tech writer | Blogger | Sharing insights on the latest in technology and development.',
         location: {
           text: 'Austin, TX',
@@ -135,6 +140,7 @@ export default function Bookmarkedpage(){
         Posts: '1,234',
         isCompleted: true,
         isVerified: true,
+        plan:'Pro',
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
@@ -187,11 +193,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: false,
       userbookmarked: true,
       username: 'Amritansh Rai',
-      handle: 'amritansh_coder',
+      handle: '@amritansh_coder',
       avatar: '/images/myProfile.jpg',
       cover: 'https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg',
       bio: 'Emma just hehe my way thru life...',
-      isVerified: true,
+      isCompleted:true,
+      isVerified: false,
+      plan:'Free',
       followers: '327k',
       following: '177',
       isFollowing: true,
@@ -217,11 +225,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: true,
       userbookmarked: true,
       username: 'Sarah Johnson',
-      handle: 'sarah_nature',
+      handle: '@sarah_nature',
       avatar: 'https://picsum.photos/seed/avatar2/200/200',
       cover: 'https://picsum.photos/seed/cover2/1500/500',
       bio: 'Nature photographer & travel enthusiast',
+      isCompleted:true,
       isVerified: false,
+      plan:'Free',
       followers: '12.5k',
       following: '892'
     },
@@ -242,11 +252,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: false,
       userbookmarked: true,
       username: 'Michael Chen',
-      handle: 'mike_reads',
+      handle: '@mike_reads',
       avatar: 'https://picsum.photos/seed/avatar3/200/200',
       cover: 'https://picsum.photos/seed/cover3/1500/500',
       bio: 'Book lover | Tech enthusiast | Coffee addict',
+      isCompleted:true,
       isVerified: true,
+      plan:'Pro',
       followers: '45.2k',
       following: '1.2k',
       isFollowing: false,
@@ -272,11 +284,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: true,
       userbookmarked: true,
       username: 'Emma Wilson',
-      handle: 'emma_cooks',
+      handle: '@emma_cooks',
       avatar: 'https://picsum.photos/seed/avatar4/200/200',
       cover: 'https://picsum.photos/seed/cover4/1500/500',
       bio: 'Home chef | Food blogger | Pizza enthusiast',
-      isVerified: false,
+      isCompleted:true,
+      isVerified: true,
+      plan:'Creator',
       followers: '8.3k',
       following: '456'
     },
@@ -297,11 +311,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: false,
       userbookmarked: true,
       username: 'David Kim',
-      handle: 'david_dev',
+      handle: '@david_dev',
       avatar: 'https://picsum.photos/seed/avatar5/200/200',
       cover: 'https://picsum.photos/seed/cover5/1500/500',
       bio: 'Full-stack developer | Building cool stuff',
-      isVerified: true,
+      isCompleted:true,
+      isVerified: false,
+      plan:'Free',
       followers: '89.7k',
       following: '234',
       isFollowing: true,
@@ -327,11 +343,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: false,
       userbookmarked: true,
       username: 'Lisa Thompson',
-      handle: 'lisa_relax',
+      handle: '@lisa_relax',
       avatar: 'https://picsum.photos/seed/avatar6/200/200',
       cover: 'https://picsum.photos/seed/cover6/1500/500',
       bio: 'Yoga instructor | Wellness advocate',
-      isVerified: false,
+      isCompleted:true,
+      isVerified: true,
+      plan:'Pro',
       followers: '22.1k',
       following: '567'
     },
@@ -352,11 +370,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: true,
       userbookmarked: true,
       username: 'James Wilson',
-      handle: 'james_tech',
+      handle: '@james_tech',
       avatar: 'https://picsum.photos/seed/avatar7/200/200',
       cover: 'https://picsum.photos/seed/cover7/1500/500',
       bio: 'Tech entrepreneur | Speaker | Innovator',
+      isCompleted:true,
       isVerified: true,
+      plan:'Pro',
       followers: '156k',
       following: '890',
       isFollowing: false,
@@ -382,11 +402,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: false,
       userbookmarked: true,
       username: 'Alex Rivera',
-      handle: 'alex_code',
+      handle: '@alex_code',
       avatar: 'https://picsum.photos/seed/avatar8/200/200',
       cover: 'https://picsum.photos/seed/cover8/1500/500',
       bio: 'Software engineer | Coffee lover',
+      isCompleted:true,
       isVerified: false,
+      plan:'Free',
       followers: '5.6k',
       following: '321'
     },
@@ -407,11 +429,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: true,
       userbookmarked: true,
       username: 'Rachel Green',
-      handle: 'rachel_hikes',
+      handle: '@rachel_hikes',
       avatar: 'https://picsum.photos/seed/avatar9/200/200',
       cover: 'https://picsum.photos/seed/cover9/1500/500',
       bio: 'Adventure seeker | Hiking enthusiast',
-      isVerified: false,
+      isCompleted:true,
+      isVerified: true,
+      plan:'Pro',
       followers: '18.9k',
       following: '445'
     },
@@ -432,11 +456,13 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       usercommented: false,
       userbookmarked: true,
       username: 'Chris Anderson',
-      handle: 'chris_web',
+      handle: '@chris_web',
       avatar: 'https://picsum.photos/seed/avatar10/200/200',
       cover: 'https://picsum.photos/seed/cover10/1500/500',
       bio: 'Web designer & developer | Creator',
-      isVerified: true,
+      isCompleted:true,
+      isVerified: false,
+      plan:'Free',
       followers: '67.3k',
       following: '678'
     }
@@ -513,7 +539,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
   
 
   return (
-    <div className='h-fit flex flex-row gap-4 md:ml-72 font-poppins rounded-lg p-4 dark:bg-black'>
+    <div className='h-fit flex flex-row gap-4 font-poppins rounded-lg p-4 dark:bg-black'>
       <div className='leftContainer flex flex-col flex-1 rounded-lg'>
            <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-4 border-gray-300 dark:border-gray-800 bg-white/90 dark:bg-black/90 shadow-lg">
              <div className="p-2">
@@ -567,7 +593,11 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                         <TooltipContent>More options</TooltipContent>
                       </Tooltip>
                       {bookmarkOptionsOpen && (
-                        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-black rounded-lg shadow-lg dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 z-50 p-2">
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }} 
+                        className="absolute right-0 mt-2 w-56 bg-white dark:bg-black rounded-lg shadow-lg dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 z-50 p-2">
                           <button
                             onClick={() => { setSelectedSort('newest'); setBookmarkOptionsOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'newest' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
@@ -616,7 +646,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             <span>Most viewed</span>
                             {selectedSort === 'views' && <Check size={16} className="ml-auto" />}
                           </button>
-                        </div>
+                        </motion.div>
                       )}
                     </div>
                   </div>

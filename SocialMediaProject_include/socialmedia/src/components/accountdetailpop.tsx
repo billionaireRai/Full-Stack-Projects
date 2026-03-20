@@ -121,7 +121,7 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
 
         {/* Stats */}
         <div className="flex items-center gap-4 mt-3">
-          <Link href={`/@${user.handle}/followings`} className="flex items-center group gap-2">
+          <Link href={`/${user.handle}/followings`} className="flex items-center group gap-2">
             <span className="font-bold text-gray-900 dark:text-gray-100">
               {user.following}
             </span>
@@ -129,7 +129,7 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
               Following
             </span>
           </Link>
-          <Link href={`/@${user.handle}/followers`} className="flex items-center group gap-2">
+          <Link href={`/${user.handle}/followers`} className="flex items-center group gap-2">
             <span className="font-bold text-gray-900 dark:text-gray-100">
               {user.followers}
             </span>
@@ -144,7 +144,7 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
              Joined{' '}
              {user.joined || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short'})}
            </p>
-           <Link href={`/@${user.handle}`}>
+           <Link href={`/${user.handle}`}>
              <button className='cursor-pointer w-full font-semibold mb-2 py-2 px-4 rounded-lg hover:opacity-80 bg-yellow-400'>View Profile</button>
            </Link>
       </div>

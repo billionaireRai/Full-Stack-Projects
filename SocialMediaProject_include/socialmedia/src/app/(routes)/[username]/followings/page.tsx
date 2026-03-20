@@ -95,7 +95,7 @@ export default function followingspage () {
   
   return (
     <>
-     <div className='dark:bg-black rounded-md h-fit flex flex-col lg:flex-row md:ml-72 font-poppins'>
+     <div className='dark:bg-black rounded-md h-fit flex flex-col lg:flex-row font-poppins'>
       <div className="main flex-2 rounded-md">
         <div className="flex items-center gap-4 border border-gray-300 dark:border-gray-800 dark:bg-black rounded-lg p-5 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
           <button

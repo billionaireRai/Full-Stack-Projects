@@ -87,7 +87,7 @@ export default function reportPop({ closeReportModal , username , postId }:repor
               type="text"
               id="reportedFor"
               {...reportForm.register('reportedFor',{required:true,pattern:/@([A-Za-z0-9_]{1,15})\b/g})}
-              value={`@${username}`}
+              value={`${username}`}
               placeholder="user handle @username"
               className="w-full px-3 py-2 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 text-sm"
             />

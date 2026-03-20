@@ -118,8 +118,8 @@ const accountSchema = new mongoose.Schema({
     interests: {
         gender: {
             type: String,
-            enum: ['male', 'female', 'none'],
-            default: 'none'
+            enum: ['male', 'female', 'others'],
+            default: 'others'
         },
         ageRange: {
             type: String,

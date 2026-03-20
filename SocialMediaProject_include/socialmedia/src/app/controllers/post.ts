@@ -1,6 +1,6 @@
 import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "../middleware/errorMiddleware";
-import { postDeletionService, postUpdationService, togglePostHighlightService, togglePostPinService, togglePostFavouriteService, postNotInterestedService, postRepostService, postLikedService, postBookmarkingService, postSendingViaDM, getBookmarkAndSuggestionService, getPostPageEssentialService } from "../db/services/post";
+import { postDeletionService, postUpdationService, togglePostHighlightService, togglePostPinService, togglePostFavouriteService, postNotInterestedService, postRepostService, postLikedService, postBookmarkingService, postSendingViaDM, getBookmarkAndSuggestionService, getPostPageEssentialService , getAccountsBookmarkedAPostService} from "../db/services/post";
 
 export const deleteMyPostController =  asyncErrorHandler(async (request:NextRequest) => {
     const reqUrl = new URL(request.nextUrl);
@@ -190,5 +190,21 @@ export const postPageEssentialController = asyncErrorHandler( async (request:Nex
     }
 
     // await getPostPageEssentialService({ postId , username }) ;
+    return NextResponse.json({ message:'Essentials fetched successfully !!'},{ status:200 });
+})
+
+export const getAccountsBookmarkedAPostController = asyncErrorHandler( async (request:NextRequest) => {
+    const url = new URL(request.nextUrl) ;
+    const postid = url.searchParams.get('postid');
+    
+    const page =  parseInt(String(url.searchParams.get('page')));
+    const size = parseInt(String(url.searchParams.get('size')));
+
+    if (!postid || !page || !size) {
+        console.log("Important credential missing");
+        return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
+    }
+
+    // await getAccountsBookmarkedAPostService({ postid , page , size });
     return NextResponse.json({ message:'Essentials fetched successfully !!'},{ status:200 });
 })

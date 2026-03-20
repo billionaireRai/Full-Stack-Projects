@@ -1,12 +1,8 @@
 import { NextRequest , NextResponse } from "next/server";
 import crypto from "crypto";
 import asyncErrorHandler from "../middleware/errorMiddleware";
-import { trackingPostViewService } from "../db/services/views";
+import { getAllViewsOfPostService, trackingPostViewService } from "../db/services/views";
 
-//  function to hash ip and useragent...
-function hashString(input: string): string {
-    return crypto.createHash("sha256").update(input).digest("hex");
-}
 
 export const viewCreationController = asyncErrorHandler( async (request:NextRequest) => { 
     const { postid , fromPage } = await request.json() ; // getting postid from body...
@@ -23,10 +19,22 @@ export const viewCreationController = asyncErrorHandler( async (request:NextRequ
     // Extract User-Agent from request headers
     const userAgent = request.headers.get("user-agent") || "unknown";
     
-    // Hash the IP address and User-Agent
-    const ipHash = hashString(ipAddress);
-    const userAgentHash = hashString(userAgent);
-
-   //  await trackingPostViewService(postid,fromPage,ipHash,userAgentHash) ;
+   //  await trackingPostViewService(postid,fromPage,idAddress,userAgent) ;
     return NextResponse.json({ message:'View created successfully !!' },{ status:200 });
+})
+
+export const getAllViewsOfPostController = asyncErrorHandler( async (request:NextRequest) => {
+    const url = new URL(request.nextUrl) ;
+    const postid = url.searchParams.get('postid');
+    
+    const page =  parseInt(String(url.searchParams.get('page')));
+    const size = parseInt(String(url.searchParams.get('size')));
+
+    if (!postid || !page || !size) {
+        console.log("Important credential missing");
+        return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
+    } 
+
+    // await getAllViewsOfPostService({ postid , page , size }) ;
+    return NextResponse.json({ message:'View fetched successfully !!' },{ status:200 });
 })

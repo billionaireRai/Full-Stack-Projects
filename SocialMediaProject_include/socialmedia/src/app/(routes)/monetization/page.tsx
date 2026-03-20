@@ -16,7 +16,7 @@ import {
 export default function MonetizationPage() {
   const router = useRouter() ;
   return (
-  <div className='h-fit flex flex-col md:ml-72 font-poppins rounded-md p-2 dark:bg-black'>
+  <div className='h-fit flex flex-col font-poppins rounded-md p-2 dark:bg-black'>
     <div className="min-h-screen bg-white dark:bg-black text-gray-900 rounded-lg dark:text-white font-poppins transition-colors duration-500">
       <header className="w-full z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
         <div className="px-4 py-3">

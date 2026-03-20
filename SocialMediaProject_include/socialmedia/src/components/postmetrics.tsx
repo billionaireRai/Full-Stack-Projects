@@ -1,18 +1,19 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Eye, Heart, MessageCircle, Repeat, Bookmark, TrendingUp, Users, MapPin, Smartphone, Monitor, Clock, BarChart3, PieChart, Activity } from 'lucide-react'
+import { Eye, Heart, MessageCircle, Repeat, Bookmark, TrendingUp, Users, MapPin, Smartphone, Monitor, Clock, BarChart3, PieChart, Activity, LaptopIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import axiosInstance from '@/lib/interceptor'
+import { fmt } from '@/lib/utils'
 
 interface PostMetrics {
-  views: string
-  likes: string
-  comments: string
-  shares: string
-  bookmarks: string
-  reach: string
-  impressions: string
+  views: number
+  likes: number
+  comments: number
+  shares: number
+  bookmarks: number
+  reach: number
+  impressions: number
   engagementRate: number
   demographics: {
     age: { range: string; percentage: number }[]
@@ -24,15 +25,26 @@ interface PostMetrics {
   topPerformingDays: { day: string; engagement: number }[]
 }
 
+interface timeObj {
+  value:string ,
+  label:string
+}
+
 export default function PostMetricsPage({ postId }:{ postId:string }) {
+  // containing all time options...
+  const [timeArray, settimeArray] = useState<timeObj[]>(
+    [{value:"7d",label:'7 days'},{value:"30d",label:'30 days'},{value:"90d",label:'90 days'},{value:"1y",label:'1 year'},{value:"2y",label:'2 years'}]
+  )
+  const [TimeRange, setTimeRange] = useState<timeObj>({value:'7d',label:'7 days'}); // selected time interval for analytics...
+
   const [metrics, setMetrics] = useState<PostMetrics>({
-        views: '12543',
-        likes: '892',
-        comments: '234',
-        shares: '156',
-        bookmarks: '78',
-        reach: '9876',
-        impressions: '14567',
+        views: 12543,
+        likes: 892,
+        comments: 234,
+        shares: 156,
+        bookmarks: 78,
+        reach: 9876,
+        impressions: 14567,
         engagementRate: 7.2,
         demographics: {
           age: [
@@ -49,16 +61,20 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
           locations: [
             { country: 'United States', percentage: 28 },
             { country: 'India', percentage: 22 },
-            { country: 'United Kingdom', percentage: 15 },
+            { country: 'Europe', percentage: 15 },
             { country: 'Canada', percentage: 12 },
+            { country: 'China' , percentage:2 },
+            { country: 'Russia' , percentage: 11 },
+            { country: 'Africa' , percentage: 11 },
             { country: 'Australia', percentage: 8 },
             { country: 'Others', percentage: 15 }
           ]
         },
         deviceBreakdown: [
-          { device: 'Mobile', percentage: 68 },
-          { device: 'Desktop', percentage: 25 },
-          { device: 'Tablet', percentage: 7 }
+          { device: 'Mobile', percentage: 11 },
+          { device: 'Desktop', percentage: 35 },
+          { device: 'Laptop', percentage: 40 },
+          { device: 'Tablet', percentage: 14 }
         ],
         hourlyEngagement: [
           { hour: 9, engagement: 45 },
@@ -81,12 +97,13 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
   useEffect(() => {
     // function fetching the data...
     const fetchMetrics = async () => { 
-      const metricApi = await axiosInstance.get(`/api/post/essentials?postid=${postId}`)
+      const metricApi = await axiosInstance.get(`/api/post/essentials?postid=${postId}&timeInterval=${TimeRange.value}`)
       if (metricApi.status == 200) setMetrics(metricApi.data.metric) ;
     }
 
     // fetchMetrics() ;
-  }, [postId])
+  }, [postId,TimeRange,timeArray])
+
 
   if (!metrics) {
     return (
@@ -103,7 +120,7 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
   const MetricCard = ({ icon: Icon, title, value, change, color = 'blue' }: {
     icon: React.ElementType
     title: string
-    value: string | number
+    value: string
     change?: string
     color?: string
   }) => (
@@ -134,6 +151,17 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
 
   return (
     <div className="min-h-screen dark:bg-black px-6 py-2 rounded-lg">
+       <div className="p-2 flex flex-row items-center w-fit justify-end bg-white dark:bg-black border border-gray-300 dark:border-gray-600 rounded-md">
+          {timeArray.map((TIME: timeObj, index) => (
+            <button
+              key={ index + 1 }
+              onClick={() => setTimeRange(TIME)}
+              className={`px-3 py-1 text-sm rounded cursor-pointer font-semibold hover:bg-gray-100 dark:hover:bg-gray-950 ${TimeRange.value === TIME.value ? "bg-yellow-400 hover:bg-yellow-400 dark:text-white" : "text-gray-700 dark:text-gray-300" }`}
+            >
+              {TIME.label}
+            </button>
+          ))}
+       </div>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="m-5 flex flex-col items-center justify-center">
@@ -146,28 +174,28 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
           <MetricCard
             icon={Eye}
             title="Views"
-            value={metrics.views.toLocaleString()}
+            value={fmt(metrics.views)}
             change="+12.5%"
             color="blue"
           />
           <MetricCard
             icon={Heart}
             title="Likes"
-            value={metrics.likes.toLocaleString()}
+            value={fmt(metrics.likes)}
             change="+8.2%"
             color="red"
           />
           <MetricCard
             icon={MessageCircle}
             title="Comments"
-            value={metrics.comments.toLocaleString()}
+            value={fmt(metrics.comments)}
             change="+15.3%"
             color="green"
           />
           <MetricCard
             icon={Repeat}
             title="Shares"
-            value={metrics.shares.toLocaleString()}
+            value={fmt(metrics.shares)}
             change="+22.1%"
             color="purple"
           />
@@ -178,21 +206,21 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
           <MetricCard
             icon={Bookmark}
             title="Bookmarks"
-            value={metrics.bookmarks.toLocaleString()}
+            value={fmt(metrics.bookmarks)}
             change="+5.7%"
             color="yellow"
           />
           <MetricCard
             icon={Users}
             title="Reach"
-            value={metrics.reach.toLocaleString()}
+            value={fmt(metrics.reach)}
             change="+18.9%"
             color="indigo"
           />
           <MetricCard
             icon={TrendingUp}
             title="Engagement Rate"
-            value={`${metrics.engagementRate}%`}
+            value={`${fmt(metrics.engagementRate)}%`}
             change="+2.1%"
             color="orange"
           />
@@ -212,7 +240,7 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
                   <ProgressBar label={ageGroup.range} percentage={ageGroup.percentage} />
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
-                      className="bg-yellow-500 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${ageGroup.percentage}%` }}
                     ></div>
                   </div>
@@ -233,7 +261,7 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
                   <ProgressBar label={gender.type} percentage={gender.percentage} />
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
-                      className="bg-yellow-500 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${gender.percentage}%` }}
                     ></div>
                   </div>
@@ -265,13 +293,14 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
             <Smartphone className="h-5 w-5 mr-2" />
             Device Breakdown
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {metrics.deviceBreakdown.map((device, index) => (
               <div key={index} className="text-center">
                 <div className="flex items-center justify-center mb-2">
-                  {device.device === 'Mobile' && <Smartphone className="h-8 w-8 text-yellow-500 dark:text-blue-500" />}
-                  {device.device === 'Desktop' && <Monitor className="h-8 w-8 text-yellow-500 dark:text-blue-500" />}
-                  {device.device === 'Tablet' && <Monitor className="h-8 w-8 text-yellow-500 dark:text-blue-500" />}
+                  {device.device === 'Mobile' && <Smartphone className="h-8 w-8 text-yellow-500" />}
+                  {device.device === 'Desktop' && <Monitor className="h-8 w-8 text-yellow-500" />}
+                  {device.device === 'Tablet' && <Monitor className="h-8 w-8 text-yellow-500" />}
+                  {device.device === 'Laptop' && <LaptopIcon className="h-8 w-8 text-yellow-500" />}
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{device.percentage}%</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{device.device}</p>
@@ -295,7 +324,7 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
                   <div className="flex items-center gap-2">
                     <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-yellow-500 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${hour.engagement}%` }}
                       ></div>
                     </div>
@@ -319,7 +348,7 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
                   <div className="flex items-center gap-2">
                     <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-yellow-500 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${day.engagement}%` }}
                       ></div>
                     </div>

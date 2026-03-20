@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef , ReactElement } from 'react';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -81,7 +82,8 @@ export interface PostCardProps {
   usercommented?:boolean,
   userbookmarked?:boolean,
   isPinned?:boolean,
-  isVerified?:boolean
+  isVerified?:boolean,
+  plan?:string,
   followers?:string,
   following?:string,
   timestamp?: string;
@@ -255,14 +257,14 @@ export default function PostCard({
 
   // function handling repost logic...
   async function handleRepostToggle() {
-    const loading = toast.loading('Reposting the post...');
+    const loading = toast.loading( isReposted ? 'Removing the repost...' : 'Reposting the post...');
     try {
       const repostApi = await axiosInstance.get(`/api/post/actions?postId=${postId}&state=${isReposted}`);
       if (repostApi.status === 200) {
         toast.dismiss(loading);
         setIsReposted(!isReposted);
         setLocalReposts(isReposted ? localReposts - 1 : localReposts + 1);
-        toast.success('Reposted successfully !!');
+        toast.success('Repost toggled successfully !!');
       }
     } catch (error) {
       toast.error('Error in repost action !!')
@@ -441,10 +443,10 @@ export default function PostCard({
                 {username}
               </span>
               <Link 
-                href={`/@${handle}`}
+                href={`/${handle}`}
                 className="text-gray-500 dark:text-gray-400 text-xs sm:text-base truncate"
               >
-                @{handle}
+                {handle}
               </Link>
               <span className="text-gray-400">·</span>
               <span className="text-gray-500 dark:text-gray-400 text-sm truncate">
@@ -489,11 +491,14 @@ export default function PostCard({
       ref={postref}
       className={`bg-white dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-3 cursor-none' : 'my-1 sm:p-4'}`}>
         <div className='flex flex-row items-center justify-end gap-1 mb-2 transition-all duration-300'>
+         {isReposted && (
+           <div className='text-black dark:text-white text-xs font-semibold py-0.5 px-2 shadow-md dark:shadow-gray-800 rounded-lg flex gap-1 items-center justify-center'><Repeat size={20} /><span>you reposted</span></div>
+          )}
           { IsPinned && (
             <Tooltip>
                <TooltipTrigger>
-                 <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-blue-900/20 rounded-full border     border-yellow-200 dark:border-blue-800/50">
-                   <Pin className="w-5 h-5 rotate-45 fill-yellow-500 dark:fill-blue-500 stroke-yellow-500 dark:stroke-blue-500" />
+                 <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-blue-900/20 rounded-full border     border-yellow-200 dark:border-yellow-800/50">
+                   <Pin className="w-5 h-5 rotate-45 fill-yellow-500 stroke-yellow-500" />
                  </span>
                </TooltipTrigger>
                <TooltipContent>
@@ -501,13 +506,10 @@ export default function PostCard({
               </TooltipContent>
             </Tooltip>
           )}
-         {isReposted && (
-           <div className='border-2 text-black dark:text-white text-xs font-semibold py-0.5 px-2 shadow-md dark:shadow-gray-800 rounded-lg border-black dark:border-white flex gap-1 items-center justify-center'><Repeat size={20} /><span>you reposted</span></div>
-         )}
         </div>
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <Link href={`/@${handle}`}>
+        <Link href={`/${handle}`}>
         <img
           ref={avatarRef}
           src={avatar}
@@ -529,9 +531,9 @@ export default function PostCard({
               <span><Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/></span>
             )}
             <Link 
-            href={`/@${handle}`}
+            href={`/${handle}`}
             className={`text-gray-500 dark:text-gray-400 text-xs sm:text-base truncate`}>
-              @{handle}
+              {handle}
             </Link>
             <span className="text-gray-400">·</span>
             <span className={`text-gray-500 dark:text-gray-400 ${!showActions ? 'text-xs' : 'text-sm'} truncate`}>
@@ -542,7 +544,7 @@ export default function PostCard({
             <Tooltip>
             <TooltipTrigger asChild>
             <button
-              onClick={() => { readOnly ? router.push(`/@${handle}/post/${postId}`) : setPostOptions(true) } }
+              onClick={() => { readOnly ? router.push(`/${handle}/post/${postId}`) : setPostOptions(true) } }
               className={`ml-auto rounded-full p-1.5 cursor-pointer transition-colors ${postOptions ? 'bg-gray-100 dark:bg-gray-950' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}
             >
               <MoreVerticalIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -555,7 +557,11 @@ export default function PostCard({
           
           {/* will add ( Account.decodedHandle === handle ) logic and uncomment other...  */}
             {/* {postOptions && (
-              <div className="dropdown-container font-semibold animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
+              <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="dropdown-container font-semibold animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
                 <button
                   onClick={() => { setShowDeletePop(true); }}
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
@@ -563,7 +569,7 @@ export default function PostCard({
                   <Trash2 className="w-4 h-4" />
                   Delete
                 </button>
-                <Link href={`/@${handle}/post/${postId}?section=All`}
+                <Link href={`/${handle}/post/${postId}?section=All`}
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
                     <PodcastIcon className="w-4 h-4" />
@@ -604,18 +610,22 @@ export default function PostCard({
                  <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                 </button>
                 <Link
-                  href={`/@${handle}/post/${postId}?section=Metric`}
+                  href={`/${handle}/post/${postId}?section=Metric`}
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
                   <BarChart3 className="w-4 h-4" />
                   View post analytics
                 </Link>
-              </div>
+              </motion.div>
             )} */}
             {/* && Account.decodedHandle !== handle */}
             {postOptions  && (
-             <div className="dropdown-container font-semibold animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
-                <Link href={`/@${handle}/post/${postId}?section=All`}
+             <motion.div 
+             initial={{ opacity: 0, scale: 0.8 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0.8 }}  
+             className="dropdown-container font-semibold cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
+                <Link href={`/${handle}/post/${postId}?section=All`}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
                     <PodcastIcon className="w-4 h-4" />
@@ -633,7 +643,7 @@ export default function PostCard({
                 className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                >
                  <UserPlus className="h-4 w-4" />
-                 {isFollowing ? 'Unfollow' : 'Follow'} @{handle}
+                 {isFollowing ? 'Unfollow' : 'Follow'} {handle}
                </button>
                <button
                   onClick={() => { handleAddFavourite() }} 
@@ -650,7 +660,7 @@ export default function PostCard({
                   <Star className={`w-4 h-4 ${(isHighlighted) ? 'stroke-yellow-500 fill-yellow-600':''}`} />
                   {!isHighlighted ? "Highlight on profile" : 'UnHighlight on Profile'}
                 </button>
-               <Link href={`/@${handle}/post/${postId}?section=Metric`}
+               <Link href={`/${handle}/post/${postId}?section=Metric`}
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                >
                  <BarChart3 className="h-4 w-4" />
@@ -670,7 +680,7 @@ export default function PostCard({
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
                >
                  <Ban className="h-4 w-4" />
-                  { isBlocked ? 'Unblock' : 'Block' } @{handle}
+                  { isBlocked ? 'Unblock' : 'Block' } {handle}
                </button>
                <button
                   onClick={() => { setshowReportPop(true) }}
@@ -679,7 +689,7 @@ export default function PostCard({
                  <Flag className="h-4 w-4" />
                  Report post
                </button>
-             </div>
+             </motion.div>
            )}
           </div>
 
@@ -693,36 +703,44 @@ export default function PostCard({
           {displayMedia && displayMedia.length > 0 && displayMedia.some(item => item.url && item.url.trim() !== '') && (
             <div className="mt-2 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
               {displayMedia.filter(item => item.url && item.url.trim() !== '').length === 1 ? (
-                displayMedia.filter(item => item.url && item.url.trim() !== '')[0].media_type === 'video' ? (
-                  <video
-                    src={displayMedia.filter(item => item.url && item.url.trim() !== '')[0].url}
-                    controls
-                    className="w-full max-h-[28rem] object-cover"
-                  />
+                displayMedia[0].media_type === 'video' ? (
+                  <Link href={displayMedia[0].url}>
+                   <video
+                     src={displayMedia[0].url}
+                     controls
+                     className="w-full max-h-[28rem] object-cover"
+                   />
+                  </Link>
                 ) : (
-                  <img
-                    src={displayMedia.filter(item => item.url && item.url.trim() !== '')[0].url}
-                    alt="Post media"
-                    className="w-full max-h-[28rem] object-cover"
-                  />
+                  <Link href={displayMedia[0].url}>
+                    <img
+                     src={displayMedia[0].url}
+                     alt="Post media"
+                     className="w-full max-h-[28rem] object-cover"
+                    />
+                  </Link>
                 )
               ) : (
                 <div className="grid grid-cols-2 gap-1">
                   {displayMedia.filter(item => item.url && item.url.trim() !== '').slice(0, 4).map((item,index) => (
                     item.media_type === 'video' ? (
+                     <Link href={item.url}>
                       <video
                         key={index}
                         src={item.url}
                         controls
                         className="w-full h-40 sm:h-52 object-cover"
                       />
+                     </Link>
                     ) : (
+                     <Link href={item.url}>
                       <img
                         key={index}
                         src={item.url}
                         alt={`Post media ${index + 1}`}
                         className="w-full h-40 sm:h-52 object-cover"
                       />
+                     </Link>
                     )
                   ))}
                 </div>
@@ -791,9 +809,12 @@ export default function PostCard({
       { viewPop && (<ViewClickPop closePopUp={() => { setviewPop(false) }}/> )}
 
       { ShareDropDown && (
-        <div
-          onClick={(e) => { e.stopPropagation() }}
-          className="fixed w-fit z-50 p-2 bg-white dark:bg-black shadow-lg dark:shadow-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl share-dropdown animate-in fade-in-0 zoom-in-95 duration-200"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          onClick={(e:MouseEvent) => { e.stopPropagation() }}
+          className="fixed w-fit z-50 p-2 bg-white dark:bg-black shadow-lg dark:shadow-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl share-dropdown"
           style={{ top: `${sharePosition.top}px`, left: `${sharePosition.left}px` }}
         >
           <button 
@@ -814,7 +835,7 @@ export default function PostCard({
             <Mail className="w-4 h-4" />
             send via Direct Message
           </button>
-        </div>
+        </motion.div>
       )}
 
       { ToPinPop && ( <PinPostPop closePopUp={() => { setToPinPop(false) }} IsPinned={IsPinned} postOwner={handle} requestBy={String(Account.decodedHandle)} toggleState={() => { setIsPinned(!IsPinned) }} postId={postId} />)}
@@ -830,7 +851,7 @@ export default function PostCard({
       )}
 
       {ShareAccrosApp && (
-        <SharePopup link={`http://localhost:3000/@${handle}/post/${postId}?section=All`} onClose={() => { setShareAccrosApp(false) }} followerCount={followers} followingCount={following} open={ShareAccrosApp} text={`@${handle}.${content}`} onCopy={handleCopyLink}/>
+        <SharePopup link={`http://localhost:3000/${handle}/post/${postId}?section=All`} onClose={() => { setShareAccrosApp(false) }} followerCount={followers} followingCount={following} open={ShareAccrosApp} text={`@${handle}.${content}`} onCopy={handleCopyLink}/>
       )}
       {FavouritePop && (
         <FavouriteAddPop
@@ -875,7 +896,7 @@ export default function PostCard({
       )}
 
      {shareCardPop && (
-      <Shareviadm closemodal={() => { setshareCardPop(false) }} link={`http://localhost:3000/@${handle}/post/${postId}?section=All`} />
+      <Shareviadm closemodal={() => { setshareCardPop(false) }} link={`http://localhost:3000/${handle}/post/${postId}?section=All`} />
      )}
     </div>
   );

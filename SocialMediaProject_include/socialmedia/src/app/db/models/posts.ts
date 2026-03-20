@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { urlRegex } from "@/app/controllers/regex";
+import { urlRegex, usernameRegex } from "@/app/controllers/regex";
 
 const mediaUrlSchema = new mongoose.Schema({
   url: {
@@ -84,15 +84,15 @@ const postSchema = new mongoose.Schema(
     },
 
     mentions: {
-      type: [mongoose.Schema.Types.ObjectId],
+      type: [String],
       ref: "accounts",
       default: [],
       validate: {
-        validator: function (v:mongoose.Schema.Types.ObjectId[]) {
-          return v.every(id => mongoose.Types.ObjectId.isValid(String(id)));
-        },
+        validator: function (v: string[]) {
+          return v.every((handle: string) => usernameRegex.test(handle))
+        }
+      },
         message: "Mentions must contain valid ObjectIds"
-      }
     },
     taggedLocation : [{
       text: {

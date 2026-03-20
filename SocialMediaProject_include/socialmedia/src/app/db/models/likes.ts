@@ -9,7 +9,7 @@ const likeSchema = new mongoose.Schema({
     targetType:{
         type:String,
         trim:true,
-        default:'Post',
+        default:'post',
         enum:['post','notification','comment']
     },
     targetEntity:{

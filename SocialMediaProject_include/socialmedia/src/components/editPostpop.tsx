@@ -242,9 +242,9 @@ export default function EditPostPop({
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 Edit your post...
               </h2>
-              <Link href={`/@${Account.decodedHandle}`}>
+              <Link href={`/${Account.decodedHandle}`}>
                 <span className="text-gray-600 py-1 px-3 cursor-pointer hover:bg-gray-100 rounded-full dark:text-gray-400 text-xs font-medium truncate">
-                  @{Account.decodedHandle}
+                  {Account.decodedHandle}
                 </span>
               </Link>
             </div>

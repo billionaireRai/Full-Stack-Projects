@@ -50,7 +50,7 @@ export default function MonetizationDetailsPage() {
   const currentSection = monetizationSections[query as keyof typeof monetizationSections] || monetizationSections['Overview']
 
   return (
-  <div className='h-fit flex flex-col md:ml-72 font-poppins p-2 dark:bg-black'>
+  <div className='h-fit flex flex-col font-poppins p-2 dark:bg-black'>
     <div className="max-w-full mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
