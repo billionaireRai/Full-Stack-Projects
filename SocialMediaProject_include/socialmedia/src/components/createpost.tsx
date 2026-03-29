@@ -372,8 +372,8 @@ export default function CreatePost() {
                             animate={{ scale: 1, opacity: 1 }}
                             className="flex items-center justify-center gap-1 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 px-3 py-2.5 rounded-full text-sm font-medium shadow-sm"
                           >
-                            <Link href={`/@${tag}`} >
-                              @{tag}
+                            <Link href={`/${tag}`} >
+                              {tag}
                             </Link>
                             <button
                               onClick={() => removeArrayElement([setMentionedTo], index)}

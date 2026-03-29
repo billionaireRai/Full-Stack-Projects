@@ -36,7 +36,8 @@ import {
   Code2,
   Megaphone,
   PodcastIcon,
-  DollarSign
+  DollarSign,
+  QrCodeIcon
 } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { AxiosResponse } from 'axios';
@@ -350,7 +351,7 @@ export default function PostCard({
 
   // handle copy link of a post...
   const handleCopyLink = () => { 
-    navigator.clipboard.writeText(`http://localhost:3000/@${handle}/post/${postId}?section=All`)  ;
+    navigator.clipboard.writeText(`http://localhost:3000/${handle}/post/${postId}?section=All`)  ;
     setShareDropDown(false) ;
     toast.success("Post link successfully copied !")  
    }
@@ -569,7 +570,7 @@ export default function PostCard({
                   <Trash2 className="w-4 h-4" />
                   Delete
                 </button>
-                <Link href={`/${handle}/post/${postId}?section=All`}
+                <Link href={`/${handle}/post/${postId}?section=Bookmark`}
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
                     <PodcastIcon className="w-4 h-4" />
@@ -625,7 +626,7 @@ export default function PostCard({
              animate={{ opacity: 1, scale: 1 }}
              exit={{ opacity: 0, scale: 0.8 }}  
              className="dropdown-container font-semibold cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
-                <Link href={`/${handle}/post/${postId}?section=All`}
+                <Link href={`/${handle}/post/${postId}?section=Bookmark`}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
                     <PodcastIcon className="w-4 h-4" />
@@ -724,7 +725,7 @@ export default function PostCard({
                 <div className="grid grid-cols-2 gap-1">
                   {displayMedia.filter(item => item.url && item.url.trim() !== '').slice(0, 4).map((item,index) => (
                     item.media_type === 'video' ? (
-                     <Link href={item.url}>
+                     <Link key={index+1} href={item.url}>
                       <video
                         key={index}
                         src={item.url}
@@ -733,7 +734,7 @@ export default function PostCard({
                       />
                      </Link>
                     ) : (
-                     <Link href={item.url}>
+                     <Link key={index+1} href={item.url}>
                       <img
                         key={index}
                         src={item.url}
@@ -834,6 +835,12 @@ export default function PostCard({
           className="w-full cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors font-semibold">
             <Mail className="w-4 h-4" />
             send via Direct Message
+          </button>
+          <button 
+          // onClick={() => { setQRCodePop(true) }}
+          className="w-full cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors font-semibold">
+            <QrCodeIcon className="w-4 h-4" />
+             Generate QR code
           </button>
         </motion.div>
       )}

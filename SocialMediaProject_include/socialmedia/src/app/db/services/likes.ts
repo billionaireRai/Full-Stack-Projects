@@ -55,12 +55,12 @@ export const getAllTheLikesOfPostService = async ({ postid , page , pagesize } :
             
          return {
              id: particularAcc._id.toString(),
-             decodedHandle: '@'+particularAcc.username,
+             decodedHandle: `@${particularAcc.username}`,
              name: particularAcc.name,
              content: particularAcc.bio,
              account: {
                  name: particularAcc.name,
-                 handle:'@'+particularAcc.username,
+                 handle:`@${particularAcc.username}`,
                  bio: particularAcc.bio || '',
                  location: {
                      text: particularAcc.location?.text || '',

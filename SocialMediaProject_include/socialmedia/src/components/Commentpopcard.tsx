@@ -229,11 +229,11 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <div className={`relative rounded-xl border-1 transition-all duration-200 ${
-                  isFocused 
-                    ? 'border-yellow-400 dark:border-yellow-500 bg-white dark:bg-gray-950 shadow-md' 
-                    : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black'
-                }`}>
+               <div className={`relative flex flex-row items-center rounded-3xl border transition-all duration-300 ease-out ${
+                     isFocused
+                       ? 'border-yellow-500/80 dark:border-yellow-400/80 ring-2 ring-yellow-400/20 dark:ring-yellow-500/30 bg-white/95 dark:bg-gray-900 shadow-lg shadow-yellow-500/10 backdrop-blur-sm scale-[1.005]'
+                       : 'border-transparent bg-white/80 dark:bg-gray-950/80 shadow-sm backdrop-blur-sm hover:border-gray-200/50 dark:hover:border-zinc-700/50 hover:shadow-md'
+                   }`}>
                   <textarea
                     ref={textareaRef}
                     value={replyText}
@@ -241,7 +241,7 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     placeholder="Post your reply..."
-                    className="w-full text-gray-600 dark:text-white text-[13px] resize-none border-none outline-none placeholder-gray-950 dark:placeholder-gray-600 p-3 min-h-[120px] max-h-[150px]"
+                    className="w-full text-gray-900 dark:text-gray-100 text-[13px] resize-none border-none outline-none placeholder-gray-500 dark:placeholder-gray-400 p-3 min-h-[120px] max-h-[150px] transition-colors duration-200 caret-yellow-500 dark:caret-yellow-400 focus:caret-yellow-500"
                     rows={3}
                     maxLength={maxChars}
                   />
@@ -263,8 +263,8 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
                            animate={{ scale: 1, opacity: 1 }}
                            className="flex items-center justify-center gap-1 bg-yellow-100 dark:bg-yelltext-yellow-700 dark:text-yellow-400 px-3 py-2.5 rounded-full text-sm font-medium shadow-sm"
                          >
-                          <Link href={`/@${tag}`} >
-                            @{tag}
+                          <Link href={`/${tag}`} >
+                            {tag}
                            </Link>
                            <button
                              onClick={() => removeArrayElement([setmentions], index)}

@@ -18,6 +18,7 @@ import Message from "../models/messages";
 import Block from "../models/blocked";
 import subscriptions from "../models/subscriptions";
 import { userCardProp } from "./user";
+import { PostCardProps } from "@/components/postcard";
 
 type Plan = "Free" | "Pro" | "Creator" | "Enterprise";
 
@@ -408,12 +409,12 @@ export const getPostByIdService = async (postId: string) => {
                 reposts: repostsCount,
                 likes: likesCount,
                 views: viewsCount,
-                media: post.mediaUrls || [],
+                media: Array(post.mediaUrls).map(urlObj => ({ url:urlObj.url , media_type:urlObj.media_type })) || [],
                 hashTags: post.hashTags || [],
                 mentions: Array(post.mentions).map((u:string)=> u.trim()),
                 isPinned: false,
                 username: author.account?.name ,
-                handle: '@'+author.username,
+                handle: `@${author.username}`,
                 avatar: author.account?.avatar || '/images/default-profile-pic.png',
                 isCompleted: author.account?.completed ?? false ,
                 isVerified: author.isVerified?.value || false,
@@ -794,12 +795,12 @@ export const getBookmarkAndSuggestionService = async () => {
 
         return {
             id: particularAcc._id.toString(),
-            decodedHandle:'@'+particularAcc.username,
+            decodedHandle:`@${particularAcc.username}`,
             name: particularAcc.name,
             content: particularAcc.bio,
             account: {
                 name: particularAcc.name,
-                handle:'@'+particularAcc.username,
+                handle:`@${particularAcc.username}`,
                 bio: particularAcc.bio || '',
                 location: {
                     text: particularAcc.location?.text || '',
@@ -868,11 +869,11 @@ export const getBookmarkAndSuggestionService = async () => {
             avatar: postOwner.account?.avatar || '/images/default-profile-pic.png',
             cover: postOwner.account?.bannerUrl || '/images/default-banner.jpg',
             username: postOwner.account?.name,
-            handle: '@'+postOwner.username,
+            handle: `@${postOwner.username}`,
             bio: postOwner.account?.bio || '',
             timestamp: new Date(postMarked.createdAt).toUTCString(),
             content: postMarked.content,
-            media: postMarked.mediaUrls || [],
+            media: Array(postMarked.mediaUrls).map(urlObj => ({ url:urlObj.url , media_type:urlObj.media_type })) || [],
             likes: likesCount,
             reposts: repostsCount,
             replies: commentsCount,
@@ -907,13 +908,13 @@ export const getBookmarkAndSuggestionService = async () => {
         const isFoll = await follows.exists({ followerId: activeAcc._id, followingId: account._id, isDeleted: false });
         return {
             id:account._id.toString(),
-            decodedHandle:'@'+account.username,
+            decodedHandle:`@${account.username}`,
             name: account.name,
             content:account.bio,
             IsFollowing: isFoll ? true : false ,
             account: {
                 name: account.name,
-                handle: '@'+account.username,
+                handle: `@${account.username}`,
                 bio: account.bio || '',
                 location: {
                     text: account.location?.text || '',
@@ -964,12 +965,12 @@ export const getBookmarkAndSuggestionService = async () => {
     // Combine and deduplicate suggestions
     const allSuggestions = [new Set([...filteredSuggestedFromMarked, ...filteredMutualFriendAccounts])];
 
-    // sorting the array based on subscription level...
+// sorting the array based on subscription level...
     const planOrder: Record<Plan, number> = { "Free": 0, "Pro": 1, "Creator": 2, "Enterprise": 3 };
 
     const accountsWithSubs = Array.from(allSuggestions).map((acc: any) => {
         const account = accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
-        const plan = acc.plan as Plan;
+        const plan: Plan = (acc.account.plan as Plan) || 'Free';
         return { acc, plan, isVerified: acc.account?.isVerified || false };
     });
 
@@ -1052,7 +1053,7 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
         reposts: repostsCount,
         likes: likesCount,
         views: viewsCount,
-        mediaUrls: pagePost.mediaUrls || [],
+        mediaUrls: Array(pagePost.mediaUrls).map(urlObj => ({ url:urlObj.url , media_type:urlObj.media_type })) || [],
         hashTags: pagePost.hashTags || [],
         mentions: Array(pagePost.mentions).map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()),
         userliked: !!userLiked,
@@ -1062,7 +1063,7 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
         usercommented: !!userCommented,
         userbookmarked: !!userBookmarked,
         username: author.name ,
-        handle: '@'+author.username,
+        handle: `@${author.username}`,
         avatar: author.avatar.url || '/images/default-profile-pic.png',
         cover: author.banner.url || '/images/default-banner.jpg',
         bio: author.bio || '',
@@ -1091,12 +1092,12 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
         
         return {
             id: particularAcc._id.toString(),
-            decodedHandle:'@'+particularAcc.username,
+            decodedHandle:`@${particularAcc.username}`,
             name: particularAcc.name,
             content: particularAcc.bio,
             account: {
                 name: particularAcc.name,
-                handle: '@'+particularAcc.username,
+                handle: `@${particularAcc.username}`,
                 bio: particularAcc.bio || '',
                 location: {
                     text: particularAcc.location?.text || '',
@@ -1247,12 +1248,12 @@ export const getAccountsBookmarkedAPostService = async ({ postid , page , pagesi
         
         return {
             id: particularAcc._id.toString(),
-            decodedHandle: '@'+particularAcc.username,
+            decodedHandle: `@${particularAcc.username}`,
             name: particularAcc.name,
             content: particularAcc.bio,
             account: {
                 name: particularAcc.name,
-                handle:'@'+particularAcc.username,
+                handle:`@${particularAcc.username}`,
                 bio: particularAcc.bio || '',
                 location: {
                     text: particularAcc.location?.text || '',
@@ -1281,3 +1282,105 @@ export const getAccountsBookmarkedAPostService = async ({ postid , page , pagesi
      return NextResponse.json({ message:'Bookmarked by accounts fetched !!' , navdata:accns , hasNext:hasNext },{ status:200 })
 }
 
+export const getExplorePostsService = async ({ hashtag , page , size } : { hashtag: string , page: number , size: number }) => {
+    // extracting cookies data...
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    // getting my active account...
+    const activeAcc = await accounts.findOne({ userId: user.id, 'account.Active': true, 'account.status': 'ACTIVE' });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    await connectWithMongoDB() ; // connecting to database...
+
+    const hashQuerySection = hashtag ? { hashtags: { $in: [hashtag] }} : { } ; // include hash in query only if exists...
+
+    // getting doc total count...
+    const total = await Post.countDocuments({ $and:[ hashQuerySection ,{ isDeleted: false }] });
+        const skip = (page - 1) * size ;
+        const hasNext = (skip + size) < total ;
+
+    // query including the paticular hasgtag...
+    const desiredPosts = await Post.find({ $and:[ hashQuerySection ,{ isDeleted: false }] })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(size)
+
+    const formattedPosts = [];
+    for (const post of desiredPosts) {
+        const postOwner = await accounts.findById(post.authorId);
+        if (!postOwner) continue;
+
+        const likesCount = await likes.countDocuments({ targetEntity: post._id.toString(), targetType: 'post' });
+        const repostsCount = await Post.countDocuments({ repostId: post._id.toString(), postType: 'repost', isDeleted: false });
+        const commentsCount = await Post.countDocuments({ replyToPostId: post._id.toString(), postType: 'comment', isDeleted: false });
+        const viewStats = await viewStat.findOne({ postId: post._id.toString() });
+        const viewsCount = viewStats?.totalViews || 0;
+
+        const userLiked = await likes.findOne({ accountId: activeAcc._id, targetEntity: post._id.toString(), targetType: 'post' });
+        const userReposted = await Post.findOne({ authorId: activeAcc._id, repostId: post._id.toString(), postType: 'repost', isDeleted: false });
+        const userCommented = await Post.findOne({ authorId: activeAcc._id, replyToPostId: post._id.toString(), postType: 'comment', isDeleted: false });
+        const userBookmarked = await tagged.findOne({ accountId: activeAcc._id, taggedAs: 'bookmarked', entityId: post._id.toString() });
+
+        const isPinned = await tagged.findOne({ accountId: activeAcc._id, taggedAs: 'pinned', entityId: post._id });
+        const isHighlighted = await tagged.findOne({ accountId: activeAcc._id, taggedAs: 'highlighted', entityId: post._id });
+
+        const isFollowing = await follows.findOne({ followerId: activeAcc._id, followingId: postOwner._id, isDeleted: false });
+
+        let poll = undefined;
+        const pollData = await Poll.findOne({ authorPost: post._id, isActive: true, expiry: { $gt: new Date() } });
+        if (pollData) {
+            poll = {
+                question: pollData.question,
+                options: pollData.options.map((opt: any) => ({ text: opt.text, votes: opt.votes })),
+                duration: pollData.duration
+            };
+        }
+
+        formattedPosts.push({
+            id: post._id.toString(),
+            postId: post._id.toString(),
+            avatar: postOwner.avatar?.url ,
+            username: postOwner.name,
+            handle: `@${postOwner.username}`,
+            bio: postOwner.bio ,
+            timestamp: new Date(post.createdAt).toUTCString(),
+            content: post.content,
+            media: Array(post.mediaUrls)?.map((urlObj) => ({ url: urlObj.url, media_type: urlObj.media_type })),
+            likes: likesCount,
+            reposts: repostsCount,
+            replies: commentsCount,
+            views: viewsCount,
+            isPinned: !!isPinned,
+            isHighlighted: !!isHighlighted,
+            userliked: !!userLiked,
+            usereposted: !!userReposted,
+            usercommented: !!userCommented,
+            userbookmarked: !!userBookmarked,
+            isCompleted: postOwner.account?.completed ,
+            isVerified: postOwner.isVerified?.value ,
+            plan: postOwner.isVerified?.level ,
+            followers: fmt(await follows.countDocuments({ followingId: postOwner._id, isDeleted: false })),
+            following: fmt(await follows.countDocuments({ followerId: postOwner._id, isDeleted: false })),
+            hashTags: post.hashTags ,
+            mentions: Array(post.mentions).map((u: any) => typeof u === 'string' ? u.trim() : u.toString().trim()),
+            isFollowing: !!isFollowing,
+            taggedLocation: post.taggedLocation || [],
+            poll
+        });
+    }
+
+// arranging posts with decreasing order of subscription plan...
+    const planArrange : Record<Plan,number> = { "Free": 0 , "Pro": 1 , "Creator": 2 , "Enterprise": 3 } ;
+
+    const aarangedViaPlan = formattedPosts.sort((postA,postB) => {
+        const planA: Plan = postA.plan ;
+        const planB: Plan = postB.plan ;
+        const planAValue = planArrange[planA];
+        const planBValue = planArrange[planB];
+        if (planAValue !== planBValue) return planBValue - planAValue ; // higher subscription first...
+        if (postA.isVerified !== postB.isVerified) return postA.isVerified ? -1 : 1 ; // verified first...
+        return 0 ;
+    })
+
+    return NextResponse.json({ success: true, explore:aarangedViaPlan , hasNext }, { status: 200 });
+}

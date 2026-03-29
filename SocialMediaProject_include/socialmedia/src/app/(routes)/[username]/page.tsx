@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
-import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink} from 'lucide-react';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
@@ -806,12 +806,17 @@ export default function UserProfilePage() {
                                <li
                                 onClick={() => { setSharePop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                  <span>Share Account</span><Share2Icon size={15} />
+                                  <span>Share Account via</span><Share2Icon size={15} />
                                 </li>
                                 <li
                                 onClick={() => { handleProfileLinkCopy() }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>Copy Link</span><CopyIcon size={15}/>
+                                </li>
+                                <li
+                                // onClick={() => { setQRCodePop(true) }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Generate QR code</span><QrCodeIcon size={15}/>
                                 </li>
                                 <li
                                 onClick={() => { toast.success('View Analytics feature coming soon!') }}
@@ -853,7 +858,12 @@ export default function UserProfilePage() {
                               <li
                                 onClick={() => { setSharePop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                  <span>Share Account</span><Share2Icon size={15} />
+                                  <span>Share Account via</span><Share2Icon size={15} />
+                              </li>
+                              <li
+                                // onClick={() => { setQRCodePop(true) }}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                 <span>Generate QR code</span><QrCodeIcon size={15}/>
                               </li>
                               <li
                                onClick={() => { toast.success('Send Message feature coming soon!') }}

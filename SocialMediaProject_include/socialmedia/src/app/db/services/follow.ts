@@ -168,12 +168,12 @@ export const fetchingAccountsService = async (handle:string) => {
     
         return {
             id: paticularAcc._id.toString(),
-            decodedHandle:'@'+paticularAcc.username,
+            decodedHandle:`@${paticularAcc.username}`,
             name:paticularAcc.name,
             content:paticularAcc.bio,
             account:{
                 name:paticularAcc.name ,
-                handle:'@'+paticularAcc.username ,
+                handle:`@${paticularAcc.username}` ,
                 bio:paticularAcc.bio ,
                 location:{
                   text:paticularAcc.location.text,
@@ -249,12 +249,12 @@ export const getAllTheFollowingService = async (handle:string) => {
     
         return {
             id: paticularAcc._id.toString(),
-            decodedHandle:'@'+paticularAcc.username,
+            decodedHandle:`@${paticularAcc.username}`,
             name:paticularAcc.name,
             content:paticularAcc.bio,
             account:{
                 name:paticularAcc.name ,
-                handle:'@'+paticularAcc.username ,
+                handle:`@${paticularAcc.username}` ,
                 bio:paticularAcc.bio ,
                 location:{
                   text:paticularAcc.location.text,

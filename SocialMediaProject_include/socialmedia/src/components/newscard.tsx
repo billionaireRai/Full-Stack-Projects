@@ -1,63 +1,70 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
-interface newsCardProp {
-    bannerImg?:string ,
-    time?:string ,
-    newsCategory?:string ,
-    postsCount?:string ,
-    profileRelated?:[{
-        avatar?:string[] ,
-        name?:string,
-        href?:string
-    }],
-
+interface NewsCardProps {
+  source: string
+  category: string
+  title: string
+  gradient:string
+  timeAgo: string
+  location: string
+  href?: string
 }
 
-export default function newscard ({ bannerImg , time , newsCategory , postsCount , profileRelated = [{avatar: []}] } : newsCardProp) {
+export default function NewsCard({ 
+  source, 
+  category, 
+  title, 
+  timeAgo, 
+  gradient,
+  location, 
+  href = '/' 
+}: NewsCardProps) {
   return (
-<li>
-  <div className="flex flex-row items-start gap-3 bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm p-4 cursor-pointer hover:shadow-md dark:hover:shadow-gray-900 transition-colors">
-    {/* Thumbnail Image */}
-    <img
-      src={bannerImg}
-      alt="News Thumbnail"
-      className="w-20 h-20 object-cover rounded-lg"
-    />
-    {/* Text Section */}
-    <div className="flex flex-col flex-1">
-      <p className="text-gray-900 dark:text-white text-lg text-wrap leading-snug truncate">
-        Modi and Ishiba's Bullet Train Ride Accelerates India-Japan Ties
-      </p>
-      
-      {/* Metadata */}
-      <div className="md:flex md:items-center grid grid-rows-2 grid-cols-2 text-sm font-semibold truncate text-gray-600 dark:text-gray-400 gap-2 mt-2">
-        <span>{time}</span>
-        <span className='hidden md:block'>•</span>
-        <span>{newsCategory}</span>
-        <span className='hidden md:block'>•</span>
-        <span>{postsCount} posts</span>
-        {profileRelated && profileRelated.length > 0 && (
-          <>
-            <span className='hidden md:block'>•</span>
-            <span className='flex flex-row -space-x-3'>
-              {profileRelated.map((profile, index) => (
-                <Link href={profile.href || '#'} key={index}>
-                  <img
-                    src={profile.avatar?.[0] || '/images/myProfile.jpg'}
-                    alt={`${profile.name || 'User'} avatar`}
-                    className="rounded-full w-10 h-10 border-4 border-white dark:border-black object-cover"
-                  />
-                </Link>
-              ))}
+    <Link 
+      href={href} 
+      className="group block p-3 rounded-2xl bg-white/70 dark:bg-gray-950 backdrop-blur-sm shadow-sm hover:shadow-md hover:-translate-y-1 hover:bg-white/90 dark:hover:bg-gray-900 border border-white/20 dark:border-gray-700/50 transition-all duration-300 ease-out hover:no-underline focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+      aria-label={`Read ${title} from ${source}`}
+    >
+      <div className="flex items-start space-x-4">
+        {/* Source Logo - Gradient Badge */}
+        <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center ring-2 ring-white/30 group-hover:scale-110 transition-transform duration-300`}>
+          <span className="text-white font-bold text-sm leading-none tracking-tight drop-shadow-sm">
+            {source}
+          </span>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Category */}
+          <p className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+            {category}
+          </p>
+          
+          {/* Title */}
+          <h3 className="font-bold text-lg leading-6 text-gray-900 dark:text-white group-hover:text-gray-950 dark:group-hover:text-white line-clamp-2 mb-3 transition-colors pr-2">
+            {title}
+          </h3>
+          
+          {/* Metadata */}
+          <div className="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
+            <span className="flex items-center space-x-1">
+              <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
+              <span>{timeAgo}</span>
             </span>
-          </>
-        )}
-    </div>
-    </div>
-  </div>
-</li>
-
-    
+            <span>•</span>
+            <span className="flex items-center space-x-1">
+              <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
+              <span>{location}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
   )
 }

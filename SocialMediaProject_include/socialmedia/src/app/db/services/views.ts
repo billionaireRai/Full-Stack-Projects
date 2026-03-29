@@ -120,12 +120,12 @@ export const getAllViewsOfPostService = async ({ postid , page , pagesize } : { 
 
     return {
       id,
-      decodedHandle: '@' + acc.username,
+      decodedHandle: `@${acc.username}`,
       name: acc.name,
       content: acc.bio || '',
       account: {
         name: acc.name,
-        handle: '@'+acc.username,
+        handle: `@${acc.username}`,
         bio: acc.bio || '',
         location: {
           text: acc.location?.text || '',

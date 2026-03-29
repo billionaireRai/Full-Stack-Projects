@@ -15,6 +15,11 @@ const messageSchema = new mongoose.Schema(
       required: true,
       index: true
     },
+    conversationId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Conversation',
+      required:true
+    },
     content: {
       type: String,
       trim: true,
@@ -37,11 +42,10 @@ const messageSchema = new mongoose.Schema(
       default: "text",
       index: true
     },
-
-    isRead: {
-      type: Boolean,
-      default: false,
-      index: true
+    status: {
+      type: String,
+      enum:['sent','delivered','seen'],
+      default:'sent'
     },
     deletedFor: [
       {

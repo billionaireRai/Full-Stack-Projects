@@ -159,11 +159,11 @@ export async function logginUserService(data:loginDataType) : Promise<any> {
     const followers = await follows.find({ followingId : account._id , isDeleted:false })
     const following = await follows.find({ followerId : account._id , isDeleted:false })
     let accountData : userCardProp = {
-        decodedHandle:'@'+account.username,
+        decodedHandle:`@${account.username}`,
         name:account.name,
         account:{
             name:account.name,
-            handle:'@'+account.username,
+            handle:`@${account.username}`,
             bio:account.bio || ' ',
             location:account.location ,
             website:account.website || ' ',
@@ -210,11 +210,11 @@ export async function creatingUserAfterOauth(email: string, name: string,pic:str
         const following = await follows.find({ followerId : account._id , isDeleted:false });
 
         let accountData: userCardProp = {
-            decodedHandle:'@'+account.username,
+            decodedHandle:`@${account.username}`,
             name: account.name,
             account: {
                 name: account.name,
-                handle:'@'+account.username,
+                handle:`@${account.username}`,
                 bio: account.bio,
                 location: account.location,
                 website: account.website,
@@ -270,11 +270,11 @@ export async function creatingUserAfterOauth(email: string, name: string,pic:str
 
 
     let accountData: userCardProp = {
-        decodedHandle:'@'+newAccount.username,
+        decodedHandle:`@${newAccount.username}`,
         name: newAccount.name,
         account: {
             name: newAccount.name,
-            handle:'@'+newAccount.username,
+            handle:`@${newAccount.username}`,
             bio: newAccount.bio || '',
             location: newAccount.location ,
             website: newAccount.website || '',
@@ -362,13 +362,15 @@ export const profileSpecificDataService = async (handle:string) => {
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message:user.message },{ status:401, statusText: 'UNAUTHORIZED REQUEST...' });
 
-    const myAccount = await accounts.findOne({ username:handle , 'account.status':'ACTIVE' , 'account.Active':true }) ; // getting my account...
+    const myAccount = await accounts.findOne({ authorId:user.id , 'account.status':'ACTIVE' , 'account.Active':true }) ; // getting my account...
 
+    // target profile...
+    const targetAcc = await accounts.findOne({ username:handle , 'account.status':'ACTIVE' });
     // Fetch blocked account IDs
     const blockedDocs = await Block.find({ blockedByAcc: myAccount._id, isActive: true });
     const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
     // generating the follow suggestions...
-    const followingDocs: InstanceType<typeof follows>[] = await follows.find({ followerId : myAccount._id , isDeleted:false});
+    const followingDocs: InstanceType<typeof follows>[] = await follows.find({ followerId : targetAcc._id , isDeleted:false});
     const followingAccountId : string[] = followingDocs.map((followObj) => followObj.followingId ) ;
     
     // getting the mutual followers...
@@ -387,12 +389,12 @@ export const profileSpecificDataService = async (handle:string) => {
 
         return {
             id: paticularAcc._id.toString(),
-            decodedHandle:'@'+paticularAcc.username,
+            decodedHandle:`@${paticularAcc.username}`,
             name:paticularAcc.name,
             content:paticularAcc.bio,
             account:{
                 name:paticularAcc.name ,
-                handle:'@'+paticularAcc.username ,
+                handle:`@${paticularAcc.username}` ,
                 bio:paticularAcc.bio ,
                 location:{
                   text:paticularAcc.location.text,
@@ -528,7 +530,7 @@ export const profileSpecificDataService = async (handle:string) => {
             reposts:fmt(repostsOnPost.length),
             likes:fmt(likesOnPost.length),
             views:fmt(viewsOnPostCount),
-            mediaUrls: Array(post.mediaUrls).map(urlObj => urlObj.url ),
+            mediaUrls: Array(post.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
             hashTags: post.hashtags,
             mentions: post.mentions,
             userliked: userLiked ? true : false,
@@ -583,8 +585,8 @@ export const profileSpecificDataService = async (handle:string) => {
             postId:repliedpost.replyToPostId,
             postAuthorInfo : {
                 postId: authorPost._id.toString(),
-                username: accountInfo.username,
-                handle: '@'+accountInfo.username,
+                username: accountInfo.name,
+                handle: `@${accountInfo.username}`,
                 cover: accountInfo.banner.url,
                 bio: accountInfo.bio || '',
                 isVerified: accountInfo.isVerified.value,
@@ -594,7 +596,7 @@ export const profileSpecificDataService = async (handle:string) => {
                 timestamp: new Date(authorPost.createdAt).toUTCString(),
                 avatar: accountInfo.avatar.url,
                 content: authorPost.content,
-                media: Array(authorPost.mediaUrls).map(urlObj => urlObj.url ),
+                media: Array(authorPost.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
                 mentions: authorPost.mentions || [],
                 hashTags: authorPost.hashTags || [],
                 taggedLocation: authorPost.taggedLocation || [],
@@ -614,7 +616,7 @@ export const profileSpecificDataService = async (handle:string) => {
 
             },
             commentedText:repliedpost.content,
-            mediaUrls:Array(repliedpost.mediaUrls).map(urlObj => urlObj.url),
+            mediaUrls: Array(repliedpost.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
             mentions:repliedpost.mentions,
             hashTags:repliedpost.hashtags,
             repliedAt:new Date(repliedpost.createdAt).toUTCString(),
@@ -676,7 +678,7 @@ export const profileSpecificDataService = async (handle:string) => {
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
             views:fmt(viewsLikedCount),
-            mediaUrls: Array(post.mediaUrls).map(urlObj => urlObj.url ),
+            mediaUrls: Array(post.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
             hashTags: post.hashtags,
             mentions: post.mentions,
             userliked: userLiked ? true : false,
@@ -699,7 +701,7 @@ export const profileSpecificDataService = async (handle:string) => {
         const viewsHighlightCount = viewStatsHighlight?.totalViews || 0;
 
         const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: reqPost._id }] });
-        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'r epost' }, { repostId: reqPost._id }, { isDeleted: false }] });
+        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: reqPost._id }, { isDeleted: false }] });
         const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: reqPost._id }, { isDeleted: false }] });
         const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: reqPost._id },{ taggedAs:'bookmarked' }] });
 
@@ -711,7 +713,7 @@ export const profileSpecificDataService = async (handle:string) => {
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
             views:fmt(viewsHighlightCount),
-            mediaUrls: Array(reqPost.mediaUrls).map(urlObj => urlObj.url ),
+            mediaUrls: Array(reqPost.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
             hashTags: reqPost.hashtags,
             mentions: reqPost.mentions,
             userliked: userLiked ? true : false,

@@ -605,6 +605,20 @@ const [Comments, setComments] = useState<PostType[]>([
     }
    }
 
+  // function getting replies on comment...
+   async function getRepliesOnComments() {
+    try {
+      const apiResponse = await axiosInstance.get(`/api/post/replies?postid=${postId}&page=${commentpage}&size=${pagesize.current}`);
+      if (apiResponse.status === 200)  {
+        setRepliedPosts(apiResponse.data.replies);
+        sethasreplies(apiResponse.data.hasNext);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error('An error occured...')
+    }
+   }
+
    // getting the bookmarks...
    useEffect(() => {
     // fetchingNavSpecificData(setbookmarkUsers,sethasbookmark,String(postId),'/api/post/bookmarks',bookmarkpage);
@@ -627,7 +641,7 @@ const [Comments, setComments] = useState<PostType[]>([
 
    // getting all the replies..
    useEffect(() => {
-
+    // getRepliesOnComments() ;
    }, [repliespage,pagesize])
    
    
@@ -911,6 +925,7 @@ const [Comments, setComments] = useState<PostType[]>([
             )) || null}
             <div className='flex items-center justify-center'>
                <button 
+                onClick={() => { setcommentpage(commentpage + 1) }}
                 disabled={!hascomment}
                 className='flex items-center justify-center gap-2 p-3 my-2 mx-1 w-fit rounded-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold hover:scale-95 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer'>
                   <ChevronDown className="w-4 h-4" />
@@ -1013,6 +1028,7 @@ const [Comments, setComments] = useState<PostType[]>([
                     </div>
              <div className='flex items-center justify-center'>
                <button 
+                onClick={() => { setrepliespage(repliespage + 1) }}
                 disabled={!hasreplies}
                 className='flex items-center justify-center gap-2 p-3 my-2 mx-1 w-fit rounded-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold hover:scale-95 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer'>
                  <ChevronDown className="w-4 h-4" />
@@ -1058,6 +1074,7 @@ const [Comments, setComments] = useState<PostType[]>([
             )) || null}
              <div className='flex items-center justify-center'>
               <button 
+                onClick={() => { setviewspage(viewspage + 1) }}
                 disabled={!hasviews}
                 className='flex items-center justify-center gap-2 p-3 my-2 mx-1 w-fit rounded-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold hover:scale-95 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer'>
                  <ChevronDown className="w-4 h-4" />
@@ -1102,6 +1119,7 @@ const [Comments, setComments] = useState<PostType[]>([
             )) || null}
              <div className='flex items-center justify-center'>
               <button 
+               onClick={() => { setlikespage(likespage + 1) }}
                disabled={!haslikes}
                className='flex items-center justify-center gap-2 p-3 my-2 mx-1 w-fit rounded-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold hover:scale-95 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer'>
                  <ChevronDown className="w-4 h-4" />
