@@ -23,6 +23,7 @@ import axiosInstance from '@/lib/interceptor';
 import { AxiosResponse } from 'axios';
 import DeleteModal from '@/components/deletemodal';
 import SharePopup from '@/components/sharePopUp';
+import Qrcodepop from '@/components/qrcodepop';
 
 interface mediaType {
   url: string;
@@ -134,6 +135,7 @@ export default function UserProfilePage() {
   const fetchedHandlesRef = useRef<Set<string>>(new Set()); // ref to track fetched handles
   const [isFollowing, setisFollowing] = useState<boolean>(false);
   const [isSelf, setisSelf] = useState<boolean>(false) ;
+  const [ShowQRPop, setShowQRPop] = useState(false);
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [planIntent, setplanIntent] = useState<string>('Pro');
@@ -627,7 +629,6 @@ export default function UserProfilePage() {
         if (data.suggestions) setFollowSuggesstions(data.suggestions) ;
         if (data.replies) setRepliedPosts(data.replies) ;
         if (data.highlights) setHighlights(data.highlights) ;
-
       }
     }
     // functionToGetData();
@@ -814,7 +815,7 @@ export default function UserProfilePage() {
                                  <span>Copy Link</span><CopyIcon size={15}/>
                                 </li>
                                 <li
-                                // onClick={() => { setQRCodePop(true) }}
+                                onClick={() => { setShowQRPop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>Generate QR code</span><QrCodeIcon size={15}/>
                                 </li>
@@ -861,7 +862,7 @@ export default function UserProfilePage() {
                                   <span>Share Account via</span><Share2Icon size={15} />
                               </li>
                               <li
-                                // onClick={() => { setQRCodePop(true) }}
+                                onClick={() => { setShowQRPop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>Generate QR code</span><QrCodeIcon size={15}/>
                               </li>
@@ -1377,6 +1378,9 @@ export default function UserProfilePage() {
         )}
         { SharePop && (
           <SharePopup onClose={() => { setSharePop(false) }} open={SharePop} onCopy={() => { handleProfileLinkCopy() }} link={window.location.href} followerCount={AccountInfo.followers} followingCount={AccountInfo.following} text={`@${AccountInfo.handle}.${AccountInfo.bio}`}/>
+        )}
+        {ShowQRPop && (
+          <Qrcodepop Category='profile' copyLink={handleProfileLinkCopy} doneScanning={() => { setShowQRPop(false) }} path={window.location.origin} timestamp={new Date().toDateString()} owner={AccountInfo.handle}/>
         )}
       </>
   </>

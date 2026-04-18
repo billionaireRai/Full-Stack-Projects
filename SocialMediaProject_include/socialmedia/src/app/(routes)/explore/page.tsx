@@ -172,12 +172,12 @@ export default function explore() {
       const [newsData, setnewsData] = useState<newsCardType[]>([
         {
           source: "CNN",
-          category: `${Account.account?.location}-News`,
+          category: `${(Account.account?.location.text)}-News`,
           gradient: 'from-blue-500 via-purple-500 to-indigo-600',
-          title: `Major Breaking News from ${Account.account?.location}...`,
+          title: `Major Breaking News from ${Account.account?.location.text}...`,
           timeAgo: "about 12hr",
           location: "Breaking-News",
-          href: `/news?n=${encodeURIComponent(`Major-Breaking-News-from-${Account.account?.location}`)}&utm_source=news-click`
+          href: `/news?n=${encodeURIComponent(`Major-Breaking-News-from-${Account.account?.location.text}`)}&cat=${(Account.account?.location.text)}-News&utm_source=news-click`
         },
         {
           source: "BBC",
@@ -186,26 +186,34 @@ export default function explore() {
           title: "Top Recent News Across World",
           timeAgo: "about 12hr",
           location: "Global",
-          href: `/news?n=${encodeURIComponent('Top-Recent-News-Across-World')}&utm_source=news-click`
+          href: `/news?n=${encodeURIComponent('Top-Recent-News-Across-World')}&cat=World-News&utm_source=news-click`
         },
-        // start to refactor from here....
         {
           source: "TG",
           category: "Technology",
           gradient: 'from-red-500 via-orange-500 to-yellow-600',
-          title: "AI Revolution Continues to Transform Industries",
+          title: "Technology revolution & innovation with AI",
           timeAgo: "about 12hr",
           location: "Tech & future",
-          href: `/news?n=${encodeURIComponent('AI-Revolution-Continues-to-Transform-Industries')}&utm_source=news-click`
+          href: `/news?n=${encodeURIComponent('Technology-revolution-and-innovation-with-AI')}&cat=Technology&utm_source=news-click`
         },
         {
-          source: "DH",
-          category: "World politics",
+          source: "TWP",
+          category: "Entertainment News",
           gradient: 'from-green-500 via-green-300 to-white',
-          title: "Trump & putin meeting in vladivostok",
+          title: "News about entertainment industry around world",
           timeAgo: "about 12hr",
-          location: "Global",
-          href: `/news?n=${encodeURIComponent('Trump-Putin-Meeting-In-Vladivostok')}&utm_source=news-click`
+          location: "Entertainment & Fun",
+          href: `/news?n=${encodeURIComponent('News-About-Entertainment-Industry-Around-World')}&cat=Entertainment-News&utm_source=news-click`
+        },
+        {
+          source: "ABP",
+          category: "Crypto Market News",
+          gradient: 'from-blue-500 via-blue-300 to-white',
+          title: "Updates about crypto market & exchanges",
+          timeAgo: "about 12hr",
+          location: "Crypto Market",
+          href: `/news?n=${encodeURIComponent('Updates-About-Crypto-Market-And-Exchanges')}&cat=Crypto-Market-News&utm_source=news-click`
         }
       ]);
 
@@ -573,7 +581,7 @@ export default function explore() {
       <div className='mainbox hidden dark:bg-black w-fit h-fit rounded-lg xl:flex flex-col lg:flex-row-reverse gap-8 p-6 max-w-7xl mx-auto font-poppins'>
         <div className='right w-fit lg:w-80 xl:w-96 space-y-2'>
            {/* Today's News */}
-           {/* On hover of each redirect => '/explore?q=endcodeurlcomponent(newstitle)&utm_source=news-click*/}
+           {/* On hover of each redirect => '/explore?n=endcodeurlcomponent(newstitle)&utm_source=news-click*/}
            <div className='bg-white p-2 dark:bg-black rounded-xl shadow-lg'>
                <div className='p-4 rounded-lg border-b border-gray-200 dark:border-slate-700 flex justify-between'>
                    <h2 className='text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3'><span>Today's News</span><Activebeep /></h2>

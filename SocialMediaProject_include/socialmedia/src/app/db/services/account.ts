@@ -246,9 +246,5 @@ export const exploreDetailsForAccountService = async () => {
         posts: fmt(item.posts)
     }));
 
-    // getting Latest news...
-    // const accountSpecificCat = activeAcc.location.text || 'India' ; // By default India...
-    // const newsCategory = [`${accountSpecificCat}-News`,'World-News','Technology',`${accountSpecificCat}-Entertainment`,'Politics','Crypto-Market']
-
     return NextResponse.json({ message: 'Explore details fetched', suggestions: suggesstionsArr, trendingHashtags: top5Tags }, { status: 200 });
 }

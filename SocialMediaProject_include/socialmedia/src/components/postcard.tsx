@@ -47,6 +47,7 @@ import useActiveAccount from '@/app/states/useraccounts';
 import Commentpopcard from './Commentpopcard';
 import RequireSubscription from './requireSubscription';
 import useUpgradePop from '@/app/states/upgradePop';
+import Qrcodepop from './qrcodepop';
 import Shareviadm from './shareviadm';
 import ReportPop from './reportPop';
 import PinPostPop from './pinpostpop';
@@ -158,6 +159,7 @@ export default function PostCard({
   const [isBlocked, setisBlocked] = useState<boolean>(false);
   const [IsFollowing, setIsFollowing] = useState<boolean>(isFollowing);
   const [CommentCardPop, setCommentCardPop] = useState<boolean>(false) ;
+  const [QRCodePop,setQRCodePop] = useState<boolean>(false);
   const [showReportPop, setshowReportPop] = useState<boolean>(false);
   const [ShareAccrosApp, setShareAccrosApp] = useState<boolean>(false);
   const [BlurPost, setBlurPost] = useState<boolean>(false);
@@ -174,6 +176,7 @@ export default function PostCard({
   const postref = useRef<HTMLDivElement>(null) ;
   const avatarRef = useRef<HTMLImageElement>(null);
   const shareRef = useRef<HTMLButtonElement>(null);
+  const creatorOrEnterprise = ['Creator', 'Enterprise'].includes(Account.account?.plan || '');
 
   // Reusable click-outside handler
   const useClickOutside = (handlers: { isOpen: boolean; selector: string; setOpen: (value: boolean) => void }[]) => {
@@ -351,7 +354,7 @@ export default function PostCard({
 
   // handle copy link of a post...
   const handleCopyLink = () => { 
-    navigator.clipboard.writeText(`http://localhost:3000/${handle}/post/${postId}?section=All`)  ;
+    navigator.clipboard.writeText(`${window.location.origin}/${handle}/post/${postId}?section=All`)  ;
     setShareDropDown(false) ;
     toast.success("Post link successfully copied !")  
    }
@@ -570,7 +573,7 @@ export default function PostCard({
                   <Trash2 className="w-4 h-4" />
                   Delete
                 </button>
-                <Link href={`/${handle}/post/${postId}?section=Bookmark`}
+                <Link href={`/${handle}/post/${postId}?section=Comments`}
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
                     <PodcastIcon className="w-4 h-4" />
@@ -626,7 +629,7 @@ export default function PostCard({
              animate={{ opacity: 1, scale: 1 }}
              exit={{ opacity: 0, scale: 0.8 }}  
              className="dropdown-container font-semibold cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
-                <Link href={`/${handle}/post/${postId}?section=Bookmark`}
+                <Link href={`/${handle}/post/${postId}?section=Comments`}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
                     <PodcastIcon className="w-4 h-4" />
@@ -768,15 +771,14 @@ export default function PostCard({
               </Tooltip>
             ))}
           </div>
-          {/* { Account.decodedHandle === handle && ( */}
+          { Account.decodedHandle === handle && creatorOrEnterprise && (
           <div className='p-2 rounded-md flex items-center justify-end'>
-
             <div className='flex items-center justify-center gap-2 rounded-md'>
               <button className='text-white border dark:border-gray-800 hover:opacity-85 bg-black cursor-pointer py-1 px-3 rounded-md flex items-center gap-1'><DollarSign/><span>Monetize</span></button>
               <button className='text-white border dark:border-gray-800 hover:opacity-85 bg-black cursor-pointer py-1 px-4 rounded-md flex items-center gap-1'><TrendingUp/><span>Boost</span></button>
             </div>
           </div>
-          {/* )} */}
+          )}
         </div>
       </div>
 
@@ -837,7 +839,7 @@ export default function PostCard({
             send via Direct Message
           </button>
           <button 
-          // onClick={() => { setQRCodePop(true) }}
+          onClick={() => { setQRCodePop(true) }}
           className="w-full cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors font-semibold">
             <QrCodeIcon className="w-4 h-4" />
              Generate QR code
@@ -858,7 +860,7 @@ export default function PostCard({
       )}
 
       {ShareAccrosApp && (
-        <SharePopup link={`http://localhost:3000/${handle}/post/${postId}?section=All`} onClose={() => { setShareAccrosApp(false) }} followerCount={followers} followingCount={following} open={ShareAccrosApp} text={`@${handle}.${content}`} onCopy={handleCopyLink}/>
+        <SharePopup link={`${window.location.origin}/${handle}/post/${postId}?section=All`} onClose={() => { setShareAccrosApp(false) }} followerCount={followers} followingCount={following} open={ShareAccrosApp} text={`@${handle}.${content}`} onCopy={handleCopyLink}/>
       )}
       {FavouritePop && (
         <FavouriteAddPop
@@ -880,11 +882,15 @@ export default function PostCard({
         <ReportPop closeReportModal={() => { setshowReportPop(false) }} username={handle} postId={postId}/>
       )}
 
+      {QRCodePop && (
+        <Qrcodepop path={window.location.origin} postid={postId} copyLink={handleCopyLink} Category='post' doneScanning={() => { setQRCodePop(false) }} timestamp={new Date().toDateString()} owner={handle} />
+      )}
+
       { showEmbedPop && (
         <IframeOfEmbed
           isOpen={showEmbedPop}
           onClose={() => setshowEmbedPop(false)}
-          publicEndpoint={`http://localhost:3000/embed/post/${postId}`}
+          publicEndpoint={`${window.location.origin}/embed/post/${postId}`}
           postId={postId}
           avatar={avatar}
           username={username}
@@ -903,7 +909,7 @@ export default function PostCard({
       )}
 
      {shareCardPop && (
-      <Shareviadm closemodal={() => { setshareCardPop(false) }} link={`http://localhost:3000/${handle}/post/${postId}?section=All`} />
+      <Shareviadm closemodal={() => { setshareCardPop(false) }} link={`${window.location.origin}/${handle}/post/${postId}?section=All`} />
      )}
     </div>
   );

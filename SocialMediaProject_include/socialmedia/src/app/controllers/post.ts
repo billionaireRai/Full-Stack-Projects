@@ -1,6 +1,7 @@
 import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "../middleware/errorMiddleware";
 import { postDeletionService, postUpdationService, togglePostHighlightService, togglePostPinService, togglePostFavouriteService, postNotInterestedService, postRepostService, postLikedService, postBookmarkingService, postSendingViaDM, getBookmarkAndSuggestionService, getPostPageEssentialService , getAccountsBookmarkedAPostService} from "../db/services/post";
+import { getVerifiedUrlForQRService } from "../db/services/qr";
 
 export const deleteMyPostController =  asyncErrorHandler(async (request:NextRequest) => {
     const reqUrl = new URL(request.nextUrl);
@@ -207,4 +208,17 @@ export const getAccountsBookmarkedAPostController = asyncErrorHandler( async (re
 
     // await getAccountsBookmarkedAPostService({ postid , page , size });
     return NextResponse.json({ message:'Essentials fetched successfully !!'},{ status:200 });
+})
+
+
+export const getVerifiedUrlForQRController = asyncErrorHandler( async (request:NextRequest) => {
+    const { category , handle , id , path } = await request.json() ; // extracting data from body...
+
+    if (!category || !path) {
+        console.log("Any of the credential missing !!");
+        return NextResponse.json({ message:'Ensure credentials coming...' },{ status:400 });
+    }
+
+    // await getVerifiedUrlForQRService({ category , handle , id , url });
+    return NextResponse.json({ message:'Verified url sent !!' },{ status:200 });
 })
