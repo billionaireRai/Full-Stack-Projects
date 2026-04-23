@@ -204,13 +204,13 @@ export default function SideNavbar() {
                 </Link>
                 <Link
                   className={`${
-                    pathname === `/${Account.decodedHandle}/user-analytics`
+                    pathname === `/${Account.decodedHandle}/account-analytics`
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                        : ''
                   } 'flex flex-row items-center justify-center' `}
                   href={`/${Account.decodedHandle}/user-analytics`}
                 >
-                  <NavItem icon={<LayoutDashboard className={`${pathname === '/username/user-analytics' ? 'fill-black dark:fill-white' : ''}`} />} label="Dashboard" />
+                  <NavItem icon={<LayoutDashboard className={`${pathname === '/username/account-analytics' ? 'fill-black dark:fill-white' : ''}`} />} label="Dashboard" />
                 </Link>
                 <Link
                   className={`${

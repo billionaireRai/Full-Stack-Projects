@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   LineChart,
   Line,
@@ -29,8 +31,11 @@ import {
 import { BsFillPersonCheckFill, BsGlobe } from "react-icons/bs";
 import { HiOutlineSparkles } from "react-icons/hi";
 import Customdropdown from "@/components/customdropdown";
+import useActiveAccount from "@/app/states/useraccounts";
 import { clsx } from "clsx";
 import { useTheme } from "next-themes";
+import { MdImportExport, MdSpaceDashboard } from "react-icons/md";
+import { User } from "lucide-react";
 
 
 interface Overview {
@@ -38,11 +43,6 @@ interface Overview {
   likes: number;
   comments: number;
   engagementRate: number;
-}
-
-interface timeObj {
-  value:string ,
-  label:string
 }
 
 interface VisitorSeriesItem {
@@ -56,7 +56,8 @@ interface BreakdownItem {
 }
 
 interface RecentUploadItem {
-  id: number;
+  num:number;
+  id: string;
   title: string;
   date: string;
   views: number;
@@ -70,7 +71,8 @@ interface TopCountryItem {
 }
 
 interface TopPostItem {
-  id: string;
+  num: number;
+  id:string;
   title: string;
   views: number;
   reach: number;
@@ -108,8 +110,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function UserAnalytics() {
   // UI state
-  const [timeRange, setTimeRange] = useState<timeObj>({value:'7d',label:'7 days'});
-  const [loading, setLoading] = useState<boolean>(true);
+  const [timeRange, setTimeRange] = useState({ value:'7d',label:'7 days',priority:"1" });
+  const [loading, setLoading] = useState<boolean>(true); // used for loading animation...
 
   // Analytics data states
   const [overview, setOverview] = useState<Overview>({
@@ -120,6 +122,8 @@ export default function UserAnalytics() {
   });
 
 
+  const { Account } = useActiveAccount() ; // getting the logged in account...
+  const router = useRouter() ; // initializing router hook...
   const [visitorSeries, setVisitorSeries] = useState<VisitorSeriesItem[]>([]);
   const [deviceBreakdown, setDeviceBreakdown] = useState<BreakdownItem[]>([]);
   const [genderBreakdown, setGenderBreakdown] = useState<BreakdownItem[]>([]);
@@ -128,8 +132,8 @@ export default function UserAnalytics() {
   const [topPosts, setTopPosts] = useState<TopPostItem[]>([]);
   const [growthSeries, setGrowthSeries] = useState<GrowthSeriesItem[]>([]);
   const [interactionTypes, setInteractionTypes] = useState<InteractionTypeItem[]>([]);
-  const [timeArray, settimeArray] = useState<timeObj[]>(
-    [{value:"7d",label:'7 days'},{value:"30d",label:'30 days'},{value:"90d",label:'90 days'},{value:"1y",label:'1 year'},{value:"2y",label:'2 years'}]
+  const [timeArray, settimeArray] = useState(
+    [{value:"7d",label:'7 days', priority:"1"},{value:"30d",label:'30 days', priority:"2"},{value:"90d",label:'90 days', priority:"3"},{value:"1y",label:'1 year', priority:"4"},{value:"2y",label:'2 years', priority:"5"}]
   )
 
   const { theme } = useTheme();
@@ -193,7 +197,8 @@ export default function UserAnalytics() {
       // Recent uploads
       setRecentUploads([
         {
-          id: 1,
+          num: 1,
+          id:"IBFI(@$HFE@_#(",
           title: "This incredible natural attraction is one of the must-visits",
           date: "22-02-2023",
           views: 837748,
@@ -201,7 +206,8 @@ export default function UserAnalytics() {
           comments: 2578,
         },
         {
-          id: 2,
+          num: 2,
+          id:"@(*RH@EF)_E)F",
           title: "The Skywalk, a glass leading out over the valley",
           date: "24-02-2023",
           views: 384753,
@@ -209,7 +215,8 @@ export default function UserAnalytics() {
           comments: 4766,
         },
         {
-          id: 3,
+          num: 3,
+          id:"NFD_@DEMIF$@",
           title: "Summer is the most popular time to visit these beaches",
           date: "26-02-2023",
           views: 296087,
@@ -217,7 +224,8 @@ export default function UserAnalytics() {
           comments: 3498,
         },
         {
-          id: 4,
+          num: 4,
+          id:"NFBU@EIF)#femi2",
           title: "The White House is the official residence for the President",
           date: "28-02-2023",
           views: 876753,
@@ -238,6 +246,7 @@ export default function UserAnalytics() {
       // Top posts (content performance)
       setTopPosts([
         {
+          num:1,
           id: "p1",
           title: "Epic Sunrise Timelapse",
           views: 1200000,
@@ -245,6 +254,7 @@ export default function UserAnalytics() {
           engagement: 9.2,
         },
         {
+          num:2,
           id: "p2",
           title: "Street Food Tour",
           views: 840000,
@@ -252,6 +262,7 @@ export default function UserAnalytics() {
           engagement: 7.1,
         },
         {
+          num:3,
           id: "p3",
           title: "DIY Home Gym Setup",
           views: 610000,
@@ -313,21 +324,12 @@ export default function UserAnalytics() {
           <Line
             type="monotone"
             dataKey="value"
-            stroke="#FF7A59"
+            stroke="#F0b100"
             strokeWidth={2}
             dot={false}
           />
         </LineChart>
       </ResponsiveContainer>
-    );
-  }
-
-  // for loading...
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex text-center text-md font-semibold text-gray-600">
-        Loading analytics...
-      </div>
     );
   }
 
@@ -337,8 +339,23 @@ export default function UserAnalytics() {
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-4">
-          <div>
-            <h1 className="text-2xl font-semibold">Dashboard</h1>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-semibold flex flex-row items-center gap-1.5"><MdSpaceDashboard /><span>Dashboard</span></h1>
+            <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+              <div className="group relative inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-black/80 backdrop-blur-sm border border-gray-200/80 dark:border-gray-700/80 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5">
+                <User className="w-4 h-4 text-gray-700 dark:text-gray-300 flex-shrink-0" />
+                <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px]">{Account.name}</span>
+              </div>
+              <Link 
+                href={`/${Account.decodedHandle}`} 
+                className="group relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
+              >
+                  <span>{Account.decodedHandle}</span>
+                <svg className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </Link>
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Analytics snapshot for your account — last {timeRange.label}
             </p>
@@ -354,36 +371,15 @@ export default function UserAnalytics() {
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-600 rounded-md p-2">
+              {timeArray.map((timeobj,index) => (
               <button
-                onClick={() => setTimeRange({value:"7d", label:"7 days"})}
-                className={clsx("px-3 py-1 text-sm rounded cursor-pointer font-semibold hover:bg-gray-100 dark:hover:bg-gray-900", timeRange.value === "7d" ? "dark:bg-blue-500 bg-yellow-400 dark:text-white" : "text-gray-700 dark:text-gray-300")}
+                key={ index+1 }
+                onClick={() => setTimeRange(timeobj)}
+                className={clsx("px-3 py-1 text-sm rounded cursor-pointer font-semibold hover:bg-gray-100 dark:hover:bg-gray-900", timeRange.value === timeobj.value ? "dark:bg-yellow-500 bg-yellow-400 dark:text-white" : "text-gray-700 dark:text-gray-300")}
               >
-                7d
+                {timeobj.value}
               </button>
-              <button
-                onClick={() => setTimeRange({value:"30d", label:"30 days"})}
-                className={clsx("px-3 py-1 text-sm rounded cursor-pointer font-semibold hover:bg-gray-100 dark:hover:bg-gray-900", timeRange.value === "30d" ? "dark:bg-blue-500 bg-yellow-400 dark:text-white" : "text-gray-700 dark:text-gray-300")}
-              >
-                30d
-              </button>
-              <button
-                onClick={() => setTimeRange({value:"90d", label:"90 days"})}
-                className={clsx("px-3 py-1 text-sm rounded cursor-pointer font-semibold hover:bg-gray-100 dark:hover:bg-gray-900", timeRange.value === "90d" ? "dark:bg-blue-500 bg-yellow-400 dark:text-white" : "text-gray-700 dark:text-gray-300")}
-              >
-                90d
-              </button>
-              <button
-                onClick={() => setTimeRange({value:"1y", label:"1 year"})}
-                className={clsx("px-3 py-1 text-sm rounded cursor-pointer font-semibold hover:bg-gray-100 dark:hover:bg-gray-900", timeRange.value === "1y" ? "dark:bg-blue-500 bg-yellow-400 dark:text-white" : "text-gray-700 dark:text-gray-300")}
-              >
-                1y
-              </button>
-              <button
-                onClick={() => setTimeRange({value:"2y", label:"2 years"})}
-                className={clsx("px-3 py-1 text-sm rounded cursor-pointer font-semibold hover:bg-gray-100 dark:hover:bg-gray-900", timeRange.value === "2y" ? "dark:bg-blue-500 bg-yellow-400 dark:text-white" : "text-gray-700 dark:text-gray-300")}
-              >
-                2y
-              </button>
+              ))}
             </div>
           </div>
         </div>
@@ -398,28 +394,28 @@ export default function UserAnalytics() {
                 title="Followers"
                 value={fmt(overview.followers)}
                 delta="+2.1%" // this rate change will come from backend... 
-                icon={<FiUsers />}
+                icon={<FiUsers className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800"
               />
               <StatCard
                 title="Likes"
                 value={fmt(overview.likes)}
                 delta="+23.5%"
-                icon={<FiHeart />}
+                icon={<FiHeart className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800"
               />
               <StatCard
                 title="Comments"
                 value={fmt(overview.comments)}
                 delta="-12.4%"
-                icon={<FiMessageCircle />}
+                icon={<FiMessageCircle className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800"
               />
               <StatCard
                 title="Engagement"
                 value={`${overview.engagementRate}%`}
                 delta="+1.4%"
-                icon={<HiOutlineSparkles />}
+                icon={<HiOutlineSparkles className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800"
               />
             </div>
@@ -432,7 +428,7 @@ export default function UserAnalytics() {
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Overview of traffic and reach</p>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <Customdropdown selectedValue={timeRange} onChange={setTimeRange} options={timeArray}/>
+                  <Customdropdown options={timeArray} selectedValue={timeRange} onChange={(newTimeRange) => setTimeRange(newTimeRange)} />
                 </div>
               </div>
 
@@ -441,15 +437,15 @@ export default function UserAnalytics() {
                   <LineChart data={visitorSeries}>
                     <defs>
                       <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="#FF7A59" stopOpacity={0.12} />
-                        <stop offset="100%" stopColor="#FF7A59" stopOpacity={0} />
+                        <stop offset="0%" stopColor="#F0b100" stopOpacity={0.12} />
+                        <stop offset="100%" stopColor="#F0b100" stopOpacity={0} />
                       </linearGradient>
                     </defs>
 
                     <XAxis dataKey="name" tick={{ fill: tickColor }} />
                     <YAxis tick={{ fill: tickColor }} />
                     <Tooltip content={CustomTooltip} />
-                    <Line type="monotone" dataKey="visitors" stroke="#FF7A59" strokeWidth={2} dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="visitors" stroke="#F0b100" strokeWidth={2} dot={{ r: 3 }} />
                     <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" vertical={false} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -480,97 +476,86 @@ export default function UserAnalytics() {
               </div>
             </div>
 
-            {/* Recent Uploads + Advanced breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Recent Uploads  */}
+            <div className="w-full rounded-2xl">
               {/* Recent Uploads Table */}
-              <div className="lg:col-span-2 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">Recent Upload</h3>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Latest posts and metrics</div>
+              <div className="w-full bg-white/80 dark:bg-black/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-3">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b rounded-lg border-gray-200/50 dark:border-gray-700/50">
+                  <div className="p-2 bg-yellow-100 dark:bg-gray-950 rounded-xl">
+                    <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Recent Uploads</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Latest posts and performance metrics</p>
+                  </div>
                 </div>
 
-                <div className="mt-4">
-                  <table className="w-full text-left text-sm">
+                <div className="overflow-hidden rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-b from-white/50 to-gray-50/50 dark:from-black/50 dark:to-gray-900/50">
+                  <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-gray-600 dark:text-gray-400 text-xs">
-                        <th className="py-2">Name</th>
-                        <th className="py-2">Date</th>
-                        <th className="py-2">Views</th>
-                        <th className="py-2">Likes</th>
-                        <th className="py-2">Comments</th>
+                      <tr className="bg-gradient-to-r from-gray-50/70 to-gray-100/70 dark:from-gray-900/70 dark:to-gray-800/70 backdrop-blur-sm sticky top-0 z-10">
+                        <th className="py-4 pl-6 pr-4 font-semibold text-gray-700 dark:text-gray-300 text-left">Post</th>
+                        <th className="py-4 px-3 font-semibold text-gray-700 dark:text-gray-300 text-left whitespace-nowrap">Date</th>
+                        <th className="py-4 px-4 font-semibold text-gray-700 dark:text-gray-300 text-center whitespace-nowrap">Views</th>
+                        <th className="py-4 px-4 font-semibold text-gray-700 dark:text-gray-300 text-center whitespace-nowrap">Likes</th>
+                        <th className="py-4 pr-6 pl-4 font-semibold text-gray-700 dark:text-gray-300 text-center whitespace-nowrap">Comments</th>
                       </tr>
                     </thead>
                     <tbody>
                       {recentUploads.map((r) => (
-                        <tr key={r.id} className="border-t border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950">
-                          <td className="py-3 pr-4">
-                            <div className="text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100">{r.title}</div>
+                       <tr onClick={() => router.push(`/${Account.decodedHandle}/post/${r.id}?section=Comments`)} className={`border-b cursor-pointer rounded border-gray-100/50 dark:border-gray-800/50 hover:bg-yellow-50 dark:hover:bg-gray-950`} >
+                          <td className="py-4 pl-6 pr-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-yellow-400 dark:bg-gray-950 rounded-xl shadow-md flex items-center justify-center flex-shrink-0">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm leading-tight line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{r.title}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">Post {r.num}</div>
+                              </div>
+                            </div>
                           </td>
-                          <td className="py-3 text-gray-900 dark:text-gray-100">{r.date}</td>
-                          <td className="py-4 text-gray-900 dark:text-gray-100">{fmt(r.views)}</td>
-                          <td className="py-4 text-gray-900 dark:text-gray-100">{fmt(r.likes)}</td>
-                          <td className="py-4 text-gray-900 dark:text-gray-100">{fmt(r.comments)}</td>
+                          <td className="py-4 px-3">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{r.date}</div>
+                          </td>
+                          <td className="py-3">
+                            <div className="mx-auto w-20 py-1 px-4 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg justify-center text-center group-hover:bg-blue-100/70 dark:group-hover:bg-blue-900/40">
+                              <div className="font-bold text-sm text-blue-700 dark:text-blue-300">{fmt(r.views)}</div>
+                              <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">views</div>
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            <div className="mx-auto w-16 py-1 px-4 bg-emerald-50/50 dark:bg-emerald-900/20 rounded-lg justify-center text-center group-hover:bg-emerald-100/70 dark:group-hover:bg-emerald-900/40">
+                              <div className="font-bold text-sm text-emerald-700 dark:text-emerald-300">{fmt(r.likes)}</div>
+                              <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">likes</div>
+                            </div>
+                          </td>
+                          <td className="py-3 pr-6 pl-4">
+                            <div className="mx-auto w-20 py-1 px-4 bg-purple-50/50 dark:bg-purple-900/20 rounded-lg justify-center text-center group-hover:bg-purple-100/70 dark:group-hover:bg-purple-900/40">
+                              <div className="font-bold text-sm text-purple-700 dark:text-purple-300">{fmt(r.comments)}</div>
+                              <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">comments</div>
+                            </div>
+                          </td>
                         </tr>
+                        // </Link>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              </div>
 
-              {/* Advanced analytics card */}
-              <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-                <h3 className="font-semibold">Advanced Analytics</h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Professional insights and breakdowns</p>
-
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Engagement Rate</div>
-                      <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">{overview.engagementRate}%</div>
-                    </div>
-                    <div className="text-sm font-semibold text-green-400 flex items-center gap-1">
-                      <FiArrowUp /> 1.4%
-                    </div>
+                {recentUploads.length === 0 && (
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <svg className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">No recent uploads</p>
+                    <p className="text-sm">Your latest posts will appear here</p>
                   </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Avg Watch Time</div>
-                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">00:02:34</div>
-                    </div>
-                    <div className="text-sm font-semibold text-red-400 flex items-center gap-1">
-                      <FiArrowDown /> 0.6%
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">Top Performing Countries</div>
-                    <ul className="mt-2 text-sm space-y-1">
-                      {topCountries.map((c, idx) => (
-                        <li key={c.country} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full" style={{ background: COLORS[idx % COLORS.length] }} />
-                            <span className="text-gray-900 dark:text-gray-100">{c.country}</span>
-                          </div>
-                          <div className="text-gray-600 dark:text-gray-400">{c.percent}%</div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">Interaction Types</div>
-                    <div className="mt-2">
-                      <ResponsiveContainer width="100%" height={120}>
-                        <BarChart data={interactionTypes}>
-                          <XAxis dataKey="name" tick={{ fill: tickColor, fontSize: 12 }} />
-                          <Tooltip content={CustomTooltip} />
-                          <Bar dataKey="value" fill={theme === 'dark' ? '#ffffff' : '#000000'} barSize={20} radius={[3, 3, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -700,8 +685,8 @@ export default function UserAnalytics() {
 
             {/* Export / Quick actions */}
             <div className="bg-white dark:bg-black border border-gray-200 flex flex-col gap-2 dark:border-gray-700 rounded-xl p-3">
-              <div className="text-xs text-gray-600 dark:text-gray-400">Updated just now</div>
-              <div className="flex flex-col gap-3 p-2 rounded-lg">
+              <div className="text-xs text-gray-600 dark:text-gray-400 flex flex-row gap-1"><MdImportExport size={20} /><span>Export analytics for other usecases</span></div>
+              <div className="grid grid-cols-2 gap-10 p-2 rounded-lg">
                 <button className="bg-gradient-to-r from-[#7CC6FF] to-[#7CC6FF] hover:from-[#7CC6FF] hover:to-[#5A9FFF] dark:text-black text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer w-fit">Export CSV</button>
                 <button className="bg-gradient-to-r from-[#4EE1A0] to-[#4EE1A0] hover:from-[#4EE1A0] hover:to-[#3BCF8A] dark:text-black text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer w-fit">Export PNG</button>
                 <button className="bg-gradient-to-r from-[#FF7A59] to-[#FF7A59] hover:from-[#FF7A59] hover:to-[#FF6347] dark:text-black text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer w-fit">Share Report</button>
@@ -712,7 +697,7 @@ export default function UserAnalytics() {
         </div>
 
         {/* some more advance section */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="m-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
             <h4 className="font-semibold">Audience Interests</h4>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Top interests derived from engagement</p>
@@ -732,15 +717,41 @@ export default function UserAnalytics() {
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={160}>
                 <BarChart
-                  data={[
-                    { format: "Video", value: 62 },
-                    { format: "Image", value: 28 },
-                    { format: "Carousel", value: 10 },
-                  ]}
+                  data={interactionTypes}
+                  barCategoryGap={20}
+                  margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
                 >
-                  <XAxis dataKey="format" tick={{ fill: tickColor }} />
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" className="dark:stroke-gray-800" />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fill: tickColor, fontSize: 12, textAnchor: 'end' }}
+                    height={60}
+                  />
+                  <YAxis 
+                    tick={{ fill: tickColor, fontSize: 11 }}
+                    tickFormatter={(value) => `${value}%`}
+                  />
                   <Tooltip content={CustomTooltip} />
-                  <Bar dataKey="value" fill={theme === 'dark' ? '#ffffff' : '#000000'} radius={[6, 6, 0, 0]} />
+                  <Legend />
+                  {interactionTypes.map((entry, index) => (
+                    <Bar
+                      key={`bar-${index}`}
+                      dataKey="value"
+                      fill={`url(#color${index})`}
+                      radius={[6, 6, 0, 0]}
+                      barSize={30}
+                      isAnimationActive={true}
+                      animationDuration={800}
+                    />
+                  ))}
+                  <defs>
+                    {COLORS.map((color, index) => (
+                      <linearGradient key={`color${index}`} id={`color${index}`} x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity={0.85}/>
+                        <stop offset="100%" stopColor={color} stopOpacity={0.25}/>
+                      </linearGradient>
+                    ))}
+                  </defs>
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -757,13 +768,67 @@ export default function UserAnalytics() {
             </div>
           </div>
         </div>
+        {/* Advance anlytics card... */}
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                <h3 className="font-semibold">Advanced Analytics</h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Professional insights and breakdowns</p>
+
+                <div className="mt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">Engagement Rate</div>
+                      <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">{overview.engagementRate}%</div>
+                    </div>
+                    <div className="text-sm font-semibold text-green-400 flex items-center gap-1">
+                      <FiArrowUp /> 1.4%
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">Avg Watch Time</div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">00:02:34</div>
+                    </div>
+                    <div className="text-sm font-semibold text-red-400 flex items-center gap-1">
+                      <FiArrowDown /> 0.6%
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Top Performing Countries</div>
+                    <ul className="mt-2 text-sm space-y-1">
+                      {topCountries.map((c, idx) => (
+                        <li key={c.country} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full" style={{ background: COLORS[idx % COLORS.length] }} />
+                            <span className="text-gray-900 dark:text-gray-100">{c.country}</span>
+                          </div>
+                          <div className="text-gray-600 dark:text-gray-400">{c.percent}%</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Interaction Types</div>
+                    <div className="mt-2">
+                      <ResponsiveContainer width="100%" height={120}>
+                        <BarChart data={interactionTypes}>
+                          <XAxis dataKey="name" tick={{ fill: tickColor, fontSize: 12 }} />
+                          <Tooltip content={CustomTooltip} />
+                          <Bar dataKey="value" fill={theme === 'dark' ? '#ffffff' : '#000000'} barSize={20} radius={[3, 3, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </div>
       </div>
     </div>
   );
 }
 
 // some sub components... 
-
 interface StatCardProps {
   title: string;
   value: string;
@@ -774,18 +839,18 @@ interface StatCardProps {
 
 function StatCard({ title, value, delta, icon, colorClass }: StatCardProps) {
   return (
-    <div className={`rounded-lg p-3 ${colorClass} text-gray-900 dark:text-gray-100 shadow-lg dark:shadow-gray-900 border-none cursor-pointer hover:scale-105 transition-transform`}>
+    <div className={`rounded-lg p-3 ${colorClass} text-gray-900 dark:text-gray-100 shadow-lg dark:shadow-gray-900 border-none cursor-pointer group hover:scale-105 transition-transform`}>
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs text-gray-700 dark:text-gray-400">{title}</div>
           <div className="text-xl font-semibold mt-1">{value}</div>
         </div>
-        <div className="text-2xl opacity-90">{icon}</div>
+        <div className="text-2xl">{icon}</div>
       </div>
 
       <div className="mt-3 flex items-center justify-between">
         <div className="text-xs text-gray-600 dark:text-gray-400">From last 7 days</div>
-        <div className="text-sm text-gray-700 dark:text-gray-300">{delta}</div>
+        <div className="text-sm font-semibold">{delta}</div>
       </div>
     </div>
   );

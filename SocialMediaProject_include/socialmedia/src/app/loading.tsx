@@ -11,9 +11,6 @@ export default function Loading() {
           className="w-20 h-20 animate-pulse rounded-full dark:invert"
           alt="logo"
         />
-        <p className="text-lg font-medium text-gray-600 dark:text-gray-400 animate-pulse">
-          Loading...
-        </p>
       </div>
     </div>
   );

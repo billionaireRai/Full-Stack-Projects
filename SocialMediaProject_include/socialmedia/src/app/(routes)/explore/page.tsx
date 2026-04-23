@@ -168,7 +168,7 @@ export default function explore() {
         { rank: 4, region: "Europe", tag: "#AirbusTransfer", posts: 67776 },
         { rank: 5, region: "India", tag: "#10DayMBA", posts: 80385 }
       ]);
-      
+
       const [newsData, setnewsData] = useState<newsCardType[]>([
         {
           source: "CNN",
@@ -176,17 +176,17 @@ export default function explore() {
           gradient: 'from-blue-500 via-purple-500 to-indigo-600',
           title: `Major Breaking News from ${Account.account?.location.text}...`,
           timeAgo: "about 12hr",
-          location: "Breaking-News",
-          href: `/news?n=${encodeURIComponent(`Major-Breaking-News-from-${Account.account?.location.text}`)}&cat=${(Account.account?.location.text)}-News&utm_source=news-click`
+          location: "Politics",
+          href: `/news?n=${encodeURIComponent(`Major-Breaking-News-from-politics&cat=politics&utm_source=news-click`)}`
         },
         {
           source: "BBC",
-          category: "World News",
+          category: "Sports News",
           gradient: 'from-black via-gray-900 to-white',
-          title: "Top Recent News Across World",
+          title: "Top Sports News Across World",
           timeAgo: "about 12hr",
-          location: "Global",
-          href: `/news?n=${encodeURIComponent('Top-Recent-News-Across-World')}&cat=World-News&utm_source=news-click`
+          location: "Sports",
+          href: `/news?n=${encodeURIComponent('Top-Sports-News-Across-World')}&cat=sports&utm_source=news-click`
         },
         {
           source: "TG",
@@ -194,8 +194,8 @@ export default function explore() {
           gradient: 'from-red-500 via-orange-500 to-yellow-600',
           title: "Technology revolution & innovation with AI",
           timeAgo: "about 12hr",
-          location: "Tech & future",
-          href: `/news?n=${encodeURIComponent('Technology-revolution-and-innovation-with-AI')}&cat=Technology&utm_source=news-click`
+          location: "Technology",
+          href: `/news?n=${encodeURIComponent('Technology-revolution-and-innovation-with-AI')}&cat=technology&utm_source=news-click`
         },
         {
           source: "TWP",
@@ -203,8 +203,8 @@ export default function explore() {
           gradient: 'from-green-500 via-green-300 to-white',
           title: "News about entertainment industry around world",
           timeAgo: "about 12hr",
-          location: "Entertainment & Fun",
-          href: `/news?n=${encodeURIComponent('News-About-Entertainment-Industry-Around-World')}&cat=Entertainment-News&utm_source=news-click`
+          location: "Entertainment",
+          href: `/news?n=${encodeURIComponent('News-About-Entertainment-Industry-Around-World')}&cat=entertainment&utm_source=news-click`
         },
         {
           source: "ABP",
@@ -212,8 +212,8 @@ export default function explore() {
           gradient: 'from-blue-500 via-blue-300 to-white',
           title: "Updates about crypto market & exchanges",
           timeAgo: "about 12hr",
-          location: "Crypto Market",
-          href: `/news?n=${encodeURIComponent('Updates-About-Crypto-Market-And-Exchanges')}&cat=Crypto-Market-News&utm_source=news-click`
+          location: "Business",
+          href: `/news?n=${encodeURIComponent('Updates-About-Crypto-Market-And-Exchanges')}&cat=business&utm_source=news-click`
         }
       ]);
 

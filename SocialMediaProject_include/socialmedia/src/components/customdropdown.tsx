@@ -57,8 +57,8 @@ export default function CustomDropdown({ selectedValue, onChange, options }: Cus
             <div
               key={option.value}
               onClick={() => handleSelect(option)}
-              className={`px-4 py-2 cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors duration-150 ${
-                selectedValue.value === option.value ? 'dark:bg-blue-900 bg-yellow-300 text-yellow-600 dark:text-blue-300' : 'text-gray-900 dark:text-gray-100'
+              className={`px-4 py-2 cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-black transition-colors duration-150 ${
+                selectedValue.value === option.value ? 'dark:bg-gray-950 bg-yellow-300 text-yellow-600 dark:text-blue-300' : 'text-gray-900 dark:text-gray-100'
               }`}
             >
               {option.label}

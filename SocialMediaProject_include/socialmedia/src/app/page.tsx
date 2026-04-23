@@ -29,7 +29,7 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="border-none fixed top-0 p-0 dark:bg-black border-black w-screen h-screen flex flex-col overflow-y-auto">
+      <div className="border-none lg:-ml-72 fixed top-0 p-0 dark:bg-black border-black w-screen h-screen flex flex-col overflow-y-auto">
         {/* themetoggler section */}
         {mounted && (
           <div className="themetoggler border-none flex items-center justify-end">

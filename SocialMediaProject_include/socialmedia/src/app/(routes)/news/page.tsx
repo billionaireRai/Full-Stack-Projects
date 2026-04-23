@@ -45,117 +45,16 @@ export default function Newspage() {
   const searchQuery = searchParams.get('n') || '';
   const category = searchParams.get('cat') || '';
   const [loading, setloading] = useState<boolean>(false);
-  const [articles, setArticles] = useState<NewsArticle[]>([]);
-
-// Sample data - 6 random news articles for testing
-const sampleArticles: NewsArticle[] = [
-  {
-    title: "Breaking: AI Breakthrough Achieves Human-Level Reasoning",
-    link: "https://example.com/ai-breakthrough-2024",
-    pubDate: "2024-10-15T10:30:00Z",
-    source_id: "TechCrunch",
-    creator: ["Dr. Elena Vasquez"],
-    description: "Researchers unveil AGI model that solves complex problems indistinguishable from human cognition.",
-    content: "In a landmark announcement, the AI Research Institute has demonstrated a system capable of...",
-    image_url: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
-    category: ["Technology", "AI"],
-    country: ["USA"],
-    language: "en",
-    keywords: ["AI", "AGI", "breakthrough", "artificial intelligence"],
-    sentiment: "positive",
-    sentiment_stats: { positive: 0.85, negative: 0.05, neutral: 0.10 }
-  },
-  {
-    title: "Global Markets Surge After US Fed Rate Cut Decision",
-    link: "https://example.com/fed-rate-cut-markets",
-    pubDate: "2024-10-15T09:15:00Z",
-    source_id: "Bloomberg",
-    creator: ["Financial Desk"],
-    description: "Dow Jones up 2.5%, Nasdaq climbs 3.1% as investors celebrate unexpected 50bps cut.",
-    content: "Wall Street erupted in cheers as the Federal Reserve delivered a larger-than-expected...",
-    image_url: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&h=400&fit=crop",
-    category: ["Finance", "Economy"],
-    country: ["USA"],
-    language: "en",
-    keywords: ["Fed", "rate cut", "stocks", "markets"],
-    sentiment: "positive",
-    sentiment_stats: { positive: 0.78, negative: 0.12, neutral: 0.10 }
-  },
-  {
-    title: "Climate Summit Ends Without Binding Emissions Targets",
-    link: "https://example.com/climate-summit-failure",
-    pubDate: "2024-10-15T08:45:00Z",
-    source_id: "The Guardian",
-    creator: ["Climate Editor"],
-    description: "COP29 concludes with vague promises but no concrete commitments from major polluters.",
-    content: "Environmental groups expressed deep disappointment as world leaders failed to agree on...",
-    image_url: "https://images.unsplash.com/photo-1558618047-3c8c76bbb17e?w=800&h=400&fit=crop",
-    category: ["Environment", "Politics"],
-    country: ["Global"],
-    language: "en",
-    keywords: ["climate", "COP29", "emissions", "environment"],
-    sentiment: "negative",
-    sentiment_stats: { positive: 0.10, negative: 0.80, neutral: 0.10 }
-  },
-  {
-    title: "New Quantum Chip Promises Revolution in Computing Power",
-    link: "https://example.com/quantum-chip-revolution",
-    pubDate: "2024-10-15T07:20:00Z",
-    source_id: "Wired",
-    creator: ["Tech Correspondent"],
-    description: "Google's latest quantum processor achieves error-corrected computation for first time.",
-    content: "The era of practical quantum computing may have arrived with Google's breakthrough...",
-    image_url: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=400&fit=crop",
-    category: ["Technology", "Quantum"],
-    country: ["USA"],
-    language: "en",
-    keywords: ["quantum", "computing", "Google", "chip"],
-    sentiment: "positive",
-    sentiment_stats: { positive: 0.82, negative: 0.08, neutral: 0.10 }
-  },
-  {
-    title: "SpaceX Starship Test Flight Explodes Mid-Air",
-    link: "https://example.com/starship-explosion",
-    pubDate: "2024-10-15T06:10:00Z",
-    source_id: "Space.com",
-    creator: ["Elon Musk Updates"],
-    description: "Latest prototype disintegrates 2 minutes into flight, marking 4th failure this year.",
-    content: "Live streams captured the dramatic fireball as SpaceX's massive rocket suffered another...",
-    image_url: "https://images.unsplash.com/photo-1568500216-2883ca8c7b3f?w=800&h=400&fit=crop",
-    video_url: "https://example.com/starship-explosion-video",
-    category: ["Space", "Technology"],
-    country: ["USA"],
-    language: "en",
-    keywords: ["SpaceX", "Starship", "explosion", "rocket"],
-    sentiment: "negative",
-    sentiment_stats: { positive: 0.15, negative: 0.75, neutral: 0.10 }
-  },
-  {
-    title: "EU Regulators Approve World's First Gene-Edited Baby Policy",
-    link: "https://example.com/eu-gene-editing-babies",
-    pubDate: "2024-10-15T05:30:00Z",
-    source_id: "BBC News",
-    creator: ["Science Team"],
-    description: "Controversial framework allows limited CRISPR applications in human embryos.",
-    content: "European lawmakers have greenlit the most progressive genetic engineering policy...",
-    image_url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop",
-    category: ["Science", "Ethics", "Health"],
-    country: ["EU"],
-    language: "en",
-    keywords: ["CRISPR", "gene editing", "babies", "EU"],
-    sentiment: "neutral",
-    sentiment_stats: { positive: 0.40, negative: 0.35, neutral: 0.25 }
-  }];
-
+  
   const [nextPageToken, setNextPageToken] = useState<string>(''); 
   const [currentArticlesPage, setCurrentArticlesPage] = useState(1); 
-  const articlesPerPage:number = 12;
-
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  
   // function for getting news data...
   async function getNewsDataFromApi() {
     try {
       setloading(true);
-      const newsApi = await axiosInstance.post('/api/news',{ title:searchQuery , page:nextPageToken || '' , category });
+      const newsApi = await axiosInstance.post('/api/news',{ title:searchQuery , page:nextPageToken || '' , category },{ timeout:5000 });
       if (newsApi.status === 200) {
         const apidata : NewsResponse =  newsApi.data;
         if (newsApi.status === 200) {
@@ -175,7 +74,7 @@ const sampleArticles: NewsArticle[] = [
   }
 
   useEffect(() => {
-    getNewsDataFromApi();
+    // getNewsDataFromApi();
   }, [searchQuery, category]);
   
   // for converting date in common pattern...
@@ -203,7 +102,7 @@ const getSentimentColor = (sentiment?: string) => {
   return (
   <div className="h-screen bg-white dark:bg-black relative flex flex-col overflow-hidden">
       {/* Header Section */}
-      <div className="bg-white dark:bg-black shadow-md sticky top-0 z-50 rounded-md">
+      <div className="bg-white dark:bg-black shadow-md sticky top-0 rounded-md">
         <div className="w-full mx-auto p-4">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-1 flex-1">
@@ -256,7 +155,7 @@ const getSentimentColor = (sentiment?: string) => {
         ) : (
           <>
             {articles.length === 0 ? (
-              <div className="text-center text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-950 flex flex-col items-center justify-center gap-2 h-1/4 rounded-lg">
+              <div className="text-center h-full text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-950 flex flex-col items-center justify-center gap-2 rounded-lg">
                 <div className='flex items-center justify-center gap-2'>
                   <AlertCircle className="w-16 h-16" />
                   <p className="text-lg">No articles found. Try a different News title.</p>
@@ -355,7 +254,7 @@ const getSentimentColor = (sentiment?: string) => {
                     <button
                       onClick={() => { getNewsDataFromApi() }}
                       disabled={!nextPageToken}
-                      className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-950 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl hover:bg-yellow-50 hover:border-yellow-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-black text-white dark:bg-gray-950 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <ArrowDown className="w-4 h-4" />
                       <span>Load More</span>

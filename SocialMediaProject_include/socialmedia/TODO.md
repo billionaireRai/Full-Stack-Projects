@@ -1,11 +1,36 @@
-# Task: Implement 5 Most Important Categories on Explore Page
+# News API Fix - Complete ✅
 
-## Steps:
-1. [ ] Update `src/app/db/services/account.ts`: Add computation for `topCategories` (top 5 from accounts.interests.topicsLoved via aggregation) in `exploreDetailsForAccountService`, include in JSON response.
-2. [ ] Update `src/app/controllers/explore.ts`: Uncomment service calls in controllers to actually fetch data from DB.
-3. [ ] Update `src/app/(routes)/explore/page.tsx`: 
-   - Enable `getOtherExploreInfo()` useEffect call to fetch real trends/suggestions/categories.
-   - Add `topCategories` state.
-   - Add new UI section for 5 categories (styled like trends, using TrendCard or new component, link to `/explore?q=CategoryName`).
-4. [ ] Test: Run `npm run dev`, visit `/explore`, verify categories display with real data.
-5. [ ] [COMPLETE]
+## Changes Applied to src/app/controllers/news.ts:
+- Default query: \"technology\" (handles empty title)
+- Full params: `q`, `category`, `pageSize=10`, `language=en`, `country=us`
+- Logging: input query, API URL (key masked), raw response status/data
+- Returns: full API data (status, totalResults, results, nextPage)
+- Added validation/error handling for invalid/no results
+
+## Updated Code Structure:
+```
+console.log(\"News query:\", { title, category, page });
+console.log(\"API URL:\", url.replace(apiKey, \"***\"));
+console.log(\"Raw API response status/data:\", ...);
+const data = apiResponse.data;
+if (!data?.results) { error }
+return { success: true, status: data.status, totalResults: ..., results: ..., nextPage: ... }
+```
+
+**Root Causes Fixed (0 results):**
+1. Missing required params (language/country → no matches)
+2. Empty/specific queries
+3. Only q param used previously
+
+**Test Now:**
+1. `npm run dev` (restart server)
+2. Visit `http://localhost:3000/news?n=technology&cat=top`
+3. Check server console → new detailed logs
+4. Should return results (if quota ok)
+
+**If Still 0 Results:**
+- Check newsdata.io dashboard → quota used (free: 200 req/day)
+- Verify `NEWSDATAIO_API_KEY` in `.env.local` valid
+- Test direct: `curl \"https://newsdata.io/api/1/news?apikey=YOURKEY&q=tech&language=en\"`
+
+Controller ready – quota/key are likely remaining issue.

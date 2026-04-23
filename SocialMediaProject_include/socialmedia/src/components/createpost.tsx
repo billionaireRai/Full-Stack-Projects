@@ -278,7 +278,7 @@ export default function CreatePost() {
                 onChange={(e) => setPost(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                placeholder="What's happening?"
+                placeholder="what's happening guys ??"
                 rows={1}
                 className="w-full resize-none border-none outline-none text-xl text-gray-900 dark:text-white bg-transparent placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 min-h-[100px] max-h-[300px]"
               />
