@@ -208,9 +208,9 @@ export default function SideNavbar() {
                       ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
                        : ''
                   } 'flex flex-row items-center justify-center' `}
-                  href={`/${Account.decodedHandle}/user-analytics`}
+                  href={`/${Account.decodedHandle}/account-analytics`}
                 >
-                  <NavItem icon={<LayoutDashboard className={`${pathname === '/username/account-analytics' ? 'fill-black dark:fill-white' : ''}`} />} label="Dashboard" />
+                  <NavItem icon={<LayoutDashboard className={`${pathname === `/${Account.decodedHandle}/account-analytics` ? 'fill-black dark:fill-white' : ''}`} />} label="Dashboard" />
                 </Link>
                 <Link
                   className={`${

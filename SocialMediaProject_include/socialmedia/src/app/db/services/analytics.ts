@@ -263,3 +263,175 @@ export const getPostAnalyticsService = async ( postid :string , desiredInterval:
 
     return NextResponse.json({ message: "Metrics fetched successfully!", metric: metrics }, { status: 200 });
 }
+
+export const getProfileDashboardAnalyticsService = async (handle:string , pastTime:string ) => {
+  await connectWithMongoDB() ; // connecting with mongodb...
+
+  const user = await getDecodedDataFromCookie("accessToken");
+  if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    
+  const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+  if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+  if (handle.substring(1) !== activeAcc.username)  return NextResponse.json({ message:'Account handle mismatch !!' },{ status:200 }) ;
+  
+  
+}
+
+//     // overview of accounts (total interaction values...)
+// {
+//     followers: {
+//       value:54820803,
+//       rate:'+12.5%'
+//     },
+//     followings:{
+//       value:322,
+//       rate:'+0.1%'
+//     },
+//     likes: {
+//       value:26373493,
+//       rate:'+4.2%'
+//     } ,
+//     comments: {
+//       value:48938,
+//       rate:'-2.7%'
+//     } ,
+//     reposts:{
+//       value:421,
+//       rate:'+0.5%'
+//     },
+//     views: {
+//       value:42448203,
+//       rate:'+5.1%'
+//     },
+//     bookmarks:{
+//       value:105,
+//       rate:'+1.2%'
+//     }
+//   }
+
+//       // Visitor series for chart...
+//      [
+//         { name: "Jan", visitors: 22000 },
+//         { name: "Feb", visitors: 25000 },
+//         { name: "Mar", visitors: 32000 },
+//         { name: "Apr", visitors: 54000 },
+//         { name: "May", visitors: 37000 },
+//         { name: "Jun", visitors: 28000 },
+//         { name: "Jul", visitors: 66000 },
+//         { name: "Aug", visitors: 59000 },
+//         { name: "Sep", visitors: 42000 },
+//         { name: "Oct", visitors: 46000 },
+//         { name: "Nov", visitors: 48000 },
+//         { name: "Dec", visitors: 52000 },
+//       ];
+
+//       // Device breakdown
+//       [
+//         { name: "Desktop", value: 23 },
+//         { name: "Mobile", value: 44 },
+//         { name: "Tablet", value: 33 },
+//       ];
+
+//       // Gender breakdown for Profile Visitors
+//      [
+//         { name: "Male", value: 52 },
+//         { name: "Female", value: 44 },
+//         { name: "Other", value: 4 },
+//       ]
+
+//       // Recent uploads
+//       [
+//         {
+//           num: 1,
+//           id:"IBFI(@$HFE@_#(",
+//           title: "This incredible natural attraction is one of the must-visits",
+//           date: "22-02-2023",
+//           views: 837748,
+//           likes: 24467,
+//           comments: 2578,
+//         },
+//         {
+//           num: 2,
+//           id:"@(*RH@EF)_E)F",
+//           title: "The Skywalk, a glass leading out over the valley",
+//           date: "24-02-2023",
+//           views: 384753,
+//           likes: 87765,
+//           comments: 4766,
+//         },
+//         {
+//           num: 3,
+//           id:"NFD_@DEMIF$@",
+//           title: "Summer is the most popular time to visit these beaches",
+//           date: "26-02-2023",
+//           views: 296087,
+//           likes: 86298,
+//           comments: 3498,
+//         },
+//         {
+//           num: 4,
+//           id:"NFBU@EIF)#femi2",
+//           title: "The White House is the official residence for the President",
+//           date: "28-02-2023",
+//           views: 876753,
+//           likes: 98365,
+//           comments: 7876,
+//         },
+//       ]
+
+//       // Top countries
+//       [
+//         { country: "United States", percent: 34 },
+//         { country: "India", percent: 21 },
+//         { country: "Brazil", percent: 12 },
+//         { country: "UK", percent: 8 },
+//         { country: "Germany", percent: 5 },
+//       ];
+
+//       // Top posts (content performance)
+//         [{
+//           num:1,
+//           id: "p1",
+//           title: "Epic Sunrise Timelapse",
+//           views: 1200000,
+//           reach: 900000,
+//           engagement: 9.2,
+//         },
+//         {
+//           num:2,
+//           id: "p2",
+//           title: "Street Food Tour",
+//           views: 840000,
+//           reach: 600000,
+//           engagement: 7.1,
+//         },
+//         {
+//           num:3,
+//           id: "p3",
+//           title: "DIY Home Gym Setup",
+//           views: 610000,
+//           reach: 480000,
+//           engagement: 6.5,
+//         },  ]
+
+//       // Follower growth series (sparkline)
+//         [{ name: "Day 1", value: 120 },
+//         { name: "Day 2", value: 140 },
+//         { name: "Day 3", value: 180 },
+//         { name: "Day 4", value: 210 },
+//         { name: "Day 5", value: 260 },
+//         { name: "Day 6", value: 300 },
+//         { name: "Day 7", value: 350 }]
+
+//       // Interaction type breakdown
+//         [{ name: "Likes", value: 62 },
+//         { name: "Comments", value: 18 },
+//         { name: "Saves", value: 10 },
+//         { name: "Shares", value: 10 }]
+
+ // content performance breakdown
+    // { name: "Videos", value:32 },
+    // { name: "Images", value:41 },
+    // { name: "Gifs", value:10 },
+    // { name: "Mixed", value:2 }

@@ -35,14 +35,22 @@ import useActiveAccount from "@/app/states/useraccounts";
 import { clsx } from "clsx";
 import { useTheme } from "next-themes";
 import { MdImportExport, MdSpaceDashboard } from "react-icons/md";
-import { User } from "lucide-react";
+import { User, Loader2, Bookmark, UserRoundPlus, UserRoundMinus } from "lucide-react";
+import axiosInstance from "@/lib/interceptor";
 
 
+interface overViewData {
+  value:number;
+  rate:string;
+}
 interface Overview {
-  followers: number;
-  likes: number;
-  comments: number;
-  engagementRate: number;
+  followers: overViewData ;
+  followings:overViewData
+  likes: overViewData ;
+  comments: overViewData ;
+  reposts: overViewData ;
+  views: overViewData ;
+  bookmarks:overViewData;
 }
 
 interface VisitorSeriesItem {
@@ -89,19 +97,49 @@ interface InteractionTypeItem {
   value: number;
 }
 
-
+interface watchTimeType {
+  hour:string ;
+  min:string ;
+  sec:string ;
+  rate:string ;
+}
 
 // Custom Tooltip for Recharts with dark mode support
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 p-2 rounded shadow-md text-gray-900 dark:text-gray-100">
-        <p className="text-sm">{`${label}`}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {`${entry.dataKey}: ${entry.value}`}
+      <div className="relative overflow-hidden rounded-xl border border-gray-200/60 dark:border-gray-700/60 bg-white dark:bg-black backdrop-blur-sm shadow-xl shadow-gray-900/10 dark:shadow-black/30 p-3 min-w-[180px]">
+        {/* label header */}
+        <div className="flex items-center gap-2 mb-2.5 px-3 py-2 border-b rounded-lg border-gray-100 dark:border-gray-900">
+          <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+          <p className="text-xs font-semibold tracking-wide uppercase text-gray-500 dark:text-gray-400">
+            {label}
           </p>
-        ))}
+        </div>
+
+        {/* data rows */}
+        <div className="space-y-2">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2.5 h-2.5 rounded-full ring-4 ring-white dark:ring-gray-950"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
+                  {entry.dataKey}
+                </span>
+              </div>
+              <span
+                className="text-sm font-bold tabular-nums"
+                style={{ color: entry.color }}
+              >
+                {entry.value?.toLocaleString?.() ?? entry.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      
       </div>
     );
   }
@@ -111,91 +149,42 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function UserAnalytics() {
   // UI state
   const [timeRange, setTimeRange] = useState({ value:'7d',label:'7 days',priority:"1" });
-  const [loading, setLoading] = useState<boolean>(true); // used for loading animation...
-
-  // Analytics data states
-  const [overview, setOverview] = useState<Overview>({
-    followers: 0,
-    likes: 0,
-    comments: 0,
-    engagementRate: 0,
-  });
-
+  const [loading, setLoading] = useState<boolean>(false); // used for loading animation...
 
   const { Account } = useActiveAccount() ; // getting the logged in account...
   const router = useRouter() ; // initializing router hook...
-  const [visitorSeries, setVisitorSeries] = useState<VisitorSeriesItem[]>([]);
-  const [deviceBreakdown, setDeviceBreakdown] = useState<BreakdownItem[]>([]);
-  const [genderBreakdown, setGenderBreakdown] = useState<BreakdownItem[]>([]);
-  const [recentUploads, setRecentUploads] = useState<RecentUploadItem[]>([]);
-  const [topCountries, setTopCountries] = useState<TopCountryItem[]>([]);
-  const [topPosts, setTopPosts] = useState<TopPostItem[]>([]);
-  const [growthSeries, setGrowthSeries] = useState<GrowthSeriesItem[]>([]);
-  const [interactionTypes, setInteractionTypes] = useState<InteractionTypeItem[]>([]);
-  const [timeArray, settimeArray] = useState(
-    [{value:"7d",label:'7 days', priority:"1"},{value:"30d",label:'30 days', priority:"2"},{value:"90d",label:'90 days', priority:"3"},{value:"1y",label:'1 year', priority:"4"},{value:"2y",label:'2 years', priority:"5"}]
-  )
-
-  const { theme } = useTheme();
-  const tickColor = theme === 'dark' ? '#D1D5DB' : '#6B7280';
-  // up from here review 
-
-  // Colors used for charts for uniformity...
-  const COLORS = ["#FF7A59", "#4EE1A0", "#7CC6FF", "#FFD86B", "#B28DFF"];
-
-  // function for formating the number...
-  const fmt = (n: number): string => {
-    if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";  // 1e9 = 1 * math.pow(10,9) where e = 10 ;
-    if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
-    if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
-    return String(n); // number is in hundreds...
-  };
-
-  // useffect for loading data from backend logic...
-  useEffect(() => {
-    function simulateLoadData() {
-      // Mock dashboard overview ...
-      const ov = {
-        followers: 58378,
-        likes: 425365,
-        comments: 85245,
-        engagementRate: 4.6, // %
-      };
-      setOverview(ov); // updating the overview state...
-
-      // Visitor series for chart...
-      const months = [
-        { name: "Jan", visitors: 22000 },
-        { name: "Feb", visitors: 25000 },
-        { name: "Mar", visitors: 32000 },
-        { name: "Apr", visitors: 54000 },
-        { name: "May", visitors: 37000 },
-        { name: "Jun", visitors: 28000 },
-        { name: "Jul", visitors: 66000 },
-        { name: "Aug", visitors: 59000 },
-        { name: "Sep", visitors: 42000 },
-        { name: "Oct", visitors: 46000 },
-        { name: "Nov", visitors: 48000 },
-        { name: "Dec", visitors: 52000 },
-      ];
-      setVisitorSeries(months);
-
-      // Device breakdown
-      setDeviceBreakdown([
-        { name: "Desktop", value: 23 },
-        { name: "Mobile", value: 44 },
-        { name: "Tablet", value: 33 },
-      ]);
-
-      // Gender breakdown for Profile Visitors
-      setGenderBreakdown([
-        { name: "Male", value: 52 },
-        { name: "Female", value: 44 },
-        { name: "Other", value: 4 },
-      ]);
-
-      // Recent uploads
-      setRecentUploads([
+  const [watchTime, setwatchTime] = useState<watchTimeType>({
+    hour:'1',
+    min:'36',
+    sec:'10',
+    rate:'+4.4%'
+  })
+  const [visitorSeries, setVisitorSeries] = useState<VisitorSeriesItem[]>([
+    { name: "Jan", visitors: 22000 },
+    { name: "Feb", visitors: 25000 },
+    { name: "Mar", visitors: 32000 },
+    { name: "Apr", visitors: 54000 },
+    { name: "May", visitors: 37000 },
+    { name: "Jun", visitors: 28000 },
+    { name: "Jul", visitors: 66000 },
+    { name: "Aug", visitors: 59000 },
+    { name: "Sep", visitors: 42000 },
+    { name: "Oct", visitors: 46000 },
+    { name: "Nov", visitors: 48000 },
+    { name: "Dec", visitors: 52000 },
+  ]);
+  const [deviceBreakdown, setDeviceBreakdown] = useState<BreakdownItem[]>([
+    { name: "Desktop", value: 23 },
+    { name: "Mobile", value: 44 },
+    { name: "Tablet", value: 33 },
+  ]);
+  const [genderBreakdown, setGenderBreakdown] = useState<BreakdownItem[]>([
+    { name: "Male", value: 52 },
+    { name: "Female", value: 44 },
+    { name: "Other", value: 4 },
+  ]);
+  const [recentUploads, setRecentUploads] = useState<RecentUploadItem[]>(
+    [
         {
           num: 1,
           id:"IBFI(@$HFE@_#(",
@@ -232,20 +221,20 @@ export default function UserAnalytics() {
           likes: 98365,
           comments: 7876,
         },
-      ]);
-
-      // Top countries
-      setTopCountries([
+      ]
+  );
+  const [topCountries, setTopCountries] = useState<TopCountryItem[]>(
+     [
         { country: "United States", percent: 34 },
         { country: "India", percent: 21 },
         { country: "Brazil", percent: 12 },
         { country: "UK", percent: 8 },
         { country: "Germany", percent: 5 },
-      ]);
-
-      // Top posts (content performance)
-      setTopPosts([
-        {
+      ]
+  );
+  const [topPosts, setTopPosts] = useState<TopPostItem[]>(
+    [
+       {
           num:1,
           id: "p1",
           title: "Epic Sunrise Timelapse",
@@ -268,45 +257,119 @@ export default function UserAnalytics() {
           views: 610000,
           reach: 480000,
           engagement: 6.5,
-        },
-      ]);
+        },  
+    ]
+  );
+  const [growthSeries, setGrowthSeries] = useState<GrowthSeriesItem[]>( 
+    [
+      { name: "Day 1", value: 120 },
+      { name: "Day 2", value: 140 },
+      { name: "Day 3", value: 180 },
+      { name: "Day 4", value: 210 },
+      { name: "Day 5", value: 260 },
+      { name: "Day 6", value: 300 },
+      { name: "Day 7", value: 350 }
+    ]);
+  const [interactionTypes, setInteractionTypes] = useState<InteractionTypeItem[]>(
+    [ 
+      { name: "Likes", value: 62 },
+      { name: "Comments", value: 50 },
+      { name: "Saves", value: 5 },
+      { name: "Shares", value: 20 }
+    ]
+  );
+  const [contentPerformance, setContentPerformance] = useState<BreakdownItem[]>([
+    { name: "Videos", value:122 },
+    { name: "Images",  value:233 },
+    { name: "Gifs", value:10 },
+    { name: "Mixed", value:2 }
+  ]);
+  const [timeArray, settimeArray] = useState(
+    [{value:"7d",label:'7 days', priority:"1"},{value:"30d",label:'30 days', priority:"2"},{value:"90d",label:'90 days', priority:"3"},{value:"1y",label:'1 year', priority:"4"},{value:"2y",label:'2 years', priority:"5"}]
+  )
 
-      // Follower growth series (sparkline)
-      setGrowthSeries([
-        { name: "Day 1", value: 120 },
-        { name: "Day 2", value: 140 },
-        { name: "Day 3", value: 180 },
-        { name: "Day 4", value: 210 },
-        { name: "Day 5", value: 260 },
-        { name: "Day 6", value: 300 },
-        { name: "Day 7", value: 350 },
-      ]);
+  const { theme } = useTheme();
+  const tickColor = theme === 'dark' ? '#D1D5DB' : '#6B7280';
+  // up from here review 
 
-      // Interaction type breakdown
-      setInteractionTypes([
-        { name: "Likes", value: 62 },
-        { name: "Comments", value: 18 },
-        { name: "Saves", value: 10 },
-        { name: "Shares", value: 10 },
-      ]);
+  // Colors used for charts for uniformity...
+  const COLORS = ["#FF7A59", "#4EE1A0", "#7CC6FF", "#FFD86B", "#B28DFF"];
+
+  // Analytics data states
+  const [overview, setOverview] = useState<Overview>({
+    followers: {
+      value:54820803,
+      rate:'+12.5%'
+    },
+    followings:{
+      value:322,
+      rate:'+0.1%'
+    },
+    likes: {
+      value:26373493,
+      rate:'+4.2%'
+    } ,
+    comments: {
+      value:48938,
+      rate:'-2.7%'
+    } ,
+    reposts:{
+      value:421,
+      rate:'+0.5%'
+    },
+    views: {
+      value:42448203,
+      rate:'-2.1%'
+    },
+    bookmarks:{
+      value:105,
+      rate:'+1.2%'
+    }
+  });
+
+
+  // function for formating the number includes 10 % error...
+  const fmt = (n: number): string => {
+    if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";  // 1e9 = 1 * math.pow(10,9) where e = 10 ;
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
+    return String(n); // number is in hundreds...
+  };
+
+  // function to get analytics data...
+  async function functionToGetAnalytics() {
+     const analyticsApi = await axiosInstance.post('/api/dashboard',{ handle:Account.decodedHandle , pastTime:timeRange.value });
+     if (analyticsApi.status === 200) {
+      setOverview(analyticsApi.data.analytics.overview);
+      setVisitorSeries(analyticsApi.data.analytics.visitorseries);
+      setGenderBreakdown(analyticsApi.data.analytics.genderbreakdown);
+      setDeviceBreakdown(analyticsApi.data.analytics.devicebreakdown);
+      setRecentUploads(analyticsApi.data.analytics.recentuploads);
+      setTopCountries(analyticsApi.data.analytics.topcountries);
+      setTopPosts(analyticsApi.data.analytics.topposts);
+      setGrowthSeries(analyticsApi.data.analytics.growthseries);
+      setInteractionTypes(analyticsApi.data.analytics.interactiontypes);
+      setContentPerformance(analyticsApi.data.analytics.contentperformance);
+      
+     }
     }
 
-    // simulating network latency...
-    setLoading(true);
-    const t = setTimeout(() => {
-      simulateLoadData();
-      setLoading(false);
-    }, 1000);
+  // useffect for loading data from backend logic...
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     setLoading(true);
+  //     try {
+  //       await functionToGetAnalytics();
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+  //   // fetchData();
+  // }, [timeRange]);
 
-    return () => clearTimeout(t);
-  }, [timeRange]);
-
-  // API for advance analytics...
+  // logic for advance analytics...
   const kpis = useMemo(() => {
-    const avgDaily = Math.round(
-      visitorSeries.reduce((s, m) => s + (m.visitors || 0), 0) /
-        Math.max(visitorSeries.length, 1)
-    );
+    const avgDaily = Math.round(visitorSeries.reduce((s, m) => s + (m.visitors || 0), 0) / Math.max(visitorSeries.length, 1)); // total visitors per month...
     const topCountry = topCountries[0] || { country: "—", percent: 0 };
     const topPost = topPosts[0] || { title: "—", engagement: 0 };
     return {
@@ -331,6 +394,56 @@ export default function UserAnalytics() {
         </LineChart>
       </ResponsiveContainer>
     );
+  }
+
+  // loading section...
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white font-poppins p-4">
+        <div className="max-w-[1400px] mx-auto space-y-6">
+          {/* Header skeleton */}
+          <div className="flex items-center justify-between gap-4 animate-pulse">
+            <div className="space-y-3">
+              <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+              <div className="h-4 w-64 bg-gray-200 dark:bg-gray-800 rounded" />
+            </div>
+            <div className="h-10 w-32 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+          </div>
+
+          {/* Stats grid skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-28 bg-gray-100 dark:bg-gray-900 rounded-lg animate-pulse" />
+            ))}
+          </div>
+
+          <div className="flex flex-col items-center justify-center py-8 gap-3">
+            <Loader2 className="w-10 h-10 animate-spin rounded-full text-yellow-500" />
+          </div>
+
+          {/* Main content skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="h-80 bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse" />
+              <div className="h-64 bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse" />
+            </div>
+            <div className="space-y-4">
+              <div className="h-56 bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse" />
+              <div className="h-56 bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // function to return up/Down arrow icon...
+  function UpDownArrow(rateString:string) {
+    return (
+      <>
+      { parseFloat((rateString).substring(0,rateString.length -2)) > 0 ? <FiArrowUp /> : <FiArrowDown /> }
+      </>
+    )
   }
 
   return (
@@ -362,14 +475,6 @@ export default function UserAnalytics() {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-gray-50 dark:group-focus:bg-black dark:bg-gray-950 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 gap-2">
-              <FiSearch className="text-gray-500 dark:text-gray-400" />
-              <input
-                placeholder="Search posts, tags..."
-                className="rounded-md px-2 py-1 outline-none text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 w-56"
-              />
-            </div>
-
             <div className="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-600 rounded-md p-2">
               {timeArray.map((timeobj,index) => (
               <button
@@ -389,35 +494,57 @@ export default function UserAnalytics() {
           {/* left column */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             {/* Top stat cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <StatCard
-                title="Followers"
-                value={fmt(overview.followers)}
-                delta="+2.1%" // this rate change will come from backend... 
-                icon={<FiUsers className="group-hover:fill-black dark:group-hover:fill-white" />}
-                colorClass="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               <StatCard
                 title="Likes"
-                value={fmt(overview.likes)}
-                delta="+23.5%"
+                value={fmt(overview.likes.value)}
+                delta={overview.likes.rate}
                 icon={<FiHeart className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800"
               />
               <StatCard
                 title="Comments"
-                value={fmt(overview.comments)}
-                delta="-12.4%"
+                value={fmt(overview.comments.value)}
+                delta={overview.comments.rate}
                 icon={<FiMessageCircle className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800"
-              />
+                />
               <StatCard
-                title="Engagement"
-                value={`${overview.engagementRate}%`}
-                delta="+1.4%"
+                title="Reposts"
+                value={fmt(overview.reposts.value)}
+                delta={overview.reposts.rate}
+                icon={<FiMessageCircle className="group-hover:fill-black dark:group-hover:fill-white" />}
+                colorClass="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800"
+                />
+
+              <StatCard
+                title="Views"
+                value={fmt(overview.views.value)}
+                delta={overview.views.rate}
                 icon={<HiOutlineSparkles className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800"
               />
+              <StatCard
+                title="Bookmarks"
+                value={fmt(overview.bookmarks.value)}
+                delta={overview.bookmarks.rate}
+                icon={<Bookmark className="group-hover:fill-black dark:group-hover:fill-white" />}
+                colorClass="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800"
+              />
+              <StatCard
+                title="Followers"
+                value={fmt(overview.followers.value)}
+                delta={overview.followers.rate} // this rate change will come from backend... 
+                icon={<UserRoundPlus className="group-hover:fill-black dark:group-hover:fill-white" />}
+                colorClass="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800"
+              />
+                <StatCard
+                  title="Followings"
+                  value={fmt(overview.followings.value)}
+                  delta={overview.followings.rate}
+                  icon={<UserRoundMinus className="group-hover:fill-black dark:group-hover:fill-white" />}
+                  colorClass="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800"
+                />
             </div>
 
             {/* Visitor stats area */}
@@ -504,8 +631,8 @@ export default function UserAnalytics() {
                       </tr>
                     </thead>
                     <tbody>
-                      {recentUploads.map((r) => (
-                       <tr onClick={() => router.push(`/${Account.decodedHandle}/post/${r.id}?section=Comments`)} className={`border-b cursor-pointer rounded border-gray-100/50 dark:border-gray-800/50 hover:bg-yellow-50 dark:hover:bg-gray-950`} >
+                      {recentUploads.map((r,i) => (
+                       <tr key={ i + 1 } onClick={() => router.push(`/${Account.decodedHandle}/post/${r.id}?section=Comments`)} className={`border-b cursor-pointer rounded border-gray-100/50 dark:border-gray-800/50 hover:bg-yellow-50 dark:hover:bg-gray-950`} >
                           <td className="py-4 pl-6 pr-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-yellow-400 dark:bg-gray-950 rounded-xl shadow-md flex items-center justify-center flex-shrink-0">
@@ -710,52 +837,6 @@ export default function UserAnalytics() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <h4 className="font-semibold">Content Performance Breakdown</h4>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">By format (video, image, carousel)</p>
-
-            <div className="mt-4">
-              <ResponsiveContainer width="100%" height={160}>
-                <BarChart
-                  data={interactionTypes}
-                  barCategoryGap={20}
-                  margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
-                >
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" className="dark:stroke-gray-800" />
-                  <XAxis 
-                    dataKey="name" 
-                    tick={{ fill: tickColor, fontSize: 12, textAnchor: 'end' }}
-                    height={60}
-                  />
-                  <YAxis 
-                    tick={{ fill: tickColor, fontSize: 11 }}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip content={CustomTooltip} />
-                  <Legend />
-                  {interactionTypes.map((entry, index) => (
-                    <Bar
-                      key={`bar-${index}`}
-                      dataKey="value"
-                      fill={`url(#color${index})`}
-                      radius={[6, 6, 0, 0]}
-                      barSize={30}
-                      isAnimationActive={true}
-                      animationDuration={800}
-                    />
-                  ))}
-                  <defs>
-                    {COLORS.map((color, index) => (
-                      <linearGradient key={`color${index}`} id={`color${index}`} x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity={0.85}/>
-                        <stop offset="100%" stopColor={color} stopOpacity={0.25}/>
-                      </linearGradient>
-                    ))}
-                  </defs>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
 
           <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
             <h4 className="font-semibold">Sentiment Analysis</h4>
@@ -768,42 +849,90 @@ export default function UserAnalytics() {
             </div>
           </div>
         </div>
+
+        <div className="m-6 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <h4 className="font-semibold">Content Performance Breakdown</h4>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">By format (video, image, carousel)</p>
+
+            <div className="mt-4">
+              <ResponsiveContainer width="100%" height={160}>
+                  <BarChart
+                  data={contentPerformance}
+                  barCategoryGap={20}
+                  margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+                >
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" className="dark:stroke-gray-800 cursor-pointer" />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: tickColor, fontSize: 12, textAnchor: 'end' }}
+                    height={60}
+                  />
+                  <YAxis
+                    tick={{ fill: tickColor, fontSize: 11 }}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip content={CustomTooltip} cursor={false} />
+                  <defs>
+                    {COLORS.map((color, index) => (
+                      <linearGradient key={`color${index}`} id={`color${index}`} x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity={0.85}/>
+                        <stop offset="100%" stopColor={color} stopOpacity={0.25}/>
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  <Bar
+                    dataKey="value"
+                    radius={[6, 6, 0, 0]}
+                    barSize={60}
+                    isAnimationActive={true}
+                    animationDuration={800}
+                  >
+                    {contentPerformance.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={`url(#color${index})`} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         {/* Advance anlytics card... */}
         <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
                 <h3 className="font-semibold">Advanced Analytics</h3>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Professional insights and breakdowns</p>
 
                 <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between">
+                 <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <div>
                       <div className="text-xs text-gray-600 dark:text-gray-400">Engagement Rate</div>
-                      <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">{overview.engagementRate}%</div>
+                      <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">{fmt(overview.views.value)}</div>
                     </div>
-                    <div className="text-sm font-semibold text-green-400 flex items-center gap-1">
-                      <FiArrowUp /> 1.4%
+                    <div className={`text-sm font-semibold ${ parseFloat((overview.views.rate).substring(0,overview.views.rate.length -2)) > 0 ? 'text-green-400' : 'text-red-400' } text-green-400 flex items-center gap-1`}>
+                      {UpDownArrow(overview.views.rate)}<span>{overview.views.rate}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <div>
                       <div className="text-xs text-gray-600 dark:text-gray-400">Avg Watch Time</div>
-                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">00:02:34</div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{`${watchTime.hour}:${watchTime.min}:${watchTime.sec}`}</div>
                     </div>
-                    <div className="text-sm font-semibold text-red-400 flex items-center gap-1">
-                      <FiArrowDown /> 0.6%
+                    <div className={`text-sm font-semibold ${ parseFloat((watchTime.rate).substring(0,watchTime.rate.length -2)) > 0 ? 'text-green-400' : 'text-red-400' } flex items-center gap-1`}>
+                      {UpDownArrow(watchTime.rate)}<span>{watchTime.rate}</span>
                     </div>
                   </div>
+                 </div>
 
                   <div>
                     <div className="text-xs text-gray-600 dark:text-gray-400">Top Performing Countries</div>
-                    <ul className="mt-2 text-sm space-y-1">
+                    <ul className="mt-2 text-sm grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {topCountries.map((c, idx) => (
-                        <li key={c.country} className="flex items-center justify-between">
+                        <li key={c.country} className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full" style={{ background: COLORS[idx % COLORS.length] }} />
                             <span className="text-gray-900 dark:text-gray-100">{c.country}</span>
                           </div>
-                          <div className="text-gray-600 dark:text-gray-400">{c.percent}%</div>
+                          <div className="text-gray-600 font-semibold dark:text-gray-400">{c.percent}%</div>
                         </li>
                       ))}
                     </ul>
@@ -815,8 +944,8 @@ export default function UserAnalytics() {
                       <ResponsiveContainer width="100%" height={120}>
                         <BarChart data={interactionTypes}>
                           <XAxis dataKey="name" tick={{ fill: tickColor, fontSize: 12 }} />
-                          <Tooltip content={CustomTooltip} />
-                          <Bar dataKey="value" fill={theme === 'dark' ? '#ffffff' : '#000000'} barSize={20} radius={[3, 3, 0, 0]} />
+                          <Tooltip content={CustomTooltip} cursor={false} />
+                          <Bar dataKey="value" fill={theme === 'dark' ? '#ffffff' : '#000000'} barSize={60} radius={[3, 3, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>

@@ -11,7 +11,6 @@ import {
   Pin,
   Star,
   List,
-  MessageCircle,
   BarChart3,
   Code,
   TrendingUp,
@@ -21,10 +20,7 @@ import {
   Link as LinkIcon,
   X,
   SendHorizontalIcon,
-  Heart,
-  Repeat,
   Eye,
-  Bookmark,
   EyeOff,
   VolumeX,
   Slash,
@@ -37,7 +33,12 @@ import {
   Megaphone,
   PodcastIcon,
   DollarSign,
-  QrCodeIcon
+  QrCodeIcon,
+  MessagesSquare,
+  RefreshCw,
+  ThumbsUp,
+  BookmarkPlus,
+  ExternalLink
 } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { AxiosResponse } from 'axios';
@@ -219,12 +220,12 @@ export default function PostCard({
 
 
   const actions : actionType[] = [
-      { icon: <MessageCircle className={`w-5 h-5 group-active:animate-caret-blink ${isCommented ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-500 dark:text-yellow-500' : ''}`} />, label: "Comment", value: localComments },
-      { icon: <Repeat className={`w-5 h-5 group-active:animate-accordion-down transition-all duration-500 ${isReposted ? 'stroke-yellow-500 dark:stroke-yellow-500' : ''}`} />, label: "Repost", value: localReposts },
-      { icon: <Heart className={`w-5 h-5 group-active:animate-ping ${isLiked ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-500 dark:text-yellow-500' : ''}`} />, label: "Like", value: localLikes },
+      { icon: <MessagesSquare className={`w-5 h-5 group-active:animate-caret-blink ${isCommented ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-500 dark:text-yellow-500' : ''}`} />, label: "Comment", value: localComments },
+      { icon: <RefreshCw className={`w-5 h-5 group-active:animate-accordion-down transition-all duration-500 ${isReposted ? 'stroke-yellow-500 dark:stroke-yellow-500' : ''}`} />, label: "Repost", value: localReposts },
+      { icon: <ThumbsUp className={`w-5 h-5 group-active:animate-ping ${isLiked ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-500 dark:text-yellow-500' : ''}`} />, label: "Like", value: localLikes },
       { icon: <Eye className="w-5 h-5 group-active:scale-125 transition-all duration-300" />, label: "Views", value: views },
-      { icon: <Bookmark className={`w-5 h-5 group-active:animate-ping ${isBookmarked ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-500 dark:text-yellow-500' : ''} `} />, label: "Bookmark" },
-      { icon: <Share2 className={'w-5 h-5'} />, label: "Share", }
+      { icon: <BookmarkPlus className={`w-5 h-5 group-active:animate-ping ${isBookmarked ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-500 dark:text-yellow-500' : ''} `} />, label: "Bookmark" },
+      { icon: <ExternalLink className={'w-5 h-5'} />, label: "Share", }
   ]
   const generalImage = '/images/broken-laptop.jpg';
 
@@ -496,7 +497,7 @@ export default function PostCard({
       className={`bg-white dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-3 cursor-none' : 'my-1 sm:p-4'}`}>
         <div className='flex flex-row items-center justify-end gap-1 mb-2 transition-all duration-300'>
          {isReposted && (
-           <div className='text-black dark:text-white text-xs font-semibold py-0.5 px-2 shadow-md dark:shadow-gray-800 rounded-lg flex gap-1 items-center justify-center'><Repeat size={20} /><span>you reposted</span></div>
+           <div className='text-black dark:text-white text-xs font-semibold py-0.5 px-2 shadow-md dark:shadow-gray-800 rounded-lg flex gap-1 items-center justify-center'><RefreshCw size={20} /><span>you reposted</span></div>
           )}
           { IsPinned && (
             <Tooltip>
