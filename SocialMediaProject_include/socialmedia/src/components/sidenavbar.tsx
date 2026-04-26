@@ -121,9 +121,9 @@ export default function SideNavbar() {
             >
               <Tooltip>
                 <TooltipTrigger>
-                  <div className="p-3 m-2 rounded-full bg-white shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ease-in-out ring-2 ring-transparent">
+                  <div className="p-3 m-2 rounded-full cursor-pointer bg-white dark:bg-black transform hover:scale-110 ease-in-out ring-2 ring-transparent">
                     <div className={`transition-transform duration-500 ${isDark ? 'rotate-180' : 'rotate-0'}`}>
-                      {isDark ? <Sun size={20} className="text-black cursor-pointer" /> : <Moon size={20} className="text-black cursor-pointer" />}
+                      {isDark ? <Sun size={20} className='dark:text-white' /> : <Moon size={20} className="text-black cursor-pointer" />}
                     </div>
                   </div>
                 </TooltipTrigger>
@@ -142,7 +142,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/feed`
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}/feed`}
@@ -152,7 +152,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === '/explore'
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   }`}
                   href="/explore"
@@ -162,7 +162,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/notifications`
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}/notifications`}
@@ -175,7 +175,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/messages`
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   } flex items-center gap-2`}
                   href={`/${Account.decodedHandle}/messages`}
@@ -185,7 +185,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === '/subscription'
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   }`}
                   href="/subscription"
@@ -195,7 +195,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}`
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}`}
@@ -205,7 +205,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/account-analytics`
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                        : ''
                   } 'flex flex-row items-center justify-center' `}
                   href={`/${Account.decodedHandle}/account-analytics`}
@@ -215,7 +215,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/bookmarked`
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}/bookmarked`}
@@ -225,7 +225,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === '/monetization'
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   }`}
                   href="/monetization"
@@ -238,7 +238,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/settings/account`
-                      ? 'text-white rounded-md bg-gray-50 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}/settings/account`}

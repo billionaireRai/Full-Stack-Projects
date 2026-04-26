@@ -22,9 +22,6 @@ import {
 } from "recharts";
 import {
   FiUsers,
-  FiHeart,
-  FiMessageCircle,
-  FiSearch,
   FiArrowUp,
   FiArrowDown,
 } from "react-icons/fi";
@@ -34,8 +31,8 @@ import Customdropdown from "@/components/customdropdown";
 import useActiveAccount from "@/app/states/useraccounts";
 import { clsx } from "clsx";
 import { useTheme } from "next-themes";
-import { MdImportExport, MdSpaceDashboard } from "react-icons/md";
-import { User, Loader2, Bookmark, UserRoundPlus, UserRoundMinus } from "lucide-react";
+import { MdAnalytics, MdImportExport, MdSpaceDashboard } from "react-icons/md";
+import { User, Loader2, Bookmark, UserRoundPlus, UserRoundMinus, ArrowBigLeft, ArrowBigRight, View, MessageSquare, RefreshCw, ThumbsUp, Eye, Monitor, Users, Heart, Smile, BarChart3, TrendingUp, Upload } from "lucide-react";
 import axiosInstance from "@/lib/interceptor";
 
 
@@ -55,7 +52,7 @@ interface Overview {
 
 interface VisitorSeriesItem {
   name: string;
-  visitors: number;
+  viewers: number;
 }
 
 interface BreakdownItem {
@@ -148,10 +145,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function UserAnalytics() {
   // UI state
+  const date = new Date() ;
   const [timeRange, setTimeRange] = useState({ value:'7d',label:'7 days',priority:"1" });
   const [loading, setLoading] = useState<boolean>(false); // used for loading animation...
-
   const { Account } = useActiveAccount() ; // getting the logged in account...
+  const [Year, setYear] = useState<number>(date.getFullYear()) ;
+  const joinedDate = new Date('01-05-2020') ;  // will pass argument as 'Account.account?.joinDate'
   const router = useRouter() ; // initializing router hook...
   const [watchTime, setwatchTime] = useState<watchTimeType>({
     hour:'1',
@@ -159,19 +158,19 @@ export default function UserAnalytics() {
     sec:'10',
     rate:'+4.4%'
   })
-  const [visitorSeries, setVisitorSeries] = useState<VisitorSeriesItem[]>([
-    { name: "Jan", visitors: 22000 },
-    { name: "Feb", visitors: 25000 },
-    { name: "Mar", visitors: 32000 },
-    { name: "Apr", visitors: 54000 },
-    { name: "May", visitors: 37000 },
-    { name: "Jun", visitors: 28000 },
-    { name: "Jul", visitors: 66000 },
-    { name: "Aug", visitors: 59000 },
-    { name: "Sep", visitors: 42000 },
-    { name: "Oct", visitors: 46000 },
-    { name: "Nov", visitors: 48000 },
-    { name: "Dec", visitors: 52000 },
+  const [viewersSeries, setviewersSeries] = useState<VisitorSeriesItem[]>([
+    { name: "Jan", viewers: 22000 },
+    { name: "Feb", viewers: 25000 },
+    { name: "Mar", viewers: 32000 },
+    { name: "Apr", viewers: 54000 },
+    { name: "May", viewers: 37000 },
+    { name: "Jun", viewers: 28000 },
+    { name: "Jul", viewers: 66000 },
+    { name: "Aug", viewers: 59000 },
+    { name: "Sep", viewers: 42000 },
+    { name: "Oct", viewers: 46000 },
+    { name: "Nov", viewers: 48000 },
+    { name: "Dec", viewers: 52000 },
   ]);
   const [deviceBreakdown, setDeviceBreakdown] = useState<BreakdownItem[]>([
     { name: "Desktop", value: 23 },
@@ -338,10 +337,10 @@ export default function UserAnalytics() {
 
   // function to get analytics data...
   async function functionToGetAnalytics() {
-     const analyticsApi = await axiosInstance.post('/api/dashboard',{ handle:Account.decodedHandle , pastTime:timeRange.value });
+     const analyticsApi = await axiosInstance.post('/api/dashboard',{ handle:Account.decodedHandle , pastTime:timeRange.value , year:Year });
      if (analyticsApi.status === 200) {
       setOverview(analyticsApi.data.analytics.overview);
-      setVisitorSeries(analyticsApi.data.analytics.visitorseries);
+      setviewersSeries(analyticsApi.data.analytics.visitorseries);
       setGenderBreakdown(analyticsApi.data.analytics.genderbreakdown);
       setDeviceBreakdown(analyticsApi.data.analytics.devicebreakdown);
       setRecentUploads(analyticsApi.data.analytics.recentuploads);
@@ -365,19 +364,19 @@ export default function UserAnalytics() {
   //     }
   //   }
   //   // fetchData();
-  // }, [timeRange]);
+  // }, [timeRange,Year]);
 
   // logic for advance analytics...
   const kpis = useMemo(() => {
-    const avgDaily = Math.round(visitorSeries.reduce((s, m) => s + (m.visitors || 0), 0) / Math.max(visitorSeries.length, 1)); // total visitors per month...
+    const avgDaily = Math.round(viewersSeries.reduce((s, m) => s + (m.viewers || 0), 0) / Math.max(viewersSeries.length, 1)); // total visitors per month...
     const topCountry = topCountries[0] || { country: "—", percent: 0 };
     const topPost = topPosts[0] || { title: "—", engagement: 0 };
     return {
-      avgDailyVisitors: avgDaily,
+      avgDailyViewers: avgDaily,
       topCountry,
       topPost,
     };
-  }, [visitorSeries, topCountries, topPosts]);
+  }, [viewersSeries, topCountries, topPosts]);
 
   // foo rendering sparkling line...
   function Sparkline({ data, height = 40 }: { data: GrowthSeriesItem[]; height?: number }) {
@@ -499,21 +498,21 @@ export default function UserAnalytics() {
                 title="Likes"
                 value={fmt(overview.likes.value)}
                 delta={overview.likes.rate}
-                icon={<FiHeart className="group-hover:fill-black dark:group-hover:fill-white" />}
+                icon={<ThumbsUp className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800"
               />
               <StatCard
                 title="Comments"
                 value={fmt(overview.comments.value)}
                 delta={overview.comments.rate}
-                icon={<FiMessageCircle className="group-hover:fill-black dark:group-hover:fill-white" />}
+                icon={<MessageSquare className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800"
                 />
               <StatCard
                 title="Reposts"
                 value={fmt(overview.reposts.value)}
                 delta={overview.reposts.rate}
-                icon={<FiMessageCircle className="group-hover:fill-black dark:group-hover:fill-white" />}
+                icon={<RefreshCw className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800"
                 />
 
@@ -521,7 +520,7 @@ export default function UserAnalytics() {
                 title="Views"
                 value={fmt(overview.views.value)}
                 delta={overview.views.rate}
-                icon={<HiOutlineSparkles className="group-hover:fill-black dark:group-hover:fill-white" />}
+                icon={<Eye className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800"
               />
               <StatCard
@@ -547,21 +546,32 @@ export default function UserAnalytics() {
                 />
             </div>
 
-            {/* Visitor stats area */}
+            {/* Viewers stats area */}
             <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold text-lg">Visitors Stats</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Overview of traffic and reach</p>
+                  <h3 className="font-semibold text-xl flex items-center justify-center gap-1"><View /><span>Viewership Stats</span></h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Overview of traffic and reach</p>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   <Customdropdown options={timeArray} selectedValue={timeRange} onChange={(newTimeRange) => setTimeRange(newTimeRange)} />
                 </div>
               </div>
+              <div className="flex items-center justify-between w-full m-2 p-2 rounded-lg">
+                <div className="flex flex-col item-center gap-1">
+                  <span className="text-md text-black dark:text-white font-semibold">Viewers in year {Year}</span>
+                  <span className="text-xs">Variation of views throughout the year</span>
+                </div>
+                <div className="flex item-center justify-center gap-1">
+                  <ArrowBigLeft onClick={() => { setYear(Math.max(Year - 1,joinedDate.getFullYear())) }} size={30} className='hover:bg-gray-100 dark:hover:bg-gray-950 rounded-full p-1 cursor-pointer' />
+                  <span>{Year}</span>
+                  <ArrowBigRight onClick={() => { setYear(Math.min(Year + 1,date.getFullYear())) }} size={30} className='hover:bg-gray-100 dark:hover:bg-gray-950 rounded-full p-1 cursor-pointer' />
+                </div>
+              </div>
 
               <div className="mt-4 h-52">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={visitorSeries}>
+                  <LineChart data={viewersSeries}>
                     <defs>
                       <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
                         <stop offset="0%" stopColor="#F0b100" stopOpacity={0.12} />
@@ -583,7 +593,7 @@ export default function UserAnalytics() {
                   <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">Avg daily visitors</div>
                   <div className="text-xl flex items-center gap-3 font-semibold text-gray-900 dark:text-gray-100">
                     <FiUsers/>
-                    <span>{fmt(kpis.avgDailyVisitors)}</span>
+                    <span>{fmt(kpis.avgDailyViewers)}</span>
                   </div>
                 </div>
                 <div className="p-3 bg-gray-100 dark:bg-gray-950 rounded-md">
@@ -614,7 +624,7 @@ export default function UserAnalytics() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Recent Uploads</h3>
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent flex items-center gap-1"><Upload /><span>Recent Uploads</span></h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Latest posts and performance metrics</p>
                   </div>
                 </div>
@@ -692,7 +702,7 @@ export default function UserAnalytics() {
             {/* Device Usability */}
             <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Device Usability</h3>
+                <h3 className="font-semibold flex items-center gap-1"><Monitor /><span>Device Usability</span></h3>
                 <div className="text-xs text-gray-600 dark:text-gray-400">Distribution</div>
               </div>
 
@@ -738,7 +748,7 @@ export default function UserAnalytics() {
             {/* Profile Visitors (gender donut) */}
             <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Profile Visitors</h3>
+                <h3 className="font-semibold flex items-center gap-1"><Users /><span>Profile Visitors</span></h3>
                 <div className="text-xs text-gray-600 dark:text-gray-400">Gender</div>
               </div>
 
@@ -784,7 +794,7 @@ export default function UserAnalytics() {
             {/* Top Posts with sparlines*/}
             <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold flex items-center gap-2"><span>Top Performing Posts</span><HiOutlineSparkles/></h3>
+                <h3 className="font-semibold flex items-center gap-1"><HiOutlineSparkles/><span>Top Performing Posts</span></h3>
                 <div className="text-xs text-gray-600 dark:text-gray-400">Last period</div>
               </div>
 
@@ -826,7 +836,7 @@ export default function UserAnalytics() {
         {/* some more advance section */}
         <div className="m-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <h4 className="font-semibold">Audience Interests</h4>
+            <h4 className="font-semibold flex items-center gap-1"><Heart /><span>Audience Interests</span></h4>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Top interests derived from engagement</p>
             <div className="mt-3 space-y-2">
               <InterestPill label="Fitness" percent={28} color={COLORS[0]} />
@@ -839,7 +849,7 @@ export default function UserAnalytics() {
 
 
           <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <h4 className="font-semibold">Sentiment Analysis</h4>
+            <h4 className="font-semibold flex items-center gap-1"><Smile /><span>Sentiment Analysis</span></h4>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Comments and mentions sentiment</p>
 
             <div className="mt-4 space-y-2">
@@ -851,7 +861,8 @@ export default function UserAnalytics() {
         </div>
 
         <div className="m-6 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <h4 className="font-semibold">Content Performance Breakdown</h4>
+          <h4 className="font-semibold flex items-center gap-1"><BarChart3 /><span>Content Performance Breakdown</span></h4>
+            <h4 className="font-semibold">spanContent Performance Breakdown</h4>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">By format (video, image, carousel)</p>
 
             <div className="mt-4">
@@ -897,7 +908,7 @@ export default function UserAnalytics() {
           </div>
         {/* Advance anlytics card... */}
         <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-                <h3 className="font-semibold">Advanced Analytics</h3>
+                <h3 className="font-semibold flex items-center gap-1"><MdAnalytics />Advanced Analytics</h3>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Professional insights and breakdowns</p>
 
                 <div className="mt-4 space-y-3">

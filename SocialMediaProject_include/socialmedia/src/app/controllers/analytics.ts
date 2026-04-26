@@ -18,9 +18,9 @@ export const getPostSpecificAnalyticsController = asyncErrorHandler(async (reque
 })
 
 export const getProfileDashboardAnalyticsController = asyncErrorHandler(async (request:NextRequest) => {
-    const { handle , pastTime } = await request.json() ; // extracting the data coming...
+    const { handle , pastTime , year } = await request.json() ; // extracting the data coming...
     
-    if (!handle || !pastTime) {
+    if (!handle || !pastTime || !year) {
         console.log("Check the incoming variable !!");
         return NextResponse.json({ message:"Variable missing , please check..." },{ status:404 });
     }

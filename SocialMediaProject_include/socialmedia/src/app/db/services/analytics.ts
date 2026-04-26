@@ -4,11 +4,13 @@ import mongoose from "mongoose";
 import accounts from "../models/accounts";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import { NextResponse } from "next/server";
+import { getDeviceType } from "@/lib/deviceinfo";
 import viewStat from "../models/viewstat";
 import likes from "../models/likes";
 import tagged from "../models/tagged";
 import Views from "../models/views";
 import Post from "../models/posts";
+import follows from "../models/follows";
 
 
 // currently only 'h' and 'y' will be used...
@@ -264,7 +266,7 @@ export const getPostAnalyticsService = async ( postid :string , desiredInterval:
     return NextResponse.json({ message: "Metrics fetched successfully!", metric: metrics }, { status: 200 });
 }
 
-export const getProfileDashboardAnalyticsService = async (handle:string , pastTime:string ) => {
+export const getProfileDashboardAnalyticsService = async (handle:string , pastTime:string, year:number) => {
   await connectWithMongoDB() ; // connecting with mongodb...
 
   const user = await getDecodedDataFromCookie("accessToken");
@@ -275,7 +277,171 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
 
   if (handle.substring(1) !== activeAcc.username)  return NextResponse.json({ message:'Account handle mismatch !!' },{ status:200 }) ;
   
+  // fetching respective data from DB...
+  const pastTimeMS = new Date(pastTime) ;
+
+  // followers stats...
+  const followers = (await follows.find({ followingId:activeAcc._id  })).length ;
+  const followersAfterTime = (await follows.find({ $and:[{ followingId:activeAcc._id },{ createdAt:{ $gte:pastTimeMS } }] })).length ;
+  const followersRate = followers > followersAfterTime ? ( followersAfterTime / ( followers - followersAfterTime ) ) * 100 : 0 ; // getting percentage change...
+
+  // followings stats...
+  const followings = (await follows.find({ followerId:activeAcc._id  })).length ;
+  const followingsAfterTime = (await follows.find({ $and:[{ followerId:activeAcc._id },{ createdAt:{ $gte:pastTimeMS } }] })).length ;
+  const followingsRate = followings > followingsAfterTime ? ( followingsAfterTime / ( followings - followingsAfterTime ) ) * 100 : 0 ;
   
+  // likes stats...
+  const accountPost = await Post.find({ $and:[{ authorId:activeAcc._id },{ isDeleted:false }] }) ;
+  const postids = [...accountPost.map(post => post._id),activeAcc._id] ; // added account id in it...
+  const Likes = (await likes.find({ targetEntity:{ $in:postids } })).length ;
+  const LikesAfterTime = (await likes.find({ $and:[{ targetEntity:{ $in:postids } },{ createdAt:{ $gte:pastTimeMS }}] })).length ;
+  const likesRate = Likes > LikesAfterTime ? ( LikesAfterTime / ( Likes - LikesAfterTime ) ) * 100 : 0 ;
+
+  // comments stats...
+  const comments = (await Post.find({ $and:[{ replyToPostId:{ $in:postids } },{ postType:'comment'  },{ isDeleted:false }] })).length ;
+  const commentsAfterTime = (await Post.find({ $and:[{ replyToPostId:{ $in:postids } },{ postType:'comment'  },{ isDeleted:false },{ createdAt:{ $gte:pastTimeMS }}] })).length ;
+  const commentsRate = comments > commentsAfterTime ? ( commentsAfterTime / ( comments - commentsAfterTime ) ) * 100 : 0 ;
+
+  // repost stats...
+  const reposts = (await Post.find({ $and:[{ repostId:{ $in:postids } },{ postType:'repost' },{ isDeleted:false }] })).length ; 
+  const repostsAfterTime = (await Post.find({ $and:[{ repostId:{ $in:postids } },{ postType:'repost' },{ isDeleted:false },{ createdAt:{ $gte:pastTimeMS }}] })).length ; 
+  const repostsRate = reposts > repostsAfterTime ? ( repostsAfterTime / ( reposts - repostsAfterTime ) ) * 100 : 0 ;
+
+  // views stats...
+  const views = (await Views.find({ $and:[{ postId:{ $in:postids } },{ isQualified:true }] })).length ;
+  const viewsAfterTime = (await Views.find({ $and:[{ postId:{ $in:postids } },{ isQualified:true },{ createdAt:{ $gte:pastTimeMS }}] })).length ;
+  const viewsRate = views > viewsAfterTime ? ( viewsAfterTime / ( views - viewsAfterTime ) ) * 100 : 0 ;
+
+  // bookmarks stats...
+  const bookmarks = (await tagged.find({ $and:[{ entityId:{ $in:postids }},{ taggedAs:'bookmarked' }]})).length ;
+  const bookmarksAfterTime = (await tagged.find({ $and:[{ entityId:{ $in:postids }},{ taggedAs:'bookmarked' },{ createdAt:{ $gte:pastTimeMS }}]})).length ;
+  const bookmarksRate = bookmarks > bookmarksAfterTime ? ( bookmarksAfterTime / ( bookmarks - bookmarksAfterTime ) ) * 100 : 0 ;
+
+  // visitors related stats...
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // aggregation pipeline for views...
+  const monthlyData = await Views.aggregate([
+    {
+      $match: {
+        postId: { $in: postids },
+        isQualified: true,
+        createdAt: { $gte: new Date(year, 0, 1), $lt: new Date(year + 1, 0, 1) }
+      }
+    },
+    {
+      $group: {
+        _id: { $month: '$createdAt' },
+        viewers: { $sum: 1 }
+      }
+    }
+  ]);
+  const viewsMap = new Map(monthlyData.map((d: any) => [d._id - 1, d.viewers]));
+  const viewersSeries = monthNames.map((name, i) => ({ name , viewers: viewsMap.get(i) || 0 }));
+
+  // calculating viewership based on device type...
+  const deviceTypes = ['tablet', 'mobile', 'laptop', 'desktop'];
+  const deviceCounts: Record<string, number> = { desktop: 0, laptop: 0, mobile: 0, tablet: 0 };
+  const devicePipeline = [
+    {
+      $match: {
+        postId: { $in: postids },
+        isQualified: true,
+        createdAt: { $gte: pastTimeMS }
+      }
+    },
+    {
+      $group: {
+        _id: '$userAgent',
+        count: { $sum: 1 }
+      }
+    }
+  ];
+
+  const uniqueUAs = await Views.aggregate(devicePipeline);
+  for (const ua of uniqueUAs) {
+    const devicetype = capitalizeString(getDeviceType(ua)) ; 
+    deviceCounts[devicetype] += ua.count;
+  }
+  const totalDeviceCount = Object.values(deviceCounts).reduce((acc,count) => acc + count , 0) ;
+  const deviceStats = deviceTypes.map(name => ({ name , value: Math.ceil(((deviceCounts[name] || 0 )/totalDeviceCount) * 100 ) }));
+
+  // gender demographics stats...
+  const genderDemoPipeline = [
+        {
+          $match: {
+            postId: { $in:postids },
+            viewerId: { $ne: null },
+            createdAt:{ $gte : pastTimeMS }
+          }
+        },
+        {
+          $lookup: {
+            from: 'accounts',
+            localField: 'viewerId',
+            foreignField: '_id',
+            as: 'account',
+            pipeline: [
+              { $match: { 'account.status': 'ACTIVE' } }
+            ]
+          }
+        },
+        { 
+          $unwind: { path: '$account', preserveNullAndEmptyArrays: true } 
+        },
+        {
+          $match: {
+            ['account.interests.gender']: { $nin: [null, undefined, ''] }
+          }
+        },
+        {
+          $group: {
+            _id: '$account.interests.gender',
+            count: { $sum: 1 }
+          }
+        }
+      ];
+
+  const genders = ['male','female','others'];
+  const genderData = await Views.aggregate(genderDemoPipeline);
+  const genderMap = new Map(genderData.map(data => [data._id, data.count || 0]));
+
+  let totalGenderCount = 0 ;
+  genders.forEach(gender => {
+    totalGenderCount += genderMap.get(gender) ;
+  });
+
+  // final gender demographics...
+  const genderDemographics = genders.map(gender => ({
+    name: capitalizeString(gender),
+    value: totalGenderCount > 0 ? Math.ceil(((genderMap.get(gender) || 0) / totalGenderCount) * 100 ) : 0
+  })); 
+
+  // fetching five recent posts...
+  // {
+//           num: 1,
+//           id:"IBFI(@$HFE@_#(",
+//           title: "This incredible natural attraction is one of the must-visits",
+//           date: "22-02-2023",
+//           views: 837748,
+//           likes: 24467,
+//           comments: 2578,
+//         }
+
+// const viewsCount = await viewStat.find({ $and:[{ postId:post._id }] }) ;
+//       const likesCount = await likes.find({ $and:[{ targetEntity:post._id },{ createdAt:{ $gte:pastTimeMS }}] }) ;
+//       const commentsCount = await Post.find({ $and:[{ replyToPostId:post._id },{ postType:'comment'  },{ isDeleted:false },{ createdAt:{ $gte:pastTimeMS }}] });
+
+//       return {
+//         num: i + 1 ,
+//         id:post._id ,
+//         title:post.content ,
+//         date:new Date(post.createdAt).toUTCString() ,
+//         views:viewsCount.length ,
+//         likes:likesCount.length ,
+//         comments:commentsCount.length 
+    const recentPost = accountPost.sort((post_1,post_2) => new Date(post_1.createdAt) - new Date(post_2.createdAt))
+
+
 }
 
 //     // overview of accounts (total interaction values...)
