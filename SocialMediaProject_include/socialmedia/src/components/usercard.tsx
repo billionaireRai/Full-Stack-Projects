@@ -122,7 +122,9 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
                <div className="flex flex-col justify-center flex-1 gap-1">
                  <div className="flex items-center gap-1">
                    <Link href={`/${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
-                   <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-user'/>
+                   {account.isVerified && (
+                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-user'/>
+                   )}
                  </div>
                    <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-xs">{decodedHandle}</Link>
                  <p className="text-xs w-full text-gray-500 mt-1">

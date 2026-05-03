@@ -60,13 +60,13 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
   // Calculate centered position - subtract half of popup width
   const centeredLeft = position.left - (popupWidth / 2);
 
-  return (
+return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.18 }}
-      className="fixed z-[70] w-[340px] p-1 rounded-2xl border border-gray-200 dark:shadow-gray-700 dark:border-gray-800 bg-white dark:bg-black shadow-md overflow-hidden"
+      className="fixed z-100 w-[340px] p-1 rounded-2xl border border-gray-200 dark:shadow-gray-700 dark:border-gray-800 bg-white dark:bg-black shadow-md overflow-hidden"
       style={{ top: position.top, left: centeredLeft }}
       onMouseEnter={onOpen}
       onMouseLeave={onClose}

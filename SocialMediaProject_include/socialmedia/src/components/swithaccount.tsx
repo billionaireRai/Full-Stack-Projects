@@ -8,43 +8,45 @@ import useSwitchAccount from '@/app/states/swithaccount'
 import useUserInfo from '@/app/states/userinfo';
 import axiosInstance from '@/lib/interceptor';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter , useParams } from 'next/navigation';
 
 export default function SwitchAccountPopUp () {
   const { setisPopOpen } = useSwitchAccount();
   const { Account , setAccount } = useActiveAccount() ;
   const router = useRouter() ;
+  const params = useParams() ;
   const { User } = useUserInfo() ;
   const [Accounts,setAccounts] = useState<userCardProp[]>([
     {
-      decodedHandle: 'alice123',
+      decodedHandle: '@alice123',
       name: 'Alice Smith',
       IsFollowing: false,
       content: `Loves coding and coffee.\nPassionate about open-source projects.\nEnjoys hiking on weekends.`,
       account: {
         name: 'Alice Smith',
-        handle: 'alice123',
+        handle: '@alice123',
         bio: `Loves coding and coffee.\nPassionate about open-source projects.\nEnjoys hiking on weekends.`,
         location: { text: 'New York, NY', coordinates: [40.7128, -74.0060] },
         website: 'https://alice.dev',
         joinDate: 'Jan 2020',
         following: '150',
         followers: '300',
+        plan:'Pro',
         Posts: '45',
         isCompleted: true,
-        isVerified: false,
+        isVerified: true,
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'bob456',
+      decodedHandle: '@bob456',
       name: 'Bob Johnson',
       IsFollowing: true,
       content: `Tech enthusiast and blogger.\nWrites about the latest in AI and machine learning.\nLoves traveling and photography.`,
       account: {
         name: 'Bob Johnson',
-        handle: 'bob456',
+        handle: '@bob456',
         bio: `Tech enthusiast and blogger.\nWrites about the latest in AI and machine learning.\nLoves traveling and photography.`,
         location: { text: 'San Francisco, CA', coordinates: [37.7749, -122.4194] },
         website: 'https://bobblog.com',
@@ -53,19 +55,20 @@ export default function SwitchAccountPopUp () {
         followers: '500',
         Posts: '78',
         isCompleted: true,
+        plan:'Creator',
         isVerified: true,
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'charlie789',
+      decodedHandle: '@charlie789',
       name: 'Charlie Brown',
       IsFollowing: false,
       content: `Designer and artist.\nSpecializes in UI/UX design.\nEnjoys creating digital art in spare time.`,
       account: {
         name: 'Charlie Brown',
-        handle: 'charlie789',
+        handle: '@charlie789',
         bio: `Designer and artist.\nSpecializes in UI/UX design.\nEnjoys creating digital art in spare time.`,
         location: { text: 'Los Angeles, CA', coordinates: [34.0522, -118.2437] },
         website: 'https://charliedesigns.com',
@@ -73,6 +76,7 @@ export default function SwitchAccountPopUp () {
         following: '120',
         followers: '250',
         Posts: '32',
+        plan:'Free',
         isCompleted: false,
         isVerified: false,
         bannerUrl: '/images/default-banner.jpg',
@@ -80,13 +84,13 @@ export default function SwitchAccountPopUp () {
       }
     },
     {
-      decodedHandle: 'diana101',
+      decodedHandle: '@diana101',
       name: 'Diana Prince',
       IsFollowing: true,
       content: `Wonder woman of web dev.\nExpert in full-stack development.\nAdvocate for women in tech.`,
       account: {
         name: 'Diana Prince',
-        handle: 'diana101',
+        handle: '@diana101',
         bio: `Wonder woman of web dev.\nExpert in full-stack development.\nAdvocate for women in tech.`,
         location: { text: 'Chicago, IL', coordinates: [41.8781, -87.6298] },
         website: 'https://dianaweb.dev',
@@ -95,19 +99,20 @@ export default function SwitchAccountPopUp () {
         followers: '400',
         Posts: '60',
         isCompleted: true,
+        plan:'Pro',
         isVerified: true,
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
       }
     },
     {
-      decodedHandle: 'eve202',
+      decodedHandle: '@eve202',
       name: 'Eve Adams',
       IsFollowing: false,
       content: `Data scientist and AI researcher.\nWorks on cutting-edge machine learning projects.\nEnjoys teaching and mentoring.`,
       account: {
         name: 'Eve Adams',
-        handle: 'eve202',
+        handle: '@eve202',
         bio: `Data scientist and AI researcher.\nWorks on cutting-edge machine learning projects.\nEnjoys teaching and mentoring.`,
         location: { text: 'Seattle, WA', coordinates: [47.6062, -122.3321] },
         website: 'https://eveai.com',
@@ -116,6 +121,7 @@ export default function SwitchAccountPopUp () {
         followers: '700',
         Posts: '100',
         isCompleted: true,
+        plan:'Free',
         isVerified: false,
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png'
@@ -155,7 +161,7 @@ export default function SwitchAccountPopUp () {
         toast.success('Account switched successfully !!', { position:'top-right' });
         setAccount(toSwitchAcc) ; // updating the active account...
         setisPopOpen(false) ; // closing the pop...
-        router.refresh() ; // reloading the profile page...
+        router.push(`/${toSwitchAcc.decodedHandle}`) ; // reloading the profile page...
       } else {
         toast.dismiss(loadingToast) ;
         toast.error('Switching failed !!', { position:'top-right' })

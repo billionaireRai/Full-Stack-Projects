@@ -25,15 +25,18 @@ import {
   FiArrowUp,
   FiArrowDown,
 } from "react-icons/fi";
-import { BsFillPersonCheckFill, BsGlobe } from "react-icons/bs";
+import { BsFilePdf, BsFillPersonCheckFill, BsGlobe } from "react-icons/bs";
 import { HiOutlineSparkles } from "react-icons/hi";
 import Customdropdown from "@/components/customdropdown";
+import Notaccessablepop from "@/components/notaccessablepop";
 import useActiveAccount from "@/app/states/useraccounts";
-import { clsx } from "clsx";
+import RequireSubscription from "@/components/requireSubscription";
+import useUpgradePop from "@/app/states/upgradePop";
 import { useTheme } from "next-themes";
 import { MdAnalytics, MdImportExport, MdSpaceDashboard } from "react-icons/md";
-import { User, Loader2, Bookmark, UserRoundPlus, UserRoundMinus, ArrowBigLeft, ArrowBigRight, View, MessageSquare, RefreshCw, ThumbsUp, Eye, Monitor, Users, Heart, Smile, BarChart3, TrendingUp, Upload } from "lucide-react";
+import { User, Loader2, Bookmark, UserRoundPlus, UserRoundMinus, ArrowBigLeft, ArrowBigRight, View, MessagesSquare, RefreshCw, ThumbsUp, Eye, Monitor, Users, Heart, Smile, BarChart3, TrendingUp, Upload } from "lucide-react";
 import axiosInstance from "@/lib/interceptor";
+import toast from "react-hot-toast";
 
 
 interface overViewData {
@@ -80,8 +83,8 @@ interface TopPostItem {
   id:string;
   title: string;
   views: number;
-  reach: number;
-  engagement: number;
+  likes: number;
+  comments: number;
 }
 
 interface GrowthSeriesItem {
@@ -149,6 +152,8 @@ export default function UserAnalytics() {
   const [timeRange, setTimeRange] = useState({ value:'7d',label:'7 days',priority:"1" });
   const [loading, setLoading] = useState<boolean>(false); // used for loading animation...
   const { Account } = useActiveAccount() ; // getting the logged in account...
+  const { isPop , setisPop } = useUpgradePop() ;
+  const showNotAccessable:boolean = (!Account.account?.isVerified && Account.account?.plan === 'Free' ? true : false) ;
   const [Year, setYear] = useState<number>(date.getFullYear()) ;
   const joinedDate = new Date('01-05-2020') ;  // will pass argument as 'Account.account?.joinDate'
   const router = useRouter() ; // initializing router hook...
@@ -163,14 +168,14 @@ export default function UserAnalytics() {
     { name: "Feb", viewers: 25000 },
     { name: "Mar", viewers: 32000 },
     { name: "Apr", viewers: 54000 },
-    { name: "May", viewers: 37000 },
-    { name: "Jun", viewers: 28000 },
-    { name: "Jul", viewers: 66000 },
-    { name: "Aug", viewers: 59000 },
-    { name: "Sep", viewers: 42000 },
-    { name: "Oct", viewers: 46000 },
-    { name: "Nov", viewers: 48000 },
-    { name: "Dec", viewers: 52000 },
+    { name: "May", viewers: 60000 },
+    { name: "Jun", viewers: 30000 },
+    { name: "Jul", viewers: 6000 },
+    { name: "Aug", viewers: 29000 },
+    { name: "Sep", viewers: 70000 },
+    { name: "Oct", viewers: 100000 },
+    { name: "Nov", viewers: 80000 },
+    { name: "Dec", viewers: 55000 },
   ]);
   const [deviceBreakdown, setDeviceBreakdown] = useState<BreakdownItem[]>([
     { name: "Desktop", value: 23 },
@@ -238,24 +243,24 @@ export default function UserAnalytics() {
           id: "p1",
           title: "Epic Sunrise Timelapse",
           views: 1200000,
-          reach: 900000,
-          engagement: 9.2,
+          likes: 900000,
+          comments: 9.2,
         },
         {
           num:2,
           id: "p2",
           title: "Street Food Tour",
           views: 840000,
-          reach: 600000,
-          engagement: 7.1,
+          likes: 600000,
+          comments: 7.1,
         },
         {
           num:3,
           id: "p3",
           title: "DIY Home Gym Setup",
           views: 610000,
-          reach: 480000,
-          engagement: 6.5,
+          likes: 480000,
+          comments: 6.5,
         },  
     ]
   );
@@ -265,9 +270,9 @@ export default function UserAnalytics() {
       { name: "Day 2", value: 140 },
       { name: "Day 3", value: 180 },
       { name: "Day 4", value: 210 },
-      { name: "Day 5", value: 260 },
-      { name: "Day 6", value: 300 },
-      { name: "Day 7", value: 350 }
+      { name: "Day 5", value: 150 },
+      { name: "Day 6", value: 600 },
+      { name: "Day 7", value: 300 }
     ]);
   const [interactionTypes, setInteractionTypes] = useState<InteractionTypeItem[]>(
     [ 
@@ -280,8 +285,8 @@ export default function UserAnalytics() {
   const [contentPerformance, setContentPerformance] = useState<BreakdownItem[]>([
     { name: "Videos", value:122 },
     { name: "Images",  value:233 },
-    { name: "Gifs", value:10 },
-    { name: "Mixed", value:2 }
+    { name: "Raws", value:10 },
+    { name: "Autos", value:2 }
   ]);
   const [timeArray, settimeArray] = useState(
     [{value:"7d",label:'7 days', priority:"1"},{value:"30d",label:'30 days', priority:"2"},{value:"90d",label:'90 days', priority:"3"},{value:"1y",label:'1 year', priority:"4"},{value:"2y",label:'2 years', priority:"5"}]
@@ -378,6 +383,35 @@ export default function UserAnalytics() {
     };
   }, [viewersSeries, topCountries, topPosts]);
 
+// function handling PDF export logic...
+  const handleReportExport = async (exportIn:string) => {
+    if ((!Account.account?.isVerified && Account.account?.plan === 'Free') || (Account.account?.isVerified && Account.account?.plan === 'Pro')) {
+      setisPop(true);
+      return;
+    }
+    const toastLoading = toast.loading(`generating report for ${Account.decodedHandle}`);
+    try {
+      const reportApi = await axiosInstance.post(`/api/report`,{ timeframe:timeRange.value , handle:Account.decodedHandle, year:Year , type:exportIn },{ responseType: 'blob' });
+
+      if (reportApi.status === 200) {
+        toast.dismiss(toastLoading);
+        toast.success('Report successfully downloaded !!');
+
+        const url = window.URL.createObjectURL(reportApi.data);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `analytics-report-${Account.decodedHandle}-${new Date().toISOString()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      toast.dismiss(toastLoading);
+      toast.error('Failed to generate report');
+    }
+  }
+
   // foo rendering sparkling line...
   function Sparkline({ data, height = 40 }: { data: GrowthSeriesItem[]; height?: number }) {
     return (
@@ -454,13 +488,13 @@ export default function UserAnalytics() {
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-semibold flex flex-row items-center gap-1.5"><MdSpaceDashboard /><span>Dashboard</span></h1>
             <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-              <div className="group relative inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-black/80 backdrop-blur-sm border border-gray-200/80 dark:border-gray-700/80 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5">
+              <div className="group relative inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-black/80 backdrop-blur-sm border border-gray-200/80 dark:border-gray-700/80 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] hover:-translate-y-0.5">
                 <User className="w-4 h-4 text-gray-700 dark:text-gray-300 flex-shrink-0" />
                 <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px]">{Account.name}</span>
               </div>
               <Link 
                 href={`/${Account.decodedHandle}`} 
-                className="group relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
+                className="group relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 font-semibold"
               >
                   <span>{Account.decodedHandle}</span>
                 <svg className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -472,18 +506,32 @@ export default function UserAnalytics() {
               Analytics snapshot for your account — last {timeRange.label}
             </p>
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-600 rounded-md p-2">
-              {timeArray.map((timeobj,index) => (
-              <button
-                key={ index+1 }
-                onClick={() => setTimeRange(timeobj)}
-                className={clsx("px-3 py-1 text-sm rounded cursor-pointer font-semibold hover:bg-gray-100 dark:hover:bg-gray-900", timeRange.value === timeobj.value ? "dark:bg-yellow-500 bg-yellow-400 dark:text-white" : "text-gray-700 dark:text-gray-300")}
-              >
-                {timeobj.value}
-              </button>
+          
+          {/* Time Selection section */}
+          <div className="flex items-center gap-3">
+            <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 bg-gray-100 dark:bg-gray-900/60 rounded-xl p-1 border border-gray-200 dark:border-gray-700/50 shadow-inner">
+              {timeArray.map((timeobj, index) => (
+                <button
+                  key={ index + 1 }
+                  onClick={() => setTimeRange(timeobj)}
+                  className={`
+                    relative group z-10 px-4 py-2 text-sm font-semibold cursor-pointer rounded-lg transition-all duration-200 ease-out
+                    ${timeRange.value === timeobj.value 
+                      ? 'text-gray-900 dark:text-white shadow-md' 
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-gray-800/50'
+                    }
+                  `}
+                >
+                  {timeRange.value === timeobj.value && (
+                    <span className="absolute inset-0 bg-yellow-400 dark:bg-yellow-500 rounded-lg shadow-lg shadow-yellow-500/25 animate-pulse group-hover:animate-none" />
+                  )}
+                  <span className="relative z-10">{timeobj.value}</span>
+                </button>
               ))}
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200/60 dark:border-yellow-700/30 rounded-lg">
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse shadow-sm shadow-yellow-400" />
+              <span className="text-xs font-medium text-yellow-700 dark:text-yellow-400">{timeRange.label}</span>
             </div>
           </div>
         </div>
@@ -505,7 +553,7 @@ export default function UserAnalytics() {
                 title="Comments"
                 value={fmt(overview.comments.value)}
                 delta={overview.comments.rate}
-                icon={<MessageSquare className="group-hover:fill-black dark:group-hover:fill-white" />}
+                icon={<MessagesSquare className="group-hover:fill-black dark:group-hover:fill-white" />}
                 colorClass="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800"
                 />
               <StatCard
@@ -582,7 +630,7 @@ export default function UserAnalytics() {
                     <XAxis dataKey="name" tick={{ fill: tickColor }} />
                     <YAxis tick={{ fill: tickColor }} />
                     <Tooltip content={CustomTooltip} />
-                    <Line type="monotone" dataKey="visitors" stroke="#F0b100" strokeWidth={2} dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="viewers" stroke="#F0b100" strokeWidth={2} dot={{ r: 3 }} />
                     <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" vertical={false} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -590,7 +638,7 @@ export default function UserAnalytics() {
 
               <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="p-3 bg-gray-100 dark:bg-gray-950 rounded-md">
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">Avg daily visitors</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">Avg daily viewers</div>
                   <div className="text-xl flex items-center gap-3 font-semibold text-gray-900 dark:text-gray-100">
                     <FiUsers/>
                     <span>{fmt(kpis.avgDailyViewers)}</span>
@@ -607,7 +655,7 @@ export default function UserAnalytics() {
                   <div className="text-xs text-gray-600 dark:text-gray-400">Top  post (engagement)</div>
                   <div className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
                     <BsFillPersonCheckFill /> {kpis.topPost.title}
-                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">({kpis.topPost.engagement}%)</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">({kpis.topPost.comments}%)</span>
                   </div>
                 </div>
               </div>
@@ -678,7 +726,6 @@ export default function UserAnalytics() {
                             </div>
                           </td>
                         </tr>
-                        // </Link>
                       ))}
                     </tbody>
                   </table>
@@ -808,7 +855,7 @@ export default function UserAnalytics() {
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{p.title}</div>
                       <div className="text-xs text-gray-600 dark:text-gray-400">
-                        Views: {fmt(p.views)} • Reach: {fmt(p.reach)}
+                        Views: {fmt(p.views)} • Reach: {fmt(p.likes)}
                       </div>
                     </div>
                     <div className="w-36">
@@ -820,13 +867,19 @@ export default function UserAnalytics() {
               </div>
             </div>
 
-            {/* Export / Quick actions */}
+            {/* Export report action... */}
             <div className="bg-white dark:bg-black border border-gray-200 flex flex-col gap-2 dark:border-gray-700 rounded-xl p-3">
-              <div className="text-xs text-gray-600 dark:text-gray-400 flex flex-row gap-1"><MdImportExport size={20} /><span>Export analytics for other usecases</span></div>
-              <div className="grid grid-cols-2 gap-10 p-2 rounded-lg">
-                <button className="bg-gradient-to-r from-[#7CC6FF] to-[#7CC6FF] hover:from-[#7CC6FF] hover:to-[#5A9FFF] dark:text-black text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer w-fit">Export CSV</button>
-                <button className="bg-gradient-to-r from-[#4EE1A0] to-[#4EE1A0] hover:from-[#4EE1A0] hover:to-[#3BCF8A] dark:text-black text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer w-fit">Export PNG</button>
-                <button className="bg-gradient-to-r from-[#FF7A59] to-[#FF7A59] hover:from-[#FF7A59] hover:to-[#FF6347] dark:text-black text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer w-fit">Share Report</button>
+              <div className="text-xs text-gray-600 dark:text-gray-400 flex flex-row gap-1">
+                 <MdImportExport size={20} />
+                 <span>Export analytics for other usecases</span>
+              </div>
+              <div className="flex items-center justify-center p-2 rounded-lg">
+                <button 
+                 onClick={() => { handleReportExport('pdf') }}
+                 className="flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 dark:text-black text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer w-fit">
+                  <BsFilePdf />
+                  <span>Export PDF Report</span>
+                </button>
               </div>
               </div>
             </div>
@@ -862,8 +915,7 @@ export default function UserAnalytics() {
 
         <div className="m-6 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl p-4">
           <h4 className="font-semibold flex items-center gap-1"><BarChart3 /><span>Content Performance Breakdown</span></h4>
-            <h4 className="font-semibold">spanContent Performance Breakdown</h4>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">By format (video, image, carousel)</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">By format (video, image, raw , etc...)</p>
 
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={160}>
@@ -964,6 +1016,10 @@ export default function UserAnalytics() {
                 </div>
               </div>
       </div>
+    { isPop && <RequireSubscription isOpen={isPop} onClose={() => { setisPop(false) }} planname='Creator'  />}
+    { showNotAccessable && (
+      <Notaccessablepop username={String(Account.decodedHandle)} />
+    )}
     </div>
   );
 }
@@ -979,7 +1035,7 @@ interface StatCardProps {
 
 function StatCard({ title, value, delta, icon, colorClass }: StatCardProps) {
   return (
-    <div className={`rounded-lg p-3 ${colorClass} text-gray-900 dark:text-gray-100 shadow-lg dark:shadow-gray-900 border-none cursor-pointer group hover:scale-105 transition-transform`}>
+    <div className={`rounded-lg p-3 ${colorClass} text-gray-900 dark:text-gray-100 shadow-lg dark:shadow-gray-900 border-none group hover:scale-105 transition-transform`}>
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs text-gray-700 dark:text-gray-400">{title}</div>

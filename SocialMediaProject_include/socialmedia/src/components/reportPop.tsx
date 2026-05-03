@@ -74,8 +74,8 @@ export default function reportPop({ closeReportModal , username , postId }:repor
           <X size={15}/>
         </button>
 
-        <div className='flex items-center gap-4'>
-          <Flag size={40}/><h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Report This Account</h2>
+        <div className='flex items-center gap-4 mb-8'>
+          <Flag size={30} /><h2 className="text-2xl font-bold text-gray-900 dark:text-white">Report This Account</h2>
         </div>
 
         <form onSubmit={reportForm.handleSubmit(reportSubmit)} className="space-y-6">

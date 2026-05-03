@@ -119,18 +119,31 @@ export default function SideNavbar() {
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
               className="relative group"
             >
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className="p-3 m-2 rounded-full cursor-pointer bg-white dark:bg-black transform hover:scale-110 ease-in-out ring-2 ring-transparent">
-                    <div className={`transition-transform duration-500 ${isDark ? 'rotate-180' : 'rotate-0'}`}>
-                      {isDark ? <Sun size={20} className='dark:text-white' /> : <Moon size={20} className="text-black cursor-pointer" />}
-                    </div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Switch to {isDark ? 'Light' : 'Dark'} Mode</p>
-                </TooltipContent>
-              </Tooltip>
+             <div className="flex items-center justify-center w-10 h-10">
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <button
+                     className="cursor-pointer rounded-full bg-white dark:bg-black p-2 transform hover:scale-110 ring-2 ring-transparent"
+                   >
+                     <div
+                       className={`transition-transform duration-500 ${
+                         isDark ? "rotate-180" : "rotate-0"
+                       }`}
+                     >
+                       {isDark ? (
+                         <Sun size={20} className="text-white" />
+                       ) : (
+                         <Moon size={20} className="text-black" />
+                       )}
+                     </div>
+                   </button>
+                 </TooltipTrigger>
+
+                 <TooltipContent>
+                   <p>Switch to {isDark ? "Light" : "Dark"} Mode</p>
+                 </TooltipContent>
+               </Tooltip>
+             </div>
               <div className="absolute inset-0 rounded-full bg-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300 border border-gray-300 dark:border-gray-600"></div>
             </div>
           </div>
@@ -147,7 +160,7 @@ export default function SideNavbar() {
                   }`}
                   href={`/${Account.decodedHandle}/feed`}
                 >
-                  <NavItem icon={<HomeIcon className={`${pathname === `/@${Account.decodedHandle}/feed` ? 'fill-black dark:fill-white' : ''}`} />} label="Feed" />
+                  <NavItem icon={<HomeIcon className={`${pathname === `/${Account.decodedHandle}/feed` ? 'fill-black dark:fill-white' : ''}`} />} label="Feed" />
                 </Link>
                 <Link
                   className={`${
@@ -167,7 +180,7 @@ export default function SideNavbar() {
                   }`}
                   href={`/${Account.decodedHandle}/notifications`}
                 >
-                  <NavItem icon={<BellIcon className={`${pathname === `/@${Account.decodedHandle}/notifications` ? 'fill-black dark:fill-white' : ''}`} />} label="Notifications" />
+                  <NavItem icon={<BellIcon className={`${pathname === `/${Account.decodedHandle}/notifications` ? 'fill-black dark:fill-white' : ''}`} />} label="Notifications" />
                   { value !== 0 && (
                   <span className='px-2 rounded-full text-black dark:text-white bg-yellow-400 dark:bg-blue-500'>{value}</span>
                   )}
@@ -200,7 +213,7 @@ export default function SideNavbar() {
                   }`}
                   href={`/${Account.decodedHandle}`}
                 >
-                  <NavItem icon={<UserIcon className={`${pathname === `/@${Account.decodedHandle}` ? 'fill-black dark:fill-white' : ''}`} />} label="Profile" />
+                  <NavItem icon={<UserIcon className={`${pathname === `/${Account.decodedHandle}` ? 'fill-black dark:fill-white' : ''}`} />} label="Profile" />
                 </Link>
                 <Link
                   className={`${
@@ -220,7 +233,7 @@ export default function SideNavbar() {
                   }`}
                   href={`/${Account.decodedHandle}/bookmarked`}
                 >
-                  <NavItem icon={<BookmarkIcon className={`${pathname === `/@${Account.decodedHandle}/bookmarked` ? 'fill-black dark:fill-white' : ''}`} />} label="Bookmarked" />
+                  <NavItem icon={<BookmarkIcon className={`${pathname === `/${Account.decodedHandle}/bookmarked` ? 'fill-black dark:fill-white' : ''}`} />} label="Bookmarked" />
                 </Link>
                 <Link
                   className={`${
@@ -274,7 +287,7 @@ export default function SideNavbar() {
                   href={`/${Account.decodedHandle}`}
                 >
                   <span className="flex items-center font-medium text-gray-900 dark:text-gray-100 gap-1">
-                    {Account.name?.toUpperCase()}
+                    {Account.name}
                     {Account.account?.isVerified && (
                     <Image
                       src="/images/yellow-tick.png"

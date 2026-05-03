@@ -416,15 +416,15 @@ export const profileSpecificDataService = async (handle:string) => {
 
     }
 
-    // Resolve and flatten mutual following IDs...
+// Resolve and flatten mutual following IDs...
     const resolvedMutualFollowing = await Promise.all(mutualFollowingId);
     const flattenedMutualIds = resolvedMutualFollowing.flat();
 
     // getting the accounts of mutual followers...
-    const mutualFriendAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
-            return returnAccountDataInStructure(accId);
-        })
-    );
+    const mappedAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
+        return returnAccountDataInStructure(accId);
+    }));
+    const mutualFriendAccounts = mappedAccounts.filter(account => !account?.IsFollowing);
     const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id));
 
     // getting more accounts for suggestions...
@@ -446,41 +446,40 @@ export const profileSpecificDataService = async (handle:string) => {
 
     // getting account whose content , user like & comment...
     const myLikes  = await likes.find({ $and:[ { accountId:myAccount._id },{ targetType:{ $in: ['Post','Comment'] } }]}) ;
-    const likedToAcc = await Promise.all(myLikes.map( async ( like ) => {
+    const MappedlikedToAcc = await Promise.all(myLikes.map( async ( like ) => {
         return returnAccountDataInStructure((like.targetAccount as mongoose.Types.ObjectId).toString());
     }));
-    const filteredLikedToAcc = likedToAcc.filter(acc => acc.id && !blockedIds.includes(acc.id));
+
+    const filteredLikedToAcc = MappedlikedToAcc.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
 
     const postsContentUserCommented = await Post.find({ $and:[{ authorId:myAccount._id },{ replyToPostId: { $exists: true, $ne: null } },{ isDeleted:false }]}) ;
     const accountsWhosPost = await Promise.all(postsContentUserCommented.map( async (post) => {
         const commentedOnPost = await Post.findById(post.replyToPostId) ;
         return returnAccountDataInStructure(commentedOnPost.authorId) ;
     })) ;
-    const filteredAccountsWhosPost = accountsWhosPost.filter(acc => acc.id && !blockedIds.includes(acc.id));
+    const filteredAccountsWhosPost = accountsWhosPost.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
 
     // removing the duplicacy from account array...
     const uniqueAccArr = [...new Set([...filteredMutualFriendAccounts,...moreAccounts,...filteredLikedToAcc,...filteredAccountsWhosPost])];
     // sorting the array based on subscription level...
     const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Enterprise: 3 };
 
-    const accountsWithSubs = await Promise.all(uniqueAccArr.map(async (acc) => {
-        const account = await accounts.findOne({ username: acc.decodedHandle , 'account.status':'ACTIVE' });
-        const sub = account ? await subscriptions.findOne({ accountId: account._id, status: 'active' }) : null;
-        return { acc , plan: (sub?.plan as Plan) || 'free', isVerified: acc.account?.isVerified || false };
-    }));
-
     // sorting logic...
-    accountsWithSubs.sort((a, b) => {
-        const aLevel = planOrder[a.plan]; // plan hierarchy based on number...
-        const bLevel = planOrder[b.plan];
-        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
-        if (a.isVerified !== b.isVerified) return a.isVerified ? -1 : 1; // verified first...
+    const sortedArr = uniqueAccArr.sort((a, b) => {
+        const aPlan = (a.account?.plan || 'Free') as Plan;
+        const bPlan = (b.account?.plan || 'Free') as Plan;
+        const aLevel = planOrder[aPlan] ?? 0;
+        const bLevel = planOrder[bPlan] ?? 0;
         
+        if (aLevel !== bLevel) return bLevel - aLevel;
+        
+        const aVerified = a.account?.isVerified ?? false;
+        const bVerified = b.account?.isVerified ?? false;
+        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+            
         return 0;
     });
 
-    // final sorted array...
-    const sortedArr = accountsWithSubs.map(item => item.acc);
 
     // getting all the posts...
     const accountPosts = await Post.find({ $and:[{ authorId:myAccount._id },{ replyToPostId: null },{ postType:'original' },{ isDeleted:false }]}) ; // getting the posts...

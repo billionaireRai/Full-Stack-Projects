@@ -1,6 +1,7 @@
 import React from 'react'
 import axiosInstance from '@/lib/interceptor';
 import toast from 'react-hot-toast';
+import { BanIcon } from 'lucide-react';
 
 interface BlockUserProp {
   closeBlockPop: () => void,
@@ -33,7 +34,10 @@ export default function BlockUser({ closeBlockPop , username , updateblockState,
       <div className="relative flex items-center justify-center">
         <div className="bg-white dark:bg-black rounded-lg p-6 max-w-md mx-6 shadow-xl border border-gray-300 dark:border-gray-800">
           {/* Title */}
-          <h2 className="text-black dark:text-white text-xl font-bold mb-3">Confirm {isBlocked ? 'Unblock' : 'Block'}</h2>
+          <div className='flex flex-row items-center gap-2 mb-3'>
+            <BanIcon size={20} />
+            <h2 className="text-black dark:text-white text-xl font-bold">Confirm {isBlocked ? 'Unblock' : 'Block'}</h2>
+          </div>
 
           {/* Description */}
           <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">

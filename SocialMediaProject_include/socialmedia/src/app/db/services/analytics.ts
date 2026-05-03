@@ -283,39 +283,39 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
   // followers stats...
   const followers = (await follows.find({ followingId:activeAcc._id  })).length ;
   const followersAfterTime = (await follows.find({ $and:[{ followingId:activeAcc._id },{ createdAt:{ $gte:pastTimeMS } }] })).length ;
-  const followersRate = followers > followersAfterTime ? ( followersAfterTime / ( followers - followersAfterTime ) ) * 100 : 0 ; // getting percentage change...
+  const followersRate = followers > followersAfterTime ? Math.ceil( followersAfterTime / ( followers - followersAfterTime ) ) * 100 : 0 ; // getting percentage change...
 
   // followings stats...
-  const followings = (await follows.find({ followerId:activeAcc._id  })).length ;
-  const followingsAfterTime = (await follows.find({ $and:[{ followerId:activeAcc._id },{ createdAt:{ $gte:pastTimeMS } }] })).length ;
-  const followingsRate = followings > followingsAfterTime ? ( followingsAfterTime / ( followings - followingsAfterTime ) ) * 100 : 0 ;
+  const followings = (await follows.find({ $and:[{ followerId:activeAcc._id  },{ isDeleted:false }]})).length ;
+  const followingsAfterTime = (await follows.find({ $and:[{ followerId:activeAcc._id },{ createdAt:{ $gte:pastTimeMS } },{ isDeleted:false }] })).length ;
+  const followingsRate = followings > followingsAfterTime ? Math.ceil( followingsAfterTime / ( followings - followingsAfterTime ) ) * 100 : 0 ;
   
   // likes stats...
   const accountPost = await Post.find({ $and:[{ authorId:activeAcc._id },{ isDeleted:false }] }) ;
   const postids = [...accountPost.map(post => post._id),activeAcc._id] ; // added account id in it...
   const Likes = (await likes.find({ targetEntity:{ $in:postids } })).length ;
   const LikesAfterTime = (await likes.find({ $and:[{ targetEntity:{ $in:postids } },{ createdAt:{ $gte:pastTimeMS }}] })).length ;
-  const likesRate = Likes > LikesAfterTime ? ( LikesAfterTime / ( Likes - LikesAfterTime ) ) * 100 : 0 ;
+  const likesRate = Likes > LikesAfterTime ? Math.ceil( LikesAfterTime / ( Likes - LikesAfterTime ) ) * 100 : 0 ;
 
   // comments stats...
   const comments = (await Post.find({ $and:[{ replyToPostId:{ $in:postids } },{ postType:'comment'  },{ isDeleted:false }] })).length ;
   const commentsAfterTime = (await Post.find({ $and:[{ replyToPostId:{ $in:postids } },{ postType:'comment'  },{ isDeleted:false },{ createdAt:{ $gte:pastTimeMS }}] })).length ;
-  const commentsRate = comments > commentsAfterTime ? ( commentsAfterTime / ( comments - commentsAfterTime ) ) * 100 : 0 ;
+  const commentsRate = comments > commentsAfterTime ? Math.ceil( commentsAfterTime / ( comments - commentsAfterTime ) ) * 100 : 0 ;
 
   // repost stats...
   const reposts = (await Post.find({ $and:[{ repostId:{ $in:postids } },{ postType:'repost' },{ isDeleted:false }] })).length ; 
   const repostsAfterTime = (await Post.find({ $and:[{ repostId:{ $in:postids } },{ postType:'repost' },{ isDeleted:false },{ createdAt:{ $gte:pastTimeMS }}] })).length ; 
-  const repostsRate = reposts > repostsAfterTime ? ( repostsAfterTime / ( reposts - repostsAfterTime ) ) * 100 : 0 ;
+  const repostsRate = reposts > repostsAfterTime ? Math.ceil( repostsAfterTime / ( reposts - repostsAfterTime ) ) * 100 : 0 ;
 
   // views stats...
   const views = (await Views.find({ $and:[{ postId:{ $in:postids } },{ isQualified:true }] })).length ;
   const viewsAfterTime = (await Views.find({ $and:[{ postId:{ $in:postids } },{ isQualified:true },{ createdAt:{ $gte:pastTimeMS }}] })).length ;
-  const viewsRate = views > viewsAfterTime ? ( viewsAfterTime / ( views - viewsAfterTime ) ) * 100 : 0 ;
+  const viewsRate = views > viewsAfterTime ? Math.ceil( viewsAfterTime / ( views - viewsAfterTime ) ) * 100 : 0 ;
 
   // bookmarks stats...
   const bookmarks = (await tagged.find({ $and:[{ entityId:{ $in:postids }},{ taggedAs:'bookmarked' }]})).length ;
   const bookmarksAfterTime = (await tagged.find({ $and:[{ entityId:{ $in:postids }},{ taggedAs:'bookmarked' },{ createdAt:{ $gte:pastTimeMS }}]})).length ;
-  const bookmarksRate = bookmarks > bookmarksAfterTime ? ( bookmarksAfterTime / ( bookmarks - bookmarksAfterTime ) ) * 100 : 0 ;
+  const bookmarksRate = bookmarks > bookmarksAfterTime ? Math.ceil( bookmarksAfterTime / ( bookmarks - bookmarksAfterTime ) ) * 100 : 0 ;
 
   // visitors related stats...
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -363,7 +363,7 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
     deviceCounts[devicetype] += ua.count;
   }
   const totalDeviceCount = Object.values(deviceCounts).reduce((acc,count) => acc + count , 0) ;
-  const deviceStats = deviceTypes.map(name => ({ name , value: Math.ceil(((deviceCounts[name] || 0 )/totalDeviceCount) * 100 ) }));
+  const deviceStats = deviceTypes.map(name => ({ name , value: (Math.ceil((deviceCounts[name] || 0 )/totalDeviceCount) * 100 ) }));
 
   // gender demographics stats...
   const genderDemoPipeline = [
@@ -405,7 +405,7 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
   const genderData = await Views.aggregate(genderDemoPipeline);
   const genderMap = new Map(genderData.map(data => [data._id, data.count || 0]));
 
-  let totalGenderCount = 0 ;
+  let totalGenderCount : number = 0 ;
   genders.forEach(gender => {
     totalGenderCount += genderMap.get(gender) ;
   });
@@ -413,191 +413,165 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
   // final gender demographics...
   const genderDemographics = genders.map(gender => ({
     name: capitalizeString(gender),
-    value: totalGenderCount > 0 ? Math.ceil(((genderMap.get(gender) || 0) / totalGenderCount) * 100 ) : 0
+    value: totalGenderCount > 0 ? (Math.ceil((genderMap.get(gender) || 0) / totalGenderCount) * 100 ) : 0
   })); 
 
-  // fetching five recent posts...
-  // {
-//           num: 1,
-//           id:"IBFI(@$HFE@_#(",
-//           title: "This incredible natural attraction is one of the must-visits",
-//           date: "22-02-2023",
-//           views: 837748,
-//           likes: 24467,
-//           comments: 2578,
-//         }
+    // fetching top 5 posts...
+    const topPostsRaw = await Promise.all(accountPost.map(async (post,i) => {
+      const views = await viewStat.find({ $and:[{ postId:post._id }] }) ;
+      const likess = await likes.find({ $and:[{ targetEntity:post._id },{ createdAt:{ $gte:pastTimeMS }}] }) ;
+      const comments = await Post.find({ $and:[{ replyToPostId:post._id },{ postType:'comment'  },{ isDeleted:false },{ createdAt:{ $gte:pastTimeMS }}] });
 
-// const viewsCount = await viewStat.find({ $and:[{ postId:post._id }] }) ;
-//       const likesCount = await likes.find({ $and:[{ targetEntity:post._id },{ createdAt:{ $gte:pastTimeMS }}] }) ;
-//       const commentsCount = await Post.find({ $and:[{ replyToPostId:post._id },{ postType:'comment'  },{ isDeleted:false },{ createdAt:{ $gte:pastTimeMS }}] });
-
-//       return {
-//         num: i + 1 ,
-//         id:post._id ,
-//         title:post.content ,
-//         date:new Date(post.createdAt).toUTCString() ,
-//         views:viewsCount.length ,
-//         likes:likesCount.length ,
-//         comments:commentsCount.length 
-    const recentPost = accountPost.sort((post_1,post_2) => new Date(post_1.createdAt) - new Date(post_2.createdAt))
+      return {
+        num: i + 1 ,
+        id:post._id ,
+        title:post.content ,
+        views:views.length ,
+        likes:likess.length ,
+        comments:comments.length
+      }
+    }));
+    const topPosts = topPostsRaw.sort((post1,post2) => post2.views - post1.views || post2.likes - post1.likes || post2.comments - post1.comments).slice(0,4);
 
 
+    // fetching recent 5 posts from account...
+    const recentPost = await Promise.all(accountPost.sort((post_1,post_2) => new Date(post_2.createdAt).getTime() - new Date(post_1.createdAt).getTime()).slice(0,4).map( async (post,i) =>{
+      const views = await viewStat.find({ $and:[{ postId:post._id }] }) ;
+      const likess = await likes.find({ $and:[{ targetEntity:post._id },{ createdAt:{ $gte:pastTimeMS }}] }) ;
+      const comments = await Post.find({ $and:[{ replyToPostId:post._id },{ postType:'comment'  },{ isDeleted:false },{ createdAt:{ $gte:pastTimeMS }}] });
+      return {
+        num: i + 1 ,
+        id:post._id ,
+        title:post.content ,
+        date:new Date(post.createdAt).toUTCString(),
+        views:views.length ,
+        likes:likess.length ,
+        comments:comments.length
+      }
+    }));
+
+    // calculating top 5 country usage...    
+    // "Mehrauli Tehsil, IN" general structure...
+    const areaWiseViewPipeline = [
+        {
+          $match: {
+            postId: { $in:postids },
+            viewerId: { $ne: null },
+            createdAt:{ $gte : pastTimeMS }
+          }
+        },
+        {
+          $lookup: {
+            from: 'accounts',
+            localField: 'viewerId',
+            foreignField: '_id',
+            as: 'account',
+            pipeline: [ { $match: { 'account.status': 'ACTIVE' } } ]
+          }
+        },
+        { 
+          $unwind: { path: '$account', preserveNullAndEmptyArrays: true } 
+        },
+        {
+          $match: {
+            ['account.location.text']: { $nin: [null, undefined, ''] }
+          }
+        },
+        {
+           $group: {
+             _id: {
+               $trim: {
+                 input: {
+                   $arrayElemAt: [
+                     { $split: ["$account.location.text", ","] },1
+                   ]
+                 }
+                }
+             },
+             count: { $sum: 1 }
+           }
+        }
+     ];
+     const locationWiseViewData = await Views.aggregate(areaWiseViewPipeline) ;
+     const locationSorted = locationWiseViewData.sort((loc_1,loc_2) => loc_2.count - loc_1.count ).slice(0,4) ;
+
+     let locationCount : number = 0 ;
+     locationSorted.forEach((loc) => locationCount += loc.count ) ;
+     
+     const finalLocationDemo = locationSorted.map((loc) => {
+      const percentage = Math.ceil(loc.count/locationCount)  * 100 ;
+
+      return {
+        country: loc._id ,
+        percent: percentage
+      }
+     }) ;
+
+     // media content posted...
+    const mediaCounts : Record<string,number> = { videos:0 , images:0 , raw:0 , auto:0 } ;
+    const totalMediasArr = accountPost.map(post => post.mediaUrls) ;
+
+    totalMediasArr.forEach(media => mediaCounts[media.media_type] += 1) ;
+    
+    const finalMediaArr = Object.keys(mediaCounts).map(key => {
+      return { name:capitalizeString(key) , value:mediaCounts[key] } ;
+    })
+
+    // actions values for bar chart...
+    const actionForBarGraph = 
+    [
+        { name: "Likes", value: LikesAfterTime },
+        { name: "Comments", value: commentsAfterTime },
+        { name:"views" , value: viewsAfterTime },
+        { name: "Repost", value: repostsAfterTime },
+        { name: "Bookmarks", value: bookmarksAfterTime }
+    ]
+
+  // calculating followers trend 
+  const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const followersCount: Record<string, number> = { Sunday: 0, Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0 };
+
+  const followersAfterTimeDocs = await follows.find({
+    $and: [
+      { followingId: activeAcc._id },
+      { createdAt: { $gte: pastTimeMS } },
+      { isDeleted: false }
+    ]
+  });
+
+  followersAfterTimeDocs.forEach((followerDoc) => {
+    const dateOfCreation = new Date(followerDoc.createdAt);
+    const dayName = weekdays[dateOfCreation.getDay()];
+    followersCount[dayName] += 1;
+  });
+
+  const growthSeries = weekdays.map((day) => ({
+    name: day,
+    value: followersCount[day] || 0
+  }));
+
+  // final response payload matching frontend expectations
+  const analyticsPayload = {
+    overview: {
+      followers: { value: followers, rate: followersRate > 0 ? `+${followersRate}%` : '0%' },
+      followings: { value: followings, rate: followingsRate > 0 ? `+${followingsRate}%` : '0%' },
+      likes: { value: Likes, rate: likesRate > 0 ? `+${likesRate}%` : '0%' },
+      comments: { value: comments, rate: commentsRate > 0 ? `+${commentsRate}%` : '0%' },
+      reposts: { value: reposts, rate: repostsRate > 0 ? `+${repostsRate}%` : '0%' },
+      views: { value: views, rate: viewsRate > 0 ? `+${viewsRate}%` : '0%' },
+      bookmarks: { value: bookmarks, rate: bookmarksRate > 0 ? `+${bookmarksRate}%` : '0%' }
+    },
+    visitorseries: viewersSeries,
+    genderbreakdown: genderDemographics,
+    devicebreakdown: deviceStats,
+    recentuploads: recentPost,
+    topcountries: finalLocationDemo,
+    topposts: topPosts,
+    growthseries: growthSeries,
+    interactiontypes: actionForBarGraph,
+    contentperformance: finalMediaArr
+  };
+
+  return analyticsPayload ;
 }
 
-//     // overview of accounts (total interaction values...)
-// {
-//     followers: {
-//       value:54820803,
-//       rate:'+12.5%'
-//     },
-//     followings:{
-//       value:322,
-//       rate:'+0.1%'
-//     },
-//     likes: {
-//       value:26373493,
-//       rate:'+4.2%'
-//     } ,
-//     comments: {
-//       value:48938,
-//       rate:'-2.7%'
-//     } ,
-//     reposts:{
-//       value:421,
-//       rate:'+0.5%'
-//     },
-//     views: {
-//       value:42448203,
-//       rate:'+5.1%'
-//     },
-//     bookmarks:{
-//       value:105,
-//       rate:'+1.2%'
-//     }
-//   }
-
-//       // Visitor series for chart...
-//      [
-//         { name: "Jan", visitors: 22000 },
-//         { name: "Feb", visitors: 25000 },
-//         { name: "Mar", visitors: 32000 },
-//         { name: "Apr", visitors: 54000 },
-//         { name: "May", visitors: 37000 },
-//         { name: "Jun", visitors: 28000 },
-//         { name: "Jul", visitors: 66000 },
-//         { name: "Aug", visitors: 59000 },
-//         { name: "Sep", visitors: 42000 },
-//         { name: "Oct", visitors: 46000 },
-//         { name: "Nov", visitors: 48000 },
-//         { name: "Dec", visitors: 52000 },
-//       ];
-
-//       // Device breakdown
-//       [
-//         { name: "Desktop", value: 23 },
-//         { name: "Mobile", value: 44 },
-//         { name: "Tablet", value: 33 },
-//       ];
-
-//       // Gender breakdown for Profile Visitors
-//      [
-//         { name: "Male", value: 52 },
-//         { name: "Female", value: 44 },
-//         { name: "Other", value: 4 },
-//       ]
-
-//       // Recent uploads
-//       [
-//         {
-//           num: 1,
-//           id:"IBFI(@$HFE@_#(",
-//           title: "This incredible natural attraction is one of the must-visits",
-//           date: "22-02-2023",
-//           views: 837748,
-//           likes: 24467,
-//           comments: 2578,
-//         },
-//         {
-//           num: 2,
-//           id:"@(*RH@EF)_E)F",
-//           title: "The Skywalk, a glass leading out over the valley",
-//           date: "24-02-2023",
-//           views: 384753,
-//           likes: 87765,
-//           comments: 4766,
-//         },
-//         {
-//           num: 3,
-//           id:"NFD_@DEMIF$@",
-//           title: "Summer is the most popular time to visit these beaches",
-//           date: "26-02-2023",
-//           views: 296087,
-//           likes: 86298,
-//           comments: 3498,
-//         },
-//         {
-//           num: 4,
-//           id:"NFBU@EIF)#femi2",
-//           title: "The White House is the official residence for the President",
-//           date: "28-02-2023",
-//           views: 876753,
-//           likes: 98365,
-//           comments: 7876,
-//         },
-//       ]
-
-//       // Top countries
-//       [
-//         { country: "United States", percent: 34 },
-//         { country: "India", percent: 21 },
-//         { country: "Brazil", percent: 12 },
-//         { country: "UK", percent: 8 },
-//         { country: "Germany", percent: 5 },
-//       ];
-
-//       // Top posts (content performance)
-//         [{
-//           num:1,
-//           id: "p1",
-//           title: "Epic Sunrise Timelapse",
-//           views: 1200000,
-//           reach: 900000,
-//           engagement: 9.2,
-//         },
-//         {
-//           num:2,
-//           id: "p2",
-//           title: "Street Food Tour",
-//           views: 840000,
-//           reach: 600000,
-//           engagement: 7.1,
-//         },
-//         {
-//           num:3,
-//           id: "p3",
-//           title: "DIY Home Gym Setup",
-//           views: 610000,
-//           reach: 480000,
-//           engagement: 6.5,
-//         },  ]
-
-//       // Follower growth series (sparkline)
-//         [{ name: "Day 1", value: 120 },
-//         { name: "Day 2", value: 140 },
-//         { name: "Day 3", value: 180 },
-//         { name: "Day 4", value: 210 },
-//         { name: "Day 5", value: 260 },
-//         { name: "Day 6", value: 300 },
-//         { name: "Day 7", value: 350 }]
-
-//       // Interaction type breakdown
-//         [{ name: "Likes", value: 62 },
-//         { name: "Comments", value: 18 },
-//         { name: "Saves", value: 10 },
-//         { name: "Shares", value: 10 }]
-
- // content performance breakdown
-    // { name: "Videos", value:32 },
-    // { name: "Images", value:41 },
-    // { name: "Gifs", value:10 },
-    // { name: "Mixed", value:2 }

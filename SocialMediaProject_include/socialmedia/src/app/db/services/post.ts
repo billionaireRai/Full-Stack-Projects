@@ -35,11 +35,11 @@ interface postDeletionType {
     deleteRequestBy:string
 }
 
-interface pollOptionType {
+export interface pollOptionType {
     text: string,
     votes: number 
 }
-interface polltype {
+export interface polltype {
     question: string ,
     options: pollOptionType[],
     duration: number  
@@ -934,13 +934,14 @@ export const getBookmarkAndSuggestionService = async () => {
         };
     });
 
+    // Fetch blocked account IDs
+    const blockedDocs = await Block.find({ blockedByAcc: activeAcc._id, isActive: true });
+    const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
+    
     const suggestedFromMarked = await Promise.all(suggestedAccountsPromises);
     const filteredSuggestedFromMarked = suggestedFromMarked.filter(Boolean); // filtering the nulll values...
 
     // getting suggestions from relations...
-    // Fetch blocked account IDs
-    const blockedDocs = await Block.find({ blockedByAcc: activeAcc._id, isActive: true });
-    const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
 
     // generating the follow suggestions...
     const followingDocs = await follows.find({ followerId: activeAcc._id, isDeleted: false });
@@ -960,7 +961,7 @@ export const getBookmarkAndSuggestionService = async () => {
     const mutualFriendAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
         return returnAccountDataInStructure(accId);
     }));
-    const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id));
+    const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing );
 
     // Combine and deduplicate suggestions
     const allSuggestions = [new Set([...filteredSuggestedFromMarked, ...filteredMutualFriendAccounts])];
@@ -1369,7 +1370,7 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
         });
     }
 
-// arranging posts with decreasing order of subscription plan...
+    // arranging posts with decreasing order of subscription plan...
     const planArrange : Record<Plan,number> = { "Free": 0 , "Pro": 1 , "Creator": 2 , "Enterprise": 3 } ;
 
     const aarangedViaPlan = formattedPosts.sort((postA,postB) => {

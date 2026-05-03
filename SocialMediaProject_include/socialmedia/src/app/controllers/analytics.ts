@@ -25,6 +25,6 @@ export const getProfileDashboardAnalyticsController = asyncErrorHandler(async (r
         return NextResponse.json({ message:"Variable missing , please check..." },{ status:404 });
     }
 
-    // await getProfileDashboardAnalyticsService(handle,pastTime) ;
-    return NextResponse.json({ message:"Controller successfully triggered..." },{ status:200 });
+    // const data = await getProfileDashboardAnalyticsService(handle,pastTime,year) ;
+    return NextResponse.json({ message:"Controller successfully triggered..." , analytics:data },{ status:200 });
 })

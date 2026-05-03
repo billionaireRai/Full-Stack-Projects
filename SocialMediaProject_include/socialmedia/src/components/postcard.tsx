@@ -372,7 +372,7 @@ export default function PostCard({
 
    // favourite add handle...
    const handleAddFavourite = async () => {
-    if (!Account.account?.isVerified) setisPop(true);
+    if (!Account.account?.isVerified) setisPop(true) ;
     else {
       setFavouritePop(true);
     }
@@ -426,7 +426,7 @@ export default function PostCard({
 
   if (BlurPost) {
     return (
-      <div className="bg-white dark:bg-black shadow-sm hover:shadow-md dark:shadow-gray-900/50 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 my-1 sm:p-4">
+      <div className="bg-white dark:bg-black shadow-sm dark:shadow-gray-900/50 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 my-1 sm:p-4">
         <div className="flex items-start gap-3">
           {/* Avatar - blurred/hidden */}
           <div className="relative">
@@ -561,7 +561,7 @@ export default function PostCard({
             </Tooltip>
           
           {/* will add ( Account.decodedHandle === handle ) logic and uncomment other...  */}
-            {/* {postOptions && (
+            {postOptions && Account.decodedHandle === handle && (
               <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -622,9 +622,9 @@ export default function PostCard({
                   View post analytics
                 </Link>
               </motion.div>
-            )} */}
+            )}
             {/* && Account.decodedHandle !== handle */}
-            {postOptions  && (
+            {postOptions && Account.decodedHandle !== handle  && (
              <motion.div 
              initial={{ opacity: 0, scale: 0.8 }}
              animate={{ opacity: 1, scale: 1 }}
@@ -648,7 +648,7 @@ export default function PostCard({
                 className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                >
                  <UserPlus className="h-4 w-4" />
-                 {isFollowing ? 'Unfollow' : 'Follow'} {handle}
+                 {isFollowing ? 'Unfollow' : 'Follow'} <span className='font-semibold'>{handle}</span>
                </button>
                <button
                   onClick={() => { handleAddFavourite() }} 
@@ -685,7 +685,7 @@ export default function PostCard({
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
                >
                  <Ban className="h-4 w-4" />
-                  { isBlocked ? 'Unblock' : 'Block' } {handle}
+                  { isBlocked ? 'Unblock' : 'Block' } <span className='font-semibold'>{handle}</span>
                </button>
                <button
                   onClick={() => { setshowReportPop(true) }}

@@ -142,7 +142,7 @@ export const exploreDetailsForAccountService = async () => {
             return returnAccountDataInStructure(accId);
         })
     );
-    const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id));
+    const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
 
     // getting more accounts for suggestions...
     const ageRange = ['0-13','13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'] ;
@@ -180,24 +180,21 @@ export const exploreDetailsForAccountService = async () => {
     // sorting the array based on subscription level...
     const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Enterprise: 3 };
 
-    const accountsWithSubs = await Promise.all(uniqueAccArr.map(async (acc) => {
-        const account = await accounts.findOne({ username: acc.decodedHandle , 'account.status':'ACTIVE' });
-        const sub = account ? await subscriptions.findOne({ accountId: account._id, status: 'active' }) : null;
-        return { acc , plan: (sub?.plan as Plan) || 'free', isVerified: acc.account?.isVerified || false };
-    }));
-
     // sorting logic...
-    accountsWithSubs.sort((a, b) => {
-        const aLevel = planOrder[a.plan]; // plan hierarchy based on number...
-        const bLevel = planOrder[b.plan];
-        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
-        if (a.isVerified !== b.isVerified) return a.isVerified ? -1 : 1; // verified first...
+    const suggesstionsArr = uniqueAccArr.sort((a, b) => {
+        const aPlan = (a.account?.plan || 'Free') as Plan;
+        const bPlan = (b.account?.plan || 'Free') as Plan;
+        const aLevel = planOrder[aPlan] ?? 0;
+        const bLevel = planOrder[bPlan] ?? 0;
+        
+        if (aLevel !== bLevel) return bLevel - aLevel;
+        
+        const aVerified = a.account?.isVerified ?? false;
+        const bVerified = b.account?.isVerified ?? false;
+        if (aVerified !== bVerified) return aVerified ? -1 : 1;
         
         return 0;
     });
-
-    // final sorted array...
-    const suggesstionsArr = accountsWithSubs.map(item => item.acc); // usercardprop array...
 
     // calculating trending hashtags last 1 month...
     const totalHashtags: string[] = [];

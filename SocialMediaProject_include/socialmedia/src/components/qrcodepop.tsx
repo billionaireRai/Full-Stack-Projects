@@ -81,7 +81,7 @@ export default function Qrcodepop ({ path , owner , timestamp , doneScanning , c
                 </div>
               ) : ( 
                 <div ref={qrRef} className="text-gray-400 text-3xl font-mono rounded-md p-2">
-                  <QRCodeCanvas value={verifiedUrl} className='rounded-lg dark:invert' size={250} level='H' marginSize={1} bgColor="#FFFFFF" fgColor="#000000" />
+                  <QRCodeCanvas value={verifiedUrl} className='rounded-lg dark:invert' size={200} level='H' marginSize={1} bgColor="#FFFFFF" fgColor="#000000" />
                 </div>
             )}
             </div>

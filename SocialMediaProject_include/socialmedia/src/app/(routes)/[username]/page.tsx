@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
-import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon} from 'lucide-react';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
@@ -24,6 +24,7 @@ import { AxiosResponse } from 'axios';
 import DeleteModal from '@/components/deletemodal';
 import SharePopup from '@/components/sharePopUp';
 import Qrcodepop from '@/components/qrcodepop';
+import { BsPostcardFill } from 'react-icons/bs';
 
 interface mediaType {
   url: string;
@@ -64,7 +65,7 @@ interface PostType {
 
 interface innerPostAuthorInfo {
   postId?: string;
-  username: string;
+  name: string;
   handle: string;
   cover?: string;
   bio: string;
@@ -94,7 +95,7 @@ interface innerPostAuthorInfo {
   poll?: pollInfoType;
 }
 
-interface RepliedPostsType {
+export interface RepliedPostsType {
   id:string,
   postId:string,
   postAuthorInfo:innerPostAuthorInfo,
@@ -345,7 +346,7 @@ export default function UserProfilePage() {
       postId: '4223',
       postAuthorInfo: {
         postId: "4223",
-        username: "Amritansh Rai",
+        name: "Amritansh Rai",
         handle: "@amritansh_coder",
         cover: "",
         bio: 'love you guys...',
@@ -402,7 +403,7 @@ export default function UserProfilePage() {
       postId: '4224',
       postAuthorInfo: {
         postId: "4224",
-        username: "Sarah Tech",
+        name: "Sarah Tech",
         handle: "@sarah_dev",
         cover: "",
         bio: 'Full-stack developer | Open source contributor',
@@ -729,7 +730,7 @@ export default function UserProfilePage() {
         <div className='flex gap-2'>
           {/* Main Content - Profile */}
           <div className='flex-2 overflow-y-auto'>
-      <div className={`bg-white dark:bg-black text-gray-900 dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
+          <div className={`bg-white dark:bg-black text-gray-900 dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
               {/* Header */}
               <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
                 <div className="px-4 py-3">
@@ -740,7 +741,7 @@ export default function UserProfilePage() {
                      <Image src='/images/up-arrow.png' width={30} height={30} alt='back-arrow' className='-rotate-90 dark:invert' />
                     </button>
                     <div className="ml-4">
-                      <h1 className="text-xl font-semibold">{AccountInfo.name}</h1>
+                      <h1 className="text-xl font-semibold">{AccountInfo.handle}</h1>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{Posts.length} Posts</p>
                     </div>
                       {IsBlocked ? (
@@ -871,11 +872,11 @@ export default function UserProfilePage() {
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>Send Message</span><MessageCircle size={15}/>
                                </li>
-                               <li
-                               onClick={() => { toast.success('View Mutual Friends feature coming soon!') }}
-                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                               <Link 
+                                href={`/${AccountInfo.handle}/mutual-accounts`}
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>View Mutual Friends</span><Users size={15}/>
-                               </li>
+                               </Link>
                                <li
                                onClick={() => { toast.success('Add to List feature coming soon!') }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
@@ -927,10 +928,18 @@ export default function UserProfilePage() {
                       <h1 className="text-sm font-bold">.</h1>
                       <p className="text-gray-500 text-sm dark:text-gray-400">{AccountInfo.handle}</p>
                       { AccountInfo.isVerified ? (
-                       <Image src='/images/yellow-tick.png' width={25} height={25} alt='yellow-tick' />
+                       <Link
+                         href={'/subscription?utm_source=profile-page'}
+                         className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-0.5 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-sm hover:shadow-md hover:scale-105 cursor-pointer ring-1 ring-white/20"
+                       >
+                        <span className="text-[10px] font-bold uppercase tracking-widest">{AccountInfo.plan}</span>
+                        <div className="flex items-center justify-center w-4 h-4 bg-white rounded-full shadow-sm">
+                          <Image src='/images/yellow-tick.png' width={12} height={12} alt="verified" className="object-contain" />
+                        </div>
+                       </Link>
                        ) : (
                         <Link href='/subscription?utm_source=profile-page' className='border border-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-950 dark:border-yellow-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full'>
-                          <span>Get Verified</span><Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' />
+                          <Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' /><span className='text-gray-700 dark:text-gray-400'>get verified</span>
                         </Link>
                       )}
                       <Link href={`/${AccountInfo.handle}/favourites`} className='border border-black-500 text-white bg-black hover:opacity-85 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full transition-colors'>
@@ -995,7 +1004,9 @@ export default function UserProfilePage() {
                 {/* Posts Section */}
                 {(activeTab.label === 'Posts' || activeTab.label === 'All') && Posts.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Your posts</h3>
+                    <h3 className="text-xl flex items-center gap-2 font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                      <ImageIcon />
+                      <span>Your posts</span></h3>
                     <div className='space-y-4'>
                       {Posts.map((post:PostType) => (
                         <PostCard
@@ -1037,7 +1048,10 @@ export default function UserProfilePage() {
                 {/* Replied Posts Section */}
                 {(activeTab.label === 'Replied-Posts' || activeTab.label === 'All') && RepliedPosts.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Posts you replied to</h3>
+                    <h3 className="flex flex-row items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                      <MessageCircleMore />
+                      <span>Posts you replied</span>
+                    </h3>
                     <div className='space-y-6'>
                       {RepliedPosts.map((post: RepliedPostsType) => (
                         <div key={post.id} className="dark:bg-black rounded-xl p-4 border border-gray-200 dark:border-gray-900 transition-shadow">
@@ -1055,21 +1069,21 @@ export default function UserProfilePage() {
                               <div className="flex items-center space-x-2 mb-3">
                                 <span className="font-bold text-sm">{AccountInfo.name}</span>
                                 {AccountInfo.isVerified && (
-                                  <Image src='/svg/yellow-tick.svg' width={20} height={20} alt='yellow-tick' />
+                                  <Image src='/images/yellow-tick.png' width={20} height={20} alt='yellow-tick' /> 
                                 )}
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">{AccountInfo.handle}</span>
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">·</span>
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">{post.repliedAt}</span>
                               </div>
                               <div className="space-y-3">
-                                <Link href={`${post.postAuthorInfo.username}/post/${post.postId}`} className="text-blue-500 hover:underline text-sm inline-block">Replied to post</Link>
-                                <div className="ml-4 border-l-2 rounded-md border-gray-300 dark:border-gray-600 pl-4">
+                                <Link href={`${post.postAuthorInfo.handle}/post/${post.postId}`} className="text-blue-500 hover:underline text-sm inline-block">Replied to post</Link>
+                                <div className="ml-4 border-l-1 rounded-md border-yellow-300 dark:border-yellow-600 pl-4">
                                   <PostCard
                                     postId={post.postAuthorInfo.postId || post.postId}
                                     avatar={post.postAuthorInfo.avatar}
                                     cover={post.postAuthorInfo.cover }
-                                    username={post.postAuthorInfo.username}
-                                    handle={post.postAuthorInfo.handle || post.postAuthorInfo.username}
+                                    username={post.postAuthorInfo.name}
+                                    handle={post.postAuthorInfo.handle || post.postAuthorInfo.name}
                                     bio={post.postAuthorInfo.bio}
                                     followers={post.postAuthorInfo.followers}
                                     following={post.postAuthorInfo.following}
@@ -1140,7 +1154,7 @@ export default function UserProfilePage() {
                 {/* Media Section */}
                 {(activeTab.label === 'Media' || activeTab.label === 'All') && (
                   <div className='space-y-6'>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Media</h3>
+                    <h3 className="flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2"><ImagesIcon /><span>Media</span></h3>
                     {/* Images rendering section */}
                     {Medias.images.length > 0 && (
                       <div className="space-y-3">
@@ -1237,7 +1251,7 @@ export default function UserProfilePage() {
                 {/* Likes Section */}
                 {(activeTab.label === 'Likes' || activeTab.label === 'All') && LikedPost.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Liked posts</h3>
+                    <h3 className="flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2"><ThumbsUp /><span>Liked posts</span></h3>
                     <div className='space-y-4'>
                       {LikedPost.map((post:PostType) => (
                         <PostCard
@@ -1278,7 +1292,7 @@ export default function UserProfilePage() {
 
                 {(activeTab.label === 'Highlights' || activeTab.label === 'All') && Highlights.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Profile Highlights</h3>
+                    <h3 className="text-xl flex items-center gap-2 font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2"><HighlighterIcon /><span>Profile Highlights</span></h3>
                     <div className='space-y-4'>
                       {Highlights.map((post:PostType) => (
                         <PostCard

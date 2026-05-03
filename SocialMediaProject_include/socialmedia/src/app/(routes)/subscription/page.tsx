@@ -3,7 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
+import Activebeep from "@/components/activebeep";
 import { CreditCard } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export interface SubsPlanType {
   name: string;
@@ -34,6 +36,7 @@ export const plans: SubsPlanType[] = [
       "Standard feed distribution (no prioritization)",
       "Follow and message up to 20 users",
       "Basic profile customization",
+      "Specific Post analytics , performance check",
       "Self-service support via FAQs",
     ],
   },
@@ -51,7 +54,7 @@ export const plans: SubsPlanType[] = [
       "Ad-free browsing experience",
       "Enhanced profile credibility indicators",
       "Priority content indexing",
-      "Self-managed analytics dashboard",
+      "Account specific analytics dashboard",
     ],
   },
   {
@@ -67,9 +70,9 @@ export const plans: SubsPlanType[] = [
       "Reputation & authority score (expertise-based)",
       "Priority distribution across relevant feeds and accounts",
       "Advanced analytics dashboard (views, saves, visits)",
-      "Advanced post scheduling & versioning",
       "Self-managed moderation tools",
-      "Email support for issues",
+      "PDF data export feature for dashboard",
+      "Priority in reports resolution",
     ],
   },
   {
@@ -84,19 +87,21 @@ export const plans: SubsPlanType[] = [
       "In-depth analytics & performance insights",
       "Custom branding options for profile",
       "Exclusive access to beta features",
-      "Priority email support",
-      "Data export for personal records",
+      "Top Priority in email support",
     ],
   },
 ];
 
 export default function SubscriptionPage() {
+  const searchParams = useSearchParams() ; // intializing useParams() hook...
   const [selectedPlan, setSelectedPlan] = useState<SubsPlanType | null>(null);
 
   useEffect(() => {
-    if (selectedPlan) {
-      console.log("Selected Plan:", selectedPlan.name);
-    }
+    plans.forEach(plan => {
+      if (plan.name === searchParams.get('plan')) setSelectedPlan(plan) ;
+    })
+
+
   }, [selectedPlan]);
 
   const comparisonFeatures = [
@@ -139,10 +144,9 @@ export default function SubscriptionPage() {
       </div>
 
       {/* Plans Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-6xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full text-xs max-w-6xl">
         {plans.map((plan,i) => {
-          const isSelected = selectedPlan?.name === plan.name;
-
+          const isSelected = selectedPlan?.name === plan.name
           return (
             <div
               key={plan.name}
@@ -158,9 +162,10 @@ export default function SubscriptionPage() {
                   <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     {plan.name}
                   </h2>
-                  <span className={`text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-900/40 text-black dark:text-gray-300 ${plan.highlight === 'Most popular' ? 'animate-bounce' : ''}`}>
-                    <div className="bg-gray-200 dark:bg-gray-900/40 rounded-full">
-                      {plan.highlight}
+                  <span className={`text-xs px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300`}>
+                    <div className="bg-gray-100 dark:bg-gray-950 rounded-full flex flex-row items-center gap-1.5">
+                      <span>{plan.highlight}</span>
+                      {plan.highlight === 'Most popular' && <Activebeep />}
                     </div>
                   </span>
                 </div>
