@@ -36,8 +36,8 @@ conversationSchema.pre('save', function(next) {
 // Unique compound index for 1:1 chats...
 conversationSchema.index({ participants: 1 }, { unique: true });
 
-const Conversation = mongoose.model('Conversation', conversationSchema);
+const conversation = mongoose.models.conversation || mongoose.model('conversation', conversationSchema);
 
-export default Conversation ;
+export default conversation ;
 
 

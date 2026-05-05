@@ -93,6 +93,6 @@ reportSchema.index(
   { unique: true }
 );
 
-const reports = mongoose.model("reports", reportSchema);
+const reports = mongoose.models.reports || mongoose.model("reports", reportSchema);
 
 export default reports;

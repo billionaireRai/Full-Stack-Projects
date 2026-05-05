@@ -33,6 +33,7 @@ export default function ProfileEditor({ closePop , credentials }: EditorProps) {
     Posts: "3,245",
     isCompleted:false,
     isVerified: false,
+    plan:'Free',
     bannerUrl: "/images/default-banner.jpg",
     avatarUrl: "/images/default-profile-pic.png"
   })

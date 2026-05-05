@@ -104,6 +104,6 @@ const userSettingsSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-const UserSettings = mongoose.model("UserSettings", userSettingsSchema);
+const settings = mongoose.models.settings || mongoose.model("settings", userSettingsSchema);
 
-export default UserSettings;
+export default settings;

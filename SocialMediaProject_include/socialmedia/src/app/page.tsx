@@ -58,7 +58,7 @@ export default function HomePage() {
             <Image src='/images/letter-B.png' className="rounded-full dark:invert" width={120} height={120} alt="letter-B" />
           </div>
           <span className="text-[30px] sm:text-[50px] font-extrabold cursor-pointer">What's happening Now !!!</span>
-          <p className="text-center text-sm w-full sm:max-w-2xl sm:text-lg">
+          <p className="text-center text-xs w-full sm:max-w-2xl sm:text-sm">
             Join Briezly today and connect with friends and family in a fun, easy, and secure way! Share your moments, discover new people, and build lasting relationships on our social media platform.
           </p>
           <div className="flex flex-col sm:flex-row w-full p-2 gap-5 items-center justify-center border-none">
@@ -67,7 +67,7 @@ export default function HomePage() {
           </div>
             <hr className="w-1/3 border-b rounded-full border-gray-300 dark:border-gray-600 my-2"/>
             <Link href={`/auth/sign-up?latitude=${Location[0]}&longitude=${Location[1]}&text=${text}`} className="flex flex-row gap-2.5 cursor-pointer hover:bg-yellow-400 hover:shadow-lg bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-4 py-2 justify-center border rounded-lg"><Image src='/images/email.png' className="dark:invert" width={30} height={30} alt="facebook-icon" /><span>SignUp with Email</span></Link>
-            <p className="text-center">
+            <p className="text-center text-xs sm:text-sm">
               By Signing up you agree to Our <b>terms</b> and <b>policies</b> give you credentials to us including <b>cookies</b> usage... 
             </p>
             <hr className="w-1/3 border-b rounded-full border-gray-300 dark:border-gray-600 my-2"/>

@@ -134,8 +134,8 @@ export default function UserProfilePage() {
   const { isPop , setisPop } = useUpgradePop() ;
   const { username } = useParams() ; // taking the username from URL...
   const fetchedHandlesRef = useRef<Set<string>>(new Set()); // ref to track fetched handles
+  const isSelf = Account.decodedHandle === decodeURIComponent(String(username)) ? true : false ;
   const [isFollowing, setisFollowing] = useState<boolean>(false);
-  const [isSelf, setisSelf] = useState<boolean>(false) ;
   const [ShowQRPop, setShowQRPop] = useState(false);
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
@@ -596,13 +596,11 @@ export default function UserProfilePage() {
       if (fetchedHandlesRef.current.has(handle)) return ; // Skip if already fetched
 
       if (Account.account && Account.account?.handle === handle) {
-        setisSelf(true);
         const acc = await getlatestprofileInfo(Account.account?.handle);
         if (acc !== 'failed' && acc?.data?.account) {
           setAccount(acc.data.account);
           setAccountInfo(acc.data.account);
           setIsBlocked(acc.Blocked);
-          setshowBlockPop(true);
           fetchedHandlesRef.current.add(handle);
         }
       } else {
@@ -611,17 +609,16 @@ export default function UserProfilePage() {
         if (acc !== 'failed' && acc?.data.account) {
           setAccountInfo(acc.data.account);
           setIsBlocked(acc.Blocked);
-          setshowBlockPop(true);
           fetchedHandlesRef.current.add(handle);
         }
       }
     };
-    // fetchAccountData();
+    fetchAccountData();
   }, [Account.account, username])
 
   useEffect(() => {
     async function functionToGetData() : Promise<void> {
-      const specificData : AxiosResponse = await axiosInstance.post('/api/profile',{ handle:AccountInfo.handle });
+      const specificData : AxiosResponse = await axiosInstance.post('/api/profile',{ handle:AccountInfo.handle.substring(1) });
       if (specificData.status === 200) {
         const data = specificData.data.Infos;
         if (data.posts) setPosts(data.posts);
@@ -640,7 +637,7 @@ export default function UserProfilePage() {
     setLoading(true); // from the starting...
     const newFollowing = !isFollowing; // determine the new state...
     try {
-      const apires: AxiosResponse = await axiosInstance.get(`/api/user/follow?accounthandle=${AccountInfo.handle}&follow=${newFollowing}`); // api response instance...
+      const apires: AxiosResponse = await axiosInstance.get(`/api/user/follow?accounthandle=${AccountInfo.handle.substring(1)}&follow=${newFollowing}`); // api response instance...
         if (apires.status === 200) {
           setisFollowing(newFollowing); // update state immediately on success...
           toast.success(`${newFollowing ? 'Added to your following...' : 'Removed from following !!'}`);
@@ -903,7 +900,7 @@ export default function UserProfilePage() {
                       </motion.div>
                     )}
                   </button>
-                  {!isSelf && (
+                  { !isSelf && (
                   <button
                     disabled={IsBlocked}
                     onClick={() => handleFollowToggleLogic()}

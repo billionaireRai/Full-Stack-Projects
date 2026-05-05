@@ -115,6 +115,6 @@ const feedbackSchema = new mongoose.Schema(
 // Preventing feedback spam from same user for same type...
 feedbackSchema.index({ userId: 1, type: 1 });
 
-const Feedback = mongoose.model("Feedback", feedbackSchema);
+const Feedback = mongoose.models.feedback || mongoose.model("Feedback", feedbackSchema);
 
 export default Feedback;

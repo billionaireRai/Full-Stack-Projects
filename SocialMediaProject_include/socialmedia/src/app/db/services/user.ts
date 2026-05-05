@@ -740,7 +740,8 @@ export const profileUpdateService = async (data: accountType) => {
 
         const user = await getDecodedDataFromCookie("accessToken");
         if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST.' });
-
+        
+        console.log('Token result :',user);  // error is between this and the next log...
         const [cityname, countrycode] = data.location.text.split(',').map(s => s.trim());
         const geocodingFinalUrl = `${process.env.GEOCODING_URL}q=${encodeURIComponent(cityname)},${encodeURIComponent(countrycode)}&limit=1&appid=${process.env.NEXT_PUBLIC_GEOCODING_API_KEY}`;
 
@@ -751,6 +752,7 @@ export const profileUpdateService = async (data: accountType) => {
 
         const Account = await accounts.findOne({ $and:[{ userId:user.id },{ 'account.Active':true }]}) ; 
 
+        console.log('Account fethced in service...');
          // uploading media on cloud...
         if (Account.avatar?.public_id) {
             await cloudinary.uploader.destroy(Account.avatar.public_id); // deleteing the existing avatar...
@@ -758,6 +760,8 @@ export const profileUpdateService = async (data: accountType) => {
         if (Account.banner?.public_id) {
             await cloudinary.uploader.destroy(Account.banner.public_id); // deleteing the existing banner...
         }
+
+        console.log("Pre uploaded profile pic and banner is checked...");
 
         // function returning media url and public_id...
         const cloudinaryMediaInfo =  (title:profileEditMediaType) => {
@@ -774,7 +778,7 @@ export const profileUpdateService = async (data: accountType) => {
                 avatar: cloudinaryMediaInfo('avatarUrl'),
                 banner: cloudinaryMediaInfo('bannerUrl'),
                 name: data.name,
-                username: data.handle,
+                username: data.handle.substring(1),
                 location: {
                     text: data.location.text,
                     coordinates: [lat, lon]
@@ -785,6 +789,7 @@ export const profileUpdateService = async (data: accountType) => {
             },
             { new: true }
         );
+        console.log("Profile is updated..")
 
         if (!updatedAccount) return NextResponse.json({ message: 'Account not found or update failed' }, { status: 404 });
 

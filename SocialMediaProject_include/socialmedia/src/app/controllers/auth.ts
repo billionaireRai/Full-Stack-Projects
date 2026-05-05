@@ -54,9 +54,9 @@ export const registerUserController = asyncErrorHandler(async (request:NextReque
      const { Name , Username , Email , Password } = await request.json() ; // extracting data from request body...
     // extracting latitude and longitude from query params...
     const url = new URL(request.nextUrl);
-    const lat = url.searchParams.get('lat');
-    const long = url.searchParams.get('long');
-    const text = url.searchParams.get('text');
+    const lat = String(url.searchParams.get('lat'));
+    const long = String(url.searchParams.get('long'));
+    const text = String(url.searchParams.get('text'));
     // applying some importants checks...
     if (!Name || !Username || !Email || !Password) {
         console.log('One or More credentials missing check again!!!');

@@ -24,11 +24,11 @@ const accountSchema = new mongoose.Schema({
     location: {
       text: {
         type: String,
-        default: 'location'
+        default: 'New Delhi, IN'
       },
       coordinates: {
         type: [Number],
-        default: [0.0, 0.0] // lat,long
+        default: [28.36, 77.12] // lat,long
       }
     },
     avatar:{

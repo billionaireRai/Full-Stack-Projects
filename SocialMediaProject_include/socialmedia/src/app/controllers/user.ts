@@ -55,7 +55,7 @@ export const triggerFollowToggleController = asyncErrorHandler( async (request:N
 
     if (!accounthandle || !follow) {
         console.log('Any of neccessary credentials missing...');
-        return NextResponse.json({message:'credentials missing !!'},{ status:400 }) ;
+        return NextResponse.json({message:'credentials missing !!'},{ status:404 }) ;
     }
     
     // await userFollowService(accounthandle,follow) ; // calling DB service...
@@ -66,10 +66,10 @@ export const userProfileUpdationController = asyncErrorHandler( async (request:N
     const { updatedData } = await request.json() ; // getting updating data...
     if (!updatedData) {
         console.log('updated data missing...');
-        return NextResponse.json({ message:'updated data missing !!' }, { status:200 });
+        return NextResponse.json({ message:'updated data missing !!' }, { status:404 });
     }
 
-    // await profileUpdateService(updatedData); // calling DB service function...
+    await profileUpdateService(updatedData);
     return NextResponse.json({message:'action performed successfully...' },{ status:200 });
 })
 
@@ -119,7 +119,7 @@ export const newAccountCreationController = asyncErrorHandler(async (request:Nex
         return NextResponse.json({ message:'credentials missing !!' },{ status:400 })
     }
 
-    // await newAccountCreationService(finalData);
+    await newAccountCreationService(finalData);
     return NextResponse.json({ message:'New Account Successfully created...' },{ status:200 });
 })
 
@@ -131,7 +131,7 @@ export const getAllAccountsOfUserController = asyncErrorHandler(async (request:N
         return NextResponse.json({ message:'Missing handle !!' },{ status:400 })
     }
 
-    // await fetchingAccountsService(currentAccHandle);
+    await fetchingAccountsService(currentAccHandle);
     return NextResponse.json({ message:'New Account Successfully created...' },{ status:200 });
 })
 
@@ -142,7 +142,7 @@ export const switchTheActiveAccountController = asyncErrorHandler(async (request
         return NextResponse.json({ message:'Please send neccessary credentials...' },{ status:400 });
     }
     
-    // await switchAccountService(toSwitchAcc) ;
+    await switchAccountService(toSwitchAcc) ;
     return NextResponse.json({ message:'New Account Successfully created...' },{ status:200 });
 })
 
