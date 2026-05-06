@@ -758,11 +758,11 @@ export default function UserProfilePage() {
               </header>
 
               {/* Cover Photo */}
-              <div className={`relative h-full rounded-lg bg-gradient-to-r from-yellow-100 to-yellow-300`}>
+              <div className={`relative h-80 w-full rounded-lg bg-gradient-to-r from-yellow-100 to-yellow-300`}>
                 <img
                   src={AccountInfo.bannerUrl}
                   alt="Cover"
-                  className="object-cover h-fit rounded-lg"
+                  className="object-cover h-full rounded-lg"
                 />
               </div>
 
@@ -770,13 +770,11 @@ export default function UserProfilePage() {
               <div className={`relative px-4 ${ IsBlocked ? 'bg-red-50 dark:bg-red-950 border border-red-600' : ''}  rounded-lg`}>
                 {/* Avatar */}
                 <div className="absolute -top-16 left-4">
-                  <div className="relative">
+                  <div className="relative w-32 h-32 rounded-full">
                     <img
                       src={AccountInfo.avatarUrl}
-                      width={125}
-                      height={125}
                       alt='avatar'
-                      className={`rounded-full object-contain border-2 bg-white dark:bg-black ${IsBlocked ? 'border-red-500' : 'border-yellow-100 dark:border-black'}`}
+                      className={`rounded-full border-2 bg-white dark:bg-black ${IsBlocked ? 'border-red-500' : 'border-yellow-100 dark:border-black'}`}
                     />
                   </div>
                 </div>
@@ -1059,7 +1057,7 @@ export default function UserProfilePage() {
                               alt={AccountInfo.name}
                               width={48}
                               height={48}
-                              className="rounded-full object-cover flex-shrink-0"
+                              className="rounded-full w-13 h-13 sm:w-15 sm:h-15 object-cover flex-shrink-0"
                             />
                            </div>
                             <div className="flex-1 min-w-0">

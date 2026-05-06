@@ -14,7 +14,6 @@ export default function SwitchAccountPopUp () {
   const { setisPopOpen } = useSwitchAccount();
   const { Account , setAccount } = useActiveAccount() ;
   const router = useRouter() ;
-  const params = useParams() ;
   const { User } = useUserInfo() ;
   const [Accounts,setAccounts] = useState<userCardProp[]>([
     {
@@ -133,7 +132,7 @@ export default function SwitchAccountPopUp () {
   // getting all the accounts owner by user...
   async function functionToGetAccounts() {
     try {
-      const accountapi = await axiosInstance.get(`/api/profile/${Account.decodedHandle}`);
+      const accountapi = await axiosInstance.get(`/api/profile/username?currentHandle=${String(Account.decodedHandle).substring(1)}`);
       if (accountapi.status === 200) {
         setAccounts(accountapi.data.allAccs) ;
         console.log('All accounts fetched successfully...');
@@ -147,7 +146,7 @@ export default function SwitchAccountPopUp () {
 
   // useffect for running on page load...
   useEffect(() => {
-     //  functionToGetAccounts() ;
+      functionToGetAccounts() ;
   }, [])
   
   
@@ -195,7 +194,7 @@ export default function SwitchAccountPopUp () {
           </Link> 
         </div>
         <div className="space-y-1">
-          {Accounts.map((account,index) => (
+          {Accounts?.map((account,index) => (
             <button 
              key={index}
              onClick={() => { setcurrentAccount(account) }}

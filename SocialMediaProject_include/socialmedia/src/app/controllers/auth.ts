@@ -124,7 +124,7 @@ export const logginUserController = asyncErrorHandler( async (request:NextReques
         userId:serviceRes?.userId,
         activeAccount:serviceRes?.accountInfo
     }
-    return NextResponse.json({message:'User logged In successfully', userCred:info , handle:`@${serviceRes.accountInfo.decodedHandle}`},{status:200});
+    return NextResponse.json({message:'User logged In successfully', userCred:info , handle:`${serviceRes.accountInfo.decodedHandle}`},{status:200});
 })
 
 

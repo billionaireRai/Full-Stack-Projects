@@ -42,7 +42,7 @@ export default function createNewAccount() {
     const loadingToast = toast.loading('creating new account...');
     try {
       const finalData = { ...data , accType: { value: currAccType.value, label: currAccType.label } } ;
-      const apires = await axiosInstance.patch(`/api/profile/${params.username}`,{ finalData }) ;
+      const apires = await axiosInstance.patch(`/api/profile/username?currentHandle=${params.username}`,{ finalData }) ;
       if (apires.status === 200) {
         toast.dismiss(loadingToast);
         toast.success('Account created successfully !!');

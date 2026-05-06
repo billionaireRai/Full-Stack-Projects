@@ -125,7 +125,7 @@ export const newAccountCreationController = asyncErrorHandler(async (request:Nex
 
 export const getAllAccountsOfUserController = asyncErrorHandler(async (request:NextRequest) => {
     const requesturl = new URL(request.nextUrl) ;
-    const currentAccHandle = requesturl.username ;
+    const currentAccHandle = requesturl.searchParams.get('currentHandle') ;
     if (!currentAccHandle) {
         console.log('Active Account handle missing...');
         return NextResponse.json({ message:'Missing handle !!' },{ status:400 })

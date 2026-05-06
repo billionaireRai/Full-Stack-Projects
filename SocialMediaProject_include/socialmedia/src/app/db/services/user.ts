@@ -741,27 +741,40 @@ export const profileUpdateService = async (data: accountType) => {
         const user = await getDecodedDataFromCookie("accessToken");
         if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST.' });
         
-        console.log('Token result :',user);  // error is between this and the next log...
+        
+        // Enhanced location geocoding debugging
+        console.log('Location text:', JSON.stringify(data.location.text));
         const [cityname, countrycode] = data.location.text.split(',').map(s => s.trim());
+        
         const geocodingFinalUrl = `${process.env.GEOCODING_URL}q=${encodeURIComponent(cityname)},${encodeURIComponent(countrycode)}&limit=1&appid=${process.env.NEXT_PUBLIC_GEOCODING_API_KEY}`;
-
-        const locationApi = await axios.get(geocodingFinalUrl);
-        if (!locationApi.data || locationApi.data.length === 0) return NextResponse.json({ message: 'Location not found' }, { status: 400 });
-
-        const { lat, lon } = locationApi.data[0]; // extracting the required data...
+        
+        let lat = 0, lon = 0;
+        try {
+            console.log("Location api hit...");
+            const locationApi = await axios.get(geocodingFinalUrl, { timeout: 10000 });
+            
+            if (locationApi.data && locationApi.data.length > 0) {
+                const { lat: apiLat, lon: apiLon } = locationApi.data[0];
+                console.log(`lat ${lat} & long ${lon}`);
+                lat = apiLat;
+                lon = apiLon;
+            } else {
+                console.log('Geocoding empty - using fallback [0,0]');
+            }
+        } catch (geocodeError) {
+            console.log('Using fallback coordinates [0,0]');
+        }
 
         const Account = await accounts.findOne({ $and:[{ userId:user.id },{ 'account.Active':true }]}) ; 
 
-        console.log('Account fethced in service...');
          // uploading media on cloud...
-        if (Account.avatar?.public_id) {
-            await cloudinary.uploader.destroy(Account.avatar.public_id); // deleteing the existing avatar...
-        }
-        if (Account.banner?.public_id) {
-            await cloudinary.uploader.destroy(Account.banner.public_id); // deleteing the existing banner...
-        }
+        // if (Account.avatar?.public_id) {
+        //     await cloudinary.uploader.destroy(Account.avatar.public_id); // deleteing the existing avatar...
+        // }
+        // if (Account.banner?.public_id) {
+        //     await cloudinary.uploader.destroy(Account.banner.public_id); // deleteing the existing banner...
+        // }
 
-        console.log("Pre uploaded profile pic and banner is checked...");
 
         // function returning media url and public_id...
         const cloudinaryMediaInfo =  (title:profileEditMediaType) => {
