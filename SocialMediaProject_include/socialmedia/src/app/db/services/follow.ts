@@ -131,11 +131,13 @@ export const newAccountCreationService = async (newAcc:newAccType) => {
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
 
+    if (newAcc.userid !== user.id) return NextResponse.json({ message:'Invalid user ID sent...' },{ status:404 });
+    
     const viewerAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
     if (!viewerAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     const NewAccount = new accounts({
-        userId:viewerAcc._id,
+        userId:user.id ,
         name:newAcc.Name ,
         username:newAcc.Username,
         'avatar.url':'/images/default-profile-pic.png', 

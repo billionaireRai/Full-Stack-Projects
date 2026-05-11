@@ -10,7 +10,7 @@ import { usernameRegex } from "@/app/controllers/regex";
 import { User, AtSign, Lock, Globe, Palette, Briefcase } from "lucide-react"; // lightweight icons
 import axiosInstance from "@/lib/interceptor";
 import toast from "react-hot-toast";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 interface Option {
   value:string,
@@ -27,6 +27,8 @@ const newAccCreation = z.object({
 export default function createNewAccount() {
   const params = useParams() ; // getting the params...
   const router = useRouter() ;
+  const searchParam = useSearchParams() ;
+  const userid = searchParam.get('userId');
   // initializing the react-hook-form...
   const { register , handleSubmit , formState:{ errors , isSubmitting }} = useForm({ resolver:zodResolver(newAccCreation) }) ;
   const [accOptions, setaccOptions] = useState<Option[]>([
@@ -41,12 +43,12 @@ export default function createNewAccount() {
   const handleDataSubmission = async (data: z.infer<typeof newAccCreation>) => {
     const loadingToast = toast.loading('creating new account...');
     try {
-      const finalData = { ...data , accType: { value: currAccType.value, label: currAccType.label } } ;
+      const finalData = { ...data , userid:userid , accType: { value: currAccType.value, label: currAccType.label } } ;
       const apires = await axiosInstance.patch(`/api/profile/username?currentHandle=${params.username}`,{ finalData }) ;
       if (apires.status === 200) {
         toast.dismiss(loadingToast);
         toast.success('Account created successfully !!');
-        router.push(`/${decodeURIComponent(String(params.username))}?switch-account-pop=true`) ;
+        // router.push(`/${decodeURIComponent(String(params.username))}?switch-account-pop=true`) ;
       } else {
         toast.dismiss(loadingToast);
         toast.error('Account creation failed !!');

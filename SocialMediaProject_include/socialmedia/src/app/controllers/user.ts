@@ -15,6 +15,7 @@ export interface reportInfoType {
 export interface newAccType {
     Name: string,
     Username: string,
+    userid: string,
     accType: { value: string, label: string }
 }
 

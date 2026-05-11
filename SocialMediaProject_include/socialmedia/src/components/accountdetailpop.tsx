@@ -77,7 +77,7 @@ return (
           <img
             src={user.cover}
             alt={`${user.name} cover`}
-            className="object-cover rounded-lg"
+            className="object-cover h-full rounded-lg"
           />
         )}
       </div>

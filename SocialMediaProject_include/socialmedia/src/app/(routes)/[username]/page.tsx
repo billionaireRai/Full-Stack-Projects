@@ -762,7 +762,7 @@ export default function UserProfilePage() {
                 <img
                   src={AccountInfo.bannerUrl}
                   alt="Cover"
-                  className="object-cover h-full rounded-lg"
+                  className="object-cover w-full h-full rounded-lg"
                 />
               </div>
 
