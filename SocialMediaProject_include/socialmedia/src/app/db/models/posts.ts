@@ -33,7 +33,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "",
-      maxlength: [280, "Content cannot exceed 280 characters"]
+      maxlength: [500, "Content cannot exceed 500 characters"]
     },
 
     mediaUrls: {
@@ -41,7 +41,15 @@ const postSchema = new mongoose.Schema(
       default: [],
       validate: {
         validator: function(v: any[]) {
-          return v.every((item: any) => urlRegex.test(item.url));
+          return v.every((item: any) => {
+            if (!item || typeof item.url !== 'string' || !item.url.trim()) return false;
+            try {
+              new URL(item.url);
+              return true;
+            } catch {
+              return false;
+            }
+          });
         },
         message: "Incorrect URL format..."
       }

@@ -74,6 +74,6 @@ pollSchema.index({ authorPost: 1, createdAt: -1 });
 pollSchema.index({ expiry: 1 });
 pollSchema.index({ isActive: 1, createdAt: -1 });
 
-const Poll = mongoose.models.Poll || mongoose.model("Poll", pollSchema);
+const polls = mongoose.models.polls || mongoose.model("polls", pollSchema);
 
-export default Poll;
+export default polls;

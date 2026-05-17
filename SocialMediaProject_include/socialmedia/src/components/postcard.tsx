@@ -38,7 +38,8 @@ import {
   RefreshCw,
   ThumbsUp,
   BookmarkPlus,
-  ExternalLink
+  ExternalLink,
+  ArrowBigRightDashIcon
 } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { AxiosResponse } from 'axios';
@@ -156,6 +157,7 @@ export default function PostCard({
   const [viewPop, setviewPop] = useState<boolean>(false) ;
   const [ToPinPop, setToPinPop] = useState(false);
   const [planIntent, setplanIntent] = useState<string>('Pro');
+  const [ArrowPop, setArrowPop] = useState(false);
   const [showBlockPop, setshowBlockPop] = useState<boolean>(false);
   const [isBlocked, setisBlocked] = useState<boolean>(false);
   const [IsFollowing, setIsFollowing] = useState<boolean>(isFollowing);
@@ -177,7 +179,6 @@ export default function PostCard({
   const postref = useRef<HTMLDivElement>(null) ;
   const avatarRef = useRef<HTMLImageElement>(null);
   const shareRef = useRef<HTMLButtonElement>(null);
-  const creatorOrEnterprise = ['Creator', 'Enterprise'].includes(Account.account?.plan || '');
 
   // Reusable click-outside handler
   const useClickOutside = (handlers: { isOpen: boolean; selector: string; setOpen: (value: boolean) => void }[]) => {
@@ -727,7 +728,7 @@ export default function PostCard({
                 )
               ) : (
                 <div className="grid grid-cols-2 gap-1">
-                  {displayMedia.filter(item => item.url && item.url.trim() !== '').slice(0, 4).map((item,index) => (
+                  {displayMedia.filter(item => item.url && item.url.trim() !== '').map((item,index) => (
                     item.media_type === 'video' ? (
                      <Link key={index+1} href={item.url}>
                       <video
@@ -772,11 +773,16 @@ export default function PostCard({
               </Tooltip>
             ))}
           </div>
-          { Account.decodedHandle === handle && creatorOrEnterprise && (
+          { Account.decodedHandle === handle && ( Account.account?.plan === 'Creator' || Account.account?.plan === 'Enterprise') && (
           <div className='p-2 rounded-md flex items-center justify-end'>
-            <div className='flex items-center justify-center gap-2 rounded-md'>
-              <button className='text-white border dark:border-gray-800 hover:opacity-85 bg-black cursor-pointer py-1 px-3 rounded-md flex items-center gap-1'><DollarSign/><span>Monetize</span></button>
-              <button className='text-white border dark:border-gray-800 hover:opacity-85 bg-black cursor-pointer py-1 px-4 rounded-md flex items-center gap-1'><TrendingUp/><span>Boost</span></button>
+            <div onClick={() => { setArrowPop(!ArrowPop) }} className='border relative cursor-pointer border-gray-400 dark:border-gray-800 rounded-full p-1'>
+              <ArrowBigRightDashIcon />
+            { ArrowPop && (
+              <div className='flex flex-col absolute right-0 top-full border border-black items-start justify-center gap-2 p-1 rounded-md'>
+                <button className='text-white border dark:border-gray-800 hover:opacity-85 bg-black cursor-pointer py-1 px-3 rounded-md flex items-center gap-1'><DollarSign/><span>Monetize</span></button>
+                <button className='text-white border dark:border-gray-800 hover:opacity-85 bg-black cursor-pointer py-1 px-4 rounded-md flex items-center gap-1'><TrendingUp/><span>Boost</span></button>
+              </div>
+           )}
             </div>
           </div>
           )}

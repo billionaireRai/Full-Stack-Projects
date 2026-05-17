@@ -60,6 +60,6 @@ const messageSchema = new mongoose.Schema(
 // for fast chat retrieval...
 messageSchema.index({ fromId: 1, toId: 1, createdAt: -1 });
 
-const Message = mongoose.models.message || mongoose.model("Message", messageSchema);
+const messages = mongoose.models.messages || mongoose.model("messages", messageSchema);
 
-export default Message;
+export default messages;

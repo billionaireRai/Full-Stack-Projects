@@ -134,27 +134,26 @@ export default function SwitchAccountPopUp () {
     try {
       const accountapi = await axiosInstance.get(`/api/profile/username?currentHandle=${String(Account.decodedHandle).substring(1)}`);
       if (accountapi.status === 200) {
-        setAccounts(accountapi.data.allAccs) ;
-        console.log('All accounts fetched successfully...');
-        return 'success' ;
+        setAccounts(accountapi.data.allAccs);
+        console.log(accountapi.data);
+        return 'success';
       }
     } catch (error) {
-      console.log(error);
-      return error ;
+      return error;
     }
   }
 
-  // useffect for running on page load...
+  // useffect for getting user accounts...
   useEffect(() => {
-      functionToGetAccounts() ;
-  }, [])
+    functionToGetAccounts();
+  }, [Account?.decodedHandle]);
   
   
   // function handling switching account...
   const handleSwitchAccountLogic = async (toSwitchAcc:userCardProp) => { 
     const loadingToast = toast.loading('Swithing account please wait...',{ position:'top-right' })
     try {
-      const switchapi = await axiosInstance.put(`/api/profile/${Account.decodedHandle}`,{ toSwitchAcc:toSwitchAcc }) ;
+      const switchapi = await axiosInstance.put(`/api/profile/username`,{ toSwitchAcc:toSwitchAcc }) ;
       if (switchapi.status === 200) {
         toast.dismiss(loadingToast) ;
         toast.success('Account switched successfully !!', { position:'top-right' });
@@ -194,11 +193,11 @@ export default function SwitchAccountPopUp () {
           </Link> 
         </div>
         <div className="space-y-1">
-          {Accounts?.map((account,index) => (
+          {Array.isArray(Accounts) && Accounts.map((account,index) => (
             <button 
              key={index}
              onClick={() => { setcurrentAccount(account) }}
-             className={`w-full ${account === currentAccount && 'border-yellow-400' } group border-1 hover:border-yellow-400 cursor-pointer flex items-center space-x-4 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-gray-950 dark:hover:from-gray-800 dark:hover:to-gray-700 group`}>
+             className={`w-full ${account.decodedHandle === currentAccount?.decodedHandle && 'border-yellow-400' } group border-1 hover:border-yellow-400 cursor-pointer flex items-center space-x-4 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-gray-950 dark:hover:from-gray-800 dark:hover:to-gray-700 group`}>
                <Usercard key={index} IsFollowing={account.IsFollowing} decodedHandle={account.decodedHandle} name={account.name} content={null} account={account.account} />
                <div className={`invisible text-yellow-400 group-hover:visible border border-yellow-400 ${account.decodedHandle === currentAccount?.decodedHandle && 'visible' } rounded-full`}>
                 <CheckCircleIcon/>

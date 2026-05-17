@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
-import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon} from 'lucide-react';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon, VideoOffIcon, File} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
@@ -129,6 +129,8 @@ interface tabsTypes {
 }
 
 export default function UserProfilePage() {
+  const isTab = (id: string) => activeTab.id === id || activeTab.id === 'all';
+
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
   const router = useRouter() ;
   const { isPop , setisPop } = useUpgradePop() ;
@@ -140,7 +142,7 @@ export default function UserProfilePage() {
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [planIntent, setplanIntent] = useState<string>('Pro');
-  const [suggesstionNum, setsuggesstionNum] = useState<number>(4);
+  const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
   const [showDeleteAccPop,setshowDeleteAccPop] = useState<boolean>(false);
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
   const [Loading, setLoading] = useState(false);
@@ -584,12 +586,6 @@ export default function UserProfilePage() {
     }
   ]);
 
-  const [Posts, setPosts] = useState<PostType[]>(posts) ; // rendering some random posts...
-  const [RepliedPosts, setRepliedPosts] = useState<RepliedPostsType[]>(repliedPostData) ; // rendering some random replied posts...
-  const [Medias, setMedias] = useState<userAllMedias>(userMedia);
-  const [Highlights, setHighlights] = useState<PostType[]>(highLightPosts);
-  const [LikedPost, setLikedPost] = useState<PostType[]>(likedPosts);
-
   useEffect(() => {
     const fetchAccountData = async () => {
       const handle = decodeURIComponent(username as string)?.slice(1);
@@ -617,20 +613,33 @@ export default function UserProfilePage() {
   }, [Account.account, username])
 
   useEffect(() => {
+    if (!username) return;
+
+    const rawUsername = decodeURIComponent(String(username));
+    const handleFromUsername = rawUsername.startsWith('@') ? rawUsername.slice(1) : rawUsername;
+
     async function functionToGetData() : Promise<void> {
-      const specificData : AxiosResponse = await axiosInstance.post('/api/profile',{ handle:AccountInfo.handle.substring(1) });
-      if (specificData.status === 200) {
-        const data = specificData.data.Infos;
-        if (data.posts) setPosts(data.posts);
-        if (data.likedPosts) setLikedPost(data.likedPosts);
-        if (data.medias) setMedias(data.medias) ;
-        if (data.suggestions) setFollowSuggesstions(data.suggestions) ;
-        if (data.replies) setRepliedPosts(data.replies) ;
-        if (data.highlights) setHighlights(data.highlights) ;
+      try {
+        const specificData: AxiosResponse = await axiosInstance.post('/api/profile', { handle: handleFromUsername });
+        if (specificData.status === 200) {
+          const Data = specificData.data.Infos ;
+
+          setposts(Data.posts);
+          setlikedPosts(Data.likedPosts);
+          setuserMedia(Data.medias);
+          setFollowSuggesstions(Data.suggestions);
+          setrepliedPostData(Data.replies);
+          sethighLightPosts(Data.highlights);
+
+        }
+      } catch (err) {
+        console.error('profile fetch failed:', err);
       }
     }
-    // functionToGetData();
-  }, [AccountInfo.handle])
+
+    // running only when username exists...
+    if (username) functionToGetData();
+  }, [username])
   
   // toggleing follow logic...
   async function handleFollowToggleLogic() {
@@ -709,7 +718,7 @@ export default function UserProfilePage() {
   // function for showing more suggestions...
   const handleSuggesstionShow = () => {
     if (ShowLess) {
-      setsuggesstionNum(4);
+      setsuggesstionNum(3);
       setShowLess(false);
     } else {
       if ( ( FollowSuggesstions.length - suggesstionNum ) >= 3 ) {
@@ -739,7 +748,7 @@ export default function UserProfilePage() {
                     </button>
                     <div className="ml-4">
                       <h1 className="text-xl font-semibold">{AccountInfo.handle}</h1>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{Posts.length} Posts</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{posts.length} Posts</p>
                     </div>
                       {IsBlocked ? (
                         <div className={`flex items-center justify-center flex-row flex-1 ml-5 p-2 gap-1 rounded-md ${IsBlocked ? 'bg-red-50 dark:bg-red-950' : 'bg-white/80 dark:bg-black/80'}`}>
@@ -825,24 +834,15 @@ export default function UserProfilePage() {
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>Manage Notifications</span><Bell size={15}/>
                                 </li>
-
-                                <li onClick={() => { toast.success('Privacy Settings feature coming soon!') }} className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Privacy Settings</span><Shield size={15}/>
-                                </li>
                                 <li
                                 onClick={() => { toast.success('Account Settings feature coming soon!') }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                  <span>Account Settings</span><Settings size={15}/>
                                 </li>
                                 <li
-                                onClick={() => { toast.success('Download Data feature coming soon!') }}
-                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Download Data</span><Download size={15}/>
-                                </li>
-                                <li
                                 onClick={() => { setshowDeleteAccPop(true)  }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
-                                 <span>Delete Account</span><Delete size={15}/>
+                                 <span>Delete Account <b>{AccountInfo.handle}</b></span><Delete size={15}/>
                                 </li>
                             </>
                           ) : (
@@ -996,14 +996,15 @@ export default function UserProfilePage() {
 
               {/* Posts Feed */}
               <div className='py-4 px-4 space-y-8'>
+                 <h3 className="text-xl flex items-center gap-2 font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                    <ImageIcon />
+                    <span>Your posts</span>
+                  </h3>
                 {/* Posts Section */}
-                {(activeTab.label === 'Posts' || activeTab.label === 'All') && Posts.length > 0 && (
+                {isTab('posts') && posts.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="text-xl flex items-center gap-2 font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                      <ImageIcon />
-                      <span>Your posts</span></h3>
                     <div className='space-y-4'>
-                      {Posts.map((post:PostType) => (
+                      {posts.map((post:PostType) => (
                         <PostCard
                           key={post.id}
                           postId={post.id}
@@ -1014,7 +1015,7 @@ export default function UserProfilePage() {
                           bio={AccountInfo.bio}
                           timestamp={post.postedAt}
                           content={post.content}
-                          media={post.media || []}
+                          media={post.media}
                           likes={post.likes}
                           reposts={post.reposts}
                           replies={post.comments}
@@ -1040,15 +1041,22 @@ export default function UserProfilePage() {
                   </div>
                 )}
 
-                {/* Replied Posts Section */}
-                {(activeTab.label === 'Replied-Posts' || activeTab.label === 'All') && RepliedPosts.length > 0 && (
+                {isTab('posts') && posts.length === 0 && (
+                  <div className="text-center py-12">
+                    <ImageIcon width={64} height={64} className='dark:invert mx-auto mb-4 opacity-50' />
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">No posts available</p>
+                  </div>
+                )}
+
+
+                  <h3 className="flex flex-row items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                    <MessageCircleMore />
+                    <span>Posts you replied</span>
+                  </h3>
+                {isTab('replies') && repliedPostData.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="flex flex-row items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                      <MessageCircleMore />
-                      <span>Posts you replied</span>
-                    </h3>
                     <div className='space-y-6'>
-                      {RepliedPosts.map((post: RepliedPostsType) => (
+                      {repliedPostData.map((post: RepliedPostsType) => (
                         <div key={post.id} className="dark:bg-black rounded-xl p-4 border border-gray-200 dark:border-gray-900 transition-shadow">
                           <div className="flex space-x-3">
                            <div>
@@ -1145,17 +1153,24 @@ export default function UserProfilePage() {
                     </div>
                   </div>
                 )}
+                  {/* No Replied Posts Section */}
+                {isTab('replies') && repliedPostData.length === 0 && (
+                  <div className="text-center py-12">
+                    <MessageCircleMore width={64} height={64} className='dark:invert mx-auto mb-4 opacity-50' />
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">No replied posts available</p>
+                  </div>
+                )}
 
                 {/* Media Section */}
-                {(activeTab.label === 'Media' || activeTab.label === 'All') && (
+                {isTab('media') && (
                   <div className='space-y-6'>
                     <h3 className="flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2"><ImagesIcon /><span>Media</span></h3>
                     {/* Images rendering section */}
-                    {Medias.images.length > 0 && (
+                    {Array.isArray(userMedia.images) && userMedia.images.length > 0 && (
                       <div className="space-y-3">
                         <h4 className="text-lg font-medium text-gray-900 dark:text-white">Images</h4>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {Medias.images.map((image, index) => (
+                          {userMedia.images.map((image, index) => (
                             <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition-shadow">
                               <Link href={image} target="_blank" key={index}  >
                                 <Image
@@ -1174,11 +1189,11 @@ export default function UserProfilePage() {
                     )}
 
                     {/* Videos Section */}
-                    {Medias.videos.length > 0 && (
+                    {Array.isArray(userMedia.videos) && userMedia.videos.length > 0 && (
                       <div className="space-y-3">
                         <h4 className="text-lg font-medium text-gray-900 dark:text-white">Videos</h4>
                         <div className="space-y-4">
-                          {Medias.videos.map((video, index) => (
+                          {userMedia.videos.map((video, index) => (
                             <div key={index} className="rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 shadow-sm">
                               <video
                                 src={video}
@@ -1195,11 +1210,11 @@ export default function UserProfilePage() {
                     )}
 
                     {/* Documents Section */}
-                    {Medias.docs.length > 0 && (
+                    {Array.isArray(userMedia.docs) && userMedia.docs.length > 0 && (
                       <div className="space-y-3">
                         <h4 className="text-lg font-medium text-gray-900 dark:text-white">Documents</h4>
                         <div className="space-y-3">
-                          {Medias.docs.map((doc, index) => {
+                          {userMedia.docs.map((doc, index) => {
                             const fileName = doc.split('/').pop() || `Document ${index + 1}`;
                             const fileExtension = fileName.split('.').pop()?.toUpperCase() || 'FILE';
                             return (
@@ -1233,22 +1248,51 @@ export default function UserProfilePage() {
                       </div>
                     )}
 
-                    {/* If no media is yet uploaded... */}
-                    {Medias.images.length === 0 && Medias.videos.length === 0 && Medias.docs.length === 0 && (
-                      <div className="text-center py-12">
-                        <Image src='/images/no-camera.png' width={64} height={64} alt='media-nil' className='dark:invert mx-auto mb-4 opacity-50' />
-                        <p className="text-gray-500 dark:text-gray-400 text-lg">No media available</p>
-                      </div>
-                    )}
+                    {/* Fallbacks when a specific media tab has no content */}
+                    {isTab('media') &&
+                      Array.isArray(userMedia.images) &&
+                      userMedia.images.length === 0 && (
+                        <div className="text-center py-12">
+                            <Image
+                              src='/images/no-camera.png'
+                              width={64}
+                              height={64}
+                              alt='posts-nil'
+                              className='dark:invert mx-auto mb-4 opacity-50'
+                              />
+                          <p className="text-gray-500 dark:text-gray-400 text-lg">No images available</p>
+                        </div>
+                      )}
+
+                    {isTab('media') &&
+                      Array.isArray(userMedia.videos) &&
+                      userMedia.videos.length === 0 && (
+                        <div className="text-center py-12">
+                          <VideoOffIcon width={64} height={64} className='dark:invert mx-auto mb-4 opacity-50' />
+                          <p className="text-gray-500 dark:text-gray-400 text-lg">No videos available</p>
+                        </div>
+                      )}
+
+                    {isTab('media') &&
+                      Array.isArray(userMedia.docs) &&
+                      userMedia.docs.length === 0 && (
+                        <div className="text-center py-12">
+                          <File width={64} height={64} className='dark:invert mx-auto mb-4 opacity-50' />
+                          <p className="text-gray-500 dark:text-gray-400 text-lg">No documents available</p>
+                        </div>
+                      )}
                   </div>
                 )}
-
-                {/* Likes Section */}
-                {(activeTab.label === 'Likes' || activeTab.label === 'All') && LikedPost.length > 0 && (
+                
+                
+                <h3 className="flex flex-row items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                  <ThumbsUp />
+                  <span>Liked posts</span>
+                </h3>
+                {isTab('likes') && likedPosts.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2"><ThumbsUp /><span>Liked posts</span></h3>
                     <div className='space-y-4'>
-                      {LikedPost.map((post:PostType) => (
+                      {likedPosts.map((post:PostType) => (
                         <PostCard
                           key={post.id}
                           postId={post.id}
@@ -1284,12 +1328,19 @@ export default function UserProfilePage() {
                     </div>
                   </div>
                 )}
-
-                {(activeTab.label === 'Highlights' || activeTab.label === 'All') && Highlights.length > 0 && (
+                 {/* Likes Section */}
+                {isTab('likes') && likedPosts.length === 0 && (
+                  <div className="text-center py-12">
+                    <ThumbsUp width={64} height={64} className='dark:invert mx-auto mb-4 opacity-50'/>
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">No liked posts available</p>
+                  </div>
+                )}
+                
+                <h3 className="text-xl flex items-center gap-2 font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2"><HighlighterIcon /><span>Profile Highlights</span></h3>
+                {isTab('highlights') && highLightPosts.length > 0 && (
                   <div className='space-y-4'>
-                    <h3 className="text-xl flex items-center gap-2 font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2"><HighlighterIcon /><span>Profile Highlights</span></h3>
                     <div className='space-y-4'>
-                      {Highlights.map((post:PostType) => (
+                      {highLightPosts.map((post:PostType) => (
                         <PostCard
                           key={post.id}
                           postId={post.id}
@@ -1323,6 +1374,13 @@ export default function UserProfilePage() {
                         />
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {isTab('highlights') && highLightPosts.length === 0 && (
+                  <div className="text-center py-12">
+                    <HighlighterIcon width={64} height={64} className='dark:invert mx-auto mb-4 opacity-50'/>
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">No highlights available</p>
                   </div>
                 )}
 

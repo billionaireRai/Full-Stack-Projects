@@ -36,17 +36,16 @@ export const getUserAccountController = asyncErrorHandler(async (request:NextReq
     return NextResponse.json({ message:'profile fetch successfull !!',accountData:data.formatedOne , blocked:data.isBlocked },{ status:200 });
 })
 
-export const getProfileSpecificDataController = asyncErrorHandler( async (request:NextRequest) => { 
-    const { handle } = await request.json() ; // extracting the handle...
-    if (!handle) {
-        console.log('Account handle is REQUIRED !!');
-        return NextResponse.json({message:'Account handle unavailable...'},{ status:404 });
-    }
+export const getProfileSpecificDataController = asyncErrorHandler(async (request: NextRequest) => { 
+  const { handle } = await request.json(); // extracting the handle...
+  if (!handle) {
+    console.log('Account handle is REQUIRED !!');
+    return NextResponse.json({ message: 'Account handle unavailable...' }, { status: 404 });
+  }
 
-    const comingData = await profileSpecificDataService(handle) ; // task intensive function...
+  return profileSpecificDataService(handle);
+});
 
-    return NextResponse.json({message:'specific data fetched...' , Infos:comingData},{ status:200 });
-})
 
 export const triggerFollowToggleController = asyncErrorHandler( async (request:NextRequest) => { 
     const requestUrl = new URL(request.nextUrl) ; // making a url instance...
@@ -132,8 +131,9 @@ export const getAllAccountsOfUserController = asyncErrorHandler(async (request:N
         return NextResponse.json({ message:'Missing handle !!' },{ status:400 })
     }
 
-    await fetchingAccountsService(currentAccHandle);
-    return NextResponse.json({ message:'New Account Successfully created...' },{ status:200 });
+    const data = await fetchingAccountsService(currentAccHandle);
+    if (data instanceof NextResponse) return data;
+    return data;
 })
 
 export const switchTheActiveAccountController = asyncErrorHandler(async (request:NextRequest) => {
@@ -158,7 +158,7 @@ export const gettingSearchedAccountController = asyncErrorHandler( async (reques
     }
     
     await gettingAccountService(search) ; 
-    return NextResponse.json({ message:'accounts successfully fetched...', searchedAcc:[{}] },{ status:200 })
+    return NextResponse.json({ message:'accounts successfully fetched...' },{ status:200 })
 })
 
 export const getSearchedLocation = asyncErrorHandler(async (request:NextRequest) => {

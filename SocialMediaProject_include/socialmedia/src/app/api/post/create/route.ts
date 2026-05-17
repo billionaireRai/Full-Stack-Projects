@@ -4,7 +4,6 @@ import { createANewPostService } from "@/app/db/services/post";
 
 export async function POST(req: Request) {
     const formData = await req.formData() ; // getting the form data...
-    console.log(formData) ;
 
     const postText = formData.get('postText') as string;
     const mentions = JSON.parse(formData.get('mentions') as string);
@@ -16,7 +15,8 @@ export async function POST(req: Request) {
     const videoUrls = formData.getAll('videoUrls') as File[];
     const gifsArr = formData.getAll('gifsArr') as File[];
 
-   // await createANewPostService({ postText, imgUrls, videoUrls, mentions, gifsArr, taggedLocation, canBeRepliedBy, poll });
+   await createANewPostService({ postText, imgUrls, videoUrls, mentions, gifsArr, taggedLocation, canBeRepliedBy, poll });
 
+   return NextResponse.json({ message:'Post creation triggered... '},{ status:200 });
 }
 

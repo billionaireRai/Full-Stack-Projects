@@ -199,11 +199,11 @@ export const fetchingAccountsService = async (handle:string) => {
 
     const allAccounts = await accounts.find({ $and:[{ userId:user.id },{ 'account.status':{ $in: ['ACTIVE','DEACTIVATED'] } }]}) ;
 
-    const structuredAcc = allAccounts.map((acc) => { 
-        return returnAccountDataInStructure(acc._id) ;
-    })
+    const structuredAcc = await Promise.all(allAccounts.map( async(acc) => { 
+        return await returnAccountDataInStructure(acc._id) ;
+    }))
 
-    return NextResponse.json({ message: 'accounts fetched...' , allAccs:structuredAcc }, { status: 200 });
+    return NextResponse.json({ message: 'Accounts fetched successfully' , allAccs:structuredAcc }, { status: 200 });
 }
 
 export const switchAccountService =  async (toAccount:userCardProp) => {

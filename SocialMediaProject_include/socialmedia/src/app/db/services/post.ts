@@ -2,6 +2,7 @@ import { connectWithMongoDB } from "../dbConnection";
 import { NextResponse } from "next/server";
 import { uploadMediaOnCloudinary } from "@/app/controllers/cloudinary";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
+import { urlRegex } from '@/app/controllers/regex';
 import mongoose from "mongoose";
 import accounts from "../models/accounts";
 import Post from "../models/posts";
@@ -67,21 +68,22 @@ export const createANewPostService = async ( data:any ) => {
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     // checking post restriction...
-    const currentDate = new Date();
-    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    // const currentDate = new Date();
+    // const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    // const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
     const totalPostsThisMonth = await Post.countDocuments({
         authorId: activeAcc._id,
-        isDeleted: false,
         postType:'original',
-        createdAt: { $gte: monthStart, $lt: monthEnd }
+        isDeleted: false,
+        // createdAt: { $gte: monthStart, $lt: monthEnd }
     });
+    const foundAccounts = await accounts.find({ username: { $in: mentions } , 'account.status': 'ACTIVE' }).select('_id username').lean();
 
     // posts limited to 20 for unverified accounts...
-    if (!activeAcc.isVerified.value && ( totalPostsThisMonth >= 20 || (String(postText).length > 100))) {
-        console.log("Post creation restricted , get verified !!");
-        return NextResponse.json({ message: 'Post limit of this month exceeded for unverified accounts !!' }, { status: 429 });
-    }
+    // if (!activeAcc.isVerified.value && ( totalPostsThisMonth >= 20 || (String(postText).length > 100))) {
+    //     console.log("Post creation restricted , get verified !!");
+    //     return NextResponse.json({ message: 'Post limit of this month exceeded for unverified accounts !!' }, { status: 429 });
+    // }
 
     // uploading media on cloudinary...
     const uploadedImgObjs : uploadedObj[] = await Promise.all( imgUrls.map( async (url:File) => { 
@@ -109,26 +111,23 @@ export const createANewPostService = async ( data:any ) => {
         
     }))
 
-    // getting the accounts...
-    const foundAccounts = await accounts.find({
-        username: { $in: mentions },
-        'account.status': 'ACTIVE'
-    }).select('_id username').lean();
-
     // Create a map for quick lookup and maintain order
     const accountIdMap = new Map(foundAccounts.map(acc => [acc.username, acc._id]));
-    const mentionsAccountsIds = mentions
-        .map((username:string) => accountIdMap.get(username))
-        .filter(Boolean); // Filter out mentions with no matching account
-    const fullMediaArr = [ ...uploadedImgObjs , ...uploadedvideoObjs , ...uploadedgifsArrObjs ] ; // full array of media...
-    const newPost = new Post({
-        authorId:activeAcc._id,
-        content:postText,
-        mediaUrls: fullMediaArr.map((media) => ({ url: media.url, public_id: media.public_id, media_type: media.resource_type })),
-        replyAllowedBy:canBeRepliedBy,
-        mentions:mentionsAccountsIds,
-        taggedLocation : taggedLocation
+    const mentionsAccountsIds = mentions.map((username:string) => accountIdMap.get(username)).filter(Boolean); // Filter out mentions with no matching account
+
+    const fullMediaArr = [...uploadedImgObjs,...uploadedvideoObjs,...uploadedgifsArrObjs]; // full array of media...
+
+    const finalMediaArr = fullMediaArr.map(media => { 
+        if (media.success) return { url:media.url ,public_id:media.public_id ,media_type:media.resource_type  } ;
     })
+    const newPost = new Post({
+        authorId: activeAcc._id,
+        content: postText,
+        mediaUrls: finalMediaArr,
+        replyAllowedBy: canBeRepliedBy,
+        mentions: mentionsAccountsIds,
+        taggedLocation: taggedLocation,
+    });
     
     if (poll && poll.question) {
         const expiry = new Date(Date.now() + poll.duration * 1000); // expiry time based on duration...

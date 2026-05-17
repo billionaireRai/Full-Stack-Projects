@@ -60,7 +60,7 @@ export default function CreatePost() {
   const [openReplyOptions, setOpenReplyOptions] = useState(false);
   const { poll: PollInfo, isCreateOpen: showPollModal, setIsCreateOpen: setShowPollModal, isDisplayOpen: showDisplayModal, setIsDisplayOpen: setShowDisplayModal, resetPoll } = usePoll();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const maxPostLength : number = Account.account?.isVerified ? 500 : 100 ; 
+  const maxPostLength : number = Account.account?.isVerified ? 500 : 100 ; // conditional length...
 
   // Auto-resize textarea
   useEffect(() => {
@@ -120,7 +120,7 @@ export default function CreatePost() {
 
     setIsPosting(true);
     try {
-      const formData = new FormData();
+      const formData = new FormData(); // initializing formData instance...
       formData.append('postText', post);
       formData.append('mentions', JSON.stringify(MentionedTo));
       formData.append('taggedLocation', JSON.stringify(AddLocation));
@@ -132,15 +132,13 @@ export default function CreatePost() {
       gifFiles.forEach(file => formData.append('gifsArr', file));
 
       const postSubmissionApi = await axiosInstance.post('/api/post/create', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        }
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       if (postSubmissionApi.status === 200) {
         setCreatePop(false);
-        toast.success('Post created successfully!');
-        router.push(`/@${Account.decodedHandle}`);
+        toast.success('Post created successfully !!');
+        // router.push(`/@${Account.decodedHandle}`);
         resetForm();
       }
     } catch (error) {

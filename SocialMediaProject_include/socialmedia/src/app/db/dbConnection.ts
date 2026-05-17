@@ -11,20 +11,34 @@ function passNodeEnvironment(env:string) {
   return env.substring(0,4); 
 }
 
+let connected:boolean = false ;
+
 export const connectWithMongoDB = async () => {
+  const readyState = mongoose.connection.readyState; // 1=connected, 0=disconnected
+  if (readyState) return ;
+
   try {
     const MONGODB_URI = process.env.MONGODB_CLOUD_URL;
     const MONGODB_DB = process.env.MONGODB_DB_NAME;
     if (!MONGODB_URI || !MONGODB_DB) throw new Error("Any MONGODB credentials are missing...");
 
     const fullUri = `${MONGODB_URI.replace(/\/+$/, "")}/${MONGODB_DB.replace(/^\/+/, "")}_${passNodeEnvironment(NODE_ENV)}`;
-    await mongoose.connect(fullUri, {bufferCommands: true,autoCreate: false,autoIndex: false,maxPoolSize:10,serverSelectionTimeoutMS:5000,socketTimeoutMS:45000});
+
+    // conncurency safe connection...
+    // IMPORTANT: await connect so mongoose.connection.db is available immediately after.
+    if (!connected) {
+      await mongoose.connect(fullUri, { bufferCommands: true, autoCreate: false, autoIndex: false, maxPoolSize: 10, serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000,
+      });
+      connected = true;
+    }
 
     const db = mongoose.connection.db;
     if (!db) throw new Error("Failed to get database instance");
 
+
+
     const collections = await db.collections() ;
-    const toCreate = [process.env.DB_COL_USERS,process.env.DB_COL_POSTS,process.env.DB_COL_COMMENTS,process.env.DB_COL_FOLLOWS,process.env.DB_COL_LIKES,process.env.DB_COL_VIEWS,process.env.DB_COL_NOTIFICATIONS,process.env.DB_COL_MESSAGES,process.env.DB_COL_SUBSCRIPTION,process.env.DB_COL_REPORTS,process.env.DB_COL_FEEDBACK,process.env.DB_COL_BLOCKED,process.env.DB_COL_ACCOUNTS,process.env.DB_COL_SETTINGS,process.env.DB_COL_OAUTH,process.env.DB_COL_BOOKMARK,process.env.DB_COL_PRESENSE,process.env.DB_COL_CONVERSATION] ;
+    const toCreate = [process.env.DB_COL_USERS,process.env.DB_COL_POSTS,process.env.DB_COL_COMMENTS,process.env.DB_COL_FOLLOWS,process.env.DB_COL_LIKES,process.env.DB_COL_VIEWS,process.env.DB_COL_NOTIFICATIONS,process.env.DB_COL_MESSAGES,process.env.DB_COL_SUBSCRIPTION,process.env.DB_COL_REPORTS,process.env.DB_COL_FEEDBACK,process.env.DB_COL_BLOCKED,process.env.DB_COL_ACCOUNTS,process.env.DB_COL_SETTINGS,process.env.DB_COL_OAUTH,process.env.DB_COL_BOOKMARK,process.env.DB_COL_POLLS,process.env.DB_COL_PRESENSE,process.env.DB_COL_CONVERSATION] ;
     const validCollections = toCreate.filter((name) => {
       if (!name) {
         console.warn("Warning: One of the MongoDB collection env variables is missing.");

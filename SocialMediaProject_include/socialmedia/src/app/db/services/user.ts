@@ -303,17 +303,18 @@ export async function creatingUserAfterOauth(email: string, name: string,pic:str
 
 export async function accountFetchingService(handle:string) {
     await connectWithMongoDB() ; // establishing the connection with DB...
-
+    
     const user = await getDecodedDataFromCookie("accessToken");
     // Return the error response...
     if (user instanceof Error) return NextResponse.json({ message:user.message },{ status:401, statusText: 'UNAUTHORIZED REQUEST...' });
+    
 
     // Get viewer's account
     const myAccount = await accounts.findOne({ userId:user.id, 'account.Active': true, 'account.status':'ACTIVE' });
     if (!myAccount) return NextResponse.json({ message: 'Viewer account not found' }, { status: 404 });
 
     // getting account details...
-    const account = await accounts.findOne({ username:handle, 'account.Active': true ,'account.status':'ACTIVE'})  ;
+    const account = await accounts.findOne({ username:handle,'account.status':'ACTIVE' })  ;
     if (!account) {
         console.log('account unavailable , check account handle !!');
         return NextResponse.json({message:'account unavailable...'},{status:400});
@@ -362,22 +363,26 @@ export const profileSpecificDataService = async (handle:string) => {
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message:user.message },{ status:401, statusText: 'UNAUTHORIZED REQUEST...' });
 
-    const myAccount = await accounts.findOne({ authorId:user.id , 'account.status':'ACTIVE' , 'account.Active':true }) ; // getting my account...
-
+    const myAccount = await accounts.findOne({ userId: user.id , 'account.status':'ACTIVE' , 'account.Active':true }) ; // viewer's account doc
     // target profile...
     const targetAcc = await accounts.findOne({ username:handle , 'account.status':'ACTIVE' });
+    
+    if (!myAccount) return NextResponse.json({ message: 'Logged in account missing !!' }, { status: 404 });
+    if (!targetAcc) return NextResponse.json({ message: 'Target account not found !!' }, { status: 404 });
+
     // Fetch blocked account IDs
-    const blockedDocs = await Block.find({ blockedByAcc: myAccount._id, isActive: true });
-    const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
+    // const blockedDocs = await Block.find({ blockedByAcc: user.id , isActive: true });
+    // const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
+
     // generating the follow suggestions...
-    const followingDocs: InstanceType<typeof follows>[] = await follows.find({ followerId : targetAcc._id , isDeleted:false});
-    const followingAccountId : string[] = followingDocs.map((followObj) => followObj.followingId ) ;
+    // const followingDocs: InstanceType<typeof follows>[] = await follows.find({ followerId : targetAcc._id , isDeleted:false});
+    // const followingAccountId : string[] = followingDocs.map((followObj) => followObj.followingId ) ;
     
     // getting the mutual followers...
-    const mutualFollowingId = followingAccountId.map(async (accountId : string) => {
-        const thereFollowings : InstanceType<typeof follows>[] = await follows.find({ followerId:accountId , isDeleted:false }) ;
-        return thereFollowings.map((followobj) => followobj.followingId.toString()) ;
-    }) ;
+    // const mutualFollowingId = followingAccountId.map(async (accountId : string) => {
+    //     const thereFollowings : InstanceType<typeof follows>[] = await follows.find({ followerId:accountId , isDeleted:false }) ;
+    //     return thereFollowings.map((followobj) => followobj.followingId.toString()) ;
+    // }) ;
 
     async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
         const paticularAcc = await accounts.findById(accountId) ;
@@ -416,82 +421,102 @@ export const profileSpecificDataService = async (handle:string) => {
 
     }
 
-// Resolve and flatten mutual following IDs...
-    const resolvedMutualFollowing = await Promise.all(mutualFollowingId);
-    const flattenedMutualIds = resolvedMutualFollowing.flat();
+    // Resolve and flatten mutual following IDs...
+    // const resolvedMutualFollowing = await Promise.all(mutualFollowingId);
+    // const flattenedMutualIds = resolvedMutualFollowing.flat();
 
     // getting the accounts of mutual followers...
-    const mappedAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
-        return returnAccountDataInStructure(accId);
-    }));
-    const mutualFriendAccounts = mappedAccounts.filter(account => !account?.IsFollowing);
-    const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id));
+    // const mappedAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
+    //     return returnAccountDataInStructure(accId);
+    // }));
+    // const mutualFriendAccounts = mappedAccounts.filter(account => !account?.IsFollowing);
+    // const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id));
 
     // getting more accounts for suggestions...
-    const ageRange = ['0-13','13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'] ;
-    const genderArray = ['male', 'female', 'none'] ;
-    const indexOfAgeRange = ageRange.findIndex(myAccount.interests.ageRange); // getting the index in ageRange...
-    const indexOfGender = genderArray.findIndex(myAccount.interests.gender); // same for gender...
-    const filteredTopics = myAccount.interests.topicsLoved ; // engagement topics array...
+    // const ageRange = ['0-13','13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'] ;
+    // const genderArray = ['male', 'female', 'none'] ;
+
+    // these feilds might be missing for newly created accounts...
+    // const myGender = myAccount?.interests?.gender ?? 'none';
+    // const myAgeRange = myAccount?.interests?.ageRange ?? '0-13';
+    // const filteredTopics = myAccount?.interests?.topicsLoved ?? [] ; // engagement topics array...
+
+    // const indexOfAgeRange = ageRange.findIndex((r) => r === myAgeRange); // getting the index in ageRange...
+    // const indexOfGender = genderArray.findIndex((g) => g === myGender); // same for gender...
+
+    // const safeIndexOfAgeRange = indexOfAgeRange === -1 ? 0 : indexOfAgeRange;
+    // const safeIndexOfGender = indexOfGender === -1 ? 2 : indexOfGender;
 
     // opposite gender filter for increasing engagement...
-    const moreAccounts = await accounts.find({
-        $and:[
-            {'interests.gender' : genderArray[indexOfGender] === 'none' ? ' ' : !(genderArray[indexOfGender])},
-            { 'interests.ageRange' : (ageRange.length - indexOfAgeRange)  >= 2  ? (ageRange[indexOfAgeRange] || ageRange[indexOfAgeRange + 1] || ageRange[indexOfAgeRange + 2])  : (ageRange[ageRange.length - 1] || ageRange[ageRange.length - 2]) },
-            {'interests.topicsLoved' : { $in: filteredTopics } },
-            { _id: { $nin: blockedIds } },
-        ]
-    }) ;
+    // const oppositeGender = genderArray[safeIndexOfGender] === 'none' ? ' ' : (genderArray[safeIndexOfGender] === 'male' ? 'female' : 'male');
+    // const targetAge = (ageRange.length - safeIndexOfAgeRange)  >= 2
+    //     ? (ageRange[safeIndexOfAgeRange] || ageRange[safeIndexOfAgeRange + 1] || ageRange[safeIndexOfAgeRange + 2])
+    //     : (ageRange[ageRange.length - 1] || ageRange[ageRange.length - 2]);
+
+    // const moreAccounts = await accounts.find({
+    //     $and:[
+    //         {'interests.gender' : oppositeGender},
+    //         { 'interests.ageRange' : targetAge },
+    //         {'interests.topicsLoved' : { $in: filteredTopics } },
+    //         { _id: { $nin: blockedIds } },
+    //     ]
+    // }) ;
 
     // getting account whose content , user like & comment...
-    const myLikes  = await likes.find({ $and:[ { accountId:myAccount._id },{ targetType:{ $in: ['Post','Comment'] } }]}) ;
-    const MappedlikedToAcc = await Promise.all(myLikes.map( async ( like ) => {
-        return returnAccountDataInStructure((like.targetAccount as mongoose.Types.ObjectId).toString());
-    }));
+    // likes.accountId should be the viewer's account (_id) not user.id (user doc _id)
+    const myLikes  = await likes.find({ $and:[ { accountId: myAccount._id },{ targetType:{ $in: ['Post','Comment'] } }]}) ;
+    // const MappedlikedToAcc = await Promise.all(myLikes.map( async ( like ) => {
+    //     return returnAccountDataInStructure((like.targetAccount as mongoose.Types.ObjectId).toString());
+    // }));
 
-    const filteredLikedToAcc = MappedlikedToAcc.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
+    // const filteredLikedToAcc = MappedlikedToAcc.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
 
-    const postsContentUserCommented = await Post.find({ $and:[{ authorId:myAccount._id },{ replyToPostId: { $exists: true, $ne: null } },{ isDeleted:false }]}) ;
-    const accountsWhosPost = await Promise.all(postsContentUserCommented.map( async (post) => {
-        const commentedOnPost = await Post.findById(post.replyToPostId) ;
-        return returnAccountDataInStructure(commentedOnPost.authorId) ;
-    })) ;
-    const filteredAccountsWhosPost = accountsWhosPost.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
+    //  const postsContentUserCommented = await Post.find({ $and:[{ authorId: user.id },{ replyToPostId: { $exists: true, $ne: null } },{ isDeleted:false }]}) ;
 
-    // removing the duplicacy from account array...
-    const uniqueAccArr = [...new Set([...filteredMutualFriendAccounts,...moreAccounts,...filteredLikedToAcc,...filteredAccountsWhosPost])];
-    // sorting the array based on subscription level...
-    const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Enterprise: 3 };
+    // const accountsWhosPost = await Promise.all(postsContentUserCommented.map( async (post) => {
+    //     const commentedOnPost = await Post.findById(post.replyToPostId) ;
+    //     return returnAccountDataInStructure(commentedOnPost.authorId) ;
+    // })) ;
+    // const filteredAccountsWhosPost = accountsWhosPost.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
 
-    // sorting logic...
-    const sortedArr = uniqueAccArr.sort((a, b) => {
-        const aPlan = (a.account?.plan || 'Free') as Plan;
-        const bPlan = (b.account?.plan || 'Free') as Plan;
-        const aLevel = planOrder[aPlan] ?? 0;
-        const bLevel = planOrder[bPlan] ?? 0;
+    // // removing the duplicacy from account array...
+    // const uniqueAccArr = [...new Set([...filteredMutualFriendAccounts,...moreAccounts,...filteredLikedToAcc,...filteredAccountsWhosPost])];
+    // // sorting the array based on subscription level...
+    // const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Enterprise: 3 };
+
+    // // sorting logic...
+    // const sortedArr = uniqueAccArr.sort((a, b) => {
+    //     const aPlan = (a.account?.plan || 'Free') as Plan;
+    //     const bPlan = (b.account?.plan || 'Free') as Plan;
+    //     const aLevel = planOrder[aPlan] ?? 0;
+    //     const bLevel = planOrder[bPlan] ?? 0;
         
-        if (aLevel !== bLevel) return bLevel - aLevel;
+    //     if (aLevel !== bLevel) return bLevel - aLevel;
         
-        const aVerified = a.account?.isVerified ?? false;
-        const bVerified = b.account?.isVerified ?? false;
-        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+    //     const aVerified = a.account?.isVerified ?? false;
+    //     const bVerified = b.account?.isVerified ?? false;
+    //     if (aVerified !== bVerified) return aVerified ? -1 : 1;
             
-        return 0;
-    });
+    //     return 0;
+    // });
 
+    const initialSuggstions = await accounts.find({ $and:[{ _id: { $ne: myAccount._id }},{'account.status': 'ACTIVE' }] }) ;
+    const sortedArr = await Promise.all(initialSuggstions.map( async (account) => {
+        return returnAccountDataInStructure(account._id) ;
+    }))
 
     // getting all the posts...
-    const accountPosts = await Post.find({ $and:[{ authorId:myAccount._id },{ replyToPostId: null },{ postType:'original' },{ isDeleted:false }]}) ; // getting the posts...
+    const accountPosts = await Post.find({
+        $and:[{ authorId: targetAcc._id },{ replyToPostId: null },{ postType:'original' },{ isDeleted:false }]
+    }) ;
     
     // Fetch tagged statuses for all posts
     const postIds = accountPosts.map(p => p._id);
     const taggedDocs = await tagged.find({ entityId: { $in: postIds } });
     const taggedMap = new Map();
     taggedDocs.forEach(doc => {
-        if (!taggedMap.has(doc.entityId.toString())) {
-            taggedMap.set(doc.entityId.toString(), {});
-        }
+        if (!taggedMap.has(doc.entityId.toString())) taggedMap.set(doc.entityId.toString(), {});
+        
         taggedMap.get(doc.entityId.toString())[doc.taggedAs] = true;
     });
 
@@ -505,8 +530,9 @@ export const profileSpecificDataService = async (handle:string) => {
             duration: poll.duration
         });
     });
+    
 
-    const structuredPost = Promise.all(accountPosts.map( async (post) => {
+    const structuredPost = await Promise.all(accountPosts.map( async (post) => {
         const commentsOnPost = await Post.find({ $and:[{ replyToPostId:post._id },{ postType:'comment' },{ isDeleted:false }] });
         const repostsOnPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:post._id },{ isDeleted:false }] });
         const likesOnPost = await likes.find({ $and:[{ targetType:'post' },{ targetEntity:post._id }]});
@@ -516,11 +542,11 @@ export const profileSpecificDataService = async (handle:string) => {
         // Calculate user interactions...
         const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: post._id }] });
         const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: post._id }, { isDeleted: false }] });
-        const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: post._id }, { isDeleted: false }] });
-        const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { entityId: post._id },{ taggedAs:'bookmarked' }] });
+        const userCommented = await Post.exists({ $and: [{ authorId: user.id }, { postType: 'comment' }, { replyToPostId: post._id }, { isDeleted: false }] });
+        const userBookmarked = await tagged.exists({ $and: [{ accountId: user.id }, { entityId: post._id },{ taggedAs:'bookmarked' }] });
 
         const postTagStatus = taggedMap.get(post._id.toString()) || {};
-        
+
         return {
             id:post._id,
             content:post.content,
@@ -529,7 +555,7 @@ export const profileSpecificDataService = async (handle:string) => {
             reposts:fmt(repostsOnPost.length),
             likes:fmt(likesOnPost.length),
             views:fmt(viewsOnPostCount),
-            mediaUrls: Array(post.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
+            media: (post.mediaUrls ?? []).map((urlObj: any) => ({ url: urlObj?.url, media_type: urlObj?.media_type })), // sending normalized mediaurl array...
             hashTags: post.hashtags,
             mentions: post.mentions,
             userliked: userLiked ? true : false,
@@ -545,6 +571,7 @@ export const profileSpecificDataService = async (handle:string) => {
 
     // getting the replied posts...
     const repliedPosts = await Post.find({ $and:[{ authorId:myAccount._id },{ replyToPostId: { $exists: true, $ne: null } },{ postType:'comment' },{ isDeleted:false }]});
+
 
     const structuredRepliedPost = await Promise.all(repliedPosts.map( async (repliedpost) => { 
         const authorPost = await Post.findById(repliedpost.replyToPostId) ; // getting the inner post...
@@ -569,14 +596,14 @@ export const profileSpecificDataService = async (handle:string) => {
         const authorRepostsPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:authorPost._id },{ isDeleted:false }] });
         const authorViewStats = await viewStat.findOne({ postId: authorPost._id });
         const authorViewsCount = authorViewStats?.totalViews || 0;
-        const authorUserLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: authorPost._id }] });
-        const authorUserReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: authorPost._id }, { isDeleted: false }] });
-        const authorUserCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: authorPost._id }, { isDeleted: false }] });
-        const authorUserBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { entityId: authorPost._id },{ taggedAs:'bookmarked' }] });
-        const authorIsFollowing = await follows.exists({$and:[{ followerId:myAccount._id },{ followingId:accountInfo._id },{ isDeleted:false }]} );
+        const authorUserLiked = await likes.exists({ $and: [{ accountId: user.id }, { targetType: 'post' }, { targetEntity: authorPost._id }] });
+        const authorUserReposted = await Post.exists({ $and: [{ authorId: user.id }, { postType: 'repost' }, { repostId: authorPost._id }, { isDeleted: false }] });
+        const authorUserCommented = await Post.exists({ $and: [{ authorId: user.id }, { postType: 'comment' }, { replyToPostId: authorPost._id }, { isDeleted: false }] });
+        const authorUserBookmarked = await tagged.exists({ $and: [{ accountId: user.id }, { entityId: authorPost._id },{ taggedAs:'bookmarked' }] });
+        const authorIsFollowing = await follows.exists({$and:[{ followerId:user.id },{ followingId:accountInfo._id },{ isDeleted:false }]} );
         const authorPostTagStatus = taggedMap.get(authorPost._id.toString()) || {};
 
-        const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: repliedpost._id },{ taggedAs:'bookmarked' }] });
+        const userBookmarked = await tagged.exists({ $and: [{ accountId: user.id }, { postId: repliedpost._id },{ taggedAs:'bookmarked' }] });
         
         return {
 
@@ -595,7 +622,7 @@ export const profileSpecificDataService = async (handle:string) => {
                 timestamp: new Date(authorPost.createdAt).toUTCString(),
                 avatar: accountInfo.avatar.url,
                 content: authorPost.content,
-                media: Array(authorPost.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
+                media: (authorPost.mediaUrls ?? []).map((urlObj: any) => ({ url: urlObj?.url, media_type: urlObj?.media_type })),
                 mentions: authorPost.mentions || [],
                 hashTags: authorPost.hashTags || [],
                 taggedLocation: authorPost.taggedLocation || [],
@@ -615,7 +642,7 @@ export const profileSpecificDataService = async (handle:string) => {
 
             },
             commentedText:repliedpost.content,
-            mediaUrls: Array(repliedpost.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
+            mediaUrls: (repliedpost.mediaUrls ?? []).map((urlObj: any) => ({ url: urlObj?.url, media_type: urlObj?.media_type })),
             mentions:repliedpost.mentions,
             hashTags:repliedpost.hashtags,
             repliedAt:new Date(repliedpost.createdAt).toUTCString(),
@@ -631,18 +658,19 @@ export const profileSpecificDataService = async (handle:string) => {
      }));
 
      // getting media related data...
-     const userPosts = await Post.find({ $and:[{ authorId:myAccount._id },{ isDeleted:false }]}); // getting users posts...
+     const userPosts = await Post.find({ $and:[{ authorId:targetAcc._id },{ isDeleted:false }]}); // getting users posts...
      const usermedia = await Promise.all(userPosts.map((post) => {
         let allImages: string[] = [] ;
         let allVideos: string[] = [] ;
         let allDocs: string[] = [] ;
 
         if (post.mediaUrls && Array.isArray(post.mediaUrls)) {
-            post.mediaUrls.forEach((urlObj:{ url:string , public_id:string }) => {
-                const lowerUrl = urlObj.url.toLowerCase(); // converting the url to lowercase...
-                if (lowerUrl.endsWith('.jpg') || lowerUrl.endsWith('.jpeg') || lowerUrl.endsWith('.png') || lowerUrl.endsWith('.gif') || lowerUrl.endsWith('.webp')) {
+            post.mediaUrls.forEach((urlObj:{ url:string , media_type?:string , public_id?:string }) => {
+                const mediaType = (urlObj.media_type || '').toLowerCase();
+
+                if (mediaType === 'image') {
                     allImages.push(urlObj.url);
-                } else if (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.avi') || lowerUrl.endsWith('.mov') || lowerUrl.endsWith('.wmv')){
+                } else if (mediaType === 'video') {
                     allVideos.push(urlObj.url);
                 } else {
                     allDocs.push(urlObj.url);
@@ -653,6 +681,8 @@ export const profileSpecificDataService = async (handle:string) => {
             return { images:[] , videos:[] , docs:[] } ;
         }
      }));
+
+
 
      // getting the posts user liked... 
      const likedPosts = await Promise.all(myLikes.map( async (likeobj) => { 
@@ -666,9 +696,9 @@ export const profileSpecificDataService = async (handle:string) => {
 
         // Calculate user interactions for the liked post
         const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: post._id }] });
-        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: post._id }, { isDeleted: false }] });
-        const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: post._id }, { isDeleted: false }] });
-        const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: post._id },{ taggedAs:'bookmarked' }] });
+        const userReposted = await Post.exists({ $and: [{ authorId: user.id }, { postType: 'repost' }, { repostId: post._id }, { isDeleted: false }] });
+        const userCommented = await Post.exists({ $and: [{ authorId: user.id }, { postType: 'comment' }, { replyToPostId: post._id }, { isDeleted: false }] });
+        const userBookmarked = await tagged.exists({ $and: [{ accountId: user.id }, { postId: post._id },{ taggedAs:'bookmarked' }] });
         return {
             id:post._id,
             content:post.content,
@@ -677,7 +707,7 @@ export const profileSpecificDataService = async (handle:string) => {
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
             views:fmt(viewsLikedCount),
-            mediaUrls: Array(post.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
+            mediaUrls: (post.mediaUrls ?? []).map((urlObj: any) => ({ url: urlObj?.url, media_type: urlObj?.media_type })),
             hashTags: post.hashtags,
             mentions: post.mentions,
             userliked: userLiked ? true : false,
@@ -689,7 +719,7 @@ export const profileSpecificDataService = async (handle:string) => {
       }));
 
       // calculating the highlighted post...
-      const taggedPost = await tagged.find({ $and:[{ accountId:myAccount._id },{ taggedAs:'highlighted' }] });
+      const taggedPost = await tagged.find({ $and:[{ accountId:user.id },{ taggedAs:'highlighted' }] });
       const highlightedOnes = await Promise.all(taggedPost.map( async (taggedobj) => { 
         const reqPost = await Post.findById(taggedobj.postId) ; // getting the exact post...
 
@@ -699,10 +729,10 @@ export const profileSpecificDataService = async (handle:string) => {
         const viewStatsHighlight = await viewStat.findOne({ postId: taggedobj.postId });
         const viewsHighlightCount = viewStatsHighlight?.totalViews || 0;
 
-        const userLiked = await likes.exists({ $and: [{ accountId: myAccount._id }, { targetType: 'post' }, { targetEntity: reqPost._id }] });
-        const userReposted = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'repost' }, { repostId: reqPost._id }, { isDeleted: false }] });
-        const userCommented = await Post.exists({ $and: [{ authorId: myAccount._id }, { postType: 'comment' }, { replyToPostId: reqPost._id }, { isDeleted: false }] });
-        const userBookmarked = await tagged.exists({ $and: [{ accountId: myAccount._id }, { postId: reqPost._id },{ taggedAs:'bookmarked' }] });
+        const userLiked = await likes.exists({ $and: [{ accountId: user.id }, { targetType: 'post' }, { targetEntity: reqPost._id }] });
+        const userReposted = await Post.exists({ $and: [{ authorId: user.id }, { postType: 'repost' }, { repostId: reqPost._id }, { isDeleted: false }] });
+        const userCommented = await Post.exists({ $and: [{ authorId: user.id }, { postType: 'comment' }, { replyToPostId: reqPost._id }, { isDeleted: false }] });
+        const userBookmarked = await tagged.exists({ $and: [{ accountId: user.id }, { postId: reqPost._id },{ taggedAs:'bookmarked' }] });
 
         return {
             id:reqPost._id,
@@ -712,7 +742,7 @@ export const profileSpecificDataService = async (handle:string) => {
             reposts:fmt(repostsPost.length),
             likes:fmt(likesPost.length),
             views:fmt(viewsHighlightCount),
-            mediaUrls: Array(reqPost.mediaUrls).map(urlObj => ({ url: urlObj.url, media_type: urlObj.media_type })),
+            mediaUrls: (reqPost.mediaUrls ?? []).map((urlObj: any) => ({ url: urlObj?.url, media_type: urlObj?.media_type })),
             hashTags: reqPost.hashtags,
             mentions: reqPost.mentions,
             userliked: userLiked ? true : false,
@@ -723,7 +753,7 @@ export const profileSpecificDataService = async (handle:string) => {
 
        }))
 
-    return {
+    const comingData = {
         suggestions:sortedArr,
         posts: structuredPost,
         replies:structuredRepliedPost,
@@ -732,6 +762,7 @@ export const profileSpecificDataService = async (handle:string) => {
         highlights:highlightedOnes
 
     }
+    return NextResponse.json({message:'specific data fetched...' , Infos:comingData },{ status:200 });
 }
 
 export const profileUpdateService = async (data: accountType) => {
