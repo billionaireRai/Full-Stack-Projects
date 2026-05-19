@@ -1,0 +1,21 @@
+# Node / build outputs
+node_modules
+.next/
+out/
+dist/
+build/
+coverage/
+
+# sensitive credentials and gitignore
+.gitignore
+.env.*
+
+
+# Docker / k8s files
+docker.yml
+docker-compose.yml
+kubernetes/
+
+
+
+

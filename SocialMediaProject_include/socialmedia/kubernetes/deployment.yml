@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: briezl-social-media
+  namespace: briezl
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: briezl-social-media
+
+  template:
+    metadata:
+      labels:
+        app: briezl-social-media
+
+    spec:
+      containers:
+        - name: briezl-container
+          image: amritanshrai/briezl-social-social-media:v1
+
+          ports:
+            - containerPort: 3000
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          envFrom:
+            - secretRef:
+                name: briezl-secret

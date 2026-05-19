@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: true,
   },
+  output: "standalone" // for minimizing docker image size...
 };
 
 export default nextConfig;
