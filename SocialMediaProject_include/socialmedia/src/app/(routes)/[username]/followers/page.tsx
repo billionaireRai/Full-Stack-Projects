@@ -3,7 +3,7 @@
 import React,{useState , useEffect} from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
-import { useWindowWidth } from '@/app/hooks/useWindowWidth';
+// import { useWindowWidth } from '@/app/hooks/useWindowWidth';
 import { useParams , useRouter } from 'next/navigation'
 import Usercard from '@/components/usercard';
 import { Users, TrendingUp, Calendar, Clock, UserCheck, ThumbsUp } from 'lucide-react';
@@ -41,7 +41,7 @@ interface navItemsType {
 export default function followingspage () {
   const params = useParams() ; // initializing the param hook...
   const router = useRouter() ;
-  const width = useWindowWidth() ; // custom hook created to getting screen width...
+  // const width = useWindowWidth() ; // custom hook created to getting screen width...
   const [user, setuser] = useState<userType>({
     name:'Amritansh Rai' ,
     handle:'@amritansh_coder' ,
@@ -112,12 +112,12 @@ export default function followingspage () {
             </Link>
           </div>
           <div className='text-xs text-gray-700 dark:text-gray-300 leading-relaxed flex-1'>
-            {width > 1000
+            {/* {width > 1000
             ?
               "Accounts that follow you. They stay updated with your posts, and you'll be notified of their actions."
             :
               "Your followers."
-            }
+            } */}
           </div>
         </div>
         <div className="navigation-section m-2">
@@ -136,11 +136,11 @@ export default function followingspage () {
       </nav>
     </div>
     <div className='m-2'>
-      {AccountDetails.map((account,index) => (
+      {/* {AccountDetails.map((account,index) => (
           <Usercard key={index} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} content={account.content} heading={account.heading} user={account.user} />
         ))
         
-      }
+      } */}
       <Usercard IsFollowing={true}/>
       <Usercard IsFollowing={true}/>
       <Usercard/>

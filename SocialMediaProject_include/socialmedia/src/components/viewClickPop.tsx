@@ -1,10 +1,20 @@
-import React from 'react'
+import React,{ useEffect } from 'react'
 
 interface viewProp {
-  closePopUp?: () => void
+  closePopUp: () => void
 }
 
 export default function viewClickPop({ closePopUp }: viewProp) {
+
+    useEffect(() => {
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') closePopUp();
+      };
+  
+      window.addEventListener('keydown', onKeyDown);
+      return () => window.removeEventListener('keydown', onKeyDown);
+    }, [closePopUp]);
+    
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       {/* Modal */}

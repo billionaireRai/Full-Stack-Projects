@@ -137,7 +137,7 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
                onClick={() => { handleFollowToggleLogic()}}
                className={`text-sm font-semibold px-4 py-2
                ${isFollowing
-               ? 'bg-white border border-gray-300 dark:border-gray-600 dark:bg-gray-950 dark:text-blue-500 hover:bg-yellow-100        dark:hover:bg-gray-950 hover:text-yellow-400 dark:hover:text-blue-700 cursor-pointer'
+               ? 'bg-white border border-gray-300 dark:border-gray-600 dark:bg-gray-950 hover:bg-yellow-100        dark:hover:bg-gray-950 hover:text-yellow-400 cursor-pointer'
                : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 cursor-pointer'
                } rounded-full`}>
                  { Loading ? <Spinner/> : ( isFollowing ? 'Following' : 'Follow' ) }

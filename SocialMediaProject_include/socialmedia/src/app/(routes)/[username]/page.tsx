@@ -25,6 +25,8 @@ import DeleteModal from '@/components/deletemodal';
 import SharePopup from '@/components/sharePopUp';
 import Qrcodepop from '@/components/qrcodepop';
 import { BsPostcardFill } from 'react-icons/bs';
+import useMediaPop from '@/app/states/mediapop';
+import Mediapopmodal from '@/components/mediapopmodal';
 
 interface mediaType {
   url: string;
@@ -134,6 +136,7 @@ export default function UserProfilePage() {
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
   const router = useRouter() ;
   const { isPop , setisPop } = useUpgradePop() ;
+  const { isMediaPop , mediaDetail , setDetails, setMediaPop } = useMediaPop() ;
   const { username } = useParams() ; // taking the username from URL...
   const fetchedHandlesRef = useRef<Set<string>>(new Set()); // ref to track fetched handles
   const isSelf = Account.decodedHandle === decodeURIComponent(String(username)) ? true : false ;
@@ -141,8 +144,8 @@ export default function UserProfilePage() {
   const [ShowQRPop, setShowQRPop] = useState(false);
   const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
-  const [planIntent, setplanIntent] = useState<string>('Pro');
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
+  const [planIntent, setplanIntent] = useState<string>('Pro');
   const [showDeleteAccPop,setshowDeleteAccPop] = useState<boolean>(false);
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
   const [Loading, setLoading] = useState(false);
@@ -609,7 +612,7 @@ export default function UserProfilePage() {
         }
       }
     };
-    fetchAccountData();
+    // fetchAccountData();
   }, [Account.account, username])
 
   useEffect(() => {
@@ -638,7 +641,7 @@ export default function UserProfilePage() {
     }
 
     // running only when username exists...
-    if (username) functionToGetData();
+    // if (username) functionToGetData();
   }, [username])
   
   // toggleing follow logic...
@@ -729,6 +732,12 @@ export default function UserProfilePage() {
       }
     }
   }
+
+  // function for handling media pop...
+  function handleMediaPop(media:mediaType) : void {
+    setMediaPop(true);
+    setDetails(media);
+  }
     
   return (
     <>
@@ -736,7 +745,7 @@ export default function UserProfilePage() {
         <div className='flex gap-2'>
           {/* Main Content - Profile */}
           <div className='flex-2 overflow-y-auto'>
-          <div className={`bg-white dark:bg-black text-gray-900 dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
+          <div className={`flex-2 bg-white dark:bg-black text-gray-900 overflow-x-hidden dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
               {/* Header */}
               <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
                 <div className="px-4 py-3">
@@ -767,7 +776,9 @@ export default function UserProfilePage() {
               </header>
 
               {/* Cover Photo */}
-              <div className={`relative h-80 w-full rounded-lg bg-gradient-to-r from-yellow-100 to-yellow-300`}>
+              <div 
+              onClick={() => { handleMediaPop({ url:AccountInfo.bannerUrl , media_type:'image' }) }}
+              className={`relative h-80 w-full cursor-pointer rounded-lg bg-gradient-to-r from-yellow-100 to-yellow-300`}>
                 <img
                   src={AccountInfo.bannerUrl}
                   alt="Cover"
@@ -779,11 +790,13 @@ export default function UserProfilePage() {
               <div className={`relative px-4 ${ IsBlocked ? 'bg-red-50 dark:bg-red-950 border border-red-600' : ''}  rounded-lg`}>
                 {/* Avatar */}
                 <div className="absolute -top-16 left-4">
-                  <div className="relative w-32 h-32 rounded-full">
+                  <div
+                    onClick={() => { handleMediaPop({ url:AccountInfo.avatarUrl , media_type:'image' }) }} 
+                    className="relative w-32 h-32 cursor-pointer rounded-full">
                     <img
                       src={AccountInfo.avatarUrl}
                       alt='avatar'
-                      className={`rounded-full border-2 bg-white dark:bg-black ${IsBlocked ? 'border-red-500' : 'border-yellow-100 dark:border-black'}`}
+                      className={`rounded-full bg-white dark:bg-black ${IsBlocked ? 'border border-red-500' : 'border border-yellow-100 dark:border-black'}`}
                     />
                   </div>
                 </div>
@@ -1059,7 +1072,7 @@ export default function UserProfilePage() {
                       {repliedPostData.map((post: RepliedPostsType) => (
                         <div key={post.id} className="dark:bg-black rounded-xl p-4 border border-gray-200 dark:border-gray-900 transition-shadow">
                           <div className="flex space-x-3">
-                           <div>
+                           <Link href={`/${AccountInfo.handle}`} className='cursor-pointer h-fit'>
                             <img
                               src={AccountInfo.avatarUrl}
                               alt={AccountInfo.name}
@@ -1067,14 +1080,16 @@ export default function UserProfilePage() {
                               height={48}
                               className="rounded-full w-13 h-13 sm:w-15 sm:h-15 object-cover flex-shrink-0"
                             />
-                           </div>
+                           </Link>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center space-x-2 mb-3">
                                 <span className="font-bold text-sm">{AccountInfo.name}</span>
                                 {AccountInfo.isVerified && (
                                   <Image src='/images/yellow-tick.png' width={20} height={20} alt='yellow-tick' /> 
                                 )}
-                                <span className="text-gray-500 dark:text-gray-400 text-sm">{AccountInfo.handle}</span>
+                                <Link href={`/${AccountInfo.handle}`} className='cursor-pointer'>
+                                  <span className="text-gray-500 dark:text-gray-400 text-sm">{AccountInfo.handle}</span>
+                                </Link>
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">·</span>
                                 <span className="text-gray-500 dark:text-gray-400 text-sm">{post.repliedAt}</span>
                               </div>
@@ -1389,7 +1404,7 @@ export default function UserProfilePage() {
           </div>
 
           {/* some other widgets... */}
-          <div className={`hidden lg:block flex-1 overflow-y-auto ${IsBlocked ? 'blur-md pointer-events-none cursor-not-allowed' : ''}`}>
+          <div className={`hidden z-20 lg:block flex-1 h-fit ${IsBlocked ? 'blur-md pointer-events-none cursor-not-allowed' : ''}`}>
             <div className='space-y-4'>
               {/* Who to Follow */}
                 {/* account suggestions according to this USER profile respective...*/}
@@ -1448,6 +1463,9 @@ export default function UserProfilePage() {
         )}
         {ShowQRPop && (
           <Qrcodepop Category='profile' copyLink={handleProfileLinkCopy} doneScanning={() => { setShowQRPop(false) }} path={window.location.origin} timestamp={new Date().toDateString()} owner={AccountInfo.handle}/>
+        )}
+        {isMediaPop && (
+          <Mediapopmodal closepop={() => { setMediaPop(false) }} media={mediaDetail} />
         )}
       </>
   </>

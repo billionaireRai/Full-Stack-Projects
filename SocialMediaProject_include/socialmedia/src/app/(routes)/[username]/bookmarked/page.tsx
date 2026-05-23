@@ -551,7 +551,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                  </button>
                  <div className="ml-4">
                     <h1 className="text-xl font-bold">Saved Posts<span className='text-yellow-400 p-3 dark:text-blue-500'>{PostDetails.length}</span></h1>
-                  <Link href={`/${pageHandle}`} className="text-sm px-3 py-1 rounded-lg w-fit hover:bg-gray-100 transition-all duration-300 dark:hover:bg-gray-950 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{pageHandle}</Link>
+                  <Link href={`/${pageHandle}`} className="text-xs px-3 py-1 rounded-lg w-fit hover:bg-gray-100 transition-all duration-300 dark:hover:bg-gray-950 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{pageHandle}</Link>
                  </div>
                   <div className='absolute right-0 mx-3 flex items-center gap-2'>
                       <p className="text-sm text-black hidden dark:text-gray-400 truncate sm:block sm:w-[170px] lg:w-fit">Posts you've saved for future</p>

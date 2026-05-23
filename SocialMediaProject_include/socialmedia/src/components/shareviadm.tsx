@@ -18,6 +18,15 @@ export default function Shareviadm({ closemodal, link }: shareViaDmProp) {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  useEffect(() => {
+     const onKeyDown = (e: KeyboardEvent) => {
+       if (e.key === 'Escape') closemodal();
+     };
+  
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [closemodal]);
+
   // Debounced search function...
   const searchAccounts = useCallback(async (query: string) => {
     if (!query.trim()) {

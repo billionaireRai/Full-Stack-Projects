@@ -3,7 +3,7 @@ import useCreatePost from "@/app/states/createpost";
 import { X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React,{ useEffect } from "react";
 
 interface SharePopupProps {
   open: boolean;
@@ -26,6 +26,15 @@ const SharePopup: React.FC<SharePopupProps> = ({
 }) => {
     const shareLinks = getShareLinks(link,text);
     const { setCreatePop } = useCreatePost() ; 
+
+    useEffect(() => {
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') onClose();
+      };
+    
+      window.addEventListener('keydown', onKeyDown);
+      return () => window.removeEventListener('keydown', onKeyDown);
+   }, [onClose]);
 
    // handle create post click...
    const handleCreatePostClick = () => { 

@@ -27,7 +27,7 @@ interface CommentCardInfo {
   content?:string ,
   media?: mediaType[],
   updateState?:() => void,
-  handleClose?:() => void
+  handleClose:() => void
 }
 
 export default function Commentpopcard({updateState,postId ,avatar , name, handle, timestamp , content ,media , handleClose }:CommentCardInfo) {
@@ -88,9 +88,6 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        handleClose?.();
-      }
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         handlePostReply();
       }
@@ -112,6 +109,15 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
   const removeArrayElement = (setters: React.Dispatch<React.SetStateAction<any[]>>[], index: number) => {
     setters.forEach(setter => setter(prev => prev.filter((_, i) => i !== index)));
   };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    
+     window.addEventListener('keydown', onKeyDown);
+     return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleClose]);
   
 
   return (

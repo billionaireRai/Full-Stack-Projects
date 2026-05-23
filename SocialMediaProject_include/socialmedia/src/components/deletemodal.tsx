@@ -1,3 +1,4 @@
+import { Delete } from 'lucide-react'
 import React from 'react'
 
 interface deleteModalProp {
@@ -11,12 +12,15 @@ export default function DeleteModal({closePopUp, onDelete , itemType = 'item'}: 
     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       {/* Modal */}
       <div className="relative flex items-center justify-center h-full">
-        <div className="bg-white dark:bg-black rounded-lg p-6 max-w-sm mx-4 shadow-xl border border-gray-300 dark:border-gray-700">
+        <div className="bg-white dark:bg-black rounded-lg p-6 max-w-sm mx-4 shadow-xl border border-gray-300 dark:border-gray-900">
           {/* Title */}
-          <h2 className="text-black dark:text-white text-xl font-bold mb-4">Confirm Deletion</h2>
+          <h2 className="text-black flex flex-row items-center gap-1.5 dark:text-white text-xl font-bold mb-4">
+            <Delete color="#dc2626" size={22} />
+            <span>Confirm Deletion</span>
+          </h2>
 
           {/* Description */}
-          <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
+          <p className="text-gray-800 dark:text-gray-300 text-sm mb-6">
             Are you sure you want to <b>delete</b> this {itemType} ? <b>This action cannot be undone.</b>
           </p>
 
@@ -24,7 +28,7 @@ export default function DeleteModal({closePopUp, onDelete , itemType = 'item'}: 
           <div className="flex gap-3">
             <button
               onClick={closePopUp}
-              className="cursor-pointer flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md px-4 py-2 text-sm font-medium transition-colors"
+              className="cursor-pointer flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-950 text-gray-800 dark:text-gray-200 rounded-md px-4 py-2 text-sm font-medium transition-colors"
             >
               Cancel
             </button>

@@ -62,15 +62,15 @@ export default function HighlightPostPop({
         </button>
 
         {/* Content */}
-        <div className="text-center">
+        <div className="text-left">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <Star className="w-5 h-5 text-yellow-500" />
+            <Star className="w-8 h-8 text-yellow-500" />
             <span>Highlight Post</span>
           </h2>
           <p className="text-gray-600 text-sm dark:text-gray-300 mb-6">
-            Highlighting this post will feature it prominently in highlight section of your profile . This action helps showcase important or favorite content, drawing attention to posts you want to emphasize. Are you sure you want to proceed with highlighting this post?
+            Highlighting this post will feature it prominently in highlight section of your profile . This action helps showcase important or favorite content, drawing attention to posts you want to emphasize.
           </p>
-          <div className="flex gap-3 items-center justify-center">
+          <div className="flex gap-3 items-start justify-center">
             <button
               onClick={onClose}
               className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2 cursor-pointer"

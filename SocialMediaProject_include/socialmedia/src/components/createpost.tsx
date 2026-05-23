@@ -218,6 +218,15 @@ export default function CreatePost() {
     }
   };
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setCreatePop(false);
+    };
+  
+     window.addEventListener('keydown', onKeyDown);
+     return () => window.removeEventListener('keydown', onKeyDown);
+  }, [setCreatePop]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}

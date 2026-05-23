@@ -4,49 +4,14 @@ import React, { useState, useEffect, useRef , ReactElement } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  MoreVerticalIcon,
-  Trash2,
-  Edit3,
-  Pin,
-  Star,
-  List,
-  BarChart3,
-  Code,
-  TrendingUp,
-  FileText,
-  Share2,
-  Mail,
-  Link as LinkIcon,
-  X,
-  SendHorizontalIcon,
-  Eye,
-  EyeOff,
-  VolumeX,
-  Slash,
-  Flag,
-  Frown,
-  UserPlus,
-  ListPlus,
-  Ban,
-  Code2,
-  Megaphone,
-  PodcastIcon,
-  DollarSign,
-  QrCodeIcon,
-  MessagesSquare,
-  RefreshCw,
-  ThumbsUp,
-  BookmarkPlus,
-  ExternalLink,
-  ArrowBigRightDashIcon
-} from 'lucide-react';
+import { MoreVerticalIcon,Trash2,Edit3,Pin,Star,List,BarChart3,Code,TrendingUp,FileText,Share2,Mail,Link as LinkIcon,X,SendHorizontalIcon,Eye,EyeOff,VolumeX,Slash,Flag,Frown,UserPlus,ListPlus,Ban,Code2,Megaphone,PodcastIcon,DollarSign,QrCodeIcon,MessagesSquare,RefreshCw,ThumbsUp,BookmarkPlus,ExternalLink,ArrowBigDownDash,BookOpen } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/lib/interceptor';
 import { useRouter } from 'next/navigation';
 import useActiveAccount from '@/app/states/useraccounts';
 import Commentpopcard from './Commentpopcard';
+import Mediapopmodal from './mediapopmodal';
 import RequireSubscription from './requireSubscription';
 import useUpgradePop from '@/app/states/upgradePop';
 import Qrcodepop from './qrcodepop';
@@ -65,6 +30,7 @@ import BlockUser from './blockUser';
 import IframeOfEmbed from './iframeOfEmbed';
 import NotInterestedPop from './NotInterestedPop';
 import SharePopup from './sharePopUp';
+import useMediaPop from '@/app/states/mediapop';
 
 interface locationTaggedType {
   text: string,
@@ -152,6 +118,7 @@ export default function PostCard({
   const router = useRouter() ;
   const { Account } = useActiveAccount() ;
   const { setisPop , isPop } = useUpgradePop() ; // upgrade pop handler... 
+  const { isMediaPop , mediaDetail , setMediaPop , setDetails } = useMediaPop() ;
   const [postOptions, setPostOptions] = useState<boolean>(false);
   const [showAccountPopup, setShowAccountPopup] = useState<boolean>(false);
   const [viewPop, setviewPop] = useState<boolean>(false) ;
@@ -180,6 +147,7 @@ export default function PostCard({
   const avatarRef = useRef<HTMLImageElement>(null);
   const shareRef = useRef<HTMLButtonElement>(null);
 
+
   // Reusable click-outside handler
   const useClickOutside = (handlers: { isOpen: boolean; selector: string; setOpen: (value: boolean) => void }[]) => {
     useEffect(() => {
@@ -206,6 +174,7 @@ export default function PostCard({
   useClickOutside([
     { isOpen: postOptions, selector: '.dropdown-container', setOpen: setPostOptions },
     { isOpen: ShareDropDown, selector: '.share-dropdown', setOpen: setShareDropDown },
+    { isOpen: ArrowPop, selector: '.pop-container', setOpen: setArrowPop },
   ]);
 
   // states related to actions of each post...
@@ -239,7 +208,7 @@ export default function PostCard({
         <Link
           key={`hash-${eachHash}`}
           href={`/explore?q=${encodeURIComponent('#'.concat(eachHash))}&utm_source=post-click`}
-          className="dark:text-blue-500 dark:hover:text-blue-700 text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
         >
           #{eachHash}
         </Link>
@@ -251,7 +220,7 @@ export default function PostCard({
         <Link
           key={`mention-${eachMention}`}
           href={`/@${eachMention}`}
-          className="dark:text-blue-500 dark:hover:text-blue-700 text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
         >
           @{eachMention}
         </Link>
@@ -423,6 +392,12 @@ export default function PostCard({
       } catch (error) {
         toast.error('Failed with action...');
     }
+  }
+
+  // function for handling media pop...
+  function handleMediaPop(media:mediaType) : void {
+    setMediaPop(true);
+    setDetails(media);
   }
 
   if (BlurPost) {
@@ -707,46 +682,42 @@ export default function PostCard({
 
           {/* Media */}
           {displayMedia && displayMedia.length > 0 && displayMedia.some(item => item.url && item.url.trim() !== '') && (
-            <div className="mt-2 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div className="mt-2 rounded-xl overflow-hidden">
               {displayMedia.filter(item => item.url && item.url.trim() !== '').length === 1 ? (
                 displayMedia[0].media_type === 'video' ? (
-                  <Link href={displayMedia[0].url}>
                    <video
+                     onClick={() => { handleMediaPop(displayMedia[0]) }}
                      src={displayMedia[0].url}
                      controls
                      className="w-full max-h-[28rem] object-cover"
                    />
-                  </Link>
                 ) : (
-                  <Link href={displayMedia[0].url}>
                     <img
+                     onClick={() => { handleMediaPop(displayMedia[0]) }}
                      src={displayMedia[0].url}
                      alt="Post media"
                      className="w-full max-h-[28rem] object-cover"
                     />
-                  </Link>
                 )
               ) : (
                 <div className="grid grid-cols-2 gap-1">
                   {displayMedia.filter(item => item.url && item.url.trim() !== '').map((item,index) => (
                     item.media_type === 'video' ? (
-                     <Link key={index+1} href={item.url}>
                       <video
+                        onClick={() => { handleMediaPop(item) }}
                         key={index}
                         src={item.url}
                         controls
                         className="w-full h-40 sm:h-52 object-cover"
                       />
-                     </Link>
                     ) : (
-                     <Link key={index+1} href={item.url}>
                       <img
+                        onClick={() => { handleMediaPop(item) }}
                         key={index}
                         src={item.url}
                         alt={`Post media ${index + 1}`}
                         className="w-full h-40 sm:h-52 object-cover"
                       />
-                     </Link>
                     )
                   ))}
                 </div>
@@ -773,19 +744,65 @@ export default function PostCard({
               </Tooltip>
             ))}
           </div>
-          { Account.decodedHandle === handle && ( Account.account?.plan === 'Creator' || Account.account?.plan === 'Enterprise') && (
+          {/* { Account.decodedHandle === handle && ( Account.account?.plan === 'Creator' || Account.account?.plan === 'Enterprise') && ( */}
           <div className='p-2 rounded-md flex items-center justify-end'>
-            <div onClick={() => { setArrowPop(!ArrowPop) }} className='border relative cursor-pointer border-gray-400 dark:border-gray-800 rounded-full p-1'>
-              <ArrowBigRightDashIcon />
+            <div 
+            onClick={() => { setArrowPop(!ArrowPop) }} 
+            className='border relative cursor-pointer border-gray-400 dark:border-gray-800 rounded-full p-1'>
+              <ArrowBigDownDash />
             { ArrowPop && (
-              <div className='flex flex-col absolute right-0 top-full border border-black items-start justify-center gap-2 p-1 rounded-md'>
-                <button className='text-white border dark:border-gray-800 hover:opacity-85 bg-black cursor-pointer py-1 px-3 rounded-md flex items-center gap-1'><DollarSign/><span>Monetize</span></button>
-                <button className='text-white border dark:border-gray-800 hover:opacity-85 bg-black cursor-pointer py-1 px-4 rounded-md flex items-center gap-1'><TrendingUp/><span>Boost</span></button>
-              </div>
+              <motion.div
+                 initial={{ opacity: 0, scale: 0.85, y: 8 }}
+                 animate={{ opacity: 1, scale: 1, y: 0 }}
+                 exit={{ opacity: 0, scale: 0.85, y: 6 }}
+                 transition={{ duration: 0.1 }}
+                 className="pop-container flex flex-col absolute m-1 top-full z-100 right-0 w-74 p-1 overflow-hidden rounded-xl border border-gray-200/70 dark:border-gray-800 bg-white/95 dark:bg-black/90 shadow-xl shadow-black/5 dark:shadow-gray-950/50 backdrop-blur">
+
+                <div className="px-3 py-2 border-b border-gray-100/80 rounded-lg dark:border-gray-900/70">
+                  <div className="flex items-center gap-2">
+                    <div className="leading-tight">
+                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Monetize & grow</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Exclusive features for creators</div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  className="group w-full flex items-center gap-2 px-3 py-2.5 text-left cursor-pointer rounded-lg transition-all duration-150 hover:bg-gray-50 dark:hover:bg-gray-950/60"
+                >
+                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-black text-white dark:bg-white dark:text-black transition-colors group-hover:bg-yellow-500 group-hover:text-black">
+                    <DollarSign className="w-4 h-4" />
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 dark:group-hover:text-yellow-400">Monetize</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Earn from your audience</span>
+                  </span>
+                </button>
+                <button
+                  className="group w-full flex items-center gap-2 px-3 py-2.5 text-left cursor-pointer rounded-lg transition-all duration-150 hover:bg-gray-50 dark:hover:bg-gray-950/60"
+                >
+                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-black text-white dark:bg-white dark:text-black transition-colors group-hover:bg-yellow-500 group-hover:text-black">
+                    <TrendingUp className="w-4 h-4" />
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 dark:group-hover:text-yellow-400">Boost</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Reach more people</span>
+                  </span>
+                </button>
+                { 
+                // ( (Account.account?.isVerified && Account.account.plan === 'Pro') || (!Account.account?.isVerified && Account.account?.plan === 'Free') ) && 
+                (
+                 <div className="px-3 py-2">
+                   <div className="text-xs flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                     <span>Upgrade to unlock premium tools</span>
+                     <Link href={'/subscription?plan=Creator'}><BookOpen className='border hover:invert border-gray-400 p-1 rounded-full'/></Link>
+                   </div>
+                 </div>
+                )}
+              </motion.div>
            )}
             </div>
           </div>
-          )}
+          {/* )} */}
         </div>
       </div>
 
@@ -831,25 +848,25 @@ export default function PostCard({
              onClick={() => { handleCopyLink() }}
              className="w-full cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors font-semibold">
             <LinkIcon className="w-4 h-4" />
-            copy link
+            <span>copy link</span>
           </button>
           <button 
           onClick={() => { setShareAccrosApp(true) }}
           className="w-full cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors font-semibold">
             <Share2 className="w-4 h-4" />
-            share accross platform
+            <span>share on platform</span>
           </button>
           <button 
           onClick={() => { setshareCardPop(true) }}
           className="w-full cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors font-semibold">
             <Mail className="w-4 h-4" />
-            send via Direct Message
+            <span>send via DM</span>
           </button>
           <button 
           onClick={() => { setQRCodePop(true) }}
           className="w-full cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors font-semibold">
             <QrCodeIcon className="w-4 h-4" />
-             Generate QR code
+             <span>Generate QR code</span>
           </button>
         </motion.div>
       )}
@@ -917,6 +934,9 @@ export default function PostCard({
 
      {shareCardPop && (
       <Shareviadm closemodal={() => { setshareCardPop(false) }} link={`${window.location.origin}/${handle}/post/${postId}?section=All`} />
+     )}
+     {isMediaPop && (
+      <Mediapopmodal closepop={() => { setMediaPop(false) }} media={mediaDetail} />
      )}
     </div>
   );

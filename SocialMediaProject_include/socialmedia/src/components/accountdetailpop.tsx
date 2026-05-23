@@ -4,6 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { Eye } from 'lucide-react'
 import axiosInstance from '@/lib/interceptor'
 import { AxiosResponse } from 'axios'
 import toast from 'react-hot-toast'
@@ -145,7 +146,10 @@ return (
              {user.joined || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short'})}
            </p>
            <Link href={`/${user.handle}`}>
-             <button className='cursor-pointer w-full font-semibold mb-2 py-2 px-4 rounded-lg hover:opacity-80 bg-yellow-400'>View Profile</button>
+             <button className='cursor-pointer w-full flex items-center justify-center gap-1.5 font-semibold mb-2 py-2 px-4 rounded-lg hover:opacity-80 bg-yellow-400'>
+              <span>view profile</span>
+              <Eye/>
+            </button>
            </Link>
       </div>
     </motion.div>

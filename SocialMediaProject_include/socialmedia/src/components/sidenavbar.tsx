@@ -14,23 +14,7 @@ import { usePathname } from 'next/navigation'
 import { handleLogoutAccountLogic } from '@/lib/logout';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
-import {
-  HomeIcon,
-  SearchIcon,
-  MoreHorizontalIcon,
-  BellIcon,
-  MessageCircleIcon,
-  UserPlusIcon,
-  UserIcon,
-  BookmarkIcon,
-  DollarSignIcon,
-  SettingsIcon,
-  LogOutIcon,
-  Sun,
-  Moon,
-  LayoutDashboard,
-  PlusCircleIcon,
-} from 'lucide-react'
+import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon } from 'lucide-react'
 
 export default function SideNavbar() {
   const { setCreatePop } = useCreatePost()
@@ -269,13 +253,13 @@ export default function SideNavbar() {
               {/* Post Button */}
               <button
                 onClick={() => { setCreatePop(true) }}
-                className="flex items-center justify-center gap-2 w-full p-3 cursor-pointer rounded-full shadow-md hover:shadow-lg dark:shadow-gray-700 dark:hover:shadow-gray-900 dark:text-white bg-yellow-400 active:bg-yellow-500 text-black font-bold hover:scale-105 transition-transform duration-150"
+                className="flex items-center justify-center gap-2 w-full p-3 cursor-pointer rounded-full shadow-md hover:shadow-lg shadow-yellow-200 dark:shadow-yellow-900 dark:text-white bg-yellow-400 active:bg-yellow-500 text-black font-bold hover:scale-105 transition-transform duration-150"
               >
                 <span>CREATE POST</span>
               </button>
 
               {/* Profile dropdown trigger */}
-              <div className="dropdown-container flex items-center relative gap-2 my-4 py-2 px-4 rounded-full hover:bg-yellow-100 dark:hover:bg-black">
+              <div className="dropdown-container flex items-center relative gap-2 my-4 p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-black">
                 <Image
                   src={Account.account?.avatarUrl || '/images/default-profile-pic.png'}
                   height={40}
@@ -301,7 +285,7 @@ export default function SideNavbar() {
                     {Account.decodedHandle}
                   </span>
                 </Link>
-                <MoreHorizontalIcon
+                <MoreVerticalIcon
                   onClick={() => {
                     setDotClick(!DotClick)
                   }}
