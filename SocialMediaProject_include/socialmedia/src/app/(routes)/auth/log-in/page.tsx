@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import useUserInfo from "@/app/states/userinfo";
 import useActiveAccount from "@/app/states/useraccounts";
 import useAuthenticationState from "@/app/states/isAuth";
+import useWebSocket from "@/app/hooks/useWebSocket";
 import z from 'zod'
 import { useRouter } from "next/navigation";
 import { emailRegex } from "@/app/controllers/regex";
@@ -42,6 +43,7 @@ export default function LogIn() {
       setAccount(loginRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${loginRes.data.handle}`);
+      useWebSocket(loginRes.data.userCred.accountId); // generating websocket connection client => server...
       return 'success';
   }
     toast.dismiss(initialToast);

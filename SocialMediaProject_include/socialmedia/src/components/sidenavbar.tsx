@@ -11,7 +11,7 @@ import useUserInfo from '@/app/states/userinfo';
 import useCreatePost from '@/app/states/createpost'
 import useSwitchAccount from '@/app/states/swithaccount'
 import { usePathname } from 'next/navigation'
-import { handleLogoutAccountLogic } from '@/lib/logout';
+import LogoutModal from './logoutmodal';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
 import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon } from 'lucide-react'
@@ -24,6 +24,7 @@ export default function SideNavbar() {
   const [DotClick, setDotClick] = useState<boolean>(false)
   const { setisPopOpen } = useSwitchAccount() ; // initializing the switchaccount state...
   const [isOpen, setIsOpen] = useState<boolean>(true)
+  const [loguOutModal, setloguOutModal] = useState<boolean>(false);
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const isDark = theme === 'dark'
@@ -302,7 +303,7 @@ export default function SideNavbar() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}  
-                  className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-72 mt-2 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
+                  className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-fit mt-2 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
                   <div className="p-1.5 font-medium">
                     <Link  
                      href={`/${Account.decodedHandle}/create-account?userId=${User.userId}`}
@@ -319,11 +320,12 @@ export default function SideNavbar() {
                     </button>
                     <div className="my-1 border-t border-gray-200 dark:border-gray-800"></div>
                     <button
-                     onClick={() => { handleLogoutAccountLogic(String(Account?.decodedHandle)) }}
-                     className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-200 flex items-center gap-3 group">
-                      <LogOutIcon className="w-5 h-5 text-red-500 dark:text-red-500 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
+                    //  onClick={() => {  }}
+                     onClick={() => { setloguOutModal(true)  }}
+                     className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-200 flex items-center gap-3">
+                      <LogOutIcon className="w-5 h-5 text-red-500 dark:text-red-500 dark:group-hover:text-red-400 transition-colors" />
                       <div className='flex flex-row items-center gap-1'>
-                        <span className="font-medium">Logout</span><span className="text-gray-500 dark:text-gray-500">{Account.decodedHandle}</span>
+                        <span className="font-medium">Logout</span><span className="text-red-500 font-semibold dark:text-red-500 truncate max-w-full">{Account.decodedHandle}</span>
                       </div>
                     </button>
                   </div>
@@ -334,7 +336,6 @@ export default function SideNavbar() {
         </aside>
 
       )}
-
       {/* Hamburger Button */}
       <Tooltip>
         <TooltipTrigger>
@@ -355,6 +356,14 @@ export default function SideNavbar() {
         </TooltipTrigger>
         <TooltipContent>Open side bar</TooltipContent>
       </Tooltip>
+
+      {/* popping logout modal for verification */}
+      {loguOutModal && (
+        <LogoutModal 
+          closePopUp={() => { setloguOutModal(false) }} 
+          handle={String(Account?.decodedHandle)}
+        />
+      )}
     </>
   )
 }

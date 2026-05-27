@@ -12,6 +12,8 @@ import Usercard from '@/components/usercard';
 import Spinner from '@/components/spinner';
 import PostCard from '@/components/postcard';
 import ProfileEditor from '@/components/profileeditor';
+import useWebSocket from '@/app/hooks/useWebSocket';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
@@ -135,6 +137,9 @@ export default function UserProfilePage() {
 
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
   const router = useRouter() ;
+  const searchParams = useSearchParams() ; // for making access to searchparams...
+  const utmsource = searchParams.get('utm_source') ;
+  const accid = searchParams.get('accid');
   const { isPop , setisPop } = useUpgradePop() ;
   const { isMediaPop , mediaDetail , setDetails, setMediaPop } = useMediaPop() ;
   const { username } = useParams() ; // taking the username from URL...
@@ -738,6 +743,12 @@ export default function UserProfilePage() {
     setMediaPop(true);
     setDetails(media);
   }
+
+  // useffect for handling 'utm_source' & 'accid' search param...
+  useEffect(() => {
+    if (utmsource?.trim() && accid?.trim())  useWebSocket(accid) ;
+  }, [utmsource])
+  
     
   return (
     <>

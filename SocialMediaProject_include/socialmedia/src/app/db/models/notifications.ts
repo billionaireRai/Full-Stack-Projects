@@ -9,7 +9,7 @@ const notificationSchema = new mongoose.Schema({
     type:{
         type:String,
         default:'like',
-        enum:['like','comment','follow','mention','repost']
+        enum:['like','comment','follow','mention','repost','post','notification_comment','notification_like']
     },
     actorId:{
         type:mongoose.Types.ObjectId,
@@ -45,6 +45,14 @@ const notificationSchema = new mongoose.Schema({
             },
             message: 'CommentId is required for this notification type'
         }
+    },
+    isLiked:{
+        type:Boolean,
+        default:false
+    },
+    isDeleted:{
+        type:Boolean,
+        default:false
     },
     isRead:{
         type:Boolean,

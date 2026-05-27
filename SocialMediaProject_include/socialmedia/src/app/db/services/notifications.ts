@@ -1,37 +1,50 @@
 import { connectWithMongoDB } from "../dbConnection";
+import { NextResponse } from "next/server";
+import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
+import accounts from "../models/accounts";
 import axios from "axios";
 import notifications from "../models/notifications";
 
 
+type NotificationType = 'follow' | 'like' | 'comment' | 'mention' | 'repost' | 'post' | 'notification_like' | 'notification_comment' ;
 // type for notification payload...
-interface CreateNotificationParams {
-  forAccId: string;  // The account receiving the notification
-  actorId: string;   // The account that performed the action
-  type: 'like' | 'comment' | 'follow' | 'mention' | 'repost';
-  postId?: string;
-  commentId?: string;
+export interface accountInvolved {
+  id: string;
+  name: string;
+  username: string;
+  isVerified:boolean
+  avatarUrl?: string;
 }
+
+export interface Post {
+  id: string;
+  thumbnailUrl?: string;
+  content?: string;
+}
+
+export interface CreateNotificationParams {
+  forAccId: string; // account receiving the notification
+  actor: accountInvolved ; // account who caused the notification
+  type: NotificationType;
+  post?: Post;
+  comment?: string;
+}
+
+
 
 // notification creation and sending via socket.io
 export const createAndSendNotification = async (params: CreateNotificationParams): Promise<void> => {
-  const { forAccId, actorId, type, postId, commentId } = params;
+  const { forAccId, actor, type, post, comment } = params;
 
-  await connectWithMongoDB();
-  // Don't send notification if the actor is the same as the recipient
-  if (forAccId === actorId) {
+  await connectWithMongoDB(); // connecting with data base...
+  // can't send notification to user itself...
+  if (forAccId === actor.id) {
     console.log("Skipping self-notification...");
     return;
   }
 
   // Create notification in database...
-  const notification = new notifications({
-    forAccId,
-    actorId,
-    type,
-    postId,
-    commentId,
-    isRead: false
-  });
+  const notification = new notifications({ forAccId, actor, type, post, comment });
 
   // Send notification via socket server...
   try {
@@ -42,9 +55,9 @@ export const createAndSendNotification = async (params: CreateNotificationParams
         payload: {
           id: notification._id.toString(),
           type,
-          actorId,
-          postId,
-          commentId,
+          actor,
+          post,
+          comment,
           createdAt: notification.createdAt
         }
       })
@@ -59,52 +72,109 @@ export const createAndSendNotification = async (params: CreateNotificationParams
 };
 
 // Creates a comment notification when comments on a post someone
-export const sendCommentNotification = async ( postAuthorId: string, commenterId: string, postId: string, commentId: string ): Promise<void> => {
+export const sendCommentNotification = async ( postAuthorId: string, commenter: accountInvolved, post: Post, comment: string ): Promise<void> => {
   await createAndSendNotification({
     forAccId: postAuthorId,
-    actorId: commenterId,
+    actor: commenter,
     type: 'comment',
-    postId,
-    commentId
+    post,
+    comment
   });
 };
 
 // Creates a like notification when someone likes a post
-export const sendLikeNotification = async ( postAuthorId: string, likerId: string, postId: string ): Promise<void> => {
+export const sendLikeNotification = async ( postAuthorId: string, liker: accountInvolved, post: Post ): Promise<void> => {
   await createAndSendNotification({
     forAccId: postAuthorId,
-    actorId: likerId,
+    actor: liker,
     type: 'like',
-    postId
+    post
   });
 };
 
 // Creates a follow notification when someone follows an account
-export const sendFollowNotification = async ( followedAccountId: string, followerId: string ): Promise<void> => {
+export const sendFollowNotification = async ( followedAccountId: string, follower: accountInvolved ): Promise<void> => {
   await createAndSendNotification({
     forAccId: followedAccountId,
-    actorId: followerId,
+    actor: follower,
     type: 'follow'
   });
 };
 
 // Creates a mention notification when someone mentions an account
-export const sendMentionNotification = async ( mentionedAccountId: string, mentionerId: string, postId: string, commentId?: string ): Promise<void> => {
+export const sendMentionNotification = async ( mentionedAccountId: string, mentioner: accountInvolved, post: Post, comment?: string ): Promise<void> => {
   await createAndSendNotification({
     forAccId: mentionedAccountId,
-    actorId: mentionerId,
+    actor: mentioner,
     type: 'mention',
-    postId,
-    commentId
+    post,
+    comment
   });
 };
 
 // Creates a repost notification when someone reposts a post
-export const sendRepostNotification = async ( postAuthorId: string, reposterId: string, postId: string ): Promise<void> => {
+export const sendRepostNotification = async ( postAuthorId: string, reposter: accountInvolved, post: Post ): Promise<void> => {
   await createAndSendNotification({
     forAccId: postAuthorId,
-    actorId: reposterId,
+    actor: reposter,
     type: 'repost',
-    postId
+    post
   });
 };
+
+// Creates a new post uploaded notification to followers...
+export const sendNewPostNotification = async ( followerId: string, postUploader: accountInvolved, post: Post ): Promise<void> => {
+  await createAndSendNotification({
+    forAccId: followerId,
+    actor: postUploader,
+    type: 'post',
+    post
+  });
+};
+
+// Creates a new comment on notification...
+export const sendNotificationComment = async ( notificationAuthorId: string, commentor: accountInvolved, post: Post ): Promise<void> => {
+  await createAndSendNotification({
+    forAccId: notificationAuthorId,
+    actor: commentor,
+    type: 'notification_comment',
+    post
+  });
+};
+
+// Creates a new like on notification...
+export const sendNotificationLike = async ( notificationAuthorId: string, liker: accountInvolved, post: Post ): Promise<void> => {
+  await createAndSendNotification({
+    forAccId: notificationAuthorId,
+    actor: liker,
+    type: 'notification_like',
+    post
+  });
+};
+
+export const getNotificationsService = async ( username:string , page:number , pagesize:number ) => {
+   await connectWithMongoDB() ; // connecting to database..
+      
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+      
+    // getting the current active account...
+    const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' });
+
+    // security check for account...
+    if (activeAcc.username !== username.substring(1)) {
+      console.log(`Account handle mismatch coming: ${username} expected: ${activeAcc.usename}`);
+      return NextResponse.json({ message:'Account handle mismatch !!' },{ status:404 });
+    }
+
+    // total notifications count
+    const notificationCount = await notifications.countDocuments({ $and:[{ forAccId:activeAcc._id },{ }] })
+
+    // defining the query variables...
+    const skip = ( page - 1 ) * pagesize ;
+    const hasMore = ( skip + pagesize ) < notificationCount ;
+
+    // fetching notifications now...
+    
+    
+}

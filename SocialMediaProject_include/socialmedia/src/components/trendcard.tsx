@@ -41,7 +41,7 @@ export default function TrendCard({ rank, region, tag, posts } : trendcardprop )
         {/* Left Section */}
         <div className="flex flex-col gap-3 flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-100 flex items-center justify-center shadow-md animate-pulse-slow">
+            <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center shadow-md animate-pulse-slow">
               <span className="text-xs font-bold text-white">{rank}</span>
             </div>
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100/50 dark:bg-slate-800/50 px-3 py-1 rounded-full">

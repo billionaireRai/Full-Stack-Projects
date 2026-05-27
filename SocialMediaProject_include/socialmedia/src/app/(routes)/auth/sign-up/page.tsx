@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import useUserInfo from "@/app/states/userinfo";
 import useActiveAccount from "@/app/states/useraccounts";
 import useAuthenticationState from "@/app/states/isAuth";
+import useWebSocket from "@/app/hooks/useWebSocket";
 import z from 'zod'
 import { useRouter, useSearchParams } from "next/navigation";
 import { usernameRegex, emailRegex } from "@/app/controllers/regex";
@@ -53,6 +54,7 @@ export default function SignUp() {
       setAccount(apiRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${apiRes.data.handle}`);
+      useWebSocket(apiRes.data.userCred.accountId);
       return 'success';
     }
     toast.dismiss(loadingToastId);

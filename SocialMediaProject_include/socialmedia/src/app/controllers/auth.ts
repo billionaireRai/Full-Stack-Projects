@@ -16,6 +16,7 @@ import { activeAccountLogoutService } from "../db/services/auth";
 export interface returnDataType {
     userId:string,
     email:string,
+    accountId:string,
     activeAccount:userCardProp
 }
 export interface registrationDataType {
@@ -87,6 +88,7 @@ export const registerUserController = asyncErrorHandler(async (request:NextReque
     const Data : returnDataType = {
         email:data?.email,
         userId:data?.userId,
+        accountId:data?.accountId,
         activeAccount:data?.accountInfo
     }
 
@@ -122,6 +124,7 @@ export const logginUserController = asyncErrorHandler( async (request:NextReques
     const info : returnDataType = {
         email:email,
         userId:serviceRes?.userId,
+        accountId:serviceRes?.accountId,
         activeAccount:serviceRes?.accountInfo
     }
     return NextResponse.json({message:'User logged In successfully', userCred:info , handle:`${serviceRes.accountInfo.decodedHandle}`},{status:200});
@@ -187,7 +190,7 @@ export const o_authGoogleController = asyncErrorHandler(async (request:NextReque
         const { codeVerifier, codeChallenge, codeChallengeMethod } = generatePKCE();
     
         const ip = getClientIP(request) ; // getting the client IP...
-        const ua = userAgent(request) ; // getting the user device...
+        const ua = userAgent(request) ; // getting the user device... 
     
         await saveOAuthState({state,codeVerifier,intent: intent ,ipAddress: ip ,userAgent: ua});
     
@@ -297,7 +300,7 @@ export const o_authGoogleCallbackController = asyncErrorHandler(async (request:N
     // });
 
     // Redirect to profile page
-    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/@${userData.accountInfo.decodedHandle}?utm_source=google`;
+    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userData.accountInfo.decodedHandle}?utm_source=google&accid=${userData.accountId}`;
     return NextResponse.redirect(profileUrl);
 
 })
@@ -385,7 +388,7 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
     // });
 
     // Redirect to profile page
-    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/@${userinfo.accountInfo.decodedHandle}?utm_source=facebook`;
+    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userinfo.accountInfo.decodedHandle}?utm_source=facebook&accid=${userinfo.accountId}`;
     return NextResponse.redirect(profileUrl);
 })
     

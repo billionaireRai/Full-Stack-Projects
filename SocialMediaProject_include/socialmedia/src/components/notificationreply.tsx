@@ -5,16 +5,18 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getNotificationActionText } from './notificationcard';
 import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
 import { X, MessageSquareText, Reply, Send } from 'lucide-react';
-import { NotificationType, accountInvolved, Post } from './notificationcard';
+import { NotificationType, Post } from './notificationcard';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { userCardProp } from './usercard';
 
 export interface Notification {
   id: string;
   type: NotificationType;
-  actor: accountInvolved;
+  actor: userCardProp;
   post?: Post;
   commentText?: string;
   timestamp: string;
@@ -24,6 +26,8 @@ export interface Notification {
 interface NotificationReplyProps {
   closeModal?: () => void;
   notification?: Notification;
+  icon:React.ReactNode;
+  tailoredURL:string;
 }
 
 function timeAgo(timestamp: string) {
@@ -38,32 +42,8 @@ function timeAgo(timestamp: string) {
   return `${Math.floor(diff / 86400)} days ago`;
 }
 
-function getActionText(type: NotificationType, commentText?: string) {
-  switch (type) {
-    case 'follow':
-      return 'Started following you';
 
-    case 'like':
-      return 'Liked your post';
-
-    case 'comment':
-      return `Commented: "${commentText ?? ''}"`;
-
-    case 'mention':
-      return 'Mentioned you in a post';
-
-    case 'repost':
-      return 'Reposted your post';
-
-    default:
-      return '';
-  }
-}
-
-export default function Notificationreply({
-  closeModal,
-  notification,
-}: NotificationReplyProps) {
+export default function Notificationreply({ closeModal, notification, icon, tailoredURL }: NotificationReplyProps) {
   const { resolvedTheme } = useTheme();
 
   const [isReplying, setisReplying] = useState<boolean>(false);
@@ -74,13 +54,12 @@ export default function Notificationreply({
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const { actor, type, post, commentText, timestamp } =
-    notification ?? ({} as Notification);
+  const { actor, type, post, commentText, timestamp } = notification as Notification ;
 
   const actionText = useMemo(() => {
     if (!notification) return '';
 
-    return getActionText(type, commentText);
+    return getNotificationActionText(type, commentText);
   }, [commentText, notification, type]);
 
   useEffect(() => {
@@ -141,7 +120,7 @@ export default function Notificationreply({
 
   if (!notification) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+      <div className="fixed overflow-y-scroll inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.96, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -211,11 +190,11 @@ export default function Notificationreply({
             <div className="flex flex-col items-center w-12">
               <div className="relative">
                 <Link
-                  href={`/${actor.username}`}
+                  href={`/${actor.decodedHandle}`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <img
-                    src={actor.avatarUrl}
+                    src={actor.account?.avatarUrl}
                     alt={`${actor.name}'s avatar`}
                     className="object-cover w-11 h-11 rounded-full ring-2 ring-white dark:ring-black"
                   />
@@ -243,7 +222,7 @@ export default function Notificationreply({
                 />
 
                 <span className="text-sm text-gray-500 dark:text-zinc-400 truncate">
-                  @{actor.username}
+                  {actor.decodedHandle}
                 </span>
 
                 <span className="text-gray-400">·</span>
@@ -254,12 +233,11 @@ export default function Notificationreply({
               </div>
 
               {/* Action */}
-              <div className="flex items-start gap-2.5">
-                <div className="mt-0.5">
-                  <MessageSquareText className="w-4 h-4 text-yellow-500" />
+              <div className="flex items-center gap-2.5">
+                <div className="mt-0.5 text-yellow-500 dark:text-yellow-400 p-1 rounded-full ">
+                  {icon}
                 </div>
-
-                <p className="text-sm font-medium leading-6 text-yellow-600 dark:text-yellow-400 break-words">
+                <p className="text-sm font-medium leading-6 text-yellow-500 border border-yellow-500 bg-yellow-50 dark:bg-yellow-950 w-fit py-1 px-2 rounded-full dark:text-yellow-400 break-words">
                   {actionText}
                 </p>
               </div>
@@ -267,14 +245,14 @@ export default function Notificationreply({
               {/* Thumbnail */}
               {post?.thumbnailUrl ? (
                 <Link
-                  href={`/${actor.username}/post/${post.id}`}
+                  href={tailoredURL}
                   className="block"
                 >
-                  <div className="overflow-hidden border rounded-2xl border-gray-200 dark:border-zinc-800">
+                  <div>
                     <img
                       src={post.thumbnailUrl}
                       alt="notification post thumbnail"
-                      className="object-cover block w-full h-36"
+                      className="object-contain rounded-2xl block w-1/4 h-auto"
                     />
                   </div>
                 </Link>
@@ -284,10 +262,10 @@ export default function Notificationreply({
               <div className="text-sm text-gray-500 dark:text-zinc-400">
                 Replying to{' '}
                 <Link
-                  href={`/${actor.username}`}
-                  className="font-medium text-blue-500 hover:underline"
+                  href={`/${actor.decodedHandle}`}
+                  className="font-medium text-yellow-500 hover:underline"
                 >
-                  {actor.username}
+                  {actor.decodedHandle}
                 </Link>
               </div>
             </div>
@@ -299,7 +277,7 @@ export default function Notificationreply({
           <div className="flex items-start gap-4">
             {/* Current User Avatar */}
             <Link
-              href={`/${actor.username}`}
+              href={`/${actor.decodedHandle}`}
             >
               <img
                 src="/images/myProfile.jpg"
@@ -325,7 +303,7 @@ export default function Notificationreply({
                 {/* Left Actions */}
                 <div className="flex items-center gap-3">
                   <Link
-                    href={`/${actor?.username}/post/${post?.id}?section=Comments`}
+                    href={`/${actor?.decodedHandle}/post/${post?.id}?section=Comments`}
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 transition-all duration-200 rounded-full cursor-pointer dark:text-zinc-400 hover:text-yellow-500 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-500/10"
                   >
                     <span>View post</span>
@@ -374,7 +352,6 @@ export default function Notificationreply({
                         transition={{ duration: 0.2 }}
                         className="absolute bottom-14 right-0 z-[100]"
                       >
-                        <div className="overflow-hidden border shadow-2xl rounded-2xl border-gray-200 dark:border-zinc-700">
                           <EmojiPicker
                             onEmojiClick={(emoji) => { onEmojiClick(emoji) }}
                             width={320}
@@ -384,7 +361,6 @@ export default function Notificationreply({
                             searchDisabled={false}
                             theme={resolvedTheme === 'dark' ? Theme.DARK : resolvedTheme === 'light' ? Theme.LIGHT : Theme.AUTO}
                           />
-                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>

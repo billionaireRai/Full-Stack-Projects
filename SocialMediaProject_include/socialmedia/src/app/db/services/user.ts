@@ -29,6 +29,7 @@ interface resType {
     userId:string,
     accessToken:string,
     refreshToken:string,
+    accountId:string,
     accountInfo:userCardProp
 }
 
@@ -76,7 +77,6 @@ export async function userRegistrationService(credentials:registrationDataType) 
 
     const newUser = new users({ email:Email , password:Password }); // making new user...
     // Set location if lat and long are provided...
-    
     const accessToken = newUser.generateAccessToken();
     const refreshToken = newUser.generateRefreshToken();
     
@@ -119,6 +119,7 @@ export async function userRegistrationService(credentials:registrationDataType) 
         userId:String(newUser._id),
         accessToken:accessToken,
         refreshToken:refreshToken.token,
+        accountId:firstAccount._id,
         accountInfo:accountData
     } 
 
@@ -183,6 +184,7 @@ export async function logginUserService(data:loginDataType) : Promise<any> {
         userId:String(userdoc._id),
         accessToken:accessToken,
         refreshToken:refreshToken.token,
+        accountId:account._id,
         accountInfo:accountData
     }
 
@@ -235,6 +237,7 @@ export async function creatingUserAfterOauth(email: string, name: string,pic:str
             userId: String(existingUser._id),
             accessToken,
             refreshToken: refreshToken.token,
+            accountId:account._id,
             accountInfo: accountData
         };
 
@@ -295,6 +298,7 @@ export async function creatingUserAfterOauth(email: string, name: string,pic:str
         userId: String(newUser._id),
         accessToken,
         refreshToken: refreshToken.token,
+        accountId:newAccount._id,
         accountInfo: accountData
     };
 

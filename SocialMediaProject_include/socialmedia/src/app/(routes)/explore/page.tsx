@@ -566,12 +566,14 @@ export default function explore() {
       // useeffect for search params...
       // useEffect(() => {
         // if ((window.innerHeight - window.scrollY) <= autoHeightGap) {
-          if (searchparam.get('t')) {
-            const decodedT = decodeURIComponent(String(searchparam.get('t'))); // pattern #something
-            functionFetchPosts(decodedT); // getting explore posts 
-          } else {
-           functionFetchPosts() ;
-          }
+
+          // if (searchparam.get('t')) {
+          //   const decodedT = decodeURIComponent(String(searchparam.get('t'))); // pattern #something
+          //   functionFetchPosts(decodedT); // getting explore posts 
+          // } else {
+          //  functionFetchPosts() ;
+          // }
+          
         // }
       // }, [searchparam.get('t'),window.scrollY]) 
       
