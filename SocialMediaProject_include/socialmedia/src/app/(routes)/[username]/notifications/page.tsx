@@ -6,9 +6,9 @@ import Usercard, { userCardProp } from '@/components/usercard';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
 import { Users, ArrowBigUpIcon, SettingsIcon , BellOff } from 'lucide-react';
 import Activebeep from '@/components/activebeep';
+import useActiveAccount from '@/app/states/useraccounts';
 import Trendcard from '@/components/trendcard';
 import NotificationCard, { Notification, NotificationCardSkeleton } from '@/components/notificationcard';
-
 import { MdNotifications } from 'react-icons/md';
 import axiosInstance from '@/lib/interceptor';
 import { useParams } from 'next/navigation';
@@ -18,6 +18,7 @@ export default function notifications() {
   const params = useParams() ;
   const pagesize = 15 ;
   const autoHeightGap:number = 200 ;
+  const { Account } = useActiveAccount() ;
   const [Page, setPage] = useState<number>(1);
   const [hasMoreNotifications, sethasMoreNotifications] = useState<boolean>(true);
   const [Loading, setLoading] = useState<boolean>(false);
@@ -25,7 +26,7 @@ export default function notifications() {
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
   const [notificationList, setNotificationList] = useState<Notification[]>([
     {
-      id: '1',
+      id: 'Buf942u2-2f43goj',
       type: 'follow',
       actor: {
         id: 'u1',
@@ -55,11 +56,11 @@ export default function notifications() {
       },
       timestamp: new Date(Date.now() - 60000).toISOString(),
       isread:false,
-      isliked:true,
-      iscommented:false,
+      isliked:false,
+      isReplied:false,
     },
     {
-      id: '2',
+      id: 'bb8g753gnrfmok',
       type: 'like',
       actor: {
         id: 'u2',
@@ -88,12 +89,12 @@ export default function notifications() {
         id: 'p1'
       },
       isread:false,
-      isliked:true,
-      iscommented:true,
+      isliked:false,
+      isReplied:true,
       timestamp: new Date(Date.now() - 3600000).toISOString(),
     },
     {
-      id: '3',
+      id: 'jv320efjnedmnr',
       type: 'comment',
       actor: {
         id: 'u3',
@@ -118,18 +119,21 @@ export default function notifications() {
           avatarUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=256&q=60',
         },
       },
+      comment: 'Hey buddy light weight!!',
       post: {
         id: 'p2',
-        thumbnailUrl: 'https://cdn.pixabay.com/photo/2026/05/05/09/35/09-35-14-122_1280.jpg',
+        thumbnailUrl: { 
+          url:'https://cdn.pixabay.com/photo/2026/05/05/09/35/09-35-14-122_1280.jpg',
+          media_type:'image'
+        },
       },
-      commentText: 'Hey buddy light weight!!',
       isread:false,
       isliked:false,
-      iscommented:true,
+      isReplied:true,
       timestamp: new Date(Date.now() - 86400000).toISOString(),
     },
     {
-      id: '4',
+      id: 'DH8ie2hiejmfcee',
       type: 'post',
       actor: {
         id: 'u4',
@@ -157,14 +161,14 @@ export default function notifications() {
       post: {
         id: 'p3',
       },
-      commentText: 'Hey buddy light weight!!',
+      comment: 'Hey buddy light weight!!',
       isread:true,
       isliked:true,
-      iscommented:false,
+      isReplied:false,
       timestamp: new Date(Date.now() - 86400000).toISOString(),
     },
     {
-      id: '5',
+      id: '9r3802nfkdvrk',
       type: 'mention',
       actor: {
         id: 'u4',
@@ -191,15 +195,18 @@ export default function notifications() {
       },
       post: {
         id: 'p4',
-        thumbnailUrl: 'https://cdn.pixabay.com/photo/2026/02/28/00/51/atsu_tettey-beautiful-girl-10147760_1280.jpg',
+        thumbnailUrl:{ 
+          url: 'https://cdn.pixabay.com/photo/2026/02/28/00/51/atsu_tettey-beautiful-girl-10147760_1280.jpg',
+          media_type:'image'
+        }
       },
       isread:true,
       isliked:false,
-      iscommented:false,
+      isReplied:false,
       timestamp: new Date(Date.now() - 1800000).toISOString(),
     },
     {
-      id: '6',
+      id: 'g2hrb0fdifjndmck',
       type: 'repost',
       actor: {
         id: 'u5',
@@ -226,15 +233,18 @@ export default function notifications() {
       },
       post: {
         id: 'p5',
-        thumbnailUrl: 'https://vidiq.com/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2F7g6d2cj1%2Fproduction%2Fda30eb0f304fa10846dd371b2df21385fb5d722f-1280x720.jpg%3Fh%3D720%26q%3D70%26auto%3Dformat&w=1080&q=70&dpl=dpl_22ELgAJEoF6JLNdpKZFXKrQupXGC',
+        thumbnailUrl: { 
+          url:'https://vidiq.com/_next/image/?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2F7g6d2cj1%2Fproduction%2Fda30eb0f304fa10846dd371b2df21385fb5d722f-1280x720.jpg%3Fh%3D720%26q%3D70%26auto%3Dformat&w=1080&q=70&dpl=dpl_22ELgAJEoF6JLNdpKZFXKrQupXGC',
+          media_type:'image'
+        }  
       },
       isread:true,
       isliked:false,
-      iscommented:false,
+      isReplied:false,
       timestamp: new Date(Date.now() - 7200000).toISOString(),
     },
     {
-      id: '7',
+      id: '121wde0fbvt8gi3',
       type: 'notification_like',
       actor: {
         id: 'u6',
@@ -264,29 +274,29 @@ export default function notifications() {
       },
       isread:true,
       isliked:true,
-      iscommented:false,
+      isReplied:false,
       timestamp: new Date(Date.now() - 7200000).toISOString(),
     },
     {
-      id: '8',
+      id: '30490mnlsdivfh45',
       type: 'notification_comment',
-      commentText:'Thanks for appreciation buddy !!',
+      comment:'Thanks for appreciation buddy !!',
       actor: {
         id: 'u6',
-        decodedHandle: '@amritnashcoder',
-        name: 'Amritansh Coder',
+        decodedHandle: '@dwyanejhonson__',
+        name: 'Dwyane Jhonson',
         content: null,
         IsFollowing: false,
         account: {
-          name: 'Amritansh Coder',
-          handle: '@amritnashcoder',
+          name: 'Dwyane Jhonson',
+          handle: '@dwyanejhonson__',
           bio: 'Full-stack builder • React/Node • Building scalable apps',
           location: { text: 'Gurugram, IN', coordinates: [28.4595, 77.0266] },
-          website: 'https://amritnashcoder.dev',
+          website: 'https://dwyaneJ.dev',
           joinDate: '2021-01-28',
-          following: '1,203',
-          followers: '15.8k',
-          Posts: '2,144',
+          following: '103',
+          followers: '18k',
+          Posts: '214',
           isCompleted: true,
           isVerified: true,
           plan: 'Pro',
@@ -299,7 +309,7 @@ export default function notifications() {
       },
       isread:true,
       isliked:false,
-      iscommented:false,
+      isReplied:false,
       timestamp: new Date(Date.now() - 7200000).toISOString(),
     }
   ]);
@@ -558,20 +568,39 @@ export default function notifications() {
         setNotificationList((prev) => [...prev,...data.notifications]);
         sethasMoreNotifications(data.hasMore);
         setLoading(false);
+        MarkNotificationsRead(); 
       }
     } catch (error) {
       console.log("An error occured in fetching notifications...");
-      toast.error('An error occured !!');
       setLoading(false);
     }
   }
   // useeffect for auto-fethcing of notifications....
     // useEffect(() => {
-    // if ((window.innerHeight - window.scrollY) <= autoHeightGap) {
-        // setPage( Page + 1 ); 
-        // fetchNotifications();
-    // }
+    // if ((window.innerHeight - window.scrollY) <= autoHeightGap && hasMoreNotifications)   setPage( Page + 1 ) ;
+
   // }, [window.scrollY]) ]
+
+
+  // function for marking notifications read...
+  async function MarkNotificationsRead() {
+    try {
+      const readUpdateApi = await axiosInstance.patch('/api/account/notifications',{ page:Page , size:pagesize });
+      if (readUpdateApi.status === 200) {
+        notificationList.forEach((notifcn) => { 
+          if(!notifcn.isread)  notifcn.isread = true ;
+        })
+        toast.success("New notifications read !!");
+      }
+    } catch (error) {
+      console.log("An error occured in updating isRead state of notification...");
+    }
+  }
+
+  // when the Page state changes fetch notifications and marking read...
+  useEffect(() => {
+    // fetchNotifications() ;
+  }, [Page])
 
   // function for getting trends...
   async function getOtherExploreInfo() {
@@ -582,20 +611,9 @@ export default function notifications() {
     }
   }
 
-  // function for marking notifications read...
-  async function MarkNotificationsRead() {
-    try {
-        notificationList.forEach((notifcn) => { 
-        notifcn.isread = true ;
-      })
-
-    } catch (error) {
-      
-    }
-  }
   // useffect for handling isRead feild...
   useEffect(() => {
-    // MarkNotificationsRead() ;
+    // getOtherExploreInfo()
   }, [])
     
 
@@ -650,7 +668,7 @@ export default function notifications() {
                   <Trendcard key={ i + 1 } rank={trend.rank} region={trend.region} tag={trend.tag} posts={trend.posts} />
                 ))}
               </ul>
-              <div className='pt-4'>
+              <div className='p-4'>
                 <Link
                   href={`/explore?q=${encodeURIComponent('whats-happening')}&utm_source=show-more`}
                   className='cursor-pointer text-blue-500 hover:text-blue-600 text-sm font-medium'
@@ -679,7 +697,7 @@ export default function notifications() {
                 <span className='font-bold'>Notifications</span>
               </div>
               <Link
-                href='/username/settings/notifications'
+                href={`/${Account.decodedHandle}/settings/notifications`}
                 className='p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer'
               >
                 <SettingsIcon />

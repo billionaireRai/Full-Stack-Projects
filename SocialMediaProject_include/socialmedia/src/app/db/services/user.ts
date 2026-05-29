@@ -94,6 +94,7 @@ export async function userRegistrationService(credentials:registrationDataType) 
             };
     }
     await firstAccount.save(); // saving account doc to DB...
+
     let accountData : userCardProp = {
         decodedHandle:'@' + firstAccount.username,
         name:firstAccount.name,

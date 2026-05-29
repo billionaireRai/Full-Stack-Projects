@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
-type RegisterUserFn = (accountId: string) => void;
+type AccountConnectionFn = (accountId: string) => void;
 
-export default function useWebSocket(accountId?: string) {
+export default function useWebSocket( accountId:string , type:string ) {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -15,12 +15,18 @@ export default function useWebSocket(accountId?: string) {
 
     socketRef.current = socket ;
 
-    const register: RegisterUserFn = (accountid) => {
+    const register: AccountConnectionFn = (accountid) => {
       socket.emit("register_account", accountid) ;
     };
 
+    const login: AccountConnectionFn = (accountid) => { 
+      socket.emit("login_account",accountid)
+    };
+
     socket.on("connect", () => {
-      register(accountId) ;
+      if (type === 'register') register(accountId) ;
+      else login(accountId) ;
+      
     });
 
     return () => {

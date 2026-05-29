@@ -43,7 +43,7 @@ export default function LogIn() {
       setAccount(loginRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${loginRes.data.handle}`);
-      useWebSocket(loginRes.data.userCred.accountId); // generating websocket connection client => server...
+      useWebSocket(loginRes.data.userCred.accountId,'login'); // generating websocket connection client => server...
       return 'success';
   }
     toast.dismiss(initialToast);

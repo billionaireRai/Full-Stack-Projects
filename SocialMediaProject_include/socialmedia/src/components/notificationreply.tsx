@@ -9,6 +9,7 @@ import { getNotificationActionText } from './notificationcard';
 import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
 import { X, MessageSquareText, Reply, Send } from 'lucide-react';
+import axiosInstance from '@/lib/interceptor';
 import { NotificationType, Post } from './notificationcard';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { userCardProp } from './usercard';
@@ -25,7 +26,7 @@ export interface Notification {
 
 interface NotificationReplyProps {
   closeModal?: () => void;
-  notification?: Notification;
+  notification: Notification;
   icon:React.ReactNode;
   tailoredURL:string;
 }
@@ -68,30 +69,32 @@ export default function Notificationreply({ closeModal, notification, icon, tail
     }
   }, [notification]);
 
-  const handleNotificationReply = async () => {
-    if (!replyText.trim()) return;
-
+  // function to handle comment on notification...
+  async function handleCommentOnNotification() {
     try {
+      if (!replyText.trim()) {
+        toast.error('Reply text cant be empty !!');
+        return ;
+      };
+      const commentApi = await axiosInstance.post('/api/account/notifications', { notifcnId: notification.id , replyText });
       setisReplying(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      setReplyText('');
-
-      toast.success('Successfully replied to notification!');
-
-      closeModal?.();
+      if (commentApi.status === 200) {
+        toast.success('Successfully replied to notification!');
+        closeModal?.();
+      }
     } catch (error) {
-      toast.error('Failed to send reply');
+      console.log("An error occured in replying !!");
+      toast.error('Failed to send reply !!');
     } finally {
       setisReplying(false);
     }
-  };
+  }
 
+  // for slicing text till max char...
   useEffect(() => {
-    if (replyText.length > maxChars) {
-      setReplyText(replyText.slice(0, maxChars));
-    }
+    if (replyText.length > maxChars) setReplyText(replyText.slice(0, maxChars));
+    
   }, [replyText]);
   
   // Auto-resize textarea
@@ -105,10 +108,9 @@ export default function Notificationreply({ closeModal, notification, icon, tail
    // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        handleNotificationReply();
-      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter')  handleCommentOnNotification();
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [replyText]);
@@ -147,7 +149,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
 
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in-0 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center overflow-y-scroll justify-center bg-black/60 backdrop-blur-md animate-in fade-in-0 duration-200">
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -242,21 +244,37 @@ export default function Notificationreply({ closeModal, notification, icon, tail
                 </p>
               </div>
 
-              {/* Thumbnail */}
-              {post?.thumbnailUrl ? (
+              <div className="relative rounded-2xl w-fit overflow-hidden border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md">
+                {/* Thumbnail link */}
                 <Link
                   href={tailoredURL}
-                  className="block"
+                  className="block group focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70"
                 >
-                  <div>
-                    <img
-                      src={post.thumbnailUrl}
-                      alt="notification post thumbnail"
-                      className="object-contain rounded-2xl block w-1/4 h-auto"
-                    />
+                  <div className="w-50 h-50 relative">
+                    {/* Image media */}
+                    {post?.thumbnailUrl?.url?.trim() && post.thumbnailUrl.media_type === 'image' && (
+                      <img
+                        src={post.thumbnailUrl.url}
+                        alt="Post thumbnail"
+                        draggable={false}
+                        loading="lazy"
+                        className="w-full h-full object-cover rounded-2xl transition-transform duration-300 group-hover:scale-[1.04]"
+                      />
+                    )}
+
+                    {/* Video media*/}
+                    {post?.thumbnailUrl?.url?.trim() && post.thumbnailUrl.media_type === 'video' && (
+                      <video
+                        src={post.thumbnailUrl.url}
+                        preload="metadata"
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover rounded-2xl"
+                      />
+                    )}
                   </div>
                 </Link>
-              ) : null}
+              </div>
 
               {/* Replying to */}
               <div className="text-sm text-gray-500 dark:text-zinc-400">
@@ -367,7 +385,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
 
                   {/* Reply Button */}
                   <button
-                    onClick={handleNotificationReply}
+                    onClick={handleCommentOnNotification}
                     disabled={!replyText.trim() || isReplying}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
                       replyText.trim()

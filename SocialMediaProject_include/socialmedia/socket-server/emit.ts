@@ -1,5 +1,6 @@
 import http from 'http';
 import { Server } from 'socket.io';
+import Presence from '@/app/db/models/presense';
 import express, { Request, Response } from 'express';
 
 const app = express();
@@ -13,9 +14,17 @@ const io = new Server(server, { cors: { origin: "*" }});
 
 /* Socket Logic */
 io.on("connection", (socket) => {
-  socket.on("register_account", (accountId) => {
-    socket.join(accountId);
+  socket.on("register_account", async (accountId) => {
+  
+  // creating Presense state in DB...
+  await Presence.create({ accountId:accountId , onlineStatus:'online' , socketId:socket.id })
+  socket.join(accountId);
   });
+
+  socket.on("login_account", async (accountId) => { 
+    await Presence.findOneAndUpdate({ accountId:accountId },{ onlineStatus:'online' }) ;
+    socket.join(accountId);
+  })
 });
 
 /* HTTP → Emit Notification */

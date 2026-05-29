@@ -14,11 +14,6 @@ const presenceSchema = new mongoose.Schema({
         default: 'offline',
         index: true
     },
-    lastSeen: {
-        type: Date,
-        default: Date.now,
-        index: true
-    },
     socketId: {
         type: String,
         trim: true,

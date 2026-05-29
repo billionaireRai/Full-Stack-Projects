@@ -140,6 +140,7 @@ export default function UserProfilePage() {
   const searchParams = useSearchParams() ; // for making access to searchparams...
   const utmsource = searchParams.get('utm_source') ;
   const accid = searchParams.get('accid');
+  const intent = searchParams.get('intent');
   const { isPop , setisPop } = useUpgradePop() ;
   const { isMediaPop , mediaDetail , setDetails, setMediaPop } = useMediaPop() ;
   const { username } = useParams() ; // taking the username from URL...
@@ -746,7 +747,7 @@ export default function UserProfilePage() {
 
   // useffect for handling 'utm_source' & 'accid' search param...
   useEffect(() => {
-    if (utmsource?.trim() && accid?.trim())  useWebSocket(accid) ;
+    if (utmsource?.trim() && accid?.trim() && intent?.trim())  useWebSocket(accid,intent) ;
   }, [utmsource])
   
     

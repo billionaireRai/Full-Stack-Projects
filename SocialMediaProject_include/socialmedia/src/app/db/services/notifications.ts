@@ -4,6 +4,9 @@ import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import accounts from "../models/accounts";
 import axios from "axios";
 import notifications from "../models/notifications";
+import Post from "../models/posts";
+import follows from "../models/follows";
+import { fmt } from "@/lib/utils";
 
 
 type NotificationType = 'follow' | 'like' | 'comment' | 'mention' | 'repost' | 'post' | 'notification_like' | 'notification_comment' ;
@@ -167,14 +170,162 @@ export const getNotificationsService = async ( username:string , page:number , p
       return NextResponse.json({ message:'Account handle mismatch !!' },{ status:404 });
     }
 
-    // total notifications count
-    const notificationCount = await notifications.countDocuments({ $and:[{ forAccId:activeAcc._id },{ }] })
+    // total notifications count...
+    const notificationCount = await notifications.countDocuments({ $and:[{ forAccId:activeAcc._id },{ isDeleted:false }] })
 
     // defining the query variables...
     const skip = ( page - 1 ) * pagesize ;
     const hasMore = ( skip + pagesize ) < notificationCount ;
 
     // fetching notifications now...
-    
-    
+    const Notifications = await notifications.find({ $and:[{ forAccId:activeAcc._id },{ isDeleted:false }] })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pagesize);
+
+    const notificationData = await Promise.all(Notifications.map(async (notification) => {
+        // fetching some required data...
+        const actorAccount = await accounts.findOne({ $and:[{ _id:notification.actorId },{ 'account.status':'ACTIVE' }] });
+        const postInvolved = notification.postId ? await Post.findById(notification.postId) : null ;
+
+        const isFollowing = await follows.exists({ $and:[{ followerId: activeAcc._id },{ followingId: actorAccount._id }] })
+        const followers = await follows.find({ followingId : actorAccount._id , isDeleted:false })
+        const following = await follows.find({ followerId : actorAccount._id , isDeleted:false })
+
+        const posts = await Post.countDocuments({ authorId:actorAccount._id , isDeleted:false }) ;
+
+        // checking actor account existence...
+        if (!actorAccount) {
+          console.log('Actor account not found !!');
+          return null ;
+        }
+        // checking post existence...
+        if (!postInvolved) {
+          console.log('Post involved not found !!');
+          return null ;
+        }
+        // returning data in required structure...
+        return {
+          id: notification._id.toString() ,
+          type: notification.type,
+          actor: {
+            id: actorAccount._id.toString(),
+            decodedHandle: `@${actorAccount.username}`,
+            name: actorAccount.name,
+            IsFollowing: Boolean(isFollowing),
+            account: {
+                  name: actorAccount.account.name,
+                  handle: `@${actorAccount.username}`,
+                  bio: actorAccount.bio,
+                  location: actorAccount.location,
+                  website: actorAccount.website,
+                  joinDate: new Date(actorAccount.createdAt).toDateString(),
+                  following: fmt(following.length),
+                  followers: fmt(followers.length),
+                  Posts: fmt(posts),
+                  isCompleted: actorAccount.account.completed,
+                  isVerified: actorAccount.isVerified.value,
+                  plan: actorAccount.isVerified.level,
+                  bannerUrl: actorAccount.banner.url,
+                  avatarUrl: actorAccount.avatar.url,
+                }
+          },
+          timestamp:new Date(notification.createdAt).toISOString(),
+          isread: Boolean(notification.isRead),
+          isliked: Boolean(notification.isLiked),
+          iscommented: notification.comment.trim() && notification.comment.length > 0 ,
+          commentText: notification.comment.trim() ? notification.comment : '',
+          post:{
+              id: postInvolved._id.toString(),
+              thumbnailUrl: { url:postInvolved.mediaUrls[0].url , media_type:postInvolved.mediaUrls[0].media_type },
+              content: postInvolved.content,
+            },
+        };
+      })
+    );
+
+    return {
+        notifications: notificationData,
+        hasMore,
+      }
+}
+
+export const markNotificationsReadService = async ( page:number , size:number) => {
+  await connectWithMongoDB() ; // connecting to database..
+      
+  const user = await getDecodedDataFromCookie("accessToken");
+  if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+      
+  // getting the current active account...
+  const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' }); 
+
+  if (!activeAcc) {
+    console.log("Current loggedin account not found !!");
+    return NextResponse.json({ message:'LoggedIn account not found !!' },{ status:404 });
+  }
+
+  // defining skip variable for new fetching...
+  const skip = ( page - 1 ) * size ;
+
+  // fetching notifications now...
+  const Notifications = await notifications.find({ $and:[{ forAccId:activeAcc._id },{ isDeleted:false }] }).sort({ createdAt:-1 }).skip(skip).limit(size);
+
+  const notificationIds = Notifications.map((notifcn) => notifcn._id) ;
+
+  // bulk update in data in notifications collection...
+  await notifications.updateMany({ _id:{ $in:notificationIds }},{ isRead:true });
+}
+
+export const likeNotificationService = async ( id:string , updateTo:boolean ) => {
+  await connectWithMongoDB() ; // connecting to database..
+      
+  const user = await getDecodedDataFromCookie("accessToken");
+  if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+      
+  // getting the current active account...
+  const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' }); 
+
+    if (!activeAcc) {
+    console.log("Current loggedin account not found !!");
+    return NextResponse.json({ message:'LoggedIn account not found !!' },{ status:404 });
+  }
+
+  await notifications.findByIdAndUpdate(id,{ isLiked:updateTo }); // updating the like state...
+
+}
+
+export const commentOnNotificationService = async ( id:string , reply:string ) => {
+  await connectWithMongoDB() ; // connecting to database..
+      
+  const user = await getDecodedDataFromCookie("accessToken");
+  if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+
+  // getting the current active account...
+  const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' }); 
+
+  if (!activeAcc) {
+    console.log("Current loggedin account not found !!");
+    return NextResponse.json({ message:'LoggedIn account not found !!' },{ status:404 });
+  }
+
+  await notifications.findByIdAndUpdate(id,{ comment:reply.trim() }) ;
+
+}
+
+export const deleteNotificationService = async ( id:string ) => {
+  await connectWithMongoDB() ; // connecting to database..
+      
+  const user = await getDecodedDataFromCookie("accessToken");
+  if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+
+  // getting the current active account...
+  const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' }); 
+
+  if (!activeAcc) {
+    console.log("Current loggedin account not found !!");
+    return NextResponse.json({ message:'LoggedIn account not found !!' },{ status:404 });
+  }
+
+  await notifications.findByIdAndUpdate(id,{ isDeleted:true }) ;
+
 }

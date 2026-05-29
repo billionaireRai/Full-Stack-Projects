@@ -21,10 +21,13 @@ interface skeletonprops {
   isodd:boolean
 }
 
-
+interface mediaSchema {
+  url:string,
+  media_type:string
+}
 export interface Post {
   id: string;
-  thumbnailUrl?: string;
+  thumbnailUrl?: mediaSchema;
   content?: string;
 }
 
@@ -33,16 +36,16 @@ export interface Notification {
   type: NotificationType;
   actor: userCardProp;
   post?: Post;
-  commentText?: string;
+  comment?: string;
   timestamp: string; // ISO string or date string
   isread:boolean
   isliked:boolean
-  iscommented:boolean
+  isReplied:boolean
 }
 
 interface NotificationCardProps {
   notification: Notification;
-  onRemove?: (notificationId: string) => void;
+  onRemove: (notificationId: string) => void;
 }
 
 export function NotificationCardSkeleton( { isodd } :skeletonprops ) {
@@ -114,10 +117,10 @@ export function getNotificationActionText( type: NotificationType,commentText?: 
 export default function NotificationCard({ notification , onRemove }: NotificationCardProps) {
   const { Account } = useActiveAccount() ;
   const avatarRef = useRef<HTMLAnchorElement>(null);
-  const { actor, type, post, commentText, timestamp, isread ,isliked , iscommented } = notification ; // extracting the notification infos...
+  const { actor, type, post, comment, timestamp, isread ,isliked , isReplied } = notification ; // extracting the notification infos...
   const [Loading, setLoading] = useState<boolean>(false);
   const [isLiked, setisLiked] = useState<boolean>(isliked);
-  const [isCommented, setisCommented] = useState<boolean>(iscommented);
+  const [isCommented, setisCommented] = useState<boolean>(isReplied);
   const [isFollowing, setisFollowing] = useState(actor.IsFollowing);
   const [replyModal, setreplyModal] = useState(false) ;
   const [deletePop, setdeletePop] = useState(false);
@@ -155,15 +158,35 @@ export default function NotificationCard({ notification , onRemove }: Notificati
         }
   };
 
-  const handleRemove = () => {
-    onRemove?.(notification.id) ;
+  const handleRemove = async () => {
+    const loading = toast.loading("Deleting a notification , please wait...");
+    try {
+      const deletedApi = await axiosInstance.delete(`/api/account/notifications?notificationId=${notification.id}`);
+      if (deletedApi.status === 200)  { 
+        onRemove(notification.id);
+        toast.dismiss(loading);
+        toast.success("notification deleted successfully !!") ;
+      }
+    } catch (error) {
+       console.log("An error occured in deletion !!")
+       toast.dismiss(loading);
+       toast.error("An error occured !!")
+    }
   };
 
   // function for handling liking notification...
-  function handleLikeToggle() {
-    setopenDD(false); setisLiked(!isLiked);
+  async function handleLikeToggle() {
+    try {
+      const targetState = !isLiked ;
+      const likeApi = await axiosInstance.put('/api/account/notifications',{ notifcnId:notification.id , targetState })
+      if (likeApi.status === 200) {
+        setopenDD(false); 
+        setisLiked(targetState);
+      }
+    } catch (error) {
+      console.log("Failed with like action !!!")
+    }
   }
-
 
    // Close dropdown if clicked outside
     useEffect(() => {
@@ -205,7 +228,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
 
   return (
     <>
-    <div className={`flex relative flex-col md:flex-row md:items-center md:justify-between dark:shadow-gray-900 bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md cursor-pointer p-4 md:p-5 mb-1 font-poppins ${! isread && 'bg-yellow-100'}`}>
+    <div className={`flex relative flex-col md:flex-row md:items-center md:justify-between dark:shadow-gray-900 bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md cursor-pointer p-4 md:p-5 mb-1 font-poppins ${! isread && 'bg-yellow-100 dark:border-yellow-800'}`}>
       <div className="flex items-center space-x-3 md:space-x-4 flex-1">
         <div className='relative'>
           <Link href={`/${actor.decodedHandle}`} ref={avatarRef} onMouseEnter={handleAvatarHover} onMouseLeave={handleAvatarLeave} >
@@ -247,10 +270,10 @@ export default function NotificationCard({ notification , onRemove }: Notificati
           <div className="text-yellow-500 font-semibold md:text-base break-words">
             {type === 'follow' && <NotificationContainer icon={currentNotificationIcon} text='Started following you' />}
             {type === 'like' && <NotificationContainer icon={currentNotificationIcon} text='Liked your post' />}
-            {type === 'comment' && <NotificationContainer icon={currentNotificationIcon} text={`Commented : ${commentText}`} />}
+            {type === 'comment' && <NotificationContainer icon={currentNotificationIcon} text={`Commented : ${comment}`} />}
             {type === 'post' && <NotificationContainer icon={currentNotificationIcon} text={'New post uploaded'} />}
             {type === 'notification_like' && <NotificationContainer icon={currentNotificationIcon} text={'Liked your notification'} />}
-            {type === 'notification_comment' && <NotificationContainer icon={currentNotificationIcon} text={`Comment on your notification : ${commentText}`} />}
+            {type === 'notification_comment' && <NotificationContainer icon={currentNotificationIcon} text={`Comment on your notification : ${comment}`} />}
             {type === 'mention' && <NotificationContainer icon={currentNotificationIcon} text='Mentioned you in a post' />}
             {type === 'repost' && <NotificationContainer icon={currentNotificationIcon} text='Reposted your post' />}
           </div>
@@ -273,13 +296,27 @@ export default function NotificationCard({ notification , onRemove }: Notificati
           </div>
         )}
 
-        {(type === 'like' || type === 'comment' || type === 'mention' || type === 'repost') && post?.thumbnailUrl ? (
+        {(type === 'like' || type === 'comment' || type === 'mention' || type === 'repost' || type === 'post') && post?.thumbnailUrl ? (
           <Link href={getTailoredURL(type)}>
-          <img
-            src={post.thumbnailUrl}
-            alt='Post-Thumbnail'
-            className="w-18 h-18 rounded-lg object-cover cursor-pointer flex-shrink-0"
-            />
+            {post?.thumbnailUrl.media_type === 'image' && (
+              <img
+                src={post.thumbnailUrl.url}
+                alt='Post-Thumbnail'
+                role='link'
+                draggable={false}
+                tabIndex={0}
+                loading='lazy'
+                aria-label='One of the media uploaded on the post'
+                className="w-20 h-20 rounded-lg object-cover cursor-pointer flex-shrink-0"
+              />
+            )}
+            {post?.thumbnailUrl.media_type === 'video' && (
+              <video
+                src={post.thumbnailUrl.url}
+                disableRemotePlayback
+                className="w-20 h-20 rounded-lg object-cover cursor-pointer flex-shrink-0"
+              />
+            )}
           </Link>
         ):(
           <Link href={getTailoredURL(type)} className='cursor-pointer hover:invert hover:border border-gray-500 text-gray-500 rounded-full p-1'>
@@ -289,7 +326,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
          <div className="relative" ref={dropdownRef}>
           <div
             onClick={(e) => { e.stopPropagation(); setopenDD(!openDD); }}
-            className='hover:bg-gray-100 dark:hover:bg-gray-950 p-1 rounded-full cursor-pointer'>
+            className='hover:bg-yellow-300 dark:hover:bg-gray-950 p-1 rounded-full cursor-pointer'>
             <MoreHorizontalIcon width={15} height={15} />
           </div>
           { openDD && (
@@ -307,7 +344,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
                   <span>{ isLiked ? 'Unlike' : 'Like' } Notification</span><HeartIcon width={20} height={20} className={`${isLiked && 'fill-black dark:fill-white'}`} />
                 </button>
                 <button
-                  onClick={() => { setreplyModal(true); setopenDD(false); }}
+                  onClick={() => { setreplyModal(true) ; setopenDD(false) }}
                   className="flex flex-row items-center justify-between cursor-pointer gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 rounded-md"
                 >
                   <span>{ isCommented ? 'Commented' : 'Make A Comment' }</span><MessageCircleIcon height={20} width={20} className={`${isCommented && 'fill-black dark:fill-white'}`}/>
@@ -325,6 +362,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
           }
         </div>
       </div>
+      {/* Is liked icon */}
       {isLiked && (
         <motion.div
           className="rounded-full p-1 absolute right-0 top-0"
@@ -337,6 +375,22 @@ export default function NotificationCard({ notification , onRemove }: Notificati
           transition={{ duration: 0.8, times: [0, 0.35, 0.6, 1], ease: 'easeOut' }}
         >
             <Heart strokeWidth={2} color="#f0b100" fill='#f0b100' size={20} />
+        </motion.div>
+      )}
+
+      {/* new notification icon */}
+      {!notification.isread && (
+        <motion.div
+          className="rounded-full p-1 absolute left-0 top-0"
+          initial={{ scale: 0.2, rotate: -20, opacity: 0 }}
+          animate={{ 
+            scale: [0.2, 1.35, 0.95, 1],
+            rotate: [0, -10, 10, 0],
+            opacity: 1,
+          }}
+          transition={{ duration: 0.8, times: [0, 0.35, 0.6, 1], ease: 'easeOut' }}
+        >
+            <BellIcon strokeWidth={2} color="#f0b100" fill='#f0b100' size={20} />
         </motion.div>
       )}
 

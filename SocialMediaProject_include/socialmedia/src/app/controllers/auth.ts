@@ -208,7 +208,7 @@ export const o_authGoogleCallbackController = asyncErrorHandler(async (request:N
 
     if (!code || !state) {
         console.log("either of code OR state is missing !!");
-        return NextResponse.json({message:'Important credentials missing...'});
+        return NextResponse.json({ message:'Important credentials missing...' });
     }
 
     const oAuthState = await validateAndConsumeState(String(state)) ;
@@ -300,7 +300,7 @@ export const o_authGoogleCallbackController = asyncErrorHandler(async (request:N
     // });
 
     // Redirect to profile page
-    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userData.accountInfo.decodedHandle}?utm_source=google&accid=${userData.accountId}`;
+    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userData.accountInfo.decodedHandle}?utm_source=google&accid=${userData.accountId}&intent=${STATE?.intent}`;
     return NextResponse.redirect(profileUrl);
 
 })
@@ -340,6 +340,7 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
 
     // verifying the state from DB...
     const oAuthState = await validateAndConsumeState(String(state)) ; // validation the o-auth request...
+    const STATE = await findOAuthState(state);
     if (!oAuthState) {
         console.log("o-auth state did'nt exists !!");
         return NextResponse.json({message:'o-auth state unavailable...'},{ status:402 });
@@ -388,7 +389,7 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
     // });
 
     // Redirect to profile page
-    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userinfo.accountInfo.decodedHandle}?utm_source=facebook&accid=${userinfo.accountId}`;
+    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userinfo.accountInfo.decodedHandle}?utm_source=facebook&accid=${userinfo.accountId}&intent=${STATE?.intent}`;
     return NextResponse.redirect(profileUrl);
 })
     

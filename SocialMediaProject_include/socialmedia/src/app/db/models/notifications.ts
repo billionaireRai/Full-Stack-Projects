@@ -19,10 +19,10 @@ const notificationSchema = new mongoose.Schema({
     postId:{
         type:mongoose.Types.ObjectId,
         ref:'post',
-        required:[false,'Not required in (follow) action!!'],
+        required:[false,'Not required in some action!!'],
         validate: {
             validator: function(this: mongoose.Document, value: any) {
-                const typesRequiringPostId = ['like', 'comment', 'mention', 'repost'];
+                const typesRequiringPostId = ['like', 'comment', 'mention', 'repost','post'];
                 if (typesRequiringPostId.includes(this.get('type'))) {
                     return value != null;
                 }
@@ -31,20 +31,10 @@ const notificationSchema = new mongoose.Schema({
             message: 'postId is required for this notification type'
         }
     },
-    commentId:{
-        type:mongoose.Types.ObjectId,
-        ref:'post',
-        required:[false,'Not required in (like) and (follow) actions!!'],
-        validate: {
-            validator: function(this: mongoose.Document, value: any) {
-                const typesRequiringCommentId = ['comment', 'mention', 'repost'];
-                if (typesRequiringCommentId.includes(this.get('type'))) {
-                    return value != null;
-                }
-                return true;
-            },
-            message: 'CommentId is required for this notification type'
-        }
+    comment:{
+        type:String,
+        required:[false,'Not neccessary in any actions!!'],
+        trim:true
     },
     isLiked:{
         type:Boolean,
@@ -59,6 +49,15 @@ const notificationSchema = new mongoose.Schema({
         default:false
     }
 }, { timestamps:true });
+
+// Latest notifications per recipient
+notificationSchema.index({ forAccId: 1, createdAt: -1 });
+// Faster unread fetches
+notificationSchema.index({ forAccId: 1, isRead: 1, createdAt: -1 });
+// Faster filtering by type (if used)
+notificationSchema.index({ forAccId: 1, type: 1, createdAt: -1 });
+// Fallback index for createdAt ordering
+notificationSchema.index({ createdAt: -1 });
 
 const notifications = mongoose.models.notifications || mongoose.model('notifications',notificationSchema) ;
 

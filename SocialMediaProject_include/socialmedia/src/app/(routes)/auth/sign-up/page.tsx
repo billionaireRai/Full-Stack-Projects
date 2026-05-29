@@ -54,7 +54,7 @@ export default function SignUp() {
       setAccount(apiRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${apiRes.data.handle}`);
-      useWebSocket(apiRes.data.userCred.accountId);
+      useWebSocket(apiRes.data.userCred.accountId,'register');
       return 'success';
     }
     toast.dismiss(loadingToastId);
