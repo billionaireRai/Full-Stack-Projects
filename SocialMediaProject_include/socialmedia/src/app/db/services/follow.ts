@@ -151,14 +151,14 @@ export const newAccountCreationService = async (newAcc:newAccType) => {
     return NextResponse.json({ message: 'Account created successfully...' }, { status: 200 });
 }
 
-export const fetchingAccountsService = async (handle:string) => {
-    await connectWithMongoDB() ; // connecting to database..
-
+export const fetchingAccountsService = async (handle: string) => {
+    await connectWithMongoDB(); // connecting to database..
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
 
-    const activeAcc = await accounts.findOne({ username:handle , userId: user.id , 'account.Active':true });
-    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+    const activeAcc = await accounts.findOne({ username:handle ,userId:user.id, 'account.Active':true, 'account.status':{ $in:['ACTIVE','DEACTIVATED']}});
+
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found', handle, viewerUserId: user.id }, { status: 404 });
 
     async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
         const paticularAcc = await accounts.findById(accountId) ;
@@ -214,13 +214,13 @@ export const switchAccountService =  async (toAccount:userCardProp) => {
 
     // removing active state from current account...
     const removing = await accounts.findOneAndUpdate(
-        { username:toAccount.decodedHandle , userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' },
+        { userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' },
         { 'account.Active':false } , { new:true }
     );
 
     // adding active state toAccount...
     const newActive = await accounts.findOneAndUpdate(
-        { username:toAccount.decodedHandle , userId:user.id , 'account.Active':false , 'account.status':'ACTIVE' },
+        { username:toAccount.decodedHandle , userId:user.id , 'account.Active':false , 'account.status':{ $in:['ACTIVE','DEACTIVATED']} },
         { 'account.Active':true } , { new:true }
     ) ;
 

@@ -623,7 +623,7 @@ export default function CreatePost() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute bottom-12 right-0 mt-2 w-80 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-700 p-4 z-50"
+                      className="absolute bottom-12 right-0 mt-2 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-700 p-4 z-50"
                     >
                       <div className="mb-4">
                         <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Who can reply?</h3>

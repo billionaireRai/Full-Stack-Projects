@@ -11,10 +11,10 @@ import toast from 'react-hot-toast';
 import { useRouter , useParams } from 'next/navigation';
 
 export default function SwitchAccountPopUp () {
-  const { setisPopOpen } = useSwitchAccount();
-  const { Account , setAccount } = useActiveAccount() ;
   const router = useRouter() ;
   const { User } = useUserInfo() ;
+  const { setisPopOpen } = useSwitchAccount();
+  const { Account , setAccount } = useActiveAccount() ;
   const [Accounts,setAccounts] = useState<userCardProp[]>([
     {
       decodedHandle: '@alice123',
@@ -135,7 +135,6 @@ export default function SwitchAccountPopUp () {
       const accountapi = await axiosInstance.get(`/api/profile/username?currentHandle=${String(Account.decodedHandle).substring(1)}`);
       if (accountapi.status === 200) {
         setAccounts(accountapi.data.allAccs);
-        console.log(accountapi.data);
         return 'success';
       }
     } catch (error) {
@@ -155,9 +154,9 @@ export default function SwitchAccountPopUp () {
     try {
       const switchapi = await axiosInstance.put(`/api/profile/username`,{ toSwitchAcc:toSwitchAcc }) ;
       if (switchapi.status === 200) {
+        setAccount(toSwitchAcc) ; // updating the active account...
         toast.dismiss(loadingToast) ;
         toast.success('Account switched successfully !!', { position:'top-right' });
-        setAccount(toSwitchAcc) ; // updating the active account...
         setisPopOpen(false) ; // closing the pop...
         router.push(`/${toSwitchAcc.decodedHandle}`) ; // reloading the profile page...
       } else {
@@ -189,7 +188,7 @@ export default function SwitchAccountPopUp () {
         </div>
         <div className="text-sm flex flex-row items-center text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
           <p>Select an account you would like to switch to continue enjoying.</p>
-          <Link href={`/@${Account?.decodedHandle}/create-account?userId=${User.userId}`} className='flex items-center justify-between gap-1.5 text-sm font-semibold cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-950 text-yellow-500 rounded-lg px-4 py-2'><span>New Account</span><PlusCircleIcon />
+          <Link href={`/${Account?.decodedHandle}/create-account?userId=${User.userId}`} className='flex items-center justify-between gap-1.5 text-sm font-semibold cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-950 text-yellow-500 rounded-lg px-4 py-2'><span>New Account</span><PlusCircleIcon />
           </Link> 
         </div>
         <div className="space-y-1">

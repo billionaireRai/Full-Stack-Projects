@@ -19,7 +19,7 @@ export const gettingAccountService = async (text:string) => {
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
     
-    const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+    const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' });
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
@@ -80,7 +80,7 @@ export const exploreDetailsForAccountService = async () => {
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
     
-    const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+    const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' });
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     // Fetch blocked account IDs

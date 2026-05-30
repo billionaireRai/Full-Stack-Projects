@@ -29,6 +29,7 @@ import Qrcodepop from '@/components/qrcodepop';
 import { BsPostcardFill } from 'react-icons/bs';
 import useMediaPop from '@/app/states/mediapop';
 import Mediapopmodal from '@/components/mediapopmodal';
+import { usernameRegex } from '@/app/controllers/regex';
 
 interface mediaType {
   url: string;
@@ -750,8 +751,33 @@ export default function UserProfilePage() {
     if (utmsource?.trim() && accid?.trim() && intent?.trim())  useWebSocket(accid,intent) ;
   }, [utmsource])
   
-    
+  // function to make mentions a link in bio...
+  const makeMentionsAsLink = (Bio: string) => {
+   if (!Bio?.trim()) return null ;
+
+    const parts = Bio.split(/(@[a-zA-Z0-9_]{8,20})/g);
+
+    return parts.map((part, idx) => {
+      if (part.startsWith("@") && usernameRegex.test(part.slice(1))) {
+       const username = part.slice(1);
+
+       return (
+        <Link
+          key={idx}
+          href={`/${username}`}
+          className="text-yellow-500 hover:text-shadow-xs text-shadow-yellow-400"
+        >
+          {part}
+        </Link>
+       );
+      }
+      
+      return <React.Fragment key={idx}>{part}</React.Fragment>;
+    });
+};
+
   return (
+
     <>
       <div className={`h-fit flex flex-col font-poppins rounded-md p-2 dark:bg-black`}>
         <div className='flex gap-2'>
@@ -969,7 +995,9 @@ export default function UserProfilePage() {
                     </div>
                   </div>
 
-                  <p className="text-sm">{AccountInfo.bio}</p>
+                  <div className="text-sm inline">
+                    <span>{makeMentionsAsLink(AccountInfo.bio)}</span>
+                  </div>
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <Link href={`https://www.google.com/maps?q=${AccountInfo.location?.coordinates[0]},${AccountInfo.location?.coordinates[1]}`}  // lat,lng
@@ -1468,7 +1496,7 @@ export default function UserProfilePage() {
           <BlockUser closeBlockPop={() => { setshowBlockPop(false) }} username={AccountInfo.handle} updateblockState={() => { setIsBlocked(!IsBlocked) }} isBlocked={IsBlocked} />
         )}
         { showDeleteAccPop && (
-          <DeleteModal closePopUp={() => { setshowDeleteAccPop(false) }} itemType={`Account @${AccountInfo.handle}`} onDelete={() => { handleProfileDeleteLogic(AccountInfo.handle) }}/>
+          <DeleteModal closePopUp={() => { setshowDeleteAccPop(false) }} itemType={`Account ${AccountInfo.handle}`} onDelete={() => { handleProfileDeleteLogic(AccountInfo.handle) }}/>
         )}
         { SharePop && (
           <SharePopup onClose={() => { setSharePop(false) }} open={SharePop} onCopy={() => { handleProfileLinkCopy() }} link={window.location.href} followerCount={AccountInfo.followers} followingCount={AccountInfo.following} text={`@${AccountInfo.handle}.${AccountInfo.bio}`}/>

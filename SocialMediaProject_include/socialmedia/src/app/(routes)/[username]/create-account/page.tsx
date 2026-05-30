@@ -48,7 +48,7 @@ export default function createNewAccount() {
       if (apires.status === 200) {
         toast.dismiss(loadingToast);
         toast.success('Account created successfully !!');
-        // router.push(`/${decodeURIComponent(String(params.username))}?switch-account-pop=true`) ;
+        router.push(`/${decodeURIComponent(String(params.username))}?switch-account-pop=true`) ;
       } else {
         toast.dismiss(loadingToast);
         toast.error('Account creation failed !!');

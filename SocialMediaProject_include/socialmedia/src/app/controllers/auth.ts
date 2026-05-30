@@ -401,7 +401,7 @@ export const accountLogoutController = asyncErrorHandler( async (request:NextReq
     }
 
     // function for logout service...
-    // await activeAccountLogoutService(accountHandle) ;
+    await activeAccountLogoutService(accountHandle) ;
 
     return NextResponse.json({ message:'account logout successfull !!'},{ status:200 });
 })
