@@ -14,13 +14,14 @@ const io = new Server(server, { cors: { origin: "*" }});
 
 /* Socket Logic */
 io.on("connection", (socket) => {
+  // for registering account as socket
   socket.on("register_account", async (accountId) => {
-  
   // creating Presense state in DB...
   await Presence.create({ accountId:accountId , onlineStatus:'online' , socketId:socket.id })
   socket.join(accountId);
   });
 
+  // for login
   socket.on("login_account", async (accountId) => { 
     await Presence.findOneAndUpdate({ accountId:accountId },{ onlineStatus:'online' }) ;
     socket.join(accountId);
@@ -37,5 +38,5 @@ app.post("/emit-notification", (req: Request, res: Response) => {
 });
 
 server.listen(port, () => {
-  console.log("Realtime server running on port 4000");
+  console.log(`Realtime server running on port ${port}`);
 });

@@ -519,10 +519,20 @@ export const commentingOnAPostService = async ( data:commentDataType ) => {
         // notification to post author about the new comment...
         if (targetPost.authorId.toString() !== activeAcc._id.toString()) {
             await sendCommentNotification(
-                targetPost.authorId.toString(),   
-                activeAcc._id.toString(),            
-                postId,                               
-                commentPost._id.toString()          
+                targetPost.authorId.toString(),
+                {
+                    id: activeAcc._id.toString(),
+                    name: activeAcc.name,
+                    username: activeAcc.username,
+                    isVerified: !!activeAcc.isVerified?.value,
+                    avatarUrl: activeAcc.avatar?.url
+                },
+                {
+                    id: postId.toString(),
+                    content: targetPost.content,
+                    thumbnailUrl:targetPost.mediaUrls.length > 0 ? targetPost.mediaUrls[0] : ''
+                },
+                replyText
             );
         }
 
@@ -532,9 +542,19 @@ export const commentingOnAPostService = async ( data:commentDataType ) => {
             // Don't send notification to the post author (they already got comment notification)
             if (mentionIdStr !== targetPost.authorId.toString() && mentionIdStr !== activeAcc._id.toString()) {
                 await sendMentionNotification(
-                    mentionIdStr,               
-                    activeAcc._id.toString(),     
-                    postId,                       
+                mentionIdStr,               
+                {
+                    id: activeAcc._id.toString(),
+                    name: activeAcc.name,
+                    username: activeAcc.username,
+                    isVerified: !!activeAcc.isVerified?.value,
+                    avatarUrl: activeAcc.avatar?.url
+                },
+                {
+                    id: postId.toString(),
+                    content: targetPost.content,
+                    thumbnailUrl:targetPost.mediaUrls.length > 0 ? targetPost.mediaUrls[0] : ''
+                },                       
                     commentPost._id.toString()      
                 );
             }

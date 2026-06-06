@@ -15,6 +15,7 @@ import { emailRegex } from "@/app/controllers/regex";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
 import { Mail, Lock } from "lucide-react";
+import { generateKeyPairAndStoreBoth } from "@/lib/pairedkeys";
 
 // applying ZOD validation on form feilds...
 const loginInfoType = z.object({
@@ -43,6 +44,7 @@ export default function LogIn() {
       setAccount(loginRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${loginRes.data.handle}`);
+      generateKeyPairAndStoreBoth(loginRes.data.userCred.accountId); // for public-private key generation...
       useWebSocket(loginRes.data.userCred.accountId,'login'); // generating websocket connection client => server...
       return 'success';
   }

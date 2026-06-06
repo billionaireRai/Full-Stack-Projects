@@ -305,8 +305,8 @@ export default function Messages() {
             ))}
             <div 
              onClick={() => { setaddUserPop(!addUserPop) }}
-             className='mt-10 w-full flex items-center justify-center p-2 cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 rounded-lg'>
-              <span><PlusCircleIcon  /></span>
+             className='sticky bottom-0 w-full flex items-center justify-center p-2 dark:bg-black/60 backdrop-blur-sm cursor-pointer hover:bg-yellow-200 dark:hover:bg-gray-950 rounded-full font-semibold'>
+              <div className='flex items-center justify-center gap-2'><PlusCircleIcon  /><span>Add Account</span></div>
             </div>
         </div>
         <div className={`ChatSection h-full flex-4 rounded-md overflow-y-hidden transition-all duration-700`}>
@@ -478,7 +478,7 @@ export default function Messages() {
           No Chat Selected yet
         </h2>
         <p className="text-gray-600 dark:text-gray-400 max-w-sm">
-          Select a chat from the chatlist or add a user to start messaging.
+          Select a chat from the chatlist you have texted in past or add an account to start messaging.
         </p>
       </div>
     )}

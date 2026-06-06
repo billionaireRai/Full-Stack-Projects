@@ -7,6 +7,7 @@ import notifications from "../models/notifications";
 import Post from "../models/posts";
 import follows from "../models/follows";
 import { fmt } from "@/lib/utils";
+import Presence from "../models/presense";
 
 
 type NotificationType = 'follow' | 'like' | 'comment' | 'mention' | 'repost' | 'post' | 'notification_like' | 'notification_comment' ;
@@ -37,42 +38,44 @@ export interface CreateNotificationParams {
 
 // notification creation and sending via socket.io
 export const createAndSendNotification = async (params: CreateNotificationParams): Promise<void> => {
-  const { forAccId, actor, type, post, comment } = params;
+  const { forAccId, actor, type, post, comment } = params ;
 
   await connectWithMongoDB(); // connecting with data base...
   // can't send notification to user itself...
   if (forAccId === actor.id) {
-    console.log("Skipping self-notification...");
-    return;
+    console.log("Skipping self-notification sending...");
+    return ;
   }
 
-  // Create notification in database...
-  const notification = new notifications({ forAccId, actor, type, post, comment });
+  // Creating notification in database...
+  const notification = await notifications.create({ forAccId, actor, type, post, comment }); 
+  const presense = await Presence.findOne({ accountId:forAccId }) ; // getting presense state of for acc...
 
   // Send notification via socket server...
-  try {
-    const emitReq = await axios.post("http://localhost:4000/emit-notification", {
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        recipientAcc: forAccId,
-        payload: {
-          id: notification._id.toString(),
-          type,
-          actor,
-          post,
-          comment,
-          createdAt: notification.createdAt
-        }
-      })
-    });
-    if (emitReq.status === 200) {
-      await notification.save() ;
-      console.log(`Notification sent via socket to account : ${forAccId}`);
-    }
-  } catch (error) {
-    console.error("Failed to send notification via socket:", error);
+  if (presense && presense?.onlineStatus === 'online') {
+   try {
+     const emitReq = await axios.post("http://localhost:4000/emit-notification", {
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({
+         recipientAcc: presense?.socketId,
+         payload: {
+           id: notification._id.toString(),
+           type,
+           actor,
+           post,
+           comment,
+           createdAt: notification.createdAt
+         }
+       })
+     })
+     if (emitReq.status === 200) {
+       console.log(`Notification sent via socket to account : ${forAccId}`);
+     }
+   } catch (error) {
+     console.error("Failed to send notification via socket:", error);
+   }
   }
-};
+}
 
 // Creates a comment notification when comments on a post someone
 export const sendCommentNotification = async ( postAuthorId: string, commenter: accountInvolved, post: Post, comment: string ): Promise<void> => {

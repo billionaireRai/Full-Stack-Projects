@@ -30,6 +30,7 @@ import { BsPostcardFill } from 'react-icons/bs';
 import useMediaPop from '@/app/states/mediapop';
 import Mediapopmodal from '@/components/mediapopmodal';
 import { usernameRegex } from '@/app/controllers/regex';
+import { generateKeyPairAndStoreBoth } from '@/lib/pairedkeys';
 
 interface mediaType {
   url: string;
@@ -621,7 +622,7 @@ export default function UserProfilePage() {
     };
     // fetchAccountData();
   }, [Account.account, username])
-
+  
   useEffect(() => {
     if (!username) return;
 
@@ -748,7 +749,10 @@ export default function UserProfilePage() {
 
   // useffect for handling 'utm_source' & 'accid' search param...
   useEffect(() => {
-    if (utmsource?.trim() && accid?.trim() && intent?.trim())  useWebSocket(accid,intent) ;
+    if (utmsource?.trim() && accid?.trim() && intent?.trim())  {
+      generateKeyPairAndStoreBoth(accid); // for public-private key generation...
+      useWebSocket(accid,intent) // registering web-socket id... 
+    } ;
   }, [utmsource])
   
   // function to make mentions a link in bio...

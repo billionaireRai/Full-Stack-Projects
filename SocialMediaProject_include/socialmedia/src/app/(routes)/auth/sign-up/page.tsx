@@ -14,6 +14,7 @@ import { usernameRegex, emailRegex } from "@/app/controllers/regex";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
 import { User, Mail, Lock , AtSign} from "lucide-react"; // lightweight icons
+import { generateKeyPairAndStoreBoth } from "@/lib/pairedkeys";
 import axiosInstance from "@/lib/interceptor";
 
 // applying ZOD validation on form feilds...
@@ -54,7 +55,8 @@ export default function SignUp() {
       setAccount(apiRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${apiRes.data.handle}`);
-      useWebSocket(apiRes.data.userCred.accountId,'register');
+      generateKeyPairAndStoreBoth(apiRes.data.userCred.accountId); // for public-private key generation...
+      useWebSocket(apiRes.data.userCred.accountId,'register'); // registering web-socket id...
       return 'success';
     }
     toast.dismiss(loadingToastId);

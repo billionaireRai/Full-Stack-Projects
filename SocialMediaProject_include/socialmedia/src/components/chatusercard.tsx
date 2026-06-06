@@ -22,11 +22,11 @@ export default function Chatusercard ({ cardInfo , onclick , currentOpenChat }:c
   return (
     <div
      onClick={onclick}
-     className={`shadow-sm hover:shadow-md dark:border-gray-600 w-full h-16 rounded-md p-2 flex items-center gap-3 bg-white hover:bg-gray-50 dark:bg-gray-950 dark:hover:shadow-gray-900 cursor-pointer transition-colors ${isTargetChat ? 'dark:border-2 bg-yellow-100 dark:bg-blue-200 shadow-lg' : ''}`}>
+     className={`shadow-sm hover:shadow-md dark:border-gray-600 w-full rounded-xl py-4 px-3 flex items-center gap-3 bg-white hover:bg-yellow-50 dark:bg-black dark:hover:opacity-70 hover:scale-102 cursor-pointer ${isTargetChat ? 'dark:border-2 bg-yellow-100 dark:bg-yellow-200 shadow-lg' : ''}`}>
       <img
         src={cardInfo.avatarUrl}
         alt={cardInfo.name}
-        className='w-10 h-10 rounded-full object-cover'
+        className='w-13 h-13 rounded-full object-cover'
       />
       <div className='flex-1 min-w-0'>
         <div className='flex items-center justify-between'>
@@ -42,7 +42,7 @@ export default function Chatusercard ({ cardInfo , onclick , currentOpenChat }:c
             {cardInfo.lastMessage}
           </p>
           {cardInfo.unreadCount > 0 && (
-            <span className='dark:bg-blue-500 bg-yellow-400 text-black dark:text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center'>
+            <span className='dark:bg-yellow-500 bg-yellow-400 text-black dark:text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center'>
               {cardInfo.unreadCount}
             </span>
           )}
