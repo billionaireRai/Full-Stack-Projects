@@ -1,206 +1,214 @@
 'use client'
 
 import React,{ useState , useEffect }from 'react'
+import { motion } from 'framer-motion';
 import Chatusercard from '@/components/chatusercard'
+import Link from 'next/link'
 import { useTheme } from 'next-themes'
 // import useUnreadMessage from '@/app/states/unreadmessage'; 
 import Image from 'next/image';
 import AudioRecordModal from '@/components/audioRecordModal';
+import BlockChatPop from '@/components/blockchat';
 import MessageCard from '@/components/messagecard';
 import Sharecontactonchat from '@/components/sharecontactonchat';
 import Adduserinchatlist from '@/components/adduserinchatlist';
-import { USER } from '@/components/adduserinchatlist'
+import { Acctype } from '@/components/adduserinchatlist'
 import useSound from 'use-sound' ;
 import EmojiPicker ,{ EmojiClickData } from 'emoji-picker-react';
-import { motion } from 'framer-motion';
-import { SearchIcon, PlusCircleIcon, MessageCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, UserX, Flag, Trash, Smile, Paperclip, Mic, Image as image, Video, File, Music, Square, Play, X, PhoneIcon, BarChart3 } from 'lucide-react'
+import { SearchIcon, PlusCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, UserX, Flag, Trash, Smile, Paperclip, Mic, Image as image, Video, File, Music, Square, Play, X, PhoneIcon, BarChart3, Images, MessageCirclePlus, BanIcon , Link2Icon, BellDot } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import toast from 'react-hot-toast';
-
-export interface infoForChatCard {
-  id: string;
-  name: string;
-  handle: string;
-  lastMessage: string;
-  timestamp: string;
-  avatarUrl: string;
-  unreadCount: number;
-}
+import { infoForChatCard } from '@/components/chatusercard'
 
 export default function Messages() {
-  const [PersonSearch, setPersonSearch] = useState('') ;
-  const [ play ] = useSound('/audio/notification.mp3') ;
+  const [ChatSearch, setChatSearch] = useState('') ; // input for searching a paticular chat...
   const { resolvedTheme } = useTheme();
-  const [CurrentOpenChat, setCurrentOpenChat] = useState<string>('');
+  const [ play ] = useSound('/audio/notification.mp3') ;
+  const [CurrentOpenChat, setCurrentOpenChat] = useState<infoForChatCard>();
   const [chatSlideOpen, setchatSlideOpen] = useState<boolean>(false) ;
-  const [addUserPop, setaddUserPop] = useState<boolean>(false);
+  const [addChatPop, setaddChatPop] = useState<boolean>(false);
 
-  const handleAddUser = (user: USER) => {
+  const handleAddUser = (AccForChat: Acctype) => {
     const newChat: infoForChatCard = {
-      id: user.id,
-      name: user.name,
-      handle: user.handle,
-      lastMessage: 'New chat created',
+      id: AccForChat.id,
+      name: AccForChat.name,
+      handle: AccForChat.handle,
+      isVerified: false,
+      lastMessage: 'New chat created !!',
       timestamp: 'Just now',
-      avatarUrl: user.avatarUrl,
+      avatarUrl: AccForChat.avatarUrl,
       unreadCount: 0
     };
-    setcardInfo(prev => [...prev, newChat]);
+    setconversations(prev => [...prev, newChat]);
   };
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false) ;
   const [messageText, setmessageText] = useState('') ;
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+  const [blockAccPop, setblockAccPop] = useState<boolean>(false);
   const [OpenedCard, setOpenedCard] = useState<infoForChatCard>() ;
   const [shareContact, setshareContact] = useState<boolean>(false);
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false) ;
   const [showAudioModal, setShowAudioModal] = useState<boolean>(false) ;
  // const { setUnreadMessage } = useUnreadMessage() ; // getting the unread message state...
-  const [cardInfo, setcardInfo] = useState<infoForChatCard[]>([
+  const [conversations, setconversations] = useState<infoForChatCard[]>([
     {
       id: '1',
       name: 'Alice Johnson',
-      handle: 'alicejohnson',
+      handle: '@alicejohnson',
       lastMessage: 'Hey, how are you?',
-      timestamp: '10:30 AM',
+      timestamp: 'Fri Jun 05 2026', // random previous date via toDateString()
+      isVerified: true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2
     },
     {
       id: '2',
       name: 'Bob Smith',
-      handle: 'bobsmith',
+      handle: '@bobsmith',
       lastMessage: 'Let\'s meet tomorrow',
       timestamp: '9:15 AM',
+      isVerified: false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
     {
       id: '3',
       name: 'Charlie Brown',
-      handle: 'charliebrown',
+      handle: '@charliebrown',
       lastMessage: 'Thanks for the help!',
       timestamp: 'Yesterday',
+      isVerified:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
     {
       id: '4',
       name: 'Diana Prince',
-      handle: 'dianaprince',
+      handle: '@dianaprince',
       lastMessage: 'See you soon',
       timestamp: '2 days ago',
+      isVerified:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 4
     },
     {
       id: '5',
       name: 'Eve Wilson',
-      handle: 'evewilson',
+      handle: '@evewilson',
       lastMessage: 'What\'s up?',
       timestamp: '3 hours ago',
+      isVerified:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
     {
       id: '6',
       name: 'Frank Miller',
-      handle: 'frankmiller',
+      handle: '@frankmiller',
       lastMessage: 'Good morning!',
       timestamp: '8:45 AM',
+      isVerified:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
     {
       id: '7',
       name: 'Grace Lee',
-      handle: 'gracelee',
+      handle: '@gracelee',
       lastMessage: 'Call me later',
       timestamp: '1 hour ago',
+      isVerified:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1
     },
     {
       id: '8',
       name: 'Henry Davis',
-      handle: 'henrydavis',
+      handle: '@henrydavis',
       lastMessage: 'Nice work!',
       timestamp: 'Yesterday',
+      isVerified:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1
     },
     {
       id: '9',
       name: 'Isaac Newton',
-      handle: 'isaacnewton',
+      handle: '@isaacnewton',
       lastMessage: 'Physics is fun!',
       timestamp: '5 minutes ago',
+      isVerified:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 3
     },
     {
       id: '10',
       name: 'Jack Ryan',
-      handle: 'jackryan',
+      handle: '@jackryan',
       lastMessage: 'Mission accomplished',
       timestamp: '2 hours ago',
+      isVerified:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
     {
       id: '11',
       name: 'Karen White',
-      handle: 'karenwhite',
+      handle: '@karenwhite',
       lastMessage: 'Let\'s catch up',
       timestamp: '1 day ago',
+      isVerified:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2
     },
     {
       id: '12',
       name: 'Liam Green',
-      handle: 'liamgreen',
+      handle: '@liamgreen',
       lastMessage: 'Great idea!',
       timestamp: '30 minutes ago',
+      isVerified:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1
     },
     {
       id: '13',
       name: 'Mia Black',
-      handle: 'miablack',
+      handle: '@miablack',
       lastMessage: 'See you at the event',
       timestamp: '4 hours ago',
+      isVerified:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
     {
       id: '14',
       name: 'Noah Blue',
-      handle: 'noahblue',
+      handle: '@noahblue',
       lastMessage: 'Thanks again',
       timestamp: '3 days ago',
+      isVerified:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 5
     },
     {
       id: '15',
       name: 'Olivia Red',
-      handle: 'olivared',
+      handle: '@olivared',
       lastMessage: 'Happy birthday!',
       timestamp: '6 hours ago',
+      isVerified:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     }
   ])
   const attachFileoptions = [
-    { icon: <image className="w-3 h-3 text-blue-500" />, label: "Photos" },
+    { icon: <Images className="w-3 h-3 text-blue-500" />, label: "Photos" },
     { icon: <Video className="w-3 h-3 text-purple-500" />, label: "Videos" },
-    { icon: <File className="w-3 h-3 text-green-500" />, label: "Documents" },
     { icon: <Music className="w-3 h-3 text-pink-500" />, label: "Audio" },
     { icon: <PhoneIcon className="w-3 h-3 text-red-500" />, label: "Contact" },
-    { icon: <BarChart3 className="w-3 h-3 text-red-500" />, label: "Poll" },
   ]
-  const [filteredCards, setFilteredCards] = useState(cardInfo); // for handling the searched result array...
+  const [filteredCards, setFilteredCards] = useState(conversations); // for handling the searched result array...
 
    useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -228,24 +236,22 @@ export default function Messages() {
   }
 
   const handleSearch = (searchedText: string) => {
-    const filtered = cardInfo.filter((userCard) =>
-      userCard.name.toLowerCase().includes(searchedText.toLowerCase()) ||  // high chance that user search without case sensitivity...
-      userCard.handle.toLowerCase().includes(searchedText.toLowerCase())
+    const filtered = conversations.filter((chatCard) =>
+      chatCard.name.toLowerCase().includes(searchedText.toLowerCase()) ||  // high chance that account search without case sensitivity...
+      chatCard.handle.toLowerCase().includes(searchedText.toLowerCase())
     );
     setFilteredCards(filtered);
   };
   // useffect hook for handling the search change...
   useEffect(() => {
-   if (PersonSearch.trim()) {
-    handleSearch(PersonSearch); // run the funtion if something is searched...
-  } else {
-    setFilteredCards(cardInfo); // show all if search is empty
-  }
-}, [PersonSearch, cardInfo]);
+    if (ChatSearch.trim())  handleSearch(ChatSearch); // run the funtion if something is searched...
+
+    else  setFilteredCards(conversations); // show all if search is empty...
+  }, [ChatSearch,conversations]);
 
 
   useEffect(() => {
-    let getCardInfo = cardInfo.find((card) => card.id === CurrentOpenChat) ;
+    let getCardInfo = conversations.find((card) => card.id === CurrentOpenChat?.id) ;
     setOpenedCard(getCardInfo) ;
   }, [CurrentOpenChat])
   
@@ -256,7 +262,7 @@ export default function Messages() {
 
   // useffect for page load actions..
   useEffect(() => {
-    calculateTotalUnread(cardInfo);
+    calculateTotalUnread(conversations);
   }, [])
 
   // function handling file option clicking logic...
@@ -267,18 +273,16 @@ export default function Messages() {
      setShowFilePopup(false)
    }
 
-  const menuItems = [
-    { icon: User, label: 'View Profile'},
-    { icon: BellOff, label: 'Mute Notifications'},
-    { icon: Folder, label: 'View Media, Links & Docs' },
-    { icon: Eraser, label: 'Clear Chat' },
-    { icon: UserX, label: 'Block User' },
-    { icon: Flag, label: 'Report Chat' },
-    { icon: Trash, label: 'Delete Chat', className: 'text-red-700 dark:text-red-700' },
-  ];
+  // function for handling chatcard click...
+  function handleChatCardClick(card:infoForChatCard) {
+    setCurrentOpenChat(card) ;  
+    card.unreadCount = 0 ;
+     setchatSlideOpen(true) 
+  }
 
    // function handling sending message...
    const handleSendMessage = (msg:string) => {
+
     setmessageText('') ;
     play() ;
   }
@@ -286,29 +290,52 @@ export default function Messages() {
   return (
     <div className='h-full flex flex-col lg:flex-row p-1 gap-1 font-poppins rounded-md dark:bg-black'>
         <div className={`relative chatList h-full flex-2 flex-col gap-1 rounded-md overflow-y-scroll overflow-x-hidden ${chatSlideOpen ? 'hidden lg:flex' : 'flex'}`}>
-            <div className='sticky top-0 searchSection backdrop-blur-md flex items-center w-full max-w-md mx-auto p-2 mb-3 rounded-lg bg-gray-100/80 dark:bg-gray-950/80 shadow-md border border-gray-300 dark:border-gray-700'>
+            <div className='searchSection sticky top-0 backdrop-blur-md flex items-center w-full max-w-md mx-auto p-2 m-2 rounded-lg  shadow-md border border-gray-200 dark:border-gray-700'>
                 <span 
-                  onClick={() => { handleSearch(PersonSearch) }}
-                  className='text-gray-500 dark:text-gray-400 mr-3 cursor-pointer'>
+                  onClick={() => { handleSearch(ChatSearch) }}
+                  className='text-gray-500 dark:text-gray-400 mr-1 cursor-pointer'>
                     <SearchIcon size={20} />
                 </span>
                 <input
-                    type="text"
-                    value={PersonSearch}
-                    onChange={(e) => setPersonSearch(e.target.value)}
-                    placeholder="Search people..."
-                    className="flex-grow bg-transparent outline-none border border-transparent focus:border-yellow-400 dark:focus:border-blue-500 focus:ring-1 focus:ring-yellow-400 dark:focus:ring-blue-400 rounded-md px-3 py-1 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-200"
+                  type="text"
+                  value={ChatSearch}
+                  onChange={(e) => setChatSearch(e.target.value)}
+                  placeholder="Search you chats..."
+                  className="flex-grow backdrop-blur-sm outline-none border border-transparent focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30 rounded-md px-3 py-1 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500 transition-colors duration-200"
                 />
             </div>
-            {filteredCards.map((card) => (
-              <Chatusercard onclick={() => { setCurrentOpenChat(card.id) ;  card.unreadCount = 0 ; setchatSlideOpen(true) }} key={card.id} cardInfo={card} currentOpenChat={CurrentOpenChat} />
-            ))}
+           {Array.isArray(filteredCards) && filteredCards.length > 0 ? 
+            filteredCards.sort((card1,card2) => card2.unreadCount - card1.unreadCount).map((card) => (
+              <Chatusercard onclick={() => { handleChatCardClick(card) }} key={card.id} cardInfo={card} currentOpenChat={CurrentOpenChat} />
+            )) : (
+            <div className="flex flex-col items-center justify-center h-full py-10 px-4 text-center">
+                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-950 flex items-center justify-center border border-gray-200 dark:border-gray-800">
+                  <SearchIcon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                </div>
+                <h3 className="mt-4 text-base font-semibold text-gray-900 dark:text-gray-100">
+                  No chats found
+                </h3>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 max-w-xs">
+                  {ChatSearch.trim() ? (
+                    <>
+                    No conversations match <span className="font-medium text-gray-900 dark:text-gray-200">“<b>{ChatSearch.trim()}</b>”</span>.
+                    </>
+                  ):(
+                    <>
+                    No chat started with any account...
+                    </>
+                  )}
+                </p>
+              </div>
+            )}
             <div 
-             onClick={() => { setaddUserPop(!addUserPop) }}
-             className='sticky bottom-0 w-full flex items-center justify-center p-2 dark:bg-black/60 backdrop-blur-sm cursor-pointer hover:bg-yellow-200 dark:hover:bg-gray-950 rounded-full font-semibold'>
+             onClick={() => { setaddChatPop(!addChatPop) }}
+             className='sticky bottom-0 w-full flex items-center justify-center px-2 py-4 dark:bg-black/60 backdrop-blur-sm cursor-pointer rounded-full font-semibold'>
               <div className='flex items-center justify-center gap-2'><PlusCircleIcon  /><span>Add Account</span></div>
             </div>
         </div>
+
+        {/* main chat section... */}
         <div className={`ChatSection h-full flex-4 rounded-md overflow-y-hidden transition-all duration-700`}>
           { OpenedCard && (
              <div className={`lg:hidden flex items-center justify-end rounded-md p-2`}>
@@ -320,12 +347,12 @@ export default function Messages() {
                  />
              </div>
           )}
-  <div className="relative flex flex-col h-full rounded-t-md">
-    {OpenedCard ? (
+      <div className="relative flex flex-col h-full rounded-t-md">
+     {OpenedCard ? (
       <>
         {/* Chat Header */}
         <div className="sticky top-0 flex items-center px-4 py-3 justify-between rounded-md shadow-sm border-b border-gray-200 dark:border-gray-900 dark:bg-black z-10">
-          {/* Left Section - Avatar + User Info */}
+          {/* Left Section - Avatar + Account Info */}
           <div className="flex items-center gap-3">
             <div className="relative">
               <img
@@ -333,19 +360,22 @@ export default function Messages() {
                 alt={OpenedCard.name}
                 className="w-12 h-12 rounded-full object-cover border border-gray-300 dark:border-gray-600"
               />
-              <span className="absolute bottom-0 right-0 block w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
+              {/* bottom right yellow dot... */}
+              <span className="absolute bottom-0 right-0 block w-3 h-3 bg-yellow-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
             </div>
 
             <div className="flex flex-col">
               <h3 className="flex items-center gap-1 text-base font-semibold text-gray-900 dark:text-gray-100">
                 <span>{OpenedCard.name}</span>
                 <span>.</span>
-                <span className="text-sm text-gray-500 dark:text-gray-400 font-normal">
-                  @{OpenedCard.handle}
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400 font-normal">
-                  <Image src='/images/yellow-tick.png' width={18} height={18} alt='verified'/>
-                </span>
+                <Link href={`/${OpenedCard.handle}`} className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                  {OpenedCard.handle}
+                </Link>
+                {OpenedCard.isVerified && (
+                  <span className="text-sm text-gray-500 dark:text-gray-400 font-normal">
+                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='verified'/>
+                  </span>
+                )}
               </h3>
               <p className="text-xs text-gray-600 dark:text-gray-400">
                 {OpenedCard.lastMessage} • {OpenedCard.timestamp}
@@ -362,17 +392,53 @@ export default function Messages() {
               <span>⋮</span>
             </button>
             {openChatThreeDot && (
-              <div className="Three_dot absolute right-2 font-semibold p-2 top-12 w-65 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl dark:shadow-gray-950 overflow-hidden z-50 animate-fadeIn">
-                {menuItems.map((item, index) => (
-                  <button
-                    key={index}
-                    className={`w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${item.className || ''}`}
-                    onClick={() => { setopenChatThreeDot(false) }}
-                  >
-                    <item.icon className="w-4 h-4" /> {item.label}
-                  </button>
-                ))}
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="Three_dot absolute p-2 top-0 right-0 w-65 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl dark:shadow-gray-950 overflow-hidden z-50 animate-fadeIn">
+                <Link href={`/${OpenedCard?.handle}`}
+                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  onClick={() => { setopenChatThreeDot(false) }}
+                >
+                   <User className="w-4 h-4" />
+                   View<b>{OpenedCard?.handle}</b>
+                </Link>
+                <button
+                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  onClick={() => { setopenChatThreeDot(false) }}
+                >
+                  <Folder className="w-4 h-4" />View all attachements
+                </button>
+
+                <button
+                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  onClick={() => { setopenChatThreeDot(false) }}
+                >
+                  <Eraser className="w-4 h-4" />Clear chat history
+                </button>
+
+                <button
+                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  onClick={() => { setopenChatThreeDot(false) }}
+                >
+                  <BanIcon className="w-4 h-4" />Block<b>{OpenedCard?.handle}</b>
+                </button>
+
+                <button
+                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  onClick={() => { setopenChatThreeDot(false) }}
+                >
+                  <Flag className="w-4 h-4" />Report Chat
+                </button>
+
+                <button
+                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100"
+                  onClick={() => { setopenChatThreeDot(false) }}
+                >
+                  <Trash className="w-4 h-4" />Delete Conversation
+                </button>
+              </motion.div>
             )}
           </div>
         </div>
@@ -384,14 +450,13 @@ export default function Messages() {
           <MessageCard /> 
         </div>
 
-
           {/* message sending controls...  */}
-          <div className="messagesendsection shadow-md sticky bottom-0 w-full rounded-md px-4 py-1 bg-white dark:bg-black flex items-center gap-3 z-10">
+          <div className="messagesendsection border border-gray-200 dark:border-gray-900 inset-shadow-yellow-200 sticky bottom-0 w-full rounded-xl px-4 py-1 bg-white dark:bg-black flex items-center gap-3 z-10">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   onClick={() => { setShowEmojiPicker(!showEmojiPicker) }}
-                  className="p-2 cursor-pointer rounded-full bg-white dark:invert text-black hover:bg-gray-200 transition">
+                  className="p-2 cursor-pointer rounded-full bg-white dark:invert text-black hover:bg-gray-200">
                   <Smile className="w-4 h-4" />
                 </button>
               </TooltipTrigger>
@@ -412,7 +477,7 @@ export default function Messages() {
             <div className="relative">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button onClick={() => setShowFilePopup(!showFilePopup)} className="p-2 cursor-pointer rounded-full bg-white dark:invert text-black hover:bg-gray-200 transition">
+                  <button onClick={() => setShowFilePopup(!showFilePopup)} className="p-2 cursor-pointer rounded-full bg-white dark:invert text-black hover:bg-gray-200">
                     <Paperclip className="w-4 h-4" />
                   </button>
                 </TooltipTrigger>
@@ -430,7 +495,7 @@ export default function Messages() {
                      key={index}
                     onClick={() => { handleFileOptionClick(item.label) }}
                      className="flex items-center cursor-pointer rounded-lg gap-3 px-3 py-2 w-full text-sm font-medium text-gray-700 
-                    dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-950 transition-all duration-200">
+                    dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-950">
                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800">
                        {item.icon}
                      </div>
@@ -447,7 +512,7 @@ export default function Messages() {
                 value={messageText}
                 onChange={(e) => { setmessageText(e.target.value) }}
                 placeholder="type a message..."
-                className="w-full bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-white dark:focus:bg-gray-900 transition-all duration-300"
+                className="w-full bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-white dark:focus:bg-gray-950"
               />
             </div>
             <Tooltip>
@@ -473,11 +538,11 @@ export default function Messages() {
     ) : (
       /* Fallback when no chat is selected */
       <div className="flex flex-col items-center justify-center h-full text-center p-6">
-        <MessageCircleIcon size={64} className="text-black dark:text-gray-600 mb-4" />
+        <MessageCirclePlus onClick={() => { setaddChatPop(!addChatPop) }} size={64} className="cursor-pointer hover:scale-105 text-black dark:text-gray-600 mb-4" />
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-300 mb-2">
           No Chat Selected yet
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 max-w-sm">
+        <p className="text-gray-600 dark:text-gray-400 max-w-sm text-sm">
           Select a chat from the chatlist you have texted in past or add an account to start messaging.
         </p>
       </div>
@@ -487,11 +552,14 @@ export default function Messages() {
 {showAudioModal && (
   <AudioRecordModal closePopUp={() => setShowAudioModal(false)} />
 )}
-{addUserPop && (
-  <Adduserinchatlist closePop={() => setaddUserPop(false)} onAddUser={handleAddUser} />
+{addChatPop && (
+  <Adduserinchatlist closePop={() => setaddChatPop(false)} onAddChat={handleAddUser} />
 )}
 {shareContact && (
   <Sharecontactonchat closeShareContact={() => setshareContact(false)}  />
+)}
+{blockAccPop && (
+  <BlockChatPop key={CurrentOpenChat?.id} username={String(CurrentOpenChat?.handle)} closeBlockPop={() => { setblockAccPop(false) }} isBlocked={false} updateblockState={() => {}}  />
 )}
     </div>
 )}

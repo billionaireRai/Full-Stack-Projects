@@ -49,7 +49,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider>
         {children}
-        <Toaster position="top-center" />
+        <Toaster position="top-center" reverseOrder={false} />
         { isCreatePop && <CreatePost /> }
         { isPopOpen && <SwitchAccountPopUp /> }
         {/* { isAuth && !isCompleted && <AccCompletionPop onClose={() => { setisCompleted(true) }} onContinue={() => { router.push(`/@${Account.decodedHandle}`) }}/> } */}

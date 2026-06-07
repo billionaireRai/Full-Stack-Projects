@@ -35,7 +35,7 @@ export default function TrendingCard({
   return (
     <Link 
       href={`/explore?q=${trendName}&utm_source=trend-click`}
-      className="happening-dropdown hover:bg-gray-100 dark:hover:bg-gray-950 p-3 rounded-lg cursor-pointer transition-all duration-200 inline-block w-full"
+      className="happening-dropdown hover:bg-gray-100 dark:hover:bg-gray-950 p-3 rounded-lg cursor-pointer inline-block w-full"
     >
       <div className="flex items-center justify-center space-x-3">
         <div className={`w-8 h-8 bg-gradient-to-r ${gradientFrom} ${gradientTo} rounded-full flex items-center justify-center`}>

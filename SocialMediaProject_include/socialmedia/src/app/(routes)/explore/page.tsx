@@ -85,6 +85,8 @@ export default function explore() {
   const [openSettings, setopenSettings] = useState(false);
   const [LocationSetting, setLocationSetting] = useState(false);
   const [hpninPopUp, sethpninPopUp] = useState(0);
+  const [ShowLess, setShowLess] = useState<boolean>(false);
+  const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
 
   const [suggestionAcc,setsuggestionAcc] =useState<userCardProp[]>([
         {
@@ -577,6 +579,20 @@ export default function explore() {
         // }
       // }, [searchparam.get('t'),window.scrollY]) 
       
+  // function for showing more suggestions...
+  const handleSuggesstionShow = () => {
+    if (ShowLess) {
+      setsuggesstionNum(3);
+      setShowLess(false);
+    } else {
+      if ( ( suggestionAcc.length - suggesstionNum ) >= 3 ) {
+        setsuggesstionNum(suggesstionNum + 3);
+        if (suggesstionNum + 3 === suggestionAcc.length) {
+          setShowLess(true);
+        }
+      }
+    }
+  }
 
   return (
     <div className='h-fit flex flex-row-reverse font-poppins rounded-lg dark:bg-black'>
@@ -595,7 +611,7 @@ export default function explore() {
                      ))}
                         </div>
                         <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
-                           <Link  href={`/explore?q=${encodeURIComponent('todays-news')}&utm_source=show-more`} className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'>
+                           <Link  href={`/explore?q=${encodeURIComponent('todays-news')}&utm_source=show-more`} className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
                                 Show more
                             </Link>
                          </div>
@@ -619,7 +635,8 @@ export default function explore() {
                           </div>
                         <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
                            <button 
-                            className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'>
+                            onClick={() => { handleSuggesstionShow() }}
+                            className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
                              { 'Show more' }
                            </button>
                          </div>

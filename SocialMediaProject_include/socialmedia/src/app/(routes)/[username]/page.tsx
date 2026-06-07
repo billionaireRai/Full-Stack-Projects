@@ -1469,7 +1469,7 @@ export default function UserProfilePage() {
                 <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
                   <button 
                     onClick={() => { handleSuggesstionShow() }}
-                    className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'>
+                    className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
                     { ShowLess ? 'Show less' : 'Show more' }
                   </button>
                 </div>

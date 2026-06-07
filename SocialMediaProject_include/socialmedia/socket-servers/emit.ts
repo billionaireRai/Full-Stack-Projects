@@ -1,6 +1,7 @@
 import http from 'http';
 import { Server } from 'socket.io';
 import Presence from '@/app/db/models/presense';
+import { notificationPayloadType } from '@/app/db/services/notifications';
 import express, { Request, Response } from 'express';
 
 const app = express();
@@ -30,10 +31,9 @@ io.on("connection", (socket) => {
 
 /* HTTP → Emit Notification */
 app.post("/emit-notification", (req: Request, res: Response) => {
-  const { recipientId, payload } = req.body as { recipientId: string; payload: unknown }; // recipientId means accountId to emit notification
+  const { recipientSocketId, payload } = req.body as { recipientSocketId: string; payload: notificationPayloadType }; // recipientId means accountId to emit notification
 
-  io.to(recipientId).emit("notification", payload);
-
+  io.to(recipientSocketId).emit("notification", payload); // emiting via io...
   res.json({ success: true , status:200 });
 });
 

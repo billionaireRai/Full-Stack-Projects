@@ -24,7 +24,7 @@ export default function NewsCard({
   return (
     <Link 
       href={href} 
-      className="group block p-3 rounded-2xl bg-white/70 dark:bg-gray-950 backdrop-blur-sm shadow-sm hover:shadow-md hover:-translate-y-1 hover:bg-white/90 dark:hover:bg-gray-900 border border-white/20 dark:border-gray-700/50 transition-all duration-300 ease-out hover:no-underline focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+      className="group block p-3 rounded-2xl bg-white/70 dark:bg-black backdrop-blur-sm shadow-sm hover:shadow-md hover:-translate-y-1 hover:bg-white/90 border border-white/20 dark:border-gray-700/50 ease-out hover:no-underline focus:outline-none focus:ring-1 focus:ring-blue-500/50"
       aria-label={`Read ${title} from ${source}`}
     >
       <div className="flex items-start space-x-4">

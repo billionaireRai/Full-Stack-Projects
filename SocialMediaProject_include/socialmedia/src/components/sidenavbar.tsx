@@ -140,7 +140,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/feed`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}/feed`}
@@ -150,7 +150,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === '/explore'
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
                       : ''
                   }`}
                   href="/explore"
@@ -160,7 +160,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/notifications`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}/notifications`}
@@ -173,17 +173,17 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/messages`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
                       : ''
                   } flex items-center gap-2`}
                   href={`/${Account.decodedHandle}/messages`}
                 >
-                  <NavItem icon={<MessageCircleIcon className={`${pathname === '/username/messages' ? 'fill-black dark:fill-white' : ''}`} />} label="Messages" />
+                  <NavItem icon={<MessageCircleIcon className={`${pathname === `/${Account.decodedHandle}/messages` ? 'fill-black dark:fill-white' : ''}`} />} label="Messages" />
                 </Link>
                 <Link
                   className={`${
                     pathname === '/subscription'
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
                       : ''
                   }`}
                   href="/subscription"
@@ -193,7 +193,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}`}
@@ -203,7 +203,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/account-analytics`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
                        : ''
                   } 'flex flex-row items-center justify-center' `}
                   href={`/${Account.decodedHandle}/account-analytics`}
@@ -213,7 +213,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/bookmarked`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:dark:bg-white/5'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}/bookmarked`}
@@ -223,7 +223,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === '/monetization'
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:dark:bg-white/5'
                       : ''
                   }`}
                   href="/monetization"
@@ -236,7 +236,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/settings/account`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-gray-950'
+                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
                       : ''
                   }`}
                   href={`/${Account.decodedHandle}/settings/account`}

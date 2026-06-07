@@ -36,7 +36,7 @@ export default function TrendCard({ rank, region, tag, posts } : trendcardprop )
 
   return (
     <Link href={`/explore?t=${encodeURIComponent(String(tag))}&utm_source=Trending-Nowdays`}>
-        <div className="flex justify-between p-3 items-center bg-gradient-to-br cursor-pointer from-white/80 to-gray-50/80 dark:from-slate-900/80 dark:to-black/80 backdrop-blur-sm rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-out relative overflow-hidden group">
+        <div className="flex justify-between p-3 items-center bg-gradient-to-br cursor-pointer from-white/80 to-gray-50/80 dark:from-gray-950/80 dark:to-black/80 backdrop-blur-sm rounded-2xl border border-white/20 dark:border-slate-700/50 shadow-md hover:shadow-lg hover:scale-[1.02] ease-out relative overflow-hidden group">
         
         {/* Left Section */}
         <div className="flex flex-col gap-3 flex-1">

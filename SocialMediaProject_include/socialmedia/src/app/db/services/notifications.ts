@@ -26,6 +26,14 @@ export interface Post {
   content?: string;
 }
 
+export interface notificationPayloadType {
+   id: string;
+   type:NotificationType;
+   actor:accountInvolved;
+   post?:Post;
+   comment?:string;
+   createdAt: string;
+}
 export interface CreateNotificationParams {
   forAccId: string; // account receiving the notification
   actor: accountInvolved ; // account who caused the notification
@@ -34,7 +42,16 @@ export interface CreateNotificationParams {
   comment?: string;
 }
 
-
+export const notificationText: Record<NotificationType, string> = {
+  follow: "started following you",
+  like: "liked your post",
+  comment: "commented on your post",
+  mention: "mentioned you",
+  repost: "reposted your post",
+  post: "shared a new post",
+  notification_like: "liked your notification",
+  notification_comment: "replied to your notification",
+};
 
 // notification creation and sending via socket.io
 export const createAndSendNotification = async (params: CreateNotificationParams): Promise<void> => {
@@ -57,7 +74,7 @@ export const createAndSendNotification = async (params: CreateNotificationParams
      const emitReq = await axios.post("http://localhost:4000/emit-notification", {
        headers: { "Content-Type": "application/json" },
        body: JSON.stringify({
-         recipientAcc: presense?.socketId,
+         recipientSocketId: presense?.socketId,
          payload: {
            id: notification._id.toString(),
            type,

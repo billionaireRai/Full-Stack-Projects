@@ -241,10 +241,10 @@ export default function CreatePost() {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
           transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="bg-white dark:bg-black w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 max-h-[90vh] flex flex-col flex-shrink-0"
+          className="bg-white dark:bg-black w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-900 max-h-[90vh] flex flex-col flex-shrink-0"
         >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-zinc-800 bg-white dark:bg-black rounded-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-zinc-950 bg-white dark:bg-black rounded-2xl">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-yellow-400/30 ring-offset-2 ring-offset-white dark:ring-offset-zinc-900">
               <img
@@ -431,7 +431,7 @@ export default function CreatePost() {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t rounded-2xl border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-black">
+        <div className="px-6 py-4 border-t rounded-2xl border-gray-100 dark:border-zinc-950 bg-gray-50/50 dark:bg-black">
           <div className="flex items-center justify-between">
             {/* Media Upload Options */}
             <div className="flex items-center gap-1">
