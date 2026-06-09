@@ -4,14 +4,14 @@ const messageSchema = new mongoose.Schema(
   {
     fromId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "account",
       required: true,
       index: true
     },
 
     toId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "account",
       required: true,
       index: true
     },
@@ -38,7 +38,7 @@ const messageSchema = new mongoose.Schema(
 
     messageType: {
       type: String,
-      enum: ["text", "image", "video", "file", "mixed"],
+      enum: ["text", "image", "video",'audio','contact'],
       default: "text",
       index: true
     },

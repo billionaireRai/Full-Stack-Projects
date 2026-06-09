@@ -15,12 +15,12 @@ import LogoutModal from './logoutmodal';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
 import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon } from 'lucide-react'
+import useMessageCount from '@/app/states/unreadmessages';
 
 export default function SideNavbar() {
   const { setCreatePop } = useCreatePost()
   const { User } = useUserInfo();
   const { Account } = useActiveAccount();
-  const { value } = useNotificationValue() ;
   const [DotClick, setDotClick] = useState<boolean>(false)
   const { setisPopOpen } = useSwitchAccount() ; // initializing the switchaccount state...
   const [isOpen, setIsOpen] = useState<boolean>(true)
@@ -140,8 +140,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/feed`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
-                      : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
                   }`}
                   href={`/${Account.decodedHandle}/feed`}
                 >
@@ -150,8 +149,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === '/explore'
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
-                      : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
                   }`}
                   href="/explore"
                 >
@@ -160,21 +158,16 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/notifications`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
-                      : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
                   }`}
                   href={`/${Account.decodedHandle}/notifications`}
                 >
                   <NavItem icon={<BellIcon className={`${pathname === `/${Account.decodedHandle}/notifications` ? 'fill-black dark:fill-white' : ''}`} />} label="Notifications" />
-                  { value !== 0 && (
-                  <span className='px-2 rounded-full text-black dark:text-white bg-yellow-400 dark:bg-blue-500'>{value}</span>
-                  )}
                 </Link>
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/messages`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
-                      : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
                   } flex items-center gap-2`}
                   href={`/${Account.decodedHandle}/messages`}
                 >
@@ -183,8 +176,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === '/subscription'
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
-                      : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
                   }`}
                   href="/subscription"
                 >
@@ -193,8 +185,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
-                      : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
                   }`}
                   href={`/${Account.decodedHandle}`}
                 >
@@ -203,8 +194,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/account-analytics`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
-                       : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
                   } 'flex flex-row items-center justify-center' `}
                   href={`/${Account.decodedHandle}/account-analytics`}
                 >
@@ -213,8 +203,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/bookmarked`
-                      ? 'text-white rounded-md bg-gray-100 dark:dark:bg-white/5'
-                      : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:dark:bg-white/5'
                   }`}
                   href={`/${Account.decodedHandle}/bookmarked`}
                 >
@@ -223,8 +212,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === '/monetization'
-                      ? 'text-white rounded-md bg-gray-100 dark:dark:bg-white/5'
-                      : ''
+                      && 'text-white rounded-md bg-yellow-100 dark:dark:bg-white/5'
                   }`}
                   href="/monetization"
                 >
@@ -236,8 +224,7 @@ export default function SideNavbar() {
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/settings/account`
-                      ? 'text-white rounded-md bg-gray-100 dark:bg-white/5'
-                      : ''
+                    && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
                   }`}
                   href={`/${Account.decodedHandle}/settings/account`}
                 >
@@ -375,14 +362,29 @@ function NavItem({
   icon: React.ReactNode
   label: string
 }) {
-  // const { unreadMessage } = useUnreadMessage() ; // getting the state...
+  const { messageCount } = useMessageCount(); // getting the state...
+  const { notificationCount } = useNotificationValue() ;
   return (
-    <li className="flex items-center group w-full dark:text-white gap-3 p-3 rounded-md text-black hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer transition-all">
+    <li className="flex items-center group w-full dark:text-white gap-3 p-3 rounded-md text-black hover:bg-yellow-50 dark:hover:bg-gray-950 cursor-pointer transition-all">
       <span className="w-5 h-5 group-hover:fill-black">{icon}</span>
       <span className="font-medium">{label}</span>
-       {/* { unreadMessage !== 0 && label ==='Messages' && (
-          <span className='px-2 rounded-full text-black dark:text-white bg-yellow-400 dark:bg-blue-500'>{unreadMessage}</span>
-       )} */}
+      {label === 'Messages' && messageCount !== 0 && (
+        <span
+          className="ml-auto flex items-center justify-center w-6 h-6 rounded-full bg-yellow-400 dark:bg-yellow-500 text-black dark:text-white text-xs font-bold leading-none shadow-sm ring-4 ring-yellow-300/40 dark:ring-yellow-400/30"
+          aria-label={`${messageCount} unread messages`}
+        >
+          {messageCount}
+        </span>
+      )}
+
+      {label === 'Notifications' && notificationCount !== 0 && (
+        <span
+          className="ml-auto flex items-center justify-center w-6 h-6 rounded-full bg-yellow-400 dark:bg-yellow-500 text-black dark:text-white text-xs font-bold leading-none shadow-sm ring-4 ring-yellow-300/40 dark:ring-yellow-400/30"
+          aria-label={`${notificationCount} unread notifications`}
+        >
+          {notificationCount}
+        </span>
+      )}
     </li>
   )
 }

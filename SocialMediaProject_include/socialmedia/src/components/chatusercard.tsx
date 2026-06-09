@@ -62,7 +62,7 @@ export default function Chatusercard ({ cardInfo , onclick , currentOpenChat }:c
             {cardInfo.lastMessage}
           </p>
           {cardInfo.unreadCount > 0 && (
-            <span className='dark:bg-yellow-500 bg-yellow-400 text-black dark:text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center'>
+            <span className='dark:bg-yellow-500 bg-yellow-400 text-black dark:text-white text-xs rounded-full w-5 h-5 text-center'>
               {cardInfo.unreadCount}
             </span>
           )}

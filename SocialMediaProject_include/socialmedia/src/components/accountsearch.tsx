@@ -264,7 +264,7 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
     }
     async function getTheSearchedAccount(searchtext:string) {
       try {
-        const searchapi = await axiosInstance.get(`/api/user?search=${searchtext}`);
+        const searchapi = await axiosInstance.get(`/api/account?search=${searchtext}`);
         if (searchapi.status === 200) {
           setsearchedAccounts(searchapi.data.searchedAcc) ; // updating the searched accounts state..
         }

@@ -568,7 +568,6 @@ export default function notifications() {
         setNotificationList((prev) => [...prev,...data.notifications]);
         sethasMoreNotifications(data.hasMore);
         setLoading(false);
-        MarkNotificationsRead(); 
       }
     } catch (error) {
       console.log("An error occured in fetching notifications...");
@@ -597,6 +596,10 @@ export default function notifications() {
     }
   }
 
+  useEffect(() => {
+    // MarkNotificationsRead() ;
+  }, [notificationList])
+  
   // when the Page state changes fetch notifications and marking read...
   useEffect(() => {
     // fetchNotifications() ;

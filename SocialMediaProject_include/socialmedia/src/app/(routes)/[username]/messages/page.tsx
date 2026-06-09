@@ -11,14 +11,15 @@ import AudioRecordModal from '@/components/audioRecordModal';
 import BlockChatPop from '@/components/blockchat';
 import MessageCard from '@/components/messagecard';
 import Sharecontactonchat from '@/components/sharecontactonchat';
-import Adduserinchatlist from '@/components/adduserinchatlist';
-import { Acctype } from '@/components/adduserinchatlist'
+import AddAccinchatlist from '@/components/adduserinchatlist';
+import { userCardProp } from '@/components/usercard';
 import useSound from 'use-sound' ;
 import EmojiPicker ,{ EmojiClickData } from 'emoji-picker-react';
-import { SearchIcon, PlusCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, UserX, Flag, Trash, Smile, Paperclip, Mic, Image as image, Video, File, Music, Square, Play, X, PhoneIcon, BarChart3, Images, MessageCirclePlus, BanIcon , Link2Icon, BellDot } from 'lucide-react'
+import { SearchIcon, PlusCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, UserX, Flag, Trash, Smile, Paperclip, Mic, Image as image, Video, File, Music, Square, Play, X, PhoneIcon, BarChart3, Images, MessageCirclePlus, BanIcon , Link2Icon, BellDot, MessageCircleDashed } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import toast from 'react-hot-toast';
 import { infoForChatCard } from '@/components/chatusercard'
+import axiosInstance from '@/lib/interceptor';
 
 export default function Messages() {
   const [ChatSearch, setChatSearch] = useState('') ; // input for searching a paticular chat...
@@ -28,18 +29,19 @@ export default function Messages() {
   const [chatSlideOpen, setchatSlideOpen] = useState<boolean>(false) ;
   const [addChatPop, setaddChatPop] = useState<boolean>(false);
 
-  const handleAddUser = (AccForChat: Acctype) => {
+  const handleAddUser = (AccForChat: userCardProp) => {
     const newChat: infoForChatCard = {
-      id: AccForChat.id,
-      name: AccForChat.name,
-      handle: AccForChat.handle,
-      isVerified: false,
-      lastMessage: 'New chat created !!',
+      id: String(AccForChat?.id),
+      name: String(AccForChat?.name),
+      handle: String(AccForChat.decodedHandle),
+      isVerified: Boolean(AccForChat.account?.isVerified),
+      lastMessage: 'New chat created just now !!',
       timestamp: 'Just now',
-      avatarUrl: AccForChat.avatarUrl,
-      unreadCount: 0
+      avatarUrl: AccForChat.account?.avatarUrl ?? '/images/myProfile.jpg',
+      unreadCount: 0,
     };
-    setconversations(prev => [...prev, newChat]);
+
+    setconversations((prev) => [...prev, newChat]);
   };
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false) ;
   const [messageText, setmessageText] = useState('') ;
@@ -260,11 +262,7 @@ export default function Messages() {
     setmessageText((prev) => prev + emojiData.emoji);
   };
 
-  // useffect for page load actions..
-  useEffect(() => {
-    calculateTotalUnread(conversations);
-  }, [])
-
+  
   // function handling file option clicking logic...
   const handleFileOptionClick = (clickedLable:string) => {
      if (clickedLable === 'Contact') {
@@ -277,16 +275,39 @@ export default function Messages() {
   function handleChatCardClick(card:infoForChatCard) {
     setCurrentOpenChat(card) ;  
     card.unreadCount = 0 ;
-     setchatSlideOpen(true) 
+    setchatSlideOpen(true) 
   }
 
-   // function handling sending message...
-   const handleSendMessage = (msg:string) => {
+  // function fethcing all conversations...
+  async function getConversations() {
+    axiosInstance.get('/api/account/conversations')
+      .then((apires) => {
+        if (apires.status === 200) {
+          setconversations(apires.data.conversations);
+        }
+      })
+      .catch(() => {
+        console.log('Issue in fetching conversations !!');
+      })
+    }
+    
+  // useffect for page load actions..
+  useEffect(() => {
+    // getConversations();
+  }, [])
+
+  useEffect(() => {
+    calculateTotalUnread(conversations);
+  }, [conversations])
+  
+
+  // function handling sending message...
+  const handleSendMessage = (msg:string) => {
 
     setmessageText('') ;
     play() ;
   }
-
+// searchedAcc
   return (
     <div className='h-full flex flex-col lg:flex-row p-1 gap-1 font-poppins rounded-md dark:bg-black'>
         <div className={`relative chatList h-full flex-2 flex-col gap-1 rounded-md overflow-y-scroll overflow-x-hidden ${chatSlideOpen ? 'hidden lg:flex' : 'flex'}`}>
@@ -303,6 +324,12 @@ export default function Messages() {
                   placeholder="Search you chats..."
                   className="flex-grow backdrop-blur-sm outline-none border border-transparent focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30 rounded-md px-3 py-1 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500 transition-colors duration-200"
                 />
+            </div>
+            <div className='my-1 flex items-center justify-between rounded-xl px-1'>
+              <MessageCircleDashed className='text-yellow-500' />
+              <span className='border border-yellow-400 text-yellow-500 dark:bg-zinc-950 text-xs p-2 rounded-full'>
+                <b>{conversations.length}</b> chat conversations
+              </span>
             </div>
            {Array.isArray(filteredCards) && filteredCards.length > 0 ? 
             filteredCards.sort((card1,card2) => card2.unreadCount - card1.unreadCount).map((card) => (
@@ -553,7 +580,7 @@ export default function Messages() {
   <AudioRecordModal closePopUp={() => setShowAudioModal(false)} />
 )}
 {addChatPop && (
-  <Adduserinchatlist closePop={() => setaddChatPop(false)} onAddChat={handleAddUser} />
+  <AddAccinchatlist closePop={() => setaddChatPop(false)} onAddChat={handleAddUser} />
 )}
 {shareContact && (
   <Sharecontactonchat closeShareContact={() => setshareContact(false)}  />

@@ -13,6 +13,8 @@ import useCreatePost from '@/app/states/createpost'
 import useSwitchAccount from '@/app/states/swithaccount'
 import useAuthenticationState from "./states/isAuth"
 import AccCompletionPop from "@/components/acccompletionpop"
+import NotificationToaster from "@/components/NotificationToaster"
+import UnreadMeesageWrapper from "@/components/unreadwrapper"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter() ;
@@ -41,7 +43,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let timer = setTimeout(() => {
        setshowInterest(true)
-    }, 2000)
+    }, 4000)
     return () => {
       clearTimeout(timer) ;
     }
@@ -49,6 +51,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider>
         {children}
+        <NotificationToaster />
+        <UnreadMeesageWrapper/>
         <Toaster position="top-center" reverseOrder={false} />
         { isCreatePop && <CreatePost /> }
         { isPopOpen && <SwitchAccountPopUp /> }
