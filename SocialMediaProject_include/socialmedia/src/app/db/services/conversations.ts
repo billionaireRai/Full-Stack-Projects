@@ -4,6 +4,8 @@ import { connectWithMongoDB } from "../dbConnection";
 import { NextResponse } from "next/server";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import messages from "../models/messages";
+import { userCardProp } from "./user";
+import Block from "../models/blocked";
 
 export const getConversationsService = async () => {
     await connectWithMongoDB() ;
@@ -14,8 +16,11 @@ export const getConversationsService = async () => {
     const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
     if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
 
+    // blocked conversations...
+    const blockedChatsAccIds = (await Block.find({ blockedByAcc:activeAcc._id , source:'chat' })).map((block) => block.blockedAcc);
+
     // get converations of this account...
-    const conversationDocs = await conversation.find({ participants:{ $in:[activeAcc._id] } });
+    const conversationDocs = await conversation.find({ participants:{ $in:[activeAcc._id] , $nin:blockedChatsAccIds } });
     const finalConvs = await Promise.all(conversationDocs.map( async (conversation) => {
 
         const chatWithAcc = await accounts.findOne({
@@ -51,4 +56,19 @@ export const getConversationsService = async () => {
     })) 
     
     return finalConvs ;
+}
+
+export const createNewConversationService = async (targetAcc:userCardProp) => {
+   await connectWithMongoDB() ;
+    
+   const user = await getDecodedDataFromCookie("accessToken");
+   if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    
+   const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+   if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
+
+   const targetAccount = await accounts.findById(targetAcc.id); // fetching target account from DB...
+
+   // creating new conversation...
+   await conversation.create({ participants:[activeAcc._id,targetAccount._id] });
 }

@@ -33,7 +33,6 @@ export const activeAccountLogoutService = async (handle:string) => {
 
     // updating Presense state in DB...
     await Presence.updateOne({ accountId:activeAcc._id },{ onlineStatus:'offline' });
-    
     const response = NextResponse.json({ message:'logged-out from server...'},{ status:200 }) ;
 
     // setting action token cookie deletion...

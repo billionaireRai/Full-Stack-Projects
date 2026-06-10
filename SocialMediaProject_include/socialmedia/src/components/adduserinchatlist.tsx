@@ -16,12 +16,14 @@ interface addUserInListPop {
 
 export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListPop) {
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [loadingAcc, setloadingAcc] = useState<boolean>(false);
   const [selectedAcc, setSelectedAcc] = useState<userCardProp>();
   const [Accounts, setAccounts] = useState<userCardProp[]>([])
 
   useEffect(() => {
     const mockAccs: userCardProp[] = [
-       {
+    {
+    id:'g3irf3rem3',
     decodedHandle: "@alice",
     name: "Alice Johnson",
     content: "Software Engineer at TechCorp",
@@ -44,6 +46,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
+    id:'npn249giekdf3',
     decodedHandle: "@bob",
     name: "Bob Smith",
     content: "Designer and Illustrator",
@@ -66,13 +69,14 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
-    decodedHandle: "@charlie",
+    id:'291f0n4t4bnb03',
+    decodedHandle: "@charliebrown",
     name: "Charlie Brown",
     content: "Data Scientist",
     IsFollowing: false,
     account: {
       name: "Charlie Brown",
-      handle: "@charlie",
+      handle: "@charliebrown",
       bio: "Turning data into insights.",
       location: { text: "Chicago, IL", coordinates: [41.8781, -87.6298] },
       website: "https://charliedata.com",
@@ -88,6 +92,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
+    id:'pak9i;gr393rm3r',
     decodedHandle: "@diana",
     name: "Diana Prince",
     content: "Marketing Specialist",
@@ -110,6 +115,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
+    id:'f03ngrtjnbb94',
     decodedHandle: "@eve",
     name: "Eve Adams",
     content: "Product Manager",
@@ -132,6 +138,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
+    id:'0nns0u40hf2fj4-',
     decodedHandle: "@frank",
     name: "Frank Miller",
     content: "UX Researcher",
@@ -154,6 +161,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
+    id:'k0qnkwmodfibnu5',
     decodedHandle: "@grace",
     name: "Grace Lee",
     content: "Full Stack Developer",
@@ -176,6 +184,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
+    id:'0j42nkv9h5g5f',
     decodedHandle: "@henry",
     name: "Henry Wilson",
     content: "DevOps Engineer",
@@ -198,6 +207,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
+    id:'0k4mpgbmn0n4r',
     decodedHandle: "@ivy",
     name: "Ivy Chen",
     content: "AI Researcher",
@@ -220,6 +230,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
   },
   {
+    id:'krg30jr9gj3lmd',
     decodedHandle: "@jack",
     name: "Jack Taylor",
     content: "Cybersecurity Expert",
@@ -245,28 +256,36 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     setAccounts(mockAccs)
   }, [])
 
-  const handleAddAcc = () => {
-    // by axios creating a new conversation...
-    if (selectedAcc && onAddChat) {
-      onAddChat(selectedAcc)
-      closePop?.()
-      toast.success(`Added ${selectedAcc.decodedHandle} to chat list...`)
-      return
+  const handleAddAcc = async () => {
+    try {
+      const newChatapi = await axiosInstance.post('/api/account/conversations',{ selectedAcc });
+      if (selectedAcc && onAddChat && newChatapi.status === 200) {
+      if (selectedAcc && onAddChat) {
+        onAddChat(selectedAcc)
+        return ;
+      }
+      toast.error(<>Error occured in adding <b className='mx-1'>{selectedAcc.decodedHandle}</b></>)
     }
-
-    toast.error('Either Account OR Handler not present !!')
+    } catch (error) {
+      toast.error("An error occured !!");
+    }
   }
 
   // useeffect for handling account fetching..
   useEffect(() => {
     async function getTheSearchedAccount(searchtext:string) {
+      setloadingAcc(true);
       try {
         const searchapi = await axiosInstance.get(`/api/account?search=${searchtext}`);
         if (searchapi.status === 200) {
           setAccounts(searchapi.data.searchedAcc) ; // updating the searched accounts state..
+          setloadingAcc(false);
         }
       } catch (error) {
+        setloadingAcc(false);
         console.log('An Error occured :',error);
+      } finally {
+        setloadingAcc(false);
       }
     }
 
@@ -282,7 +301,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
 
   return (
    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in-0 zoom-in-95 duration-200">
-      <div className="w-full h-full max-w-lg max-h-fit rounded-xl border border-gray-200 dark:border-gray-900 bg-white/95 dark:bg-black/95 shadow-lg">
+      <div className="w-full h-full max-w-xl max-h-fit rounded-xl border border-gray-200 dark:border-gray-900 bg-white/95 dark:bg-black/95 shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-900">
          <div className='flex items-center justify-start gap-1'>
@@ -293,7 +312,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
          </div>
           <button
             onClick={closePop}
-            className="p-2 cursor-pointer rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-2 cursor-pointer rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors"
             aria-label="Close"
           >
             <X size={18} />
@@ -309,25 +328,32 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="@accounthandle..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 outline-none focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30  transition"
+              className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-600 dark:placeholder-gray-400 outline-none border border-transparent focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30 transition duration-300"
               autoFocus
             />
           </div>
         </div>
 
         {/* List */}
-        <div className="max-h-3/4 overflow-y-scroll">
-          {Accounts.length > 0 ? (
-            <div className="p-4">
+        <div className="max-h-3/5 overflow-y-auto">
+          {loadingAcc ? (
+            <div className="flex items-center justify-center m-4 rounded-lg gap-2 h-40 text-gray-600 dark:text-gray-400 font-medium">
+              <div className="flex flex-col items-center justify-center gap-2">
+                <div className="h-7 w-7 rounded-full border-3 border-yellow-400/60 border-t-yellow-400 animate-spin" />
+                <p className="text-sm text-gray-600 dark:text-gray-300">Fetching accounts...</p>
+              </div>
+            </div>
+          ) : Accounts.length > 0 ? (
+            <div className="p-4 flex flex-col items-center justify-center">
               {Accounts.map((Acc,index) => {
-                const isSelected = selectedAcc?.id === Acc.id
+                const isSelected = selectedAcc?.id === Acc?.id // for checking selected state...
                 return (
                   <button
                     key={index}
                     type="button"
                     onClick={() => setSelectedAcc(Acc)}
-                    className={`cursor-pointer hover:shadow-md dark:shadow-gray-900 w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-colors outline-none ring-0 hover:bg-gray-50 dark:hover:bg-black ${
-                      isSelected ? 'bg-yellow-50 dark:bg-yellow-900/20 ring-1 ring-yellow-400/50' : ''
+                    className={`cursor-pointer w-full text-left flex items-center gap-3 px-4 py-2 rounded-lg transition-colors outline-none ring-0 hover:bg-gray-50 dark:hover:bg-black ${
+                      isSelected ? 'bg-yellow-50 dark:bg-yellow-950/10 ring-1 ring-yellow-400/50' : ''
                     }`}
                   >
                     <UserCard
@@ -335,7 +361,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
                       id={Acc.id}
                       decodedHandle={Acc.decodedHandle}
                       name={Acc.name}
-                      content={Acc.content}
+                      content={null}
                       IsFollowing={Acc.IsFollowing}
                       account={Acc.account}
                     />
@@ -349,9 +375,9 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
               })}
             </div>
           ) : (
-            <div className="flex items-center justify-center p-6 gap-2 text-gray-600 dark:text-gray-400 font-medium">
-              <LucideMessageCircleWarning size={18} />
-              <span>No users found "<b>{searchQuery}</b>"</span>
+            <div className="flex items-center justify-center m-4 rounded-lg gap-2 h-40 text-gray-600 dark:text-gray-400 font-medium">
+              <LucideMessageCircleWarning size={25} />
+              <span>No accounts found {searchQuery.trim() && <b>"{searchQuery}"</b>}</span>
             </div>
           )}
         </div>
@@ -360,7 +386,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
         <div className="px-4 py-3 border-t rounded-lg border-gray-200 dark:border-gray-900">
           <button
             type="button"
-            onClick={handleAddAcc}
+            onClick={() => { handleAddAcc() }}
             disabled={!selectedAcc}
             className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ring-1 ring-yellow-400/50 bg-yellow-400 text-black hover:bg-yellow-500 dark:hover:bg-yellow-500 dark:bg-yellow-400 dark:text-black`}
           >

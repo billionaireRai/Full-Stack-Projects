@@ -14,15 +14,15 @@ export interface infoForChatCard {
   avatarUrl: string;
   unreadCount: number;
 }
-interface chatUserCardProp {
+interface chatAccCardProp {
     cardInfo?: infoForChatCard ,
     onclick?:() => void ,
     currentOpenChat?:infoForChatCard
 }
 
-export default function Chatusercard ({ cardInfo , onclick , currentOpenChat }:chatUserCardProp) {
+export default function ChatAccountcard({ cardInfo , onclick , currentOpenChat }:chatAccCardProp) {
   const [isTargetChat, setisTargetChat] = useState(false) ;
-  if (!cardInfo) return null;
+  if (!cardInfo) return null ;
 
   // useffect for handling the target chat check...
   useEffect(() => {
@@ -31,7 +31,12 @@ export default function Chatusercard ({ cardInfo , onclick , currentOpenChat }:c
 
   // for backend operation...
   async function handleClick() {
-    onclick?.();
+    try {
+      onclick?.();
+      
+    } catch (error) {
+      
+    }
   }
   return (
     <div

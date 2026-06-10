@@ -16,10 +16,9 @@ const blockSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ["profile", "message", "comment", "post"],
+      enum: ["profile", "chat"],
       default: "profile"
     },
-
     isActive: {
       type: Boolean,
       default: true,
@@ -30,7 +29,7 @@ const blockSchema = new mongoose.Schema(
 );
 
 // Prevent duplicate blocks....
-blockSchema.index( { blockedBy: 1, blockedUser: 1 }, { unique: true });
+blockSchema.index( { blockedByAcc: 1, blockedAcc: 1 }, { unique: true });
 
 const Block = mongoose.models.Block || mongoose.model("Block", blockSchema);
 export default Block;
