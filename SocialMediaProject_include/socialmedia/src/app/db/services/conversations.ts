@@ -6,6 +6,7 @@ import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import messages from "../models/messages";
 import { userCardProp } from "./user";
 import Block from "../models/blocked";
+import { infoForChatCard } from "@/components/chataccountcard";
 
 export const getConversationsService = async () => {
     await connectWithMongoDB() ;
@@ -40,6 +41,9 @@ export const getConversationsService = async () => {
             })
             .sort({ createdAt: -1 });
 
+        // getting pinned state...
+        const pinned = (Array.isArray(conversation.pinnedBy) && conversation.pinnedBy.includes(activeAcc._id)) ? true : false ;
+
         // getting unseen incoming messages
         const unseenMessages = await messages.countDocuments({ fromId: chatWithAcc._id, toId: activeAcc._id, status: { $ne: 'seen' }}) ;
 
@@ -51,6 +55,7 @@ export const getConversationsService = async () => {
             timestamp: new Date(lastMessage.createdAt).toDateString(),
             isVerified: chatWithAcc.isverified.value,
             avatarUrl: chatWithAcc.avatar.url,
+            pinned:pinned,
             unreadCount:unseenMessages
         }
     })) 
@@ -71,4 +76,24 @@ export const createNewConversationService = async (targetAcc:userCardProp) => {
 
    // creating new conversation...
    await conversation.create({ participants:[activeAcc._id,targetAccount._id] });
+}
+
+
+export const chatCardOpenService = async (card:infoForChatCard) => {
+    await connectWithMongoDB() ;
+    
+   const user = await getDecodedDataFromCookie("accessToken");
+   if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    
+   const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+   if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
+
+   // getting the conversation required...
+   const conv = await conversation.findOne({ _id:card.id , participants:{ $in:[activeAcc._id] } });
+
+   // marking all non-seen messages as seen...
+   await messages.updateMany(
+    { toId:activeAcc._id , conversationId:conv._id , status:{ $ne:'seen' } , deletedFor:{ $nin:[activeAcc._id]  } },
+    { status:'seen' }
+   );
 }

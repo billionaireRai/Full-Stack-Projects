@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import axiosInstance from '@/lib/interceptor';
 import toast from 'react-hot-toast';
 import { BanIcon } from 'lucide-react';
@@ -42,8 +43,8 @@ export default function BlockChatPop({ closeBlockPop , isBlocked , updateblockSt
           {/* Description */}
           <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
             {isBlocked
-              ? `Are you sure you want to unblock this Chat with ${username}? You can follow them again after unblocking.`
-              : 'Are you sure you want to block this Account ? If unblocked later, you will have to send a follow request again to the Account.'
+              ? <>Are you sure you want to unblock this Chat with <Link href={`/${username}`}><b>{username}</b></Link>? You can follow them again after unblocking.</>
+              : <>Are you sure you want to block this Chat with <Link href={`/${username}`}><b>{username}</b></Link> ? All the notifications , chats , media wont be accessable...</>
             }
           </p>
 

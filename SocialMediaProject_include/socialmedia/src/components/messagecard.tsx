@@ -1,17 +1,18 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion , AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import EmojiPicker, { EmojiClickData ,Theme } from 'emoji-picker-react'
 import { useSound } from 'use-sound'
-import { BanIcon, Eraser, Flag, Folder, Images, Mic, Music, Paperclip, PhoneIcon, SendIcon, Smile, Trash, Video, CheckCircle, MessageCirclePlus, User } from 'lucide-react'
+import { BanIcon, Eraser, Flag, Folder, Images, Mic, Music, Paperclip, PhoneIcon, SendIcon, Smile, Trash, Video, CheckCircle, MessageCirclePlus, User, PinIcon, SearchIcon, BellOff } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import AudioRecordModal from '@/components/audioRecordModal'
 import Sharecontactonchat from '@/components/sharecontactonchat'
 import BlockChatPop from '@/components/blockchat'
+import Mediapopmodal from './mediapopmodal'
 import AddAccinchatlist from '@/components/adduserinchatlist'
 import toast from 'react-hot-toast'
 import { userCardProp } from '@/components/usercard'
@@ -30,21 +31,32 @@ interface Message {
 
 interface MessageCardProps {
   chatCardDetails?: infoForChatCard
-  handleAudioPop:() => void  
-  handleAddChat:() => void
+  handleAudioPop: () => void
+  handleAddChat: () => void
+  updateCardDetail: (msg: string, time: string) => void
 }
 
-export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAddChat }: MessageCardProps) {
+export default function MessageCard({
+  chatCardDetails,
+  handleAudioPop,
+  handleAddChat,
+  updateCardDetail,
+}: MessageCardProps) {
   const { resolvedTheme , } = useTheme()
   const [play] = useSound('/audio/notification.mp3')
+  const msgsection = useRef<HTMLDivElement | null>(null)
+  const messagesize = useRef<Number>(15) ;
+  const [messagePage, setmessagePage] = useState<Number>(1);
   const [messageText, setmessageText] = useState('')
-  const [openChatThreeDot, setopenChatThreeDot] = useState(false)
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-  const [showFilePopup, setShowFilePopup] = useState(false)
-  const [shareContact, setshareContact] = useState(false)
-  const [blockAccPop, setblockAccPop] = useState(false)
+  const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false)
+  const [loadingChat, setloadingChat] = useState<boolean>(false);
+  const [sendingMessage, setsendingMessage] = useState<boolean>(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false)
+  const [showFilePopup, setShowFilePopup] = useState<boolean>(false)
+  const [shareContact, setshareContact] = useState<boolean>(false)
+  const [blockChatPop, setblockChatPop] = useState<boolean>(true)
 
-  // Attach options (from page.tsx)
+  // Attachments option
   const attachFileoptions = useMemo(
     () => [
       { icon: <Images className="w-3 h-3 text-blue-500" />, label: 'Photos' },
@@ -55,7 +67,7 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
     [],
   )
 
-  // Dummy messages (keep existing behavior)
+  // Dummy messages
   const MessagesArray = useMemo<Message[]>(
     () => [
       {
@@ -77,7 +89,7 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
         isOwn: true,
         avatar:
           'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
-        status: 'delivered',
+        status: 'seen',
       },
       {
         id: '3',
@@ -98,6 +110,121 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
         isOwn: true,
         avatar:
           'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
+        status: 'seen',
+      },
+      {
+        id: '5',
+        sendername: 'Alice Johnson',
+        senderhandle: '@alicejhonson',
+        text: 'Nice! Are you working on chat features as well?',
+        timestamp: new Date().toLocaleString(),
+        isOwn: false,
+        avatar: '/images/myProfile.jpg',
+        status: 'seen',
+      },
+      {
+        id: '6',
+        sendername: 'Amritansh Rai',
+        senderhandle: '@amritanshdev__',
+        text: 'Yes—message UI, notifications, and some realtime syncing.',
+        timestamp: new Date().toLocaleString(),
+        isOwn: true,
+        avatar:
+          'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
+        status: 'seen',
+      },
+      {
+        id: '7',
+        sendername: 'Alice Johnson',
+        senderhandle: '@alicejhonson',
+        text: 'That sounds awesome. How are you handling pagination?',
+        timestamp: new Date().toLocaleString(),
+        isOwn: false,
+        avatar: '/images/myProfile.jpg',
+        status: 'seen',
+      },
+      {
+        id: '8',
+        sendername: 'Amritansh Rai',
+        senderhandle: '@amritanshdev__',
+        text: 'I’m loading older messages when you scroll up page size 15.',
+        timestamp: new Date().toLocaleString(),
+        isOwn: true,
+        avatar:
+          'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
+        status: 'seen',
+      },
+      {
+        id: '9',
+        sendername: 'Alice Johnson',
+        senderhandle: '@alicejhonson',
+        text: 'Perfect. Also, emoji pickers are always a nice touch 😄',
+        timestamp: new Date().toLocaleString(),
+        isOwn: false,
+        avatar: '/images/myProfile.jpg',
+        status: 'seen',
+      },
+      {
+        id: '10',
+        sendername: 'Amritansh Rai',
+        senderhandle: '@amritanshdev__',
+        text: 'Yep! Added emoji picker and attachment options too.',
+        timestamp: new Date().toLocaleString(),
+        isOwn: true,
+        avatar:
+          'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
+        status: 'delivered',
+      },
+      {
+        id: '11',
+        sendername: 'Alice Johnson',
+        senderhandle: '@alicejhonson',
+        text: 'Do you support media uploads and sending voice notes?',
+        timestamp: new Date().toLocaleString(),
+        isOwn: false,
+        avatar: '/images/myProfile.jpg',
+        status: 'sending',
+      },
+      {
+        id: '12',
+        sendername: 'Amritansh Rai',
+        senderhandle: '@amritanshdev__',
+        text: 'Working on it. For now, attachments UI is ready and voice notes trigger a modal.',
+        timestamp: new Date().toLocaleString(),
+        isOwn: true,
+        avatar:
+          'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
+        status: 'sending',
+      },
+      {
+        id: '13',
+        sendername: 'Alice Johnson',
+        senderhandle: '@alicejhonson',
+        text: 'Great progress. Want to test the UI once you’re done with backend wiring?',
+        timestamp: new Date().toLocaleString(),
+        isOwn: false,
+        avatar: '/images/myProfile.jpg',
+        status: 'delivered',
+      },
+      {
+        id: '14',
+        sendername: 'Amritansh Rai',
+        senderhandle: '@amritanshdev__',
+        text: 'Absolutely. Let’s also cover delivery + seen states properly.',
+        timestamp: new Date().toLocaleString(),
+        isOwn: true,
+        avatar:
+          'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
+        status: 'delivered',
+      },
+      {
+        id: '15',
+        sendername: 'Alice Johnson',
+        senderhandle: '@alicejhonson',
+        text: 'Cool—send me an update when you push the changes!',
+        timestamp: new Date().toLocaleString(),
+        isOwn: false,
+        avatar: '/images/myProfile.jpg',
         status: 'sending',
       },
     ],
@@ -106,12 +233,12 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
 
   const [Messages, setMessages] = useState<Message[]>([])
 
-  // IMPORTANT: sync message list when chat changes
+  // useeffect running whenever chat changes...
   useEffect(() => {
-    // temporary: using dummy array that updates on chat switch.
-    // Later replace this with real fetch by conversation/chat id.
+    // axios request...
+
     setMessages(MessagesArray)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [chatCardDetails?.id])
 
 
@@ -147,26 +274,53 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
   }
 
   const handleSendMessage = (_msg: string) => {
-    setmessageText('')
+    if (!_msg.trim()) return null
+    const trimmedmsg = _msg.trim() ;
+
+    const newMessage: Message = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      sendername: 'Amritansh Rai',
+      senderhandle: '@amritanshdev__',
+      text: trimmedmsg,
+      timestamp: new Date().toLocaleString(),
+      isOwn: true,
+      avatar:
+        'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
+      status: 'delivered',
+    }
+
+    setMessages((prevmessages) => [...prevmessages, newMessage])
+    setmessageText('');
     play()
   }
 
+  useEffect(() => {
+    if (!msgsection.current) return ;
+    const lastmessage = Messages[Messages.length - 1] ;
+    msgsection.current.scrollTop = msgsection.current.scrollHeight
+    updateCardDetail(lastmessage.text,lastmessage.timestamp)
+  }, [Messages])
+
   return (
     <div className="flex flex-col h-full rounded-md">
-      { !chatCardDetails ? (
+      {!chatCardDetails ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-6">
-          <div className='bg-yellow-400 text-black hover:animate-none animate-ping mb-2 rounded-full p-2'>
-            <MessageCirclePlus
-              onClick={handleAddChat}
-              size={75}
-              className="cursor-pointer hover:scale-105 text-black dark:text-gray-500"
-            />
+          {/* message circle beep section */}
+          <div className="relative inline-flex">
+            <span className="absolute inset-0 rounded-full bg-yellow-200 dark:bg-yellow-950 animate-ping opacity-75"></span>
+            <div className="relative rounded-full p-2">
+              <MessageCirclePlus
+                onClick={handleAddChat}
+                size={75}
+                className="cursor-pointer hover:scale-105 text-yellow-500 dark:text-yellow-700 transition-transform"
+              />
+            </div>
           </div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-300 mb-2">
             No Chat Selected yet
           </h2>
           <p className="text-xs text-gray-600 dark:text-gray-400 max-w-md">
-            Select any chat to start a conversation. Send messages, share media, and keep up with the latest updates.
+            Select any chat to start a conversation or add an account to Send messages, share media, and keep up with the latest updates.
           </p>
         </div>
       ) : (
@@ -174,7 +328,7 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
           {/* Chat Header */}
           <div className="sticky top-0 flex items-center px-4 py-3 justify-between rounded-md shadow-sm border-b border-gray-200 dark:border-gray-900 dark:bg-black z-10">
             <div className="flex items-center gap-3">
-              <div className="relative">
+             <div className="relative cursor-pointer">
               <img
                 src={chatCardDetails?.avatarUrl}
                 alt={chatCardDetails?.name}
@@ -193,6 +347,11 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
                 >
                   {chatCardDetails?.handle}
                 </Link>
+                 {chatCardDetails?.isVerified && 
+                   <span className="text-sm text-gray-500 dark:text-gray-400 font-normal">
+                     <Image src='/images/yellow-tick.png' width={18} height={18} alt='verified'/>
+                    </span>
+                 }
               </h3>
               <p className="text-xs text-gray-600 dark:text-gray-400">
                 {chatCardDetails?.lastMessage} • {chatCardDetails?.timestamp}
@@ -217,7 +376,7 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
               >
                 <Link
                   href={`/${chatCardDetails?.handle}`}
-                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
                   onClick={() => setopenChatThreeDot(false)}
                 >
                   <User className="w-4 h-4" />
@@ -227,7 +386,7 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
                 </Link>
 
                 <button
-                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
                   onClick={() => setopenChatThreeDot(false)}
                 >
                   <Folder className="w-4 h-4" />
@@ -235,7 +394,31 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  onClick={() => setopenChatThreeDot(false)}
+                >
+                  <BellOff className="w-4 h-4" />
+                  <div>Mute notifications</div>
+                </button>
+
+                <button
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  onClick={() => setopenChatThreeDot(false)}
+                >
+                  <PinIcon className="w-4 h-4 rotate-45" />
+                  <div>Pin chat</div>
+                </button>
+
+                <button
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  onClick={() => setopenChatThreeDot(false)}
+                >
+                  <SearchIcon className="w-4 h-4" />
+                  <div>Search messages</div>
+                </button>
+
+                <button
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
                   onClick={() => setopenChatThreeDot(false)}
                 >
                   <Eraser className="w-4 h-4" />
@@ -243,8 +426,16 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
                   onClick={() => setopenChatThreeDot(false)}
+                >
+                  <Flag className="w-4 h-4" />
+                  <div>Report chat</div>
+                </button>
+
+                <button
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
+                  onClick={() => { setblockChatPop(true) ; setopenChatThreeDot(false) }}
                 >
                   <BanIcon className="w-4 h-4" />
                   <div>
@@ -253,15 +444,7 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
-                  onClick={() => setopenChatThreeDot(false)}
-                >
-                  <Flag className="w-4 h-4" />
-                  <div>Report chat</div>
-                </button>
-
-                <button
-                  className="w-full cursor-pointer rounded-md flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
                   onClick={() => setopenChatThreeDot(false)}
                 >
                   <Trash className="w-4 h-4" />
@@ -275,10 +458,15 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
         </div>
 
         {/* Messages */}
-        <div className="overflow-y-auto p-2 flex flex-col border border-black h-full rounded-md">
+        <div ref={msgsection} className="overflow-y-auto flex gap-2 flex-col p-2 h-full rounded-md">
+         <AnimatePresence>
           {Messages.map((message) => (
-            <div
+            <motion.div
+              layout
               key={message.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
               className={`flex items-start gap-3 ${message.isOwn ? 'flex-row-reverse' : 'flex-row'}`}
             >
               <div className="flex-shrink-0">
@@ -287,7 +475,7 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
                   alt={`${message.senderhandle} avatar`}
                   width={40}
                   height={40}
-                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                  className="w-13 h-13 rounded-full object-cover border-1 border-gray-200 dark:border-gray-800"
                 />
               </div>
 
@@ -297,20 +485,22 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
                 }`}
               >
                 {!message.isOwn && (
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                    {message.sendername}
-                  </span>
+                  <div className="text-xs flex gap-1 items-center font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <span>{message.sendername}</span><b>.</b><Link href={`/${message.senderhandle}`}>{message.senderhandle}</Link>
+                  </div>
                 )}
-
-                <div
+                <motion.div
+                  initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  transition={{ duration: 0.25 }}
                   className={`px-4 py-2 rounded-2xl shadow-sm ${
                     message.isOwn
-                      ? 'bg-yellow-400 dark:bg-blue-500 dark:text-white rounded-br-none'
-                      : 'bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 rounded-bl-none border border-gray-200 dark:border-gray-700'
+                      ? 'bg-yellow-400 dark:bg-yellow-500 dark:text-white rounded-br-none'
+                      : 'bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 rounded-bl-none border border-gray-200 dark:border-gray-800'
                   }`}
                 >
                   <p className="text-sm leading-relaxed break-words">{message.text}</p>
-                </div>
+                </motion.div>
 
                 <div
                   className={`flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 ${
@@ -333,18 +523,36 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-
+          { sendingMessage && (
+            <div className="flex gap-1">
+              <span className="animate-bounce">•</span>
+              <span
+                className="animate-bounce"
+                style={{ animationDelay: "0.2s" }}
+              >
+                •
+              </span>
+              <span
+                className="animate-bounce"
+                style={{ animationDelay: "0.4s" }}
+              >
+                •
+              </span>
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
         {/* Message composer */}
-        <div className="messagesendsection border border-gray-200 dark:border-gray-900 inset-shadow-yellow-200 sticky bottom-0 w-full rounded-xl px-4 py-1 bg-white dark:bg-black flex items-center gap-3 z-10">
+        <div className="messagesendsection relative border border-gray-200 dark:border-gray-900 inset-shadow-yellow-200 w-full rounded-xl px-4 py-1 mt-3 bg-white dark:bg-black flex items-center gap-3 z-10">
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="p-2 cursor-pointer rounded-full bg-white dark:invert text-black hover:bg-gray-200"
+                className="p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950"
               >
-                <Smile className="w-4 h-4" />
+                <Smile className="w-4 h-4 dark:invert" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Add emoji</TooltipContent>
@@ -371,9 +579,9 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowFilePopup(!showFilePopup)}
-                  className="p-2 cursor-pointer rounded-full bg-white dark:invert text-black hover:bg-gray-200"
+                  className="p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950"
                 >
-                  <Paperclip className="w-4 h-4" />
+                  <Paperclip className="w-4 h-4 dark:invert" />
                 </button>
               </TooltipTrigger>
               <TooltipContent>Attach file</TooltipContent>
@@ -409,11 +617,9 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
             <input
               type="text"
               value={messageText}
-              onChange={(e) => {
-                setmessageText(e.target.value)
-              }}
+              onChange={(e) => { setmessageText(e.target.value) }}
               placeholder="type a message..."
-              className="w-full bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-white dark:focus:bg-gray-950"
+              className="w-full text-sm bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-white dark:focus:bg-gray-950"
             />
           </div>
 
@@ -422,37 +628,37 @@ export default function MessageCard({ chatCardDetails , handleAudioPop ,handleAd
               {messageText ? (
                 <button
                   onClick={() => handleSendMessage(messageText)}
-                  className="p-2 cursor-pointer rounded-full bg-white dark:invert text-black hover:bg-gray-200 transition"
+                  className="p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 transition dark:hover:bg-gray-950"
                 >
-                  <SendIcon className="w-4 h-4" />
+                  <SendIcon className="w-4 h-4 dark:invert" />
                 </button>
               ) : (
                 <button
                   onClick={handleAudioPop}
-                  className="p-2 cursor-pointer rounded-full bg-white dark:invert text-black hover:bg-gray-200 transition"
+                  className="p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 transition dark:hover:bg-gray-950"
                 >
-                  <Mic className="w-4 h-4" />
+                  <Mic className="w-4 h-4 dark:invert" />
                 </button>
               )}
             </TooltipTrigger>
             <TooltipContent>{messageText ? 'Send message' : 'Voice message'}</TooltipContent>
           </Tooltip>
         </div>
-      </div>
 
-      {blockAccPop && (
-        <BlockChatPop
-          key={chatCardDetails?.id}
-          username={String(chatCardDetails?.handle)}
-          closeBlockPop={() => {
-            setblockAccPop(false)
-          }}
-          isBlocked={false}
-          updateblockState={() => {}}
-        />
-      )}
     </div>
   )}
+{/* {
+  <Mediapopmodal/>
+} */}
+{blockChatPop && (
+  <BlockChatPop
+    key={chatCardDetails?.id}
+    username={String(chatCardDetails?.handle)}
+    closeBlockPop={() => { setblockChatPop(false) }}
+    isBlocked={false}
+    updateblockState={() => {}}
+  />
+)}
 </div>
 )}
 

@@ -1,10 +1,8 @@
 'use client'
 
 import React,{ useState , useEffect }from 'react'
-import { motion } from 'framer-motion';
 import ChatAccountcard from '@/components/chataccountcard'
 import Link from 'next/link'
-import { useTheme } from 'next-themes'
 // import useUnreadMessage from '@/app/states/unreadmessage'; 
 import Image from 'next/image';
 import AudioRecordModal from '@/components/audioRecordModal';
@@ -13,18 +11,13 @@ import MessageCard from '@/components/messagecard';
 import Sharecontactonchat from '@/components/sharecontactonchat';
 import AddAccinchatlist from '@/components/adduserinchatlist';
 import { userCardProp } from '@/components/usercard';
-import useSound from 'use-sound' ;
-import EmojiPicker ,{ EmojiClickData } from 'emoji-picker-react';
 import { SearchIcon, PlusCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, UserX, Flag, Trash, Smile, Paperclip, Mic, Image as image, Video, File, Music, Square, Play, X, PhoneIcon, BarChart3, Images, MessageCirclePlus, BanIcon , Link2Icon, BellDot, MessageCircleDashed } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import toast from 'react-hot-toast';
 import { infoForChatCard } from '@/components/chataccountcard'
 import axiosInstance from '@/lib/interceptor';
 
 export default function Messages() {
   const [ChatSearch, setChatSearch] = useState('') ; // input for searching a paticular chat...
-  const { resolvedTheme } = useTheme();
-  const [ play ] = useSound('/audio/notification.mp3') ;
   const [CurrentOpenChat, setCurrentOpenChat] = useState<infoForChatCard>();
   const [chatSlideOpen, setchatSlideOpen] = useState<boolean>(false) ;
   const [addChatPop, setaddChatPop] = useState<boolean>(false);
@@ -41,6 +34,8 @@ export default function Messages() {
       lastMessage: 'Hey, how are you?',
       timestamp: 'Fri Jun 05 2026', // random previous date via toDateString()
       isVerified: true,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2
     },
@@ -51,6 +46,8 @@ export default function Messages() {
       lastMessage: 'Let\'s meet tomorrow',
       timestamp: '9:15 AM',
       isVerified: false,
+      pinned:true,
+      blocked:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
@@ -61,6 +58,8 @@ export default function Messages() {
       lastMessage: 'Thanks for the help!',
       timestamp: 'Yesterday',
       isVerified:true,
+      pinned:true,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
@@ -71,6 +70,8 @@ export default function Messages() {
       lastMessage: 'See you soon',
       timestamp: '2 days ago',
       isVerified:false,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 4
     },
@@ -81,6 +82,8 @@ export default function Messages() {
       lastMessage: 'What\'s up?',
       timestamp: '3 hours ago',
       isVerified:true,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
@@ -91,6 +94,8 @@ export default function Messages() {
       lastMessage: 'Good morning!',
       timestamp: '8:45 AM',
       isVerified:false,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
@@ -101,6 +106,8 @@ export default function Messages() {
       lastMessage: 'Call me later',
       timestamp: '1 hour ago',
       isVerified:true,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1
     },
@@ -111,6 +118,8 @@ export default function Messages() {
       lastMessage: 'Nice work!',
       timestamp: 'Yesterday',
       isVerified:true,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1
     },
@@ -121,6 +130,8 @@ export default function Messages() {
       lastMessage: 'Physics is fun!',
       timestamp: '5 minutes ago',
       isVerified:false,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 3
     },
@@ -131,6 +142,8 @@ export default function Messages() {
       lastMessage: 'Mission accomplished',
       timestamp: '2 hours ago',
       isVerified:false,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
@@ -141,6 +154,8 @@ export default function Messages() {
       lastMessage: 'Let\'s catch up',
       timestamp: '1 day ago',
       isVerified:false,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2
     },
@@ -151,6 +166,8 @@ export default function Messages() {
       lastMessage: 'Great idea!',
       timestamp: '30 minutes ago',
       isVerified:true,
+      pinned:true,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1
     },
@@ -161,6 +178,8 @@ export default function Messages() {
       lastMessage: 'See you at the event',
       timestamp: '4 hours ago',
       isVerified:true,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     },
@@ -171,6 +190,8 @@ export default function Messages() {
       lastMessage: 'Thanks again',
       timestamp: '3 days ago',
       isVerified:false,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 5
     },
@@ -181,6 +202,8 @@ export default function Messages() {
       lastMessage: 'Happy birthday!',
       timestamp: '6 hours ago',
       isVerified:false,
+      pinned:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0
     }
@@ -200,6 +223,8 @@ export default function Messages() {
       name: String(AccForChat?.name),
       handle: String(AccForChat.decodedHandle),
       isVerified: Boolean(AccForChat.account?.isVerified),
+      pinned:false,
+      blocked:false,
       lastMessage: 'New chat created just now !!',
       timestamp: 'Just now',
       avatarUrl: AccForChat.account?.avatarUrl ?? '/images/myProfile.jpg',
@@ -254,13 +279,6 @@ export default function Messages() {
     else  setFilteredCards(conversations); // show all if search is empty...
   }, [ChatSearch,conversations]);
 
-  // function for handling chatcard click...
-  function handleChatCardClick(card:infoForChatCard) {
-    setchatSlideOpen(true) 
-    setCurrentOpenChat(card) ;  
-    // card.unreadCount = 0 ;
-  }
-
   // function fethcing all conversations...
   async function getConversations() {
     axiosInstance.get('/api/account/conversations')
@@ -283,12 +301,35 @@ export default function Messages() {
   useEffect(() => {
     calculateTotalUnread(conversations);
   }, [conversations])
-  
+
+  // function handling card info updation
+  const handleCardDetailUpdate = (lastmsg: string, time: string) => {
+    setconversations((prev) => {
+      const targetId = CurrentOpenChat?.id;
+      if (!targetId) return prev;
+      return prev.map((c) =>
+        c.id === targetId? { ...c, lastMessage: lastmsg, timestamp: time } : c
+      );
+    });
+
+    setCurrentOpenChat((prevdetail) => {
+      if (!prevdetail) return prevdetail;
+      return { ...prevdetail, lastMessage: lastmsg, timestamp: time };
+    });
+  }
+
+  // function for handling chat array operations...
+  function conversationArrOperation(arr: infoForChatCard[]): infoForChatCard[] {
+    return arr.sort((a, b) => {
+      if (a.pinned !== b.pinned) return b.pinned === true ? 1 : -1 ;
+      return b.unreadCount - a.unreadCount;
+    });
+  }
 
   return (
     <div className='h-full flex flex-col lg:flex-row p-1 gap-1 font-poppins rounded-md dark:bg-black'>
-        <div className={`relative chatList h-full flex-col gap-1 rounded-md overflow-y-scroll overflow-x-hidden ${chatSlideOpen ? 'hidden lg:flex' : 'flex'}`}>
-            <div className='searchSection sticky top-0 backdrop-blur-md flex items-center w-full max-w-md mx-auto p-2 m-2 rounded-lg  shadow-md border border-gray-200 dark:border-gray-700'>
+        <div className={`relative chatList h-full flex-col gap-1 min-w-xs rounded-md overflow-y-auto overflow-x-hidden ${chatSlideOpen ? 'hidden lg:flex' : 'flex'}`}>
+            <div className='searchSection sticky top-0 backdrop-blur-md flex items-center w-full mx-auto p-2 m-2 rounded-lg  shadow-md border border-gray-200 dark:border-gray-700'>
                 <span 
                   onClick={() => { handleSearch(ChatSearch) }}
                   className='text-gray-500 dark:text-gray-400 mr-1 cursor-pointer'>
@@ -309,13 +350,14 @@ export default function Messages() {
                 <b>{conversations.length}</b> chat conversations
               </span>
             </div>
-           {Array.isArray(filteredCards) && filteredCards.length > 0 ? 
-            filteredCards.sort((card1,card2) => card2.unreadCount - card1.unreadCount).map((card) => (
+           {Array.isArray(filteredCards) && filteredCards.length > 0 ? conversationArrOperation(filteredCards).map((card) => (
               <ChatAccountcard 
                 key={card.id} 
                 cardInfo={card} 
                 currentOpenChat={CurrentOpenChat} 
-                onclick={() => { handleChatCardClick(card) }} 
+                countUpdate={() => { card.unreadCount = 0 }}
+                currentChat={() => { setCurrentOpenChat(card) }}
+                openChat={() => { setchatSlideOpen(true) }}
               />
 
             )) : (
@@ -326,14 +368,14 @@ export default function Messages() {
                 <h3 className="mt-4 text-base font-semibold text-gray-900 dark:text-gray-100">
                   No chats found
                 </h3>
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 max-w-xs">
+                <p className="mt-1 max-w-xs text-sm text-gray-600 dark:text-gray-400">
                   {ChatSearch.trim() ? (
                     <>
                     No conversations match <span className="font-medium text-gray-900 dark:text-gray-200">“<b>{ChatSearch.trim()}</b>”</span>.
                     </>
                   ):(
                     <>
-                    No chat started with any account...
+                    you have'nt started chatting with any account , add an account & start having fun...
                     </>
                   )}
                 </p>
@@ -346,7 +388,7 @@ export default function Messages() {
             </div>
         </div>
         <div className="flex flex-col gap-4 p-2 h-full flex-1 dark:bg-black rounded-md min-h-0">
-            <MessageCard chatCardDetails={CurrentOpenChat} handleAudioPop={() => { setShowAudioModal(true) }} handleAddChat={() => { setaddChatPop(true) }}/>
+            <MessageCard updateCardDetail={(msg,time) => { handleCardDetailUpdate(msg,time) }} chatCardDetails={CurrentOpenChat} handleAudioPop={() => { setShowAudioModal(true) }} handleAddChat={() => { setaddChatPop(true) }}/>
         </div>
         
         {showAudioModal && (

@@ -16,7 +16,6 @@ const blockSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ["profile", "chat"],
       default: "profile"
     },
     isActive: {

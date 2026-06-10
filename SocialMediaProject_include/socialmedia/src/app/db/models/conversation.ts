@@ -14,6 +14,24 @@ const conversationSchema = new mongoose.Schema(
       ref: "Message",
       default: null,
     },
+    pinnedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "account",
+      }
+    ],
+    mutedBy:[
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "account",
+      }
+    ],
+    blockedBy:[
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "account",
+      }
+    ],
     isGroup: {
       type: Boolean,
       default: false,
