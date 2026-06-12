@@ -30,7 +30,7 @@ import { BsPostcardFill } from 'react-icons/bs';
 import useMediaPop from '@/app/states/mediapop';
 import Mediapopmodal from '@/components/mediapopmodal';
 import { usernameRegex } from '@/app/controllers/regex';
-import { generateKeyPairAndStoreBoth } from '@/lib/pairedkeys';
+import { checkForPrivateKeyIDB, generateKeyPairAndStoreBoth, isKeyObjType } from '@/lib/pairedkeys';
 
 interface mediaType {
   url: string;
@@ -620,7 +620,7 @@ export default function UserProfilePage() {
         }
       }
     };
-    // fetchAccountData();
+    fetchAccountData();
   }, [Account.account, username])
   
   useEffect(() => {
@@ -649,7 +649,7 @@ export default function UserProfilePage() {
     }
 
     // running only when username exists...
-    // if (username) functionToGetData();
+    if (username) functionToGetData();
   }, [username])
   
   // toggleing follow logic...
@@ -749,11 +749,21 @@ export default function UserProfilePage() {
 
   // useffect for handling 'utm_source' & 'accid' search param...
   useEffect(() => {
-    if (utmsource?.trim() && accid?.trim() && intent?.trim())  {
-      generateKeyPairAndStoreBoth(accid); // for public-private key generation...
-      useWebSocket(accid,intent) // registering web-socket id... 
-    } ;
-  }, [utmsource])
+    const handlingSocketAndKeyLogic = async (accountid:string) => {
+      if (intent === 'register') {
+        generateKeyPairAndStoreBoth(accountid); // for public-private key generation...
+        useWebSocket(accountid,intent) // registering web-socket id... 
+      }
+      if (intent === 'login') {
+        const output = await checkForPrivateKeyIDB(accountid);
+        if (isKeyObjType(output)) localStorage.setItem('privatekey',output.value);
+        else generateKeyPairAndStoreBoth(accountid);
+        useWebSocket(accountid,intent) // updating presence state web-socket id...
+      }    
+    }
+    // if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
+  }, [utmsource,accid,intent])
+  
   
   // function to make mentions a link in bio...
   const makeMentionsAsLink = (Bio: string) => {
@@ -763,12 +773,11 @@ export default function UserProfilePage() {
 
     return parts.map((part, idx) => {
       if (part.startsWith("@") && usernameRegex.test(part.slice(1))) {
-       const username = part.slice(1);
 
        return (
         <Link
           key={idx}
-          href={`/${username}`}
+          href={`/${part}`}
           className="text-yellow-500 hover:text-shadow-xs text-shadow-yellow-400"
         >
           {part}
@@ -819,10 +828,10 @@ export default function UserProfilePage() {
 
               {/* Cover Photo */}
               <div 
-              onClick={() => { handleMediaPop({ url:AccountInfo.bannerUrl , media_type:'image' }) }}
+              onClick={() => { handleMediaPop({ url:(AccountInfo.bannerUrl?.trim() ? AccountInfo.bannerUrl : '/images/default-banner.jpg') , media_type:'image' }) }}
               className={`relative h-80 w-full cursor-pointer rounded-lg bg-gradient-to-r from-yellow-100 to-yellow-300`}>
                 <img
-                  src={AccountInfo.bannerUrl}
+                  src={AccountInfo.bannerUrl?.trim() ? AccountInfo.bannerUrl : '/images/default-banner.jpg'}
                   alt="Cover"
                   className="object-cover w-full h-full rounded-lg"
                 />
@@ -1005,15 +1014,15 @@ export default function UserProfilePage() {
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <Link href={`https://www.google.com/maps?q=${AccountInfo.location?.coordinates[0]},${AccountInfo.location?.coordinates[1]}`}  // lat,lng
-                    className={`flex items-center space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
+                    className={`flex items-center space-x-1 py-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <MapPin className="w-4 h-4 stroke-black dark:stroke-white" />
                       <span>{AccountInfo.location?.text}</span>
                     </Link>
-                    <div className={`flex items-center cursor-pointer space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
+                    <div className={`flex items-center cursor-pointer space-x-1 py-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <LinkIcon className="w-4 h-4 stroke-black dark:stroke-white" />
                       <Link href={`${AccountInfo.website}?utm_source=briezly-profile-page`} className="text-blue-500 hover:underline">{AccountInfo.website}</Link>
                     </div>
-                    <div className={`flex items-center space-x-1 py-1 px-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
+                    <div className={`flex items-center space-x-1 py-2 transition-all duration-300 rounded-lg ${IsBlocked ? 'hover:bg-red-200 dark:hover:bg-black' : 'hover:bg-gray-100 dark:hover:bg-gray-950'}`}>
                       <Calendar className="w-4 h-4 stroke-black dark:stroke-white" />
                       <span>Joined On {new Date(AccountInfo.joinDate).toDateString()}</span>
                     </div>
@@ -1469,7 +1478,7 @@ export default function UserProfilePage() {
                 <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
                   <button 
                     onClick={() => { handleSuggesstionShow() }}
-                    className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
+                    className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
                     { ShowLess ? 'Show less' : 'Show more' }
                   </button>
                 </div>

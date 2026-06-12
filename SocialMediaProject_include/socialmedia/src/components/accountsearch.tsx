@@ -253,8 +253,8 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
     }
   }
   useEffect(() => {
-   //  apiForAllFollowings() ;
-  }, [])
+    // apiForAllFollowings();
+  }, [handle])
    
   // useeffect for handling
   useEffect(() => {
@@ -300,7 +300,7 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
 
       {/* Results */}
       <AnimatePresence>
-        {searchedAccounts && searchedAccounts.length > 0 && (
+        {Array.isArray(searchedAccounts) && searchedAccounts.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -310,16 +310,16 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
           >
             {searchedAccounts.map((account, index) => (
               <motion.div
-                key={account.decodedHandle || index}
+                key={account.decodedHandle}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
                 className="cursor-pointer rounded-lg hover:bg-gray-50 dark:hover:bg-gray-950 transition-colors duration-150"
-                onClick={() => onSelect(account.decodedHandle || '')}
+                onClick={() => onSelect(String(account.decodedHandle))}
               >
                 <Usercard
-                  decodedHandle={account.decodedHandle || ''}
-                  name={account.name || ''}
+                  decodedHandle={account.decodedHandle}
+                  name={account.name}
                   content={null}
                   IsFollowing={account.IsFollowing}
                   account={account.account}

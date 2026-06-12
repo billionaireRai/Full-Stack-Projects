@@ -17,6 +17,7 @@ export interface infoForChatCard {
   avatarUrl: string; 
   pinned:boolean;
   blocked:boolean;
+  publicKey:string;
   unreadCount: number;
 }
 interface chatAccCardProp {

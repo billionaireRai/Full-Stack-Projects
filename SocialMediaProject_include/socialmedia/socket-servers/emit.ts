@@ -1,6 +1,6 @@
 import http from 'http';
 import { Server } from 'socket.io';
-import Presence from '@/app/db/models/presense';
+import Presense from '@/app/db/models/presense';
 import { notificationPayloadType } from '@/app/db/services/notifications';
 import express, { Request, Response } from 'express';
 
@@ -18,13 +18,13 @@ io.on("connection", (socket) => {
   // for registering account as socket
   socket.on("register_account", async (accountId) => {
   // creating Presense state in DB...
-  await Presence.create({ accountId:accountId , onlineStatus:'online' , socketId:socket.id })
+  await Presense.create({ accountId:accountId , onlineStatus:'online' , socketId:socket.id })
   socket.join(accountId);
   });
 
   // for login
   socket.on("login_account", async (accountId) => { 
-    await Presence.findOneAndUpdate({ accountId:accountId },{ onlineStatus:'online' }) ;
+    await Presense.findOneAndUpdate({ accountId:accountId },{ onlineStatus:'online' }) ;
     socket.join(accountId);
   })
 });

@@ -2,7 +2,7 @@ import { connectWithMongoDB } from "../dbConnection";
 import { NextResponse } from "next/server";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import users from "../models/users";
-import Presence from "../models/presense";
+import Presense from "../models/presense";
 import accounts from "../models/accounts";
 
 export const activeAccountLogoutService = async (handle:string) => { 
@@ -32,7 +32,7 @@ export const activeAccountLogoutService = async (handle:string) => {
     }
 
     // updating Presense state in DB...
-    await Presence.updateOne({ accountId:activeAcc._id },{ onlineStatus:'offline' });
+    await Presense.updateOne({ accountId:activeAcc._id },{ onlineStatus:'offline' });
     const response = NextResponse.json({ message:'logged-out from server...'},{ status:200 }) ;
 
     // setting action token cookie deletion...

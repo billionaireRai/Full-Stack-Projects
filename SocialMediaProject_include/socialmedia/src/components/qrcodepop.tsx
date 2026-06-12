@@ -72,7 +72,7 @@ export default function Qrcodepop ({ path , owner , timestamp , doneScanning , c
 
           {/* QR Code Container */}
           <div className="flex flex-col items-center gap-2 mb-4 p-6 w-full rounded-2xl">
-            <div className="w-48 h-48 bg-gray-100 dark:bg-gray-950 rounded-xl flex items-center justify-center mb-6  border-none shadow-lg">
+            <div className="w-48 h-48 bg-gray-100 dark:bg-gray-950 rounded-xl flex items-center justify-center mb-6  border-none">
             {LoadingQR ? (
                 <div className="flex flex-col items-center justify-center space-y-4 p-8">
                   <div className="w-fit h-fit p-2 border border-yellow-200 border-t-yellow-400 rounded-full animate-pulse bg-gradient-to-br from-yellow-100/50 to-yellow-200/50 backdrop-blur-sm flex items-center justify-center">
@@ -81,7 +81,7 @@ export default function Qrcodepop ({ path , owner , timestamp , doneScanning , c
                 </div>
               ) : ( 
                 <div ref={qrRef} className="text-gray-400 text-3xl font-mono rounded-md p-2">
-                  <QRCodeCanvas value={verifiedUrl} className='rounded-lg dark:invert' size={200} level='H' marginSize={1} bgColor="#FFFFFF" fgColor="#000000" />
+                  <QRCodeCanvas value={verifiedUrl} className='rounded-lg dark:invert' size={220} level='H' marginSize={1} bgColor="#FFFFFF" fgColor="#000000" />
                 </div>
             )}
             </div>

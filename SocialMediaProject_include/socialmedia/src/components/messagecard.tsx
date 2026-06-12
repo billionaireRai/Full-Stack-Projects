@@ -7,7 +7,7 @@ import { motion , AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import EmojiPicker, { EmojiClickData ,Theme } from 'emoji-picker-react'
 import { useSound } from 'use-sound'
-import { BanIcon, Eraser, Flag, Folder, Images, Mic, Music, Paperclip, PhoneIcon, SendIcon, Smile, Trash, Video, CheckCircle, MessageCirclePlus, User, PinIcon, SearchIcon, BellOff } from 'lucide-react'
+import { BanIcon, Eraser, Flag, Folder, Images, Mic, Music, Paperclip, PhoneIcon, SendIcon, Smile, Trash, Video, CheckCircle, MessageCirclePlus, User, PinIcon, SearchIcon, BellOff, Lock } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import AudioRecordModal from '@/components/audioRecordModal'
 import Sharecontactonchat from '@/components/sharecontactonchat'
@@ -319,9 +319,11 @@ export default function MessageCard({
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-300 mb-2">
             No Chat Selected yet
           </h2>
-          <p className="text-xs text-gray-600 dark:text-gray-400 max-w-md">
-            Select any chat to start a conversation or add an account to Send messages, share media, and keep up with the latest updates.
-          </p>
+          <div className="text-xs flex flex-col items-center gap-2 text-gray-600 dark:text-gray-400 max-w-md">
+            <b>These chats are instant based for other device (No message history available on other device login)</b>
+            <p>Select any chat to start a conversation or add an account to Send messages, share media, and keep up with the latest updates.you chats are (End-To-End Encrypted)</p>
+            <div><Lock className='text-black dark:text-white'/></div>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col h-full">

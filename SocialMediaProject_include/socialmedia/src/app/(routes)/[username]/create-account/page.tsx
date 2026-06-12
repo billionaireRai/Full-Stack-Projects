@@ -11,6 +11,8 @@ import { User, AtSign, Lock, Globe, Palette, Briefcase } from "lucide-react"; //
 import axiosInstance from "@/lib/interceptor";
 import toast from "react-hot-toast";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { generateKeyPairAndStoreBoth } from "@/lib/pairedkeys";
+import useWebSocket from "@/app/hooks/useWebSocket";
 
 interface Option {
   value:string,
@@ -49,6 +51,8 @@ export default function createNewAccount() {
         toast.dismiss(loadingToast);
         toast.success('Account created successfully !!');
         router.push(`/${decodeURIComponent(String(params.username))}?switch-account-pop=true`) ;
+        // generateKeyPairAndStoreBoth(apires.data.newAccId); // for public-private key generation...
+        // useWebSocket(apires.data.newAccId,'register'); // registering web-socket id...
       } else {
         toast.dismiss(loadingToast);
         toast.error('Account creation failed !!');

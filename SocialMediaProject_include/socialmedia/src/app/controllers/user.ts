@@ -156,9 +156,9 @@ export const gettingSearchedAccountController = asyncErrorHandler( async (reques
         console.log('Search text is empty !!');
         return NextResponse.json({ message:'Search text is neccessary...' },{ status:400 });
     }
-    
-    await gettingAccountService(search) ; 
-    return NextResponse.json({ message:'accounts successfully fetched...' },{ status:200 })
+
+    // Return the service response...
+    return await gettingAccountService(search);
 })
 
 export const getSearchedLocation = asyncErrorHandler(async (request:NextRequest) => {

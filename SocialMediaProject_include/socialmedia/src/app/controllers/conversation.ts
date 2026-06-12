@@ -15,8 +15,8 @@ export const createNewConversationController = asyncErrorHandler( async (request
         return NextResponse.json({ message:'Selected account not found !!' },{ status:404 });
     }
 
-    await createNewConversationService(selectedAcc); // calling the service function...
-    return NextResponse.json({ message:'New conversation successfully created !!' },{ status:200 });
+    const pubkey = await createNewConversationService(selectedAcc); // calling the service function...
+    return NextResponse.json({ message:'New conversation successfully created !!' , pubkey },{ status:200 });
 })
 
 export const chatCardOpenController = asyncErrorHandler(async (request:NextRequest) => {

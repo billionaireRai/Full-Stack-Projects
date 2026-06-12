@@ -77,7 +77,6 @@ export const createANewPostService = async ( data:any ) => {
         isDeleted: false,
         // createdAt: { $gte: monthStart, $lt: monthEnd }
     });
-    const foundAccounts = await accounts.find({ username: { $in: mentions } , 'account.status': 'ACTIVE' }).select('_id username').lean();
 
     // posts limited to 20 for unverified accounts...
     // if (!activeAcc.isVerified.value && ( totalPostsThisMonth >= 20 || (String(postText).length > 100))) {
@@ -111,10 +110,6 @@ export const createANewPostService = async ( data:any ) => {
         
     }))
 
-    // Create a map for quick lookup and maintain order
-    const accountIdMap = new Map(foundAccounts.map(acc => [acc.username, acc._id]));
-    const mentionsAccountsIds = mentions.map((username:string) => accountIdMap.get(username)).filter(Boolean); // Filter out mentions with no matching account
-
     const fullMediaArr = [...uploadedImgObjs,...uploadedvideoObjs,...uploadedgifsArrObjs]; // full array of media...
 
     const finalMediaArr = fullMediaArr.map(media => { 
@@ -125,7 +120,7 @@ export const createANewPostService = async ( data:any ) => {
         content: postText,
         mediaUrls: finalMediaArr,
         replyAllowedBy: canBeRepliedBy,
-        mentions: mentionsAccountsIds,
+        mentions: mentions.map((mention:String) => mention.substring(1)),
         taggedLocation: taggedLocation,
     });
     

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import axiosInstance from "@/lib/interceptor";
+import { generateKeyPairAndStoreBoth, isKeyObjType} from "@/lib/pairedkeys";
 import toast from "react-hot-toast"; 
 import useUserInfo from "@/app/states/userinfo";
 import useActiveAccount from "@/app/states/useraccounts";
@@ -15,7 +16,7 @@ import { emailRegex } from "@/app/controllers/regex";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
 import { Mail, Lock } from "lucide-react";
-import { generateKeyPairAndStoreBoth } from "@/lib/pairedkeys";
+import { checkForPrivateKeyIDB } from "@/lib/pairedkeys";
 
 // applying ZOD validation on form feilds...
 const loginInfoType = z.object({
@@ -38,14 +39,16 @@ export default function LogIn() {
 
   if (loginRes.status === 200) {
     const userInfo = { email:loginRes.data.userCred.email , userId:loginRes.data.userCred.userId } // making separate objet for userInfo...
+    // const output = await checkForPrivateKeyIDB(loginRes.data.userCred.accountId); // for fetching private key in local storage...
       toast.dismiss(initialToast);
       toast.success('login successfull !!');
       setisAuth(true);
       setAccount(loginRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${loginRes.data.handle}`);
-      generateKeyPairAndStoreBoth(loginRes.data.userCred.accountId); // for public-private key generation...
-      useWebSocket(loginRes.data.userCred.accountId,'login'); // generating websocket connection client => server...
+      // if (isKeyObjType(output)) localStorage.setItem('privatekey', output.value);
+      // else generateKeyPairAndStoreBoth(loginRes.data.userCred.accountId);
+      // useWebSocket(loginRes.data.userCred.accountId,'login'); // generating websocket connection client => server...
       return 'success';
   }
     toast.dismiss(initialToast);

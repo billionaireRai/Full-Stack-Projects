@@ -6,7 +6,9 @@ import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import messages from "../models/messages";
 import { userCardProp } from "./user";
 import Block from "../models/blocked";
+import { getDevicePublicIP } from "@/lib/pairedkeys";
 import { infoForChatCard } from "@/components/chataccountcard";
+import pubkeys from "../models/pubkeys";
 
 export const getConversationsService = async () => {
     await connectWithMongoDB() ;
@@ -47,6 +49,14 @@ export const getConversationsService = async () => {
         // getting unseen incoming messages
         const unseenMessages = await messages.countDocuments({ fromId: chatWithAcc._id, toId: activeAcc._id, status: { $ne: 'seen' }}) ;
 
+        // getting the publickey of this account...
+        const deviceip = await getDevicePublicIP() ;
+        const publickey = await pubkeys.findOne({ accountId:activeAcc._id , deviceIP:deviceip , status:'active' });
+
+        if (!publickey) {
+            console.log("Public key missing !!");
+            return NextResponse.json({ message:'Public key missing' },{ status:404 });
+        }
         return {
             id: conversation._id,
             name: chatWithAcc.name,
@@ -56,7 +66,8 @@ export const getConversationsService = async () => {
             isVerified: chatWithAcc.isverified.value,
             avatarUrl: chatWithAcc.avatar.url,
             pinned:pinned,
-            unreadCount:unseenMessages
+            unreadCount:unseenMessages,
+            publicKey:publickey.publicKey
         }
     })) 
     
@@ -76,6 +87,17 @@ export const createNewConversationService = async (targetAcc:userCardProp) => {
 
    // creating new conversation...
    await conversation.create({ participants:[activeAcc._id,targetAccount._id] });
+
+   // returning public key...
+    const deviceip = await getDevicePublicIP() ;
+    const publickey = await pubkeys.findOne({ accountId:activeAcc._id , deviceIP:deviceip , status:'active' });
+
+    if (!publickey) {
+      console.log("Public key missing !!");
+      return NextResponse.json({ message:'Public key missing' },{ status:404 });
+    }
+
+    return publickey.publicKey ;
 }
 
 

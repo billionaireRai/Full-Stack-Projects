@@ -21,7 +21,7 @@ const presenceSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-const Presence = mongoose.models.presense || mongoose.model('Presence', presenceSchema);
+const Presense = mongoose.models.Presense || mongoose.model('Presense', presenceSchema);
 
-export default Presence;
+export default Presense;
 

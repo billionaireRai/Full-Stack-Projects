@@ -11,7 +11,7 @@ import axiosInstance from '@/lib/interceptor'
 
 interface addUserInListPop {
   closePop?: () => void
-  onAddChat?: (acc: userCardProp) => void
+  onAddChat?: (acc: userCardProp,pubkey:string) => void
 }
 
 export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListPop) {
@@ -261,7 +261,8 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
       const newChatapi = await axiosInstance.post('/api/account/conversations',{ selectedAcc });
       if (selectedAcc && onAddChat && newChatapi.status === 200) {
       if (selectedAcc && onAddChat) {
-        onAddChat(selectedAcc)
+        const publickey = newChatapi.data.pubkey ;
+        onAddChat(selectedAcc,publickey);
         return ;
       }
       toast.error(<>Error occured in adding <b className='mx-1'>{selectedAcc.decodedHandle}</b></>)

@@ -1,9 +1,9 @@
-'use client';
+
 import axios from "axios";
 import axiosInstance from "./interceptor";
 import toast from "react-hot-toast";
 
-interface keyObjType {
+export interface keyObjType {
   accId:string ;
   value:string ;
   createdAt:string ;
@@ -14,7 +14,14 @@ const DB_VERSION = 1;
 const DB_NAME = "BriezlIDB";
 const STORE_NAME = "privatekeys";
 
-async function getDevicePublicIP() : Promise<string> {
+// function for checking retuned key obj type...
+export function isKeyObjType(obj:any): obj is keyObjType {
+  return (
+    typeof obj === "object" && obj !== null && "accId" in obj && "value" in obj
+  );
+}
+
+export async function getDevicePublicIP() : Promise<string> {
   return await new Promise((resolve,reject) => {
     axiosInstance.get('https://api.ipify.org?format=json')
     .then((res) => {
@@ -43,7 +50,7 @@ async function sendingPubkeyToBackend( publicKey:string , accid:string ) {
   }
 }
 
-// function handling indexedDB part & sending public key...
+// function handling indexedDB part...
 const handleIndexedDBStorage = async (privatekey: string,accountid:string) : Promise<keyObjType> => {
   const request = indexedDB.open(DB_NAME, DB_VERSION); // creating OR opening indexedDB...
 
@@ -117,5 +124,40 @@ export const generateKeyPairAndStoreBoth = async (accountid:string) => {
   // localStorage.setItem('privatekey',storeobj.value);
 
 };
+
+// function to check private key storage in IDB...
+export const checkForPrivateKeyIDB = async (accountid: string) : Promise<string | null> => {
+  return await new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION); // opening request to IDB...
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME))  db.createObjectStore(STORE_NAME, { keyPath: "accId" });
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const store = tx.objectStore(STORE_NAME);
+
+      const getReq = store.get(accountid);
+
+      getReq.onsuccess = () => {
+        const result = getReq.result;
+        resolve(result ? result : null);
+      };
+
+      getReq.onerror = () => {
+        reject(getReq.error);
+      };
+    };
+
+    request.onerror = (e) => {
+      console.error("IndexedDB open error : ", e);
+      reject(e);
+    };
+  });
+};
+
 
 

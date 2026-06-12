@@ -37,7 +37,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 2
+      unreadCount: 2,
+      publicKey:'abcdefgh'
     },
     {
       id: '2',
@@ -49,7 +50,8 @@ export default function Messages() {
       pinned:true,
       blocked:true,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 0
+      unreadCount: 0,
+      publicKey:'ijklmnop'
     },
     {
       id: '291f0n4t4bnb03',
@@ -61,7 +63,8 @@ export default function Messages() {
       pinned:true,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 0
+      unreadCount: 0,
+      publicKey:'qrstuvwx'
     },
     {
       id: '4',
@@ -73,7 +76,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 4
+      unreadCount: 4,
+      publicKey:'yzagdgtebv'
     },
     {
       id: '5',
@@ -85,7 +89,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 0
+      unreadCount: 0,
+      publicKey:'rppwmlmbint'
     },
     {
       id: '6',
@@ -97,7 +102,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 0
+      unreadCount: 0,
+      publicKey:'30mr3m0gnkfs'
     },
     {
       id: '7',
@@ -109,7 +115,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 1
+      unreadCount: 1,
+      publicKey:'39jjnnnubfnef'
     },
     {
       id: '8',
@@ -121,7 +128,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 1
+      unreadCount: 1,
+      publicKey:'dkmwdibvettt'
     },
     {
       id: '9',
@@ -133,7 +141,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 3
+      unreadCount: 3,
+      publicKey:'rnniogr2rpr'
     },
     {
       id: '10',
@@ -145,7 +154,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 0
+      unreadCount: 0,
+      publicKey:'0n1o39njje9'
     },
     {
       id: '11',
@@ -157,7 +167,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 2
+      unreadCount: 2,
+      publicKey:'wlmwnnivrmwp'
     },
     {
       id: '12',
@@ -169,7 +180,8 @@ export default function Messages() {
       pinned:true,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 1
+      unreadCount: 1,
+      publicKey:'ofnndisbntuc'
     },
     {
       id: '13',
@@ -181,7 +193,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 0
+      unreadCount: 0,
+      publicKey:'jsinjwenoi5rn'
     },
     {
       id: '14',
@@ -193,7 +206,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 5
+      unreadCount: 5,
+      publicKey:'eon2nigkmvort'
     },
     {
       id: '15',
@@ -205,7 +219,8 @@ export default function Messages() {
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
-      unreadCount: 0
+      unreadCount: 0,
+      publicKey:'utbgnhskrnohwe'
     }
   ])
   const attachFileoptions = [
@@ -217,7 +232,7 @@ export default function Messages() {
   const [filteredCards, setFilteredCards] = useState(conversations); // for handling the searched result array...
   
   // for adding new chat in UI...
-  const handleAddUser = (AccForChat: userCardProp) => {
+  const handleAddUser = (AccForChat: userCardProp,pubkey:string) => {
     const newChat: infoForChatCard = {
       id: String(AccForChat?.id),
       name: String(AccForChat?.name),
@@ -227,6 +242,7 @@ export default function Messages() {
       blocked:false,
       lastMessage: 'New chat created just now !!',
       timestamp: 'Just now',
+      publicKey:pubkey.trim(),
       avatarUrl: AccForChat.account?.avatarUrl ?? '/images/myProfile.jpg',
       unreadCount: 0,
     };
@@ -388,7 +404,7 @@ export default function Messages() {
             </div>
         </div>
         <div className="flex flex-col gap-4 p-2 h-full flex-1 dark:bg-black rounded-md min-h-0">
-            <MessageCard updateCardDetail={(msg,time) => { handleCardDetailUpdate(msg,time) }} chatCardDetails={CurrentOpenChat} handleAudioPop={() => { setShowAudioModal(true) }} handleAddChat={() => { setaddChatPop(true) }}/>
+          <MessageCard updateCardDetail={(msg,time) => { handleCardDetailUpdate(msg,time) }} chatCardDetails={CurrentOpenChat} handleAudioPop={() => { setShowAudioModal(true) }} handleAddChat={() => { setaddChatPop(true) }} />
         </div>
         
         {showAudioModal && (

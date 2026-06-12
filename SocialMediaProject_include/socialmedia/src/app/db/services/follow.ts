@@ -148,7 +148,7 @@ export const newAccountCreationService = async (newAcc:newAccType) => {
 
     await NewAccount.save() ; // saving the createed doc...
 
-    return NextResponse.json({ message: 'Account created successfully...' }, { status: 200 });
+    return NextResponse.json({ message: 'Account created successfully...' , newAccId:NewAccount._id }, { status: 200 });
 }
 
 export const fetchingAccountsService = async (handle: string) => {
@@ -220,8 +220,8 @@ export const switchAccountService =  async (toAccount:userCardProp) => {
 
     // adding active state toAccount...
     const newActive = await accounts.findOneAndUpdate(
-        { username:toAccount.decodedHandle , userId:user.id , 'account.Active':false , 'account.status':{ $in:['ACTIVE','DEACTIVATED']} },
-        { 'account.Active':true } , { new:true }
+        { username:toAccount.decodedHandle?.substring(1) , userId:user.id , 'account.Active':false , 'account.status':{ $in:['ACTIVE','DEACTIVATED']} },
+        { 'account.Active':true , 'account.status':'ACTIVE' } , { new:true }
     ) ;
 
     if (!removing || !newActive) {
