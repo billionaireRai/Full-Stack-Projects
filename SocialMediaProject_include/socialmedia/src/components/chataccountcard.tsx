@@ -5,7 +5,7 @@ import Image from 'next/image'
 import React ,{ useState , useEffect , useRef } from 'react'
 import axiosInstance from '@/lib/interceptor';
 import toast from 'react-hot-toast';
-import { Pin } from 'lucide-react';
+import { BanIcon, MicOffIcon, Pin } from 'lucide-react';
 
 export interface infoForChatCard {
   id: string;
@@ -17,6 +17,7 @@ export interface infoForChatCard {
   avatarUrl: string; 
   pinned:boolean;
   blocked:boolean;
+  isMuted:boolean;
   publicKey:string;
   unreadCount: number;
 }
@@ -55,13 +56,15 @@ export default function ChatAccountcard({ cardInfo , currentChat , countUpdate ,
   }
   return (
    <div className='rounded-xl'>
-     <div className='rounded-full w-fit absolute'>
+     <div className='rounded-full w-fit flex items-center justify-start gap-1.5 absolute'>
       {cardInfo.pinned && ( <Pin className='w-5 h-5 rotate-45 text-yellow-500'/> )}
+      {cardInfo.blocked && ( <BanIcon className='w-5 h-5 text-red-500' />)}
+      {cardInfo.isMuted && ( <MicOffIcon className='w-5 h-5 text-blue-500' />)}
      </div>
     <div
      ref={chatCardRef}
      onClick={handleClick}
-     className={`shadow-sm hover:shadow-md dark:border-gray-600 max-w-sm rounded-xl py-3 px-2 flex items-center gap-3 bg-white hover:bg-yellow-50 dark:bg-black dark:hover:opacity-70 hover:scale-102 cursor-pointer ${isTargetChat ? 'dark:border-1 bg-yellow-100 dark:bg-zinc-950 shadow-lg' : ''}`}>
+     className={`shadow-sm hover:shadow-md dark:border-gray-600 max-w-sm rounded-xl py-3 px-2 flex items-center gap-3 bg-white hover:bg-yellow-50 dark:bg-black hover:scale-102 cursor-pointer ${isTargetChat ? 'dark:border-1 bg-yellow-100 dark:bg-zinc-950 shadow-lg' : ''}`}>
       <img
         src={cardInfo.avatarUrl}
         alt={cardInfo.name}

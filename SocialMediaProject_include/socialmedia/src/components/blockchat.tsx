@@ -1,26 +1,27 @@
-import React from "react";
+import React,{ useEffect } from "react";
 import Link from "next/link";
 import axiosInstance from '@/lib/interceptor';
 import toast from 'react-hot-toast';
 import { BanIcon } from 'lucide-react';
+import { infoForChatCard } from "./chataccountcard";
 
 interface BlockChatProp {
 closeBlockPop: () => void,
-updateblockState: () => void,
-username: string,
-isBlocked: boolean,
+updateblockState: (value:boolean) => void,
+conv: infoForChatCard,
 }
 
-export default function BlockChatPop({ closeBlockPop , isBlocked , updateblockState , username }:BlockChatProp) {
+export default function BlockChatPop({ closeBlockPop , updateblockState , conv }:BlockChatProp) {
 
   // function handling logic of blocking/unblocking...
-  const handleUserBlock = async (handle:string) => {
+  const handleChatBlock = async () => {
+    const updateTo = !conv.blocked ;
     // try {
-    //   const blockApi = await axiosInstance.patch('/api/profile',{ handle:handle , isBlock:isBlocked }) ;
+      // const blockChatApi = await axiosInstance.patch('/api/account/conversations',{ converstionid:conversation.id , changeTo:updateTo }) ;
     //   if (blockApi.status === 200) {
-        updateblockState();
-        closeBlockPop();
-        toast.success(`Successfully ${isBlocked ? 'unblocked' : 'blocked'} user !!`);
+        updateblockState(updateTo);
+        // closeBlockPop();
+        // toast.success(`Successfully ${blockstate ? 'unblocked' : 'blocked'} Chat !!`);
     //   } else {
     //     toast.error('Failed to perform the action...');
     //   }
@@ -29,42 +30,51 @@ export default function BlockChatPop({ closeBlockPop , isBlocked , updateblockSt
     //   toast.error('An error occurred. Please try again.');
     // }
   }
+  useEffect(() => {
+    console.log(conv);
+  }, [])
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
-      {/* Modal */}
-      <div className="relative flex items-center justify-center">
-        <div className="bg-white dark:bg-black rounded-lg p-6 max-w-md mx-6 shadow-xl border border-gray-300 dark:border-gray-950">
-          {/* Title */}
-          <div className='flex flex-row items-center gap-2 mb-3'>
-            <BanIcon size={20} />
-            <h2 className="text-black dark:text-white text-xl font-bold">Confirm {isBlocked ? 'Unblock' : 'Block'}</h2>
-          </div>
-
-          {/* Description */}
-          <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
-            {isBlocked
-              ? <>Are you sure you want to unblock this Chat with <Link href={`/${username}`}><b>{username}</b></Link>? You can follow them again after unblocking.</>
-              : <>Are you sure you want to block this Chat with <Link href={`/${username}`}><b>{username}</b></Link> ? All the notifications , chats , media wont be accessable...</>
-            }
-          </p>
-
-          {/* Buttons */}
-          <div className="flex gap-4">
-            <button
-              onClick={closeBlockPop}
-              className="cursor-pointer flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-950 dark:hover:bg-black text-gray-800 dark:text-gray-200 rounded-md py-2 text-sm font-medium transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {handleUserBlock(username)}}
-              className="cursor-pointer flex-1 bg-red-600 hover:bg-red-700 text-white rounded-md py-2 text-sm font-medium transition-colors"
-            >
-              {isBlocked ? 'Unblock' : 'Block'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <>
+    </>
   )
-}
+  
+  // return (
+  //   <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+  //     Modal
+  //     <div className="relative flex items-center justify-center">
+  //       <div className="bg-white dark:bg-black rounded-lg p-6 max-w-md mx-6 shadow-xl border border-gray-300 dark:border-gray-950">
+  //         {/* Title */}
+  //         <div className='flex flex-row items-center gap-2 mb-3'>
+  //           <BanIcon size={20} />
+  //           <h2 className="text-black dark:text-white text-xl font-bold">Confirm {conv.blocked ? 'Unblock' : 'Block'}</h2>
+  //         </div>
+
+  //         {/* Description */}
+  //         <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
+  //           {conv.blocked
+  //             ? <>Are you sure you want to <b>UnBlock</b> this Chat with <Link href={`/${conv.handle}`}><b>{conv.handle}</b></Link>? You can follow them again after unblocking.</>
+  //             : <>Are you sure you want to <b>Block</b> this Chat with <Link href={`/${conv.handle}`}><b>{conv.handle}</b></Link> ? All the notifications , chats , media wont be accessable...</>
+  //           }
+  //         </p>
+
+  //         {/* Buttons */}
+  //         <div className="flex gap-4">
+  //           <button
+  //             onClick={closeBlockPop}
+  //             className="cursor-pointer flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-950 dark:hover:bg-black text-gray-800 dark:text-gray-200 rounded-md py-2 text-sm font-medium transition-colors"
+  //           >
+  //             Cancel
+  //           </button>
+  //           <button
+  //             onClick={() => {handleChatBlock()}}
+  //             className="cursor-pointer flex-1 bg-red-600 hover:bg-red-700 text-white rounded-md py-2 text-sm font-medium transition-colors"
+  //           >
+  //             {conv.blocked ? 'Unblock' : 'Block'}
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // )
+} 

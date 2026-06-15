@@ -22,7 +22,7 @@ export default function Messages() {
   const [chatSlideOpen, setchatSlideOpen] = useState<boolean>(false) ;
   const [addChatPop, setaddChatPop] = useState<boolean>(false);
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false) ;
-  const [blockAccPop, setblockAccPop] = useState<boolean>(false);
+  const [blockChatPop, setblockChatPop] = useState<boolean>(false);
   const [shareContact, setshareContact] = useState<boolean>(false);
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false) ;
   const [showAudioModal, setShowAudioModal] = useState<boolean>(false) ;
@@ -35,6 +35,7 @@ export default function Messages() {
       timestamp: 'Fri Jun 05 2026', // random previous date via toDateString()
       isVerified: true,
       pinned:false,
+      isMuted:true,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2,
@@ -48,7 +49,8 @@ export default function Messages() {
       timestamp: '9:15 AM',
       isVerified: false,
       pinned:true,
-      blocked:true,
+      isMuted:false,
+      blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKey:'ijklmnop'
@@ -61,6 +63,7 @@ export default function Messages() {
       timestamp: 'Yesterday',
       isVerified:true,
       pinned:true,
+      isMuted:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
@@ -73,8 +76,9 @@ export default function Messages() {
       lastMessage: 'See you soon',
       timestamp: '2 days ago',
       isVerified:false,
+      isMuted:false,
       pinned:false,
-      blocked:false,
+      blocked:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 4,
       publicKey:'yzagdgtebv'
@@ -86,6 +90,7 @@ export default function Messages() {
       lastMessage: 'What\'s up?',
       timestamp: '3 hours ago',
       isVerified:true,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -99,6 +104,7 @@ export default function Messages() {
       lastMessage: 'Good morning!',
       timestamp: '8:45 AM',
       isVerified:false,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -112,6 +118,7 @@ export default function Messages() {
       lastMessage: 'Call me later',
       timestamp: '1 hour ago',
       isVerified:true,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -125,6 +132,7 @@ export default function Messages() {
       lastMessage: 'Nice work!',
       timestamp: 'Yesterday',
       isVerified:true,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -138,6 +146,7 @@ export default function Messages() {
       lastMessage: 'Physics is fun!',
       timestamp: '5 minutes ago',
       isVerified:false,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -151,6 +160,7 @@ export default function Messages() {
       lastMessage: 'Mission accomplished',
       timestamp: '2 hours ago',
       isVerified:false,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -164,6 +174,7 @@ export default function Messages() {
       lastMessage: 'Let\'s catch up',
       timestamp: '1 day ago',
       isVerified:false,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -177,7 +188,8 @@ export default function Messages() {
       lastMessage: 'Great idea!',
       timestamp: '30 minutes ago',
       isVerified:true,
-      pinned:true,
+      isMuted:false,
+      pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1,
@@ -190,6 +202,7 @@ export default function Messages() {
       lastMessage: 'See you at the event',
       timestamp: '4 hours ago',
       isVerified:true,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -203,6 +216,7 @@ export default function Messages() {
       lastMessage: 'Thanks again',
       timestamp: '3 days ago',
       isVerified:false,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -216,6 +230,7 @@ export default function Messages() {
       lastMessage: 'Happy birthday!',
       timestamp: '6 hours ago',
       isVerified:false,
+      isMuted:false,
       pinned:false,
       blocked:false,
       avatarUrl: '/images/myProfile.jpg',
@@ -240,6 +255,7 @@ export default function Messages() {
       isVerified: Boolean(AccForChat.account?.isVerified),
       pinned:false,
       blocked:false,
+      isMuted:false,
       lastMessage: 'New chat created just now !!',
       timestamp: 'Just now',
       publicKey:pubkey.trim(),
@@ -416,8 +432,15 @@ export default function Messages() {
        {shareContact && (
          <Sharecontactonchat closeShareContact={() => setshareContact(false)}  />
        )}
-       {blockAccPop && (
-         <BlockChatPop key={CurrentOpenChat?.id} username={String(CurrentOpenChat?.handle)} closeBlockPop={() => { setblockAccPop(false) }} isBlocked={false} updateblockState={() => {}}  />
+
+       {/* correct this */}
+       { blockChatPop && CurrentOpenChat && (
+        <BlockChatPop 
+         conv={CurrentOpenChat} 
+         closeBlockPop={() => { setblockChatPop(false) }} 
+         updateblockState={(updatedState) => {setCurrentOpenChat((prev) => (prev ? { ...prev, blocked: updatedState } : prev)) }}
+
+        />
        )}
        {shareContact && (
          <Sharecontactonchat closeShareContact={() => setshareContact(false)} />

@@ -7,12 +7,12 @@ import { motion , AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import EmojiPicker, { EmojiClickData ,Theme } from 'emoji-picker-react'
 import { useSound } from 'use-sound'
-import { BanIcon, Eraser, Flag, Folder, Images, Mic, Music, Paperclip, PhoneIcon, SendIcon, Smile, Trash, Video, CheckCircle, MessageCirclePlus, User, PinIcon, SearchIcon, BellOff, Lock } from 'lucide-react'
+import { BanIcon, Eraser, Flag, Folder, Images, Mic, Music, Paperclip, PhoneIcon, SendIcon, Smile, Trash, Video, CheckCircle, MessageCirclePlus, User, PinIcon, SearchIcon, BellOff, Lock, Bell, PinOff, Ban, LockOpenIcon, MicOff, X } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import AudioRecordModal from '@/components/audioRecordModal'
 import Sharecontactonchat from '@/components/sharecontactonchat'
 import BlockChatPop from '@/components/blockchat'
-import Mediapopmodal from './mediapopmodal'
+import Mediapopmodal, { mediaType } from './mediapopmodal'
 import AddAccinchatlist from '@/components/adduserinchatlist'
 import toast from 'react-hot-toast'
 import { userCardProp } from '@/components/usercard'
@@ -29,6 +29,12 @@ interface Message {
   status?: 'sending' | 'sent' | 'delivered' | 'seen'
 }
 
+interface attachmentOptionType {
+  icon: React.ReactNode
+  label: string
+  reference?: React.RefObject<HTMLInputElement | null>
+}
+
 interface MessageCardProps {
   chatCardDetails?: infoForChatCard
   handleAudioPop: () => void
@@ -36,36 +42,39 @@ interface MessageCardProps {
   updateCardDetail: (msg: string, time: string) => void
 }
 
-export default function MessageCard({
-  chatCardDetails,
-  handleAudioPop,
-  handleAddChat,
-  updateCardDetail,
-}: MessageCardProps) {
+export default function MessageCard({ chatCardDetails, handleAudioPop, handleAddChat, updateCardDetail }: MessageCardProps) {
   const { resolvedTheme , } = useTheme()
   const [play] = useSound('/audio/notification.mp3')
+  const heightGap: number = 200
   const msgsection = useRef<HTMLDivElement | null>(null)
-  const messagesize = useRef<Number>(15) ;
-  const [messagePage, setmessagePage] = useState<Number>(1);
+  const messagesize = useRef<number>(15)
+  const imageRef = useRef<HTMLInputElement | null>(null)
+  const videoRef = useRef<HTMLInputElement | null>(null)
+  const audioRef = useRef<HTMLInputElement | null>(null)
+  const [messagePage, setmessagePage] = useState<number>(1);
   const [messageText, setmessageText] = useState('')
+  const [PopMedia, setPopMedia] = useState<mediaType>()
+  const [MediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [imgUrls, setimgUrls] = useState<string[]>([]);
+  const [videoUrls, setvideoUrls] = useState<string[]>([]);
+  const [audioUrls, setaudioUrls] = useState<string[]>([]);
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false)
   const [loadingChat, setloadingChat] = useState<boolean>(false);
   const [sendingMessage, setsendingMessage] = useState<boolean>(false);
+  const [showMedia, setshowMedia] = useState<boolean>(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false)
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false)
   const [shareContact, setshareContact] = useState<boolean>(false)
-  const [blockChatPop, setblockChatPop] = useState<boolean>(true)
+  const [blockChatPop, setblockChatPop] = useState<boolean>(false);
 
   // Attachments option
-  const attachFileoptions = useMemo(
-    () => [
-      { icon: <Images className="w-3 h-3 text-blue-500" />, label: 'Photos' },
-      { icon: <Video className="w-3 h-3 text-purple-500" />, label: 'Videos' },
-      { icon: <Music className="w-3 h-3 text-pink-500" />, label: 'Audio' },
+  const attachFileoptions = useMemo(() => [
+      { icon: <Images className="w-3 h-3 text-blue-500" />, label: 'Photos' , reference:imageRef },
+      { icon: <Video className="w-3 h-3 text-purple-500" />, label: 'Videos' , reference:videoRef },
+      { icon: <Music className="w-3 h-3 text-pink-500" />, label: 'Audio' , reference:audioRef },
       { icon: <PhoneIcon className="w-3 h-3 text-red-500" />, label: 'Contact' },
     ],
-    [],
-  )
+  [],)
 
   // Dummy messages
   const MessagesArray = useMemo<Message[]>(
@@ -236,41 +245,48 @@ export default function MessageCard({
   // useeffect running whenever chat changes...
   useEffect(() => {
     // axios request...
-
+    
     setMessages(MessagesArray)
-
+    
   }, [chatCardDetails?.id])
+  
+  // useeffect for pagination of chat history...
+  // useEffect(() => {
+  //   if ((msgsection.current?.scrollTop ?? 0) <= heightGap) {
+  //     console.log("Current Gap gap from above :",msgsection.current?.scrollTop)
+  //   }
 
+  // }, [msgsection.current?.scrollTop])
+  
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element
-      if (openChatThreeDot && !target.closest('.Three_dot')) {
-        setopenChatThreeDot(false)
-      }
-      if (showFilePopup && !target.closest('.file_popup')) {
-        setShowFilePopup(false)
-      }
+      if (openChatThreeDot && !target.closest('.Three_dot')) setopenChatThreeDot(false);
+      
+      if (showFilePopup && !target.closest('.file_popup')) setShowFilePopup(false);
+      
+      if (showEmojiPicker && !target.closest('.emoji_picker_wrapper'))  setShowEmojiPicker(false);
     }
 
-    if (openChatThreeDot || showFilePopup) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
+    document.addEventListener('mousedown', handleClickOutside) ;
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('mousedown', handleClickOutside) ;
     }
-  }, [openChatThreeDot, showFilePopup])
+  }, [openChatThreeDot, showFilePopup,showEmojiPicker])
 
   const onEmojiClick = (emojiData: EmojiClickData) => {
     setmessageText((prev) => prev + emojiData.emoji)
   }
 
-  const handleFileOptionClick = (clickedLable: string) => {
-    if (clickedLable === 'Contact') {
-      setshareContact(true)
+  const handleFileOptionClick = (option:attachmentOptionType) => {
+    if (option.label === 'Contact') {
+      setshareContact(true);
+    } else {
+      setShowFilePopup(false);
+      option.reference?.current?.click();
     }
-    setShowFilePopup(false)
   }
 
   const handleSendMessage = (_msg: string) => {
@@ -286,7 +302,7 @@ export default function MessageCard({
       isOwn: true,
       avatar:
         'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
-      status: 'delivered',
+      status: 'sent',
     }
 
     setMessages((prevmessages) => [...prevmessages, newMessage])
@@ -294,12 +310,36 @@ export default function MessageCard({
     play()
   }
 
+  // downscrolling of chat on new message...
   useEffect(() => {
     if (!msgsection.current) return ;
     const lastmessage = Messages[Messages.length - 1] ;
     msgsection.current.scrollTop = msgsection.current.scrollHeight
     updateCardDetail(lastmessage.text,lastmessage.timestamp)
   }, [Messages])
+
+  // logic for hanlding attachments sharing...  
+    const removeArrayElement = (setters: React.Dispatch<React.SetStateAction<any[]>>[], index: number) => {
+      setters.forEach(setter => setter(prev => prev.filter((_, i) => i !== index)));
+    };
+  
+    const handleMediaInclude = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        if (type === 'image') {
+          setimgUrls(prev => [...prev, url]);
+          setMediaFiles(prev => [...prev, file]);
+        } else if(type === 'video') {
+          setvideoUrls(prev => [...prev, url]);
+          setMediaFiles(prev => [...prev, file]);          
+        } else {
+          setaudioUrls(prev => [...prev, url]);
+          setMediaFiles(prev => [...prev, file]);
+        }
+      }
+      e.target.value = '';
+    };
 
   return (
     <div className="flex flex-col h-full rounded-md">
@@ -324,12 +364,12 @@ export default function MessageCard({
             <p>Select any chat to start a conversation or add an account to Send messages, share media, and keep up with the latest updates.you chats are (End-To-End Encrypted)</p>
             <div><Lock className='text-black dark:text-white'/></div>
           </div>
-        </div>
+          </div>
       ) : (
-        <div className="flex flex-col h-full">
+        <div className='flex flex-col h-full rounded-xl'>
           {/* Chat Header */}
           <div className="sticky top-0 flex items-center px-4 py-3 justify-between rounded-md shadow-sm border-b border-gray-200 dark:border-gray-900 dark:bg-black z-10">
-            <div className="flex items-center gap-3">
+           <div className="flex items-center gap-3">
              <div className="relative cursor-pointer">
               <img
                 src={chatCardDetails?.avatarUrl}
@@ -360,11 +400,15 @@ export default function MessageCard({
               </p>
             </div>
           </div>
-
+          <div className='flex items-center justify-end gap-1 p-2 rounded-full flex-1'>
+            {chatCardDetails.pinned && <PinIcon className="w-5 h-5 rotate-45 text-yellow-500" /> }
+            {chatCardDetails.blocked && <Ban className="w-5 h-5 text-red-500" /> }
+            {chatCardDetails.isMuted && <MicOff className="w-5 h-5 text-blue-500" /> }
+          </div>
           <div className="relative">
             <button
               onClick={() => setopenChatThreeDot(!openChatThreeDot)}
-              className="px-3 py-1 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition"
+              className={`px-3 py-1 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition ${chatCardDetails.blocked && 'blur-none'}`}
             >
               <span>⋮</span>
             </button>
@@ -378,7 +422,7 @@ export default function MessageCard({
               >
                 <Link
                   href={`/${chatCardDetails?.handle}`}
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className='w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950'
                   onClick={() => setopenChatThreeDot(false)}
                 >
                   <User className="w-4 h-4" />
@@ -388,40 +432,45 @@ export default function MessageCard({
                 </Link>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
+                  disabled={chatCardDetails.blocked}
                 >
                   <Folder className="w-4 h-4" />
                   <div>View all attachements</div>
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
+                  disabled={chatCardDetails.blocked}
                 >
-                  <BellOff className="w-4 h-4" />
-                  <div>Mute notifications</div>
+                  {chatCardDetails.isMuted ? <Bell className="w-4 h-4"/> : <BellOff className="w-4 h-4" /> }
+                  <div>{chatCardDetails.isMuted ? <b>UnMute</b> : 'Mute'} notifications</div>
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
+                  disabled={chatCardDetails.blocked}
                 >
-                  <PinIcon className="w-4 h-4 rotate-45" />
-                  <div>Pin chat</div>
+                  {chatCardDetails.pinned ? <PinOff className="w-4 h-4"/> : <PinIcon className="w-4 h-4 rotate-45" /> }
+                  <div>{chatCardDetails.pinned ? <b>UnPin</b> : 'Pin'} chat</div>
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
+                  disabled={chatCardDetails.blocked}
                 >
                   <SearchIcon className="w-4 h-4" />
                   <div>Search messages</div>
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
+                  disabled={chatCardDetails.blocked}
                 >
                   <Eraser className="w-4 h-4" />
                   <div>Clear chat history</div>
@@ -439,9 +488,9 @@ export default function MessageCard({
                   className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
                   onClick={() => { setblockChatPop(true) ; setopenChatThreeDot(false) }}
                 >
-                  <BanIcon className="w-4 h-4" />
+                  {chatCardDetails.blocked ? <LockOpenIcon className="w-4 h-4"/> : <Ban className="w-4 h-4" /> }
                   <div>
-                    Block chats <b>{chatCardDetails?.handle}</b>
+                    {chatCardDetails.blocked ? <b>UnBlock</b> : 'Block' } chats <b>{chatCardDetails?.handle}</b>
                   </div>
                 </button>
 
@@ -460,7 +509,7 @@ export default function MessageCard({
         </div>
 
         {/* Messages */}
-        <div ref={msgsection} className="overflow-y-auto flex gap-2 flex-col p-2 h-full rounded-md">
+        <div ref={msgsection} className={`overflow-y-auto flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blocked && 'blur-sm'}`}>
          <AnimatePresence>
           {Messages.map((message) => (
             <motion.div
@@ -512,7 +561,7 @@ export default function MessageCard({
                   <span>{message.timestamp}</span>
                   {message.isOwn && message.status && (
                     <span className="flex items-center">
-                      {message.status === 'sending' && (
+                      {message.status === 'sent' && (
                         <CheckCircle height={20} width={20} className="stroke-3" />
                       )}
                       {message.status === 'delivered' && (
@@ -546,13 +595,70 @@ export default function MessageCard({
           )}
         </AnimatePresence>
       </div>
-        {/* Message composer */}
-        <div className="messagesendsection relative border border-gray-200 dark:border-gray-900 inset-shadow-yellow-200 w-full rounded-xl px-4 py-1 mt-3 bg-white dark:bg-black flex items-center gap-3 z-10">
+      {/* Message composer */}
+       <div className='flex flex-col justify-start gap-2 rounded-xl'>
+        <div className="flex flex-wrap gap-2 items-center rounded-xl">
+          {[...imgUrls.map((url, index) => ({ url, index, kind: 'image' })),...videoUrls.map((url, index) => ({ url, index, kind: 'video' })),...audioUrls.map((url, index) => ({ url, index, kind: 'audio' }))].map((item) => (
+            <div
+              key={`${item.kind}-${item.index}-${item.url}`}
+              className={`relative group rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden bg-gray-50 dark:bg-black ${item.kind === 'audio' ? 'w-xs' : 'w-50'} h-42`}
+            >
+              {item.kind === 'image' && (
+                <Image
+                  src={item.url}
+                  alt={`preview image ${item.index + 1}`}
+                  fill
+                  className="object-cover"
+                />
+              )}
+
+              {item.kind === 'video' && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                  <video src={item.url} className="w-full h-full object-cover" controls />
+                </div>
+              )}
+
+              {item.kind === 'audio' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-2">
+                  <span className="text-yellow-500 rounded-full bg-yellow-100 dark:bg-yellow-950 p-4">
+                    <Music className="w-8 h-8" />
+                  </span>
+                  <span className="text-[10px] text-gray-600 dark:text-gray-300 w-full">
+                    <audio
+                      controls
+                      preload="metadata"
+                    >
+                      <source src={item.url} type="audio/mpeg" />
+                      Your browser does not support audio.
+                    </audio>
+                  </span>
+                </div>
+              )}
+
+              <button
+                type="button"
+                aria-label="remove media"
+                onClick={() =>
+                  item.kind === 'image'
+                    ? removeArrayElement([setimgUrls, setMediaFiles], item.index)
+                    : item.kind === 'video'
+                      ? removeArrayElement([setvideoUrls, setMediaFiles], item.index)
+                      : removeArrayElement([setaudioUrls, setMediaFiles], item.index)
+                }
+                className="absolute top-1 right-1 w-7 h-7 cursor-pointer rounded-full bg-black dark:bg-black/80 shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity"
+              >
+                <X className="w-4 h-4 text-red-500" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className={`messagesendsection relative border border-gray-200 dark:border-gray-900 inset-shadow-yellow-200 w-full rounded-xl px-4 py-1 mt-3 bg-white dark:bg-black flex flex-row flex-nowrap items-center gap-3 z-10 ${chatCardDetails.blocked && 'blur-sm'}`}>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950"
+                disabled={chatCardDetails.blocked}
+                className={`p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'cursor-not-allowed'}`}
               >
                 <Smile className="w-4 h-4 dark:invert" />
               </button>
@@ -565,12 +671,10 @@ export default function MessageCard({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute bottom-14 left-0 z-50"
+              className='absolute bottom-14 left-0 z-50 emoji_picker_wrapper'
             >
               <EmojiPicker
-                onEmojiClick={(emoji) => {
-                  onEmojiClick(emoji)
-                }}
+                onEmojiClick={(emoji) => { onEmojiClick(emoji) }}
                 theme={resolvedTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
               />
             </motion.div>
@@ -581,7 +685,8 @@ export default function MessageCard({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowFilePopup(!showFilePopup)}
-                  className="p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950"
+                  disabled={chatCardDetails.blocked}
+                  className='p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950'
                 >
                   <Paperclip className="w-4 h-4 dark:invert" />
                 </button>
@@ -593,18 +698,18 @@ export default function MessageCard({
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
                 transition={{ duration: 0.3 }}
-                className="file_popup absolute bottom-10 left-20 transform -translate-x-1/2 mt-3 z-50 w-44 bg-white dark:bg-black border rounded-lg shadow-xl overflow-hidden"
+                className='file_popup absolute bottom-12 left-20 transform -translate-x-1/2 mt-3 z-50 w-44 bg-white dark:bg-black border rounded-lg shadow-xl overflow-hidden'
               >
                 <div className="flex flex-col p-2">
                   {attachFileoptions.map((item, index) => (
                     <button
                       key={index}
-                      onClick={() => handleFileOptionClick(item.label)}
+                      onClick={() => handleFileOptionClick(item)}
                       className="flex items-center cursor-pointer rounded-lg gap-3 px-3 py-2 w-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-950"
                     >
-                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800">
+                      <div 
+                        className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800">
                         {item.icon}
                       </div>
                       <span className="tracking-wide">{item.label}</span>
@@ -620,8 +725,9 @@ export default function MessageCard({
               type="text"
               value={messageText}
               onChange={(e) => { setmessageText(e.target.value) }}
+              disabled={chatCardDetails.blocked}
               placeholder="type a message..."
-              className="w-full text-sm bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-white dark:focus:bg-gray-950"
+              className={`w-full text-sm dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-yellow-100 dark:focus:bg-gray-950 ${chatCardDetails.blocked && 'cursor-not-allowed'}`}
             />
           </div>
 
@@ -630,14 +736,16 @@ export default function MessageCard({
               {messageText ? (
                 <button
                   onClick={() => handleSendMessage(messageText)}
-                  className="p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 transition dark:hover:bg-gray-950"
+                  disabled={chatCardDetails.blocked}
+                  className='p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950'
                 >
                   <SendIcon className="w-4 h-4 dark:invert" />
                 </button>
               ) : (
                 <button
                   onClick={handleAudioPop}
-                  className="p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 transition dark:hover:bg-gray-950"
+                  disabled={chatCardDetails.blocked}
+                  className='p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950'
                 >
                   <Mic className="w-4 h-4 dark:invert" />
                 </button>
@@ -645,22 +753,44 @@ export default function MessageCard({
             </TooltipTrigger>
             <TooltipContent>{messageText ? 'Send message' : 'Voice message'}</TooltipContent>
           </Tooltip>
-        </div>
+         </div>
+       </div>
 
+         {/* Hidden file inputs */}
+        <input
+          type="file"
+          accept="image/*"
+          ref={imageRef}
+          onChange={(e) => handleMediaInclude(e, 'image')}
+          className="hidden"
+          multiple
+        />
+        <input
+          type="file"
+          accept="video/*"
+          ref={videoRef}
+          onChange={(e) => handleMediaInclude(e, 'video')}
+          className="hidden"
+        />
+        <input
+          type="file"
+          accept="audio/*"
+          ref={audioRef}
+          onChange={(e) => handleMediaInclude(e, 'audio')}
+          className="hidden"
+        />
+        {/* <input
+          type="tel"
+          pattern="[0-9]{10}"
+          ref={contactRef}
+          onChange={(e) => handleMediaInclude(e, 'audio')}
+          className="hidden"
+        /> */}
     </div>
   )}
-{/* {
-  <Mediapopmodal/>
-} */}
-{blockChatPop && (
-  <BlockChatPop
-    key={chatCardDetails?.id}
-    username={String(chatCardDetails?.handle)}
-    closeBlockPop={() => { setblockChatPop(false) }}
-    isBlocked={false}
-    updateblockState={() => {}}
-  />
-)}
+{/* {showMedia && (
+  <Mediapopmodal closepop={() => { setshowMedia(false) }} media={}/>
+)} */}
 </div>
 )}
 

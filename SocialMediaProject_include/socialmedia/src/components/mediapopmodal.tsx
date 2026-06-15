@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-interface mediaType {
+export interface mediaType {
   url: string;
   media_type: string;
 }

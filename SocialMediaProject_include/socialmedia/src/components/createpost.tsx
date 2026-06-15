@@ -149,6 +149,17 @@ export default function CreatePost() {
     }
   };
 
+  useEffect(() => {
+    setDisablePostButton(!post.trim());
+    if(post.length > maxPostLength) {
+      setPost(post.substring(0,maxPostLength));
+    }
+  }, [post]);
+
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setPost((prev) => prev + emojiData.emoji);
+  };
+  
   const resetForm = () => {
     setPost('');
     setImageArr([]);
@@ -162,16 +173,6 @@ export default function CreatePost() {
     resetPoll();
   };
 
-  useEffect(() => {
-    setDisablePostButton(!post.trim());
-    if(post.length > maxPostLength) {
-      setPost(post.substring(0,maxPostLength));
-    }
-  }, [post]);
-
-  const onEmojiClick = (emojiData: EmojiClickData) => {
-    setPost((prev) => prev + emojiData.emoji);
-  };
 
   const removeArrayElement = (setters: React.Dispatch<React.SetStateAction<any[]>>[], index: number) => {
     setters.forEach(setter => setter(prev => prev.filter((_, i) => i !== index)));

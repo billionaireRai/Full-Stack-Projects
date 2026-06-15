@@ -1,5 +1,23 @@
 import mongoose from "mongoose";
 
+const mediaUrlSchema = new mongoose.Schema({
+  url: {
+    type: String,
+    trim: true,
+    default: '',
+    maxlength: [500, 'URL cannot exceed 500 characters']
+  },
+  public_id: {
+    type: String,
+    default: ''
+  },
+  media_type:{
+    type:String,
+    enum:["image","video" ,"raw","auto"],
+    default:'auto'
+  }
+});
+
 const messageSchema = new mongoose.Schema(
   {
     fromId: {
@@ -32,7 +50,7 @@ const messageSchema = new mongoose.Schema(
       trim:true
     },
     mediaUrls: {
-      type: [String],
+      type: [mediaUrlSchema],
       default: []
     },
 

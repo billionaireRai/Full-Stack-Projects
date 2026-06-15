@@ -14,7 +14,7 @@ import viewStat from "../models/viewstat";
 import likes from "../models/likes";
 import follows from "../models/follows";
 import { accountInfoType } from "@/components/usercard";
-import { sendCommentNotification, sendLikeNotification, sendMentionNotification, sendRepostNotification } from "./notifications";
+import { sendCommentNotification, sendLikeNotification, sendMentionNotification, sendNewPostNotification, sendRepostNotification } from "./notifications";
 import Message from "../models/messages";
 import Block from "../models/blocked";
 import subscriptions from "../models/subscriptions";
@@ -84,37 +84,22 @@ export const createANewPostService = async ( data:any ) => {
     //     return NextResponse.json({ message: 'Post limit of this month exceeded for unverified accounts !!' }, { status: 429 });
     // }
 
+    const fullMediaArr = [...imgUrls,...videoUrls,...gifsArr] ;
     // uploading media on cloudinary...
-    const uploadedImgObjs : uploadedObj[] = await Promise.all( imgUrls.map( async (url:File) => { 
-        const bytes = await url.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        
-        const uploadedObj = await uploadMediaOnCloudinary(buffer,url.name);
-        if (uploadedObj.success)  return uploadedObj ;
-    }))
+    const uploadedMediaObjs = await Promise.all(fullMediaArr.map(async (url: File) => {
+            const bytes = await url.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+            const uploadedObj = await uploadMediaOnCloudinary(buffer, url.name);
+            return uploadedObj.success ? uploadedObj : null;
+        })
+    );
 
-    const uploadedvideoObjs : uploadedObj[] = await Promise.all( videoUrls.map( async (url:File) => { 
-        const bytes = await url.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        
-        const uploadedObj = await uploadMediaOnCloudinary(buffer,url.name);
-        if (uploadedObj.success)  return uploadedObj ;
-    }))
+    const filteredUploadedMediaObjs: uploadedObj[] = uploadedMediaObjs.filter(
+        (m): m is uploadedObj => m !== null
+    );
 
-    const uploadedgifsArrObjs : uploadedObj[] = await Promise.all( gifsArr.map( async (url:File) => { 
-        const bytes = await url.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        
-        const uploadedObj = await uploadMediaOnCloudinary(buffer,url.name);
-        if (uploadedObj.success)  return uploadedObj ;
-        
-    }))
+    const finalMediaArr = filteredUploadedMediaObjs.map(media => ({ url: media.url,public_id: media.public_id,media_type: media.resource_type }));
 
-    const fullMediaArr = [...uploadedImgObjs,...uploadedvideoObjs,...uploadedgifsArrObjs]; // full array of media...
-
-    const finalMediaArr = fullMediaArr.map(media => { 
-        if (media.success) return { url:media.url ,public_id:media.public_id ,media_type:media.resource_type  } ;
-    })
     const newPost = new Post({
         authorId: activeAcc._id,
         content: postText,
@@ -131,8 +116,35 @@ export const createANewPostService = async ( data:any ) => {
     }
 
     await newPost.save(); // saving the post...
-    return NextResponse.json({ message: 'Post created successfully!' }, { status: 200 });
 
+    // get all followers...
+    const followerIds = (await follows.find({ followingId: activeAcc._id, isDeleted: false })).map((follow) => follow.followerId);
+
+    if (followerIds.length > 0) {
+        
+    // creator for this new post...
+       const postUploader = {
+         id: activeAcc._id.toString(),
+         name: activeAcc.name,
+         username: activeAcc.username,
+         isVerified: !!activeAcc.isVerified?.value,
+         avatarUrl: activeAcc.avatar?.url
+       };
+
+       for (let i = 0; i < followerIds.length; i++) {
+         await sendNewPostNotification(
+           followerIds[i].toString(),
+           postUploader,
+           {
+             id: newPost._id.toString(),
+             content: newPost.content,
+             thumbnailUrl: newPost.mediaUrls?.[0] ? newPost.mediaUrls[0].url : ''
+           }
+         );
+       }
+    }
+
+    return NextResponse.json({ message: 'Post created successfully!' }, { status: 200 });
 }
 
 export const postDeletionService = async (credentials:postDeletionType) => {

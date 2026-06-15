@@ -30,3 +30,7 @@ export const chatCardOpenController = asyncErrorHandler(async (request:NextReque
     await chatCardOpenService(cardInfo); 
     return NextResponse.json({ message:'Chat open logics completed successful..' },{ status:200 });
 })
+
+export const blockConversationController = asyncErrorHandler(async (request:NextRequest) => {
+    
+})

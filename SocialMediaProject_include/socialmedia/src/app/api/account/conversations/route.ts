@@ -1,5 +1,5 @@
 import { NextResponse , NextRequest } from "next/server";
-import { getConversationsController , createNewConversationController, chatCardOpenController } from "@/app/controllers/conversation";
+import { getConversationsController , createNewConversationController, chatCardOpenController, blockConversationController } from "@/app/controllers/conversation";
 
 export const GET = (req:NextRequest) : Promise<NextResponse> => {
     return getConversationsController(req) ;
@@ -11,4 +11,8 @@ export const POST = (req:NextRequest) : Promise<NextResponse> => {
 
 export const PUT = (req:NextRequest) : Promise<NextResponse> => {
     return chatCardOpenController(req) ;
+ }
+
+export const PATCH = (req:NextRequest) : Promise<NextResponse> => { 
+    return blockConversationController(req);
  }
