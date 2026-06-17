@@ -114,11 +114,7 @@ export async function userReportService(report: reportInfoType) {
     await sendEmailFunction({
         to: user.email,
         subject: "Report Submitted Successfully - Briezl",
-        html: generateReportEmailHTML({
-            description: report.description,
-            reason: report.selectedOne.label,
-            reportedFor: report.reportedFor
-        }),
+        html: generateReportEmailHTML({ description: report.description, reason: report.selectedOne.label, reportedFor: report.reportedFor}),
     });
 
     return NextResponse.json({ message: 'Report submitted successfully' }, { status: 200 });

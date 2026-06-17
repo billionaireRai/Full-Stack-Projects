@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Customdropdown from '@/components/customdropdown'
-import { Flag, X, FileText } from 'lucide-react'
+import { Flag, X, FileText, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import axiosInstance from '@/lib/interceptor'
 
@@ -21,10 +21,11 @@ interface formDataType {
 interface reportModalProps {
   closeReportModal:() => void,
   postId?:string,
-  username?:string
+  username?:string,
+  convid?:string
 }
 
-export default function reportPop({ closeReportModal , username , postId }:reportModalProps) {
+export default function reportPop({ closeReportModal , username, convid , postId }:reportModalProps) {
   const reportForm = useForm<formDataType>() ; // intializing useForm hook...
 
   const [Options, setOptions] = useState<optionsType[]>([
@@ -64,9 +65,14 @@ export default function reportPop({ closeReportModal , username , postId }:repor
     }
   }
 
+  // function handling copy to clipboard
+  const copeToClipboard = (toCopy:string) => { 
+
+   }
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
-      <div className="bg-white dark:bg-black border border-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-lg mx-4 relative">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200 overflow-y-scroll">
+      <div className="bg-white dark:bg-black border dark:border-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-lg max-h-fit mx-4 relative">
         <button
           className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 cursor-pointer dark:hover:bg-gray-950 dark:hover:text-gray-200 transition-colors"
           onClick={() => {closeReportModal()}}
@@ -78,32 +84,54 @@ export default function reportPop({ closeReportModal , username , postId }:repor
           <Flag size={30} /><h2 className="text-2xl font-bold text-gray-900 dark:text-white">Report This Account</h2>
         </div>
 
-        <form onSubmit={reportForm.handleSubmit(reportSubmit)} className="space-y-6">
+        <form onSubmit={reportForm.handleSubmit(reportSubmit)} className="space-y-3">
           <div>
-            <label htmlFor="reportedFor" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="reportedFor" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Reported For
             </label>
             <input
               type="text"
               id="reportedFor"
-              {...reportForm.register('reportedFor',{required:true,pattern:/@([A-Za-z0-9_]{1,15})\b/g})}
+              {...reportForm.register('reportedFor',{required:true,pattern:/@([a-zA-Z0-9_]{8,20})\b/g})}
               value={`${username}`}
               placeholder="user handle @username"
-              className="w-full px-3 py-2 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 text-sm"
+              className="w-full cursor-none px-3 py-2 border focus:border-yellow-300 dark:focus:border-yellow-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-yellow-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 text-sm"
             />
           </div>
-          { postId && (
+          { postId?.trim() && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Related Post
               </label>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-lg">
                 <div className="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
                   <FileText className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
-                <div className="flex-1 flex items-center gap-2 min-w-0">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Post ID</p>
-                  <p className="text-sm font-mono font-medium text-gray-900 dark:text-white truncate">{postId}</p>
+                <div className="flex-1 flex items-center justify-between min-w-0">
+                  <div className='flex items-center justify-center gap-2'>
+                   <p className="text-xs text-gray-500 dark:text-gray-400">Post ID</p>
+                   <p className="text-sm font-mono font-medium text-gray-900 dark:text-white truncate">{postId?.trim()}</p>
+                  </div>
+                  <span onClick={() => { copeToClipboard(postId) }} className='p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer'><Copy size={18} className='text-gray-400' /></span>
+                </div>
+              </div>
+            </div>
+          )}
+          { convid?.trim() && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Related Conversation
+              </label>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div className="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1 flex items-center justify-between min-w-0">
+                  <div className='flex items-center justify-center gap-2'>
+                   <p className="text-xs text-gray-500 dark:text-gray-400">Conversation ID</p>
+                   <p className="text-sm font-mono font-medium text-gray-900 dark:text-white truncate">{convid?.trim()}</p>
+                  </div>
+                  <span onClick={() => { copeToClipboard(convid) }} className='p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer'><Copy size={18} className='text-gray-400' /></span>
                 </div>
               </div>
             </div>
@@ -124,7 +152,7 @@ export default function reportPop({ closeReportModal , username , postId }:repor
               {...reportForm.register('description',{required:true})}
               placeholder="Please provide details about the issue..."
               rows={4}
-              className="w-full px-3 py-2 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+              className="w-full px-3 py-2 border focus:border-yellow-300 dark:focus:border-yellow-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-yellow-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
             />
           </div>
 
@@ -132,7 +160,7 @@ export default function reportPop({ closeReportModal , username , postId }:repor
             <button
               type="button"
               onClick={() => { closeReportModal() }}
-              className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
               Cancel
             </button>

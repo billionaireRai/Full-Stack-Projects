@@ -54,7 +54,7 @@ export default function Qrcodepop ({ path , owner , timestamp , doneScanning , c
   }, [])
 
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+      <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
         <div className="bg-white dark:bg-black rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-8 relative animate-in fade-in-0 zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6 p-2 border-b border-gray-100 dark:border-gray-700 rounded-lg">

@@ -23,10 +23,11 @@ interface Message {
   sendername: string
   senderhandle: string
   text: string
+  media?:mediaType[]
   timestamp: string
   isOwn: boolean
   avatar: string
-  status?: 'sending' | 'sent' | 'delivered' | 'seen'
+  status?: 'sent' | 'delivered' | 'seen'
 }
 
 interface attachmentOptionType {
@@ -40,9 +41,11 @@ interface MessageCardProps {
   handleAudioPop: () => void
   handleAddChat: () => void
   updateCardDetail: (msg: string, time: string) => void
+  openBlockPop:() => void
+  openReportPop:() => void
 }
 
-export default function MessageCard({ chatCardDetails, handleAudioPop, handleAddChat, updateCardDetail }: MessageCardProps) {
+export default function MessageCard({ chatCardDetails,openBlockPop, openReportPop , handleAudioPop, handleAddChat, updateCardDetail }: MessageCardProps) {
   const { resolvedTheme , } = useTheme()
   const [play] = useSound('/audio/notification.mp3')
   const heightGap: number = 200
@@ -65,7 +68,6 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false)
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false)
   const [shareContact, setshareContact] = useState<boolean>(false)
-  const [blockChatPop, setblockChatPop] = useState<boolean>(false);
 
   // Attachments option
   const attachFileoptions = useMemo(() => [
@@ -76,7 +78,7 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
     ],
   [],)
 
-  // Dummy messages
+  // Dummy messages (some have media)
   const MessagesArray = useMemo<Message[]>(
     () => [
       {
@@ -88,6 +90,12 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
         isOwn: false,
         avatar: '/images/myProfile.jpg',
         status: 'seen',
+        media: [
+          {
+            url: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=800&q=60',
+            media_type: 'image',
+          },
+        ],
       },
       {
         id: '2',
@@ -99,6 +107,16 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
         avatar:
           'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
         status: 'seen',
+        media: [
+          {
+            url: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=800&q=60',
+            media_type: 'image',
+          },
+          {
+            media_type: 'audio',
+            url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+          },
+        ],
       },
       {
         id: '3',
@@ -192,7 +210,7 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
         timestamp: new Date().toLocaleString(),
         isOwn: false,
         avatar: '/images/myProfile.jpg',
-        status: 'sending',
+        status: 'sent',
       },
       {
         id: '12',
@@ -203,7 +221,7 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
         isOwn: true,
         avatar:
           'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
-        status: 'sending',
+        status: 'sent',
       },
       {
         id: '13',
@@ -234,7 +252,7 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
         timestamp: new Date().toLocaleString(),
         isOwn: false,
         avatar: '/images/myProfile.jpg',
-        status: 'sending',
+        status: 'sent',
       },
     ],
     [],
@@ -299,6 +317,13 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
       senderhandle: '@amritanshdev__',
       text: trimmedmsg,
       timestamp: new Date().toLocaleString(),
+      // will render media url array with types...
+      media:[
+        {
+          url: '/images/twitter.png',
+          media_type: 'image',
+        }
+      ],
       isOwn: true,
       avatar:
         'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
@@ -310,6 +335,11 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
     play()
   }
 
+  // handling media click...
+  function handleMediaPop(media:mediaType) {
+    setPopMedia(media);
+    setshowMedia(true);
+  }
   // downscrolling of chat on new message...
   useEffect(() => {
     if (!msgsection.current) return ;
@@ -370,7 +400,7 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
           {/* Chat Header */}
           <div className="sticky top-0 flex items-center px-4 py-3 justify-between rounded-md shadow-sm border-b border-gray-200 dark:border-gray-900 dark:bg-black z-10">
            <div className="flex items-center gap-3">
-             <div className="relative cursor-pointer">
+             <div onClick={() => { handleMediaPop({ url:chatCardDetails?.avatarUrl , media_type:'image' }) }} className="relative cursor-pointer">
               <img
                 src={chatCardDetails?.avatarUrl}
                 alt={chatCardDetails?.name}
@@ -477,16 +507,16 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
-                  onClick={() => setopenChatThreeDot(false)}
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-gray-950"
+                  onClick={() => { openReportPop() ; setopenChatThreeDot(false)}}
                 >
                   <Flag className="w-4 h-4" />
                   <div>Report chat</div>
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
-                  onClick={() => { setblockChatPop(true) ; setopenChatThreeDot(false) }}
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-gray-950"
+                  onClick={() => { openBlockPop() ; setopenChatThreeDot(false) }}
                 >
                   {chatCardDetails.blocked ? <LockOpenIcon className="w-4 h-4"/> : <Ban className="w-4 h-4" /> }
                   <div>
@@ -495,7 +525,7 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-gray-950"
                   onClick={() => setopenChatThreeDot(false)}
                 >
                   <Trash className="w-4 h-4" />
@@ -509,7 +539,7 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
         </div>
 
         {/* Messages */}
-        <div ref={msgsection} className={`overflow-y-auto flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blocked && 'blur-sm'}`}>
+        <div ref={msgsection} className={`overflow-y-auto overflow-x-hidden flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blocked && 'blur-sm'}`}>
          <AnimatePresence>
           {Messages.map((message) => (
             <motion.div
@@ -530,11 +560,7 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
                 />
               </div>
 
-              <div
-                className={`flex flex-col max-w-xs sm:max-w-md lg:max-w-lg ${
-                  message.isOwn ? 'items-end' : 'items-start'
-                }`}
-              >
+              <div className={`flex flex-col max-w-xs sm:max-w-md lg:max-w-lg ${message.isOwn ? 'items-end' : 'items-start'}`}>
                 {!message.isOwn && (
                   <div className="text-xs flex gap-1 items-center font-medium text-gray-600 dark:text-gray-400 mb-1">
                     <span>{message.sendername}</span><b>.</b><Link href={`/${message.senderhandle}`}>{message.senderhandle}</Link>
@@ -550,13 +576,35 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
                       : 'bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 rounded-bl-none border border-gray-200 dark:border-gray-800'
                   }`}
                 >
+                  {Array.isArray(message.media) && message.media?.length && (
+                    <div className="my-2 flex flex-col gap-2 w-full rounded-xl ">
+                      {message.media.map((m, idx) => (
+                        <div key={`${m.media_type}-${idx}`}>
+                          {m.media_type === 'image' && (
+                            <div onClick={() => { handleMediaPop(m) }} className="relative w-70 h-60">
+                              <Image src={m.url} alt="message-image" fill className="w-full cursor-pointer hover:scale-103 transition-transform duration-200 rounded-xl object-cover" />
+                            </div>
+                          )}
+                          {m.media_type === 'video' && (
+                            <div onClick={() => { handleMediaPop(m) }} className="w-70 h-60">
+                              <video src={m.url} controls className="w-full cursor-pointer hover:scale-103 transition-transform duration-200 rounded-xl" />
+                            </div>
+                          )}
+                          {m.media_type === 'audio' && (
+                            <div className="w-70">
+                              <audio controls preload="metadata" className="w-full cursor-pointer hover:scale-103 transition-transform duration-200">
+                                <source src={m.url} />
+                              </audio>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-sm leading-relaxed break-words">{message.text}</p>
                 </motion.div>
 
-                <div
-                  className={`flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 ${
-                    message.isOwn ? 'flex-row-reverse' : 'flex-row'
-                  }`}
+                <div className={`flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 ${message.isOwn ? 'flex-row-reverse' : 'flex-row'}`}
                 >
                   <span>{message.timestamp}</span>
                   {message.isOwn && message.status && (
@@ -577,20 +625,11 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
             </motion.div>
           ))}
           { sendingMessage && (
-            <div className="flex gap-1">
-              <span className="animate-bounce">•</span>
-              <span
-                className="animate-bounce"
-                style={{ animationDelay: "0.2s" }}
-              >
-                •
-              </span>
-              <span
-                className="animate-bounce"
-                style={{ animationDelay: "0.4s" }}
-              >
-                •
-              </span>
+            <div className="flex items-center justify-end gap-1 py-2 px-4 mt-2 rounded-xl">
+              <span className='rounded-full py-1 px-3 text-yellow-500'>sending</span>
+              <span className="animate-bounce w-2 h-2 rounded-full border border-yellow-500 bg-yellow-500"></span>
+              <span className="animate-bounce w-2 h-2 rounded-full border border-yellow-500 bg-yellow-500" style={{ animationDelay: "0.2s" }} ></span>
+              <span className="animate-bounce w-2 h-2 rounded-full border border-yellow-500 bg-yellow-500" style={{ animationDelay: "0.4s" }} ></span>
             </div>
           )}
         </AnimatePresence>
@@ -788,9 +827,10 @@ export default function MessageCard({ chatCardDetails, handleAudioPop, handleAdd
         /> */}
     </div>
   )}
-{/* {showMedia && (
-  <Mediapopmodal closepop={() => { setshowMedia(false) }} media={}/>
-)} */}
+{showMedia && PopMedia && (
+  <Mediapopmodal closepop={() => { setshowMedia(false) }} media={PopMedia}/>
+)}
+
 </div>
 )}
 

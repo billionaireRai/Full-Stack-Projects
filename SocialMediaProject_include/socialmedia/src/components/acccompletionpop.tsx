@@ -10,7 +10,7 @@ interface componentProps {
 
 export default function AccCompletionPop({ onClose, onContinue } : componentProps) {
   return (
-    <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex z-50 items-center justify-center animate-in fade-in-0 zoom-in-95 duration-200'>
+    <div className='fixed inset-0 bg-black/10 backdrop-blur-xs flex z-50 items-center justify-center animate-in fade-in-0 zoom-in-95 duration-200'>
       {/* Pop-up container */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8, y: 20 }}

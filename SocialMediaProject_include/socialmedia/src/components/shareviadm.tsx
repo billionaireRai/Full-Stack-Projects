@@ -121,7 +121,7 @@ export default function Shareviadm({ closemodal, link }: shareViaDmProp) {
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200"
+      className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200"
     >
       <div 
         className="bg-white dark:bg-black rounded-xl h-10/11 p-3 w-full max-w-lg relative flex flex-col shadow-2xl"

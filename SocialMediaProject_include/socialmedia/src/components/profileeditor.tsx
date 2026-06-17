@@ -122,7 +122,7 @@ export default function ProfileEditor({ closePop , credentials }: EditorProps) {
     }
   }
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200 p-3 sm:p-4">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200 p-3 sm:p-4">
       <div className="bg-card text-card-foreground dark:bg-black rounded-lg shadow-2xl w-11/12 sm:w-3/4 lg:w-1/2 p-5 border border-border max-h-[95vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">

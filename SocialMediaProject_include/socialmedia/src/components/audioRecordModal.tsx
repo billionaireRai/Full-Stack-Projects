@@ -61,7 +61,7 @@ export default function audioRecordModal ({ closePopUp }:audioProp) {
   
 
   return (
-     <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+     <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
             <div className="audio_modal bg-white dark:bg-black rounded-lg p-6 shadow-xl max-w-md w-full mx-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Record Audio</h3>

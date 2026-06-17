@@ -32,7 +32,7 @@ export default function NotInterestedPop({ closePopUp, postId, username , update
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       <div className="bg-white dark:bg-black border border-gray-800 dark:border-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-lg mx-4 relative">
         <button
           className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 cursor-pointer dark:hover:bg-gray-950 dark:hover:text-gray-200 transition-colors"

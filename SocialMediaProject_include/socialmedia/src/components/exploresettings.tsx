@@ -11,7 +11,7 @@ interface ExploreSettingsProps {
 
 export default function ExploreSettings({ LocationSetting, toggleLocation, close }: ExploreSettingsProps) {
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       <div className="w-full max-w-md p-6 bg-white dark:bg-black rounded-lg text-gray-900 dark:text-white font-poppins">
         <div className='flex flex-row mb-6 items-center justify-between'>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Explore settings</h2>

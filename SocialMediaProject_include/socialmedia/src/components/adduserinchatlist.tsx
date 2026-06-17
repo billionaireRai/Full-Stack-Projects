@@ -301,7 +301,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
   }, [searchQuery])
 
   return (
-   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in-0 zoom-in-95 duration-200">
+   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-xs animate-in fade-in-0 zoom-in-95 duration-200">
       <div className="w-full h-full max-w-xl max-h-fit rounded-xl border border-gray-200 dark:border-gray-900 bg-white/95 dark:bg-black/95 shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-900">

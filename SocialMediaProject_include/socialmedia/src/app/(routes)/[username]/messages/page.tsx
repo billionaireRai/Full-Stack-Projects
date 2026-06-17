@@ -2,6 +2,7 @@
 
 import React,{ useState , useEffect }from 'react'
 import ChatAccountcard from '@/components/chataccountcard'
+import ReportPop from '@/components/reportPop'
 import Link from 'next/link'
 // import useUnreadMessage from '@/app/states/unreadmessage'; 
 import Image from 'next/image';
@@ -24,6 +25,7 @@ export default function Messages() {
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false) ;
   const [blockChatPop, setblockChatPop] = useState<boolean>(false);
   const [shareContact, setshareContact] = useState<boolean>(false);
+  const [showReportChat, setshowReportChat] = useState<boolean>(false);
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false) ;
   const [showAudioModal, setShowAudioModal] = useState<boolean>(false) ;
   const [conversations, setconversations] = useState<infoForChatCard[]>([
@@ -210,7 +212,7 @@ export default function Messages() {
       publicKey:'jsinjwenoi5rn'
     },
     {
-      id: '14',
+      id: '4t3ghur0o3oe',
       name: 'Noah Blue',
       handle: '@noahblue',
       lastMessage: 'Thanks again',
@@ -420,7 +422,13 @@ export default function Messages() {
             </div>
         </div>
         <div className="flex flex-col gap-4 p-2 h-full flex-1 dark:bg-black rounded-md min-h-0">
-          <MessageCard updateCardDetail={(msg,time) => { handleCardDetailUpdate(msg,time) }} chatCardDetails={CurrentOpenChat} handleAudioPop={() => { setShowAudioModal(true) }} handleAddChat={() => { setaddChatPop(true) }} />
+         <MessageCard 
+          updateCardDetail={(msg,time) => { handleCardDetailUpdate(msg,time) }} 
+          chatCardDetails={CurrentOpenChat} handleAudioPop={() => { setShowAudioModal(true) }} 
+          handleAddChat={() => { setaddChatPop(true) }}
+          openBlockPop={() => { setblockChatPop(true) }}
+          openReportPop={() => { setshowReportChat(true) }}
+         />
         </div>
         
         {showAudioModal && (
@@ -428,6 +436,9 @@ export default function Messages() {
         )}
        {addChatPop && (
          <AddAccinchatlist closePop={() => setaddChatPop(false)} onAddChat={handleAddUser} />
+       )}
+       {showReportChat && CurrentOpenChat && (
+        <ReportPop closeReportModal={() => { setshowReportChat(false) }} username={CurrentOpenChat.handle} convid={CurrentOpenChat.id} />
        )}
        {shareContact && (
          <Sharecontactonchat closeShareContact={() => setshareContact(false)}  />

@@ -32,6 +32,7 @@ const conversationSchema = new mongoose.Schema(
         ref: "account",
       }
     ],
+    
     isGroup: {
       type: Boolean,
       default: false,

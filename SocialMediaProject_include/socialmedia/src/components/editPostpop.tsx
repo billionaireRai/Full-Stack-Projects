@@ -232,7 +232,7 @@ export default function EditPostPop({
   }
 
   return (
-    <div className='fixed flex flex-col lg:flex-row overflow-y-scroll py-4 inset-0 bg-black/50 backdrop-blur-md z-50 md:items-center md:justify-start lg:justify-center lg:items-start animate-in fade-in-0 zoom-in-95 duration-300'>
+    <div className='fixed flex flex-col lg:flex-row overflow-y-scroll py-4 inset-0 bg-black/10 backdrop-blur-xs z-50 md:items-center md:justify-start lg:justify-center lg:items-start animate-in fade-in-0 zoom-in-95 duration-300'>
       <div className="bg-white dark:bg-black rounded-3xl shadow-2xl max-h-fit max-w-2xl p-0 mx-4 my-6 relative border border-gray-100 dark:border-gray-800">
         {/* Header */}
         <div className="flex items-center justify-between p-4 m-2 rounded-lg border-b border-gray-200 dark:border-gray-800">

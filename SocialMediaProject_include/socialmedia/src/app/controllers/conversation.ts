@@ -1,6 +1,6 @@
 import asyncErrorHandler from "../middleware/errorMiddleware";
 import { NextRequest , NextResponse } from "next/server";
-import { getConversationsService , createNewConversationService, chatCardOpenService } from "../db/services/conversations";
+import { getConversationsService , createNewConversationService, chatCardOpenService, chatBlockingService } from "../db/services/conversations";
 
 export const getConversationsController = asyncErrorHandler( async (req:NextRequest) => {
     const conversations = await getConversationsService();
@@ -32,5 +32,13 @@ export const chatCardOpenController = asyncErrorHandler(async (request:NextReque
 })
 
 export const blockConversationController = asyncErrorHandler(async (request:NextRequest) => {
-    
+    const { conversationid , changeTo } = await request.json() ; // extracting data from request...
+
+    if (!conversationid) {
+        console.log("Conversation ID missing !!");
+        return NextResponse.json({ message:"Conversation id missing..." },{ status:200 });
+    }
+
+    // await chatBlockingService(conversationid,changeTo);
+    return NextResponse.json({ message:`Conversation ${changeTo ? 'blocked' : 'unblocked' }  successfully !!`});
 })

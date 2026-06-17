@@ -234,7 +234,7 @@ export default function CreatePost() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center overflow-y-scroll justify-center p-4'
+      className='fixed inset-0 bg-black/10 backdrop-blur-xs z-50 flex items-center overflow-y-scroll justify-center p-4'
     >
       <div className="flex flex-col lg:flex-row gap-4 items-center justify-center w-full h-full">
         <motion.div

@@ -102,7 +102,7 @@ export const createNewConversationService = async (targetAcc:userCardProp) => {
 
 
 export const chatCardOpenService = async (card:infoForChatCard) => {
-    await connectWithMongoDB() ;
+   await connectWithMongoDB() ;
     
    const user = await getDecodedDataFromCookie("accessToken");
    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
@@ -119,3 +119,36 @@ export const chatCardOpenService = async (card:infoForChatCard) => {
     { status:'seen' }
    );
 }
+
+export const chatBlockingService = async (convid:string,updateTo:boolean) => {
+   await connectWithMongoDB() ;
+    
+   const user = await getDecodedDataFromCookie("accessToken");
+   if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    
+   const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+   if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
+    
+   // fetching the conversation...
+   const conv = await conversation.findOne({ _id:convid , participants:{ $in:[activeAcc._id] } });
+
+   // making updation on conversation...
+   if (updateTo && conv.blockedBy.includes(activeAcc._id)) {
+    console.log("Logically incorrect action !!");
+    return NextResponse.json({ message:'Already blocked this chat...' },{ status:404 });
+   }
+
+   if (!updateTo && !conv.blockedBy.includes(activeAcc._id)) {
+    console.log("Logically incorrect action !!");
+    return NextResponse.json({ message:'Not already blocked yet...' },{ status:404 });
+   }
+
+   if (updateTo && !conv.blockedBy.includes(activeAcc._id)) {
+    await conversation.findOneAndUpdate({ _id: conv._id },{ $addToSet: { blockedBy: activeAcc._id } },{ new: true });
+   }
+
+   if (!updateTo && conv.blockedBy.includes(activeAcc._id)) {
+    await conversation.findOneAndUpdate({ _id: conv._id },{ $pull: { blockedBy: activeAcc._id } },{ new: true });
+   }
+}
+

@@ -36,7 +36,7 @@ export default function PinPostPop({ closePopUp, toggleState , IsPinned , postOw
       }
     }
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       {/* Modal */}
       <div className="relative flex items-center justify-center h-full">
         <div className="bg-white dark:bg-black rounded-lg p-6 max-w-md mx-4 shadow-xl border border-gray-300 dark:border-gray-900">

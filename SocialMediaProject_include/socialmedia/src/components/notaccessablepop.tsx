@@ -15,7 +15,7 @@ export default function Notaccessablepop ({ username } : PropType) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'
+            className='fixed inset-0 bg-black/10 backdrop-blur-xs z-50 flex items-center justify-center p-4'
           >
             <div className="relative w-full max-w-lg mx-4 bg-white dark:bg-black rounded-2xl border border-gray-200 dark:border-gray-900 shadow-2xl overflow-hidden">
               {/* Header */}

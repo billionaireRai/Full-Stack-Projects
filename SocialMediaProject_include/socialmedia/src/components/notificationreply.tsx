@@ -122,7 +122,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
 
   if (!notification) {
     return (
-      <div className="fixed overflow-y-scroll inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+      <div className="fixed overflow-y-scroll inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-xs">
         <motion.div
           initial={{ opacity: 0, scale: 0.96, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}

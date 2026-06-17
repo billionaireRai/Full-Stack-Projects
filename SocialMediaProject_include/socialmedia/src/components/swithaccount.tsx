@@ -170,7 +170,7 @@ export default function SwitchAccountPopUp () {
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-sm flex justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-300">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-300">
       <div className="bg-white dark:bg-black rounded-lg p-6 h-fit max-h-[90vh] my-5 w-full max-w-xl shadow-2xl border border-gray-200 dark:border-gray-900 overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
