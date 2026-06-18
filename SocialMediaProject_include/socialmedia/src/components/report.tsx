@@ -2,10 +2,12 @@ interface ReportSuccessProps {
   reportedFor: string
   reason: string
   description: string
+  postid?:string
+  convid?:string
 }
 
 
-export const generateReportEmailHTML = ({ reportedFor , reason , description }: ReportSuccessProps): string => {
+export const generateReportEmailHTML = ({ reportedFor , reason , description ,convid ,postid }: ReportSuccessProps): string => {
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -84,7 +86,9 @@ export const generateReportEmailHTML = ({ reportedFor , reason , description }: 
             <strong>Report Details:</strong><br>
             Reported For: ${reportedFor}<br>
             Reason: ${reason}<br>
-            Description: ${description}
+            Description: ${description}<br>
+            ${postid && `Post ID ${postid}` }
+            ${convid && `Chat ID ${convid}` }
           </div>
           <p>Our moderation team will investigate this matter. If you have any additional information or questions, please contact our support team.</p>
         </div>

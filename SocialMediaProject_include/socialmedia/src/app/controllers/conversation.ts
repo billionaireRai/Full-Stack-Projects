@@ -27,18 +27,31 @@ export const chatCardOpenController = asyncErrorHandler(async (request:NextReque
        return NextResponse.json({ message:'Card information missing !!' },{ status:404 });
     }
 
-    await chatCardOpenService(cardInfo); 
+    // await chatCardOpenService(cardInfo); 
     return NextResponse.json({ message:'Chat open logics completed successful..' },{ status:200 });
 })
 
 export const blockConversationController = asyncErrorHandler(async (request:NextRequest) => {
-    const { conversationid , changeTo } = await request.json() ; // extracting data from request...
+    const { conversationid , changeTo , username } = await request.json() ; // extracting data from request...
 
-    if (!conversationid) {
-        console.log("Conversation ID missing !!");
-        return NextResponse.json({ message:"Conversation id missing..." },{ status:200 });
+    if (!conversationid || !username) {
+        console.log("Conversation ID OR Username missing !!");
+        return NextResponse.json({ message:"Conversation id Or Username missing..." },{ status:200 });
     }
 
-    // await chatBlockingService(conversationid,changeTo);
+    // await chatBlockingService(username,conversationid,changeTo);
     return NextResponse.json({ message:`Conversation ${changeTo ? 'blocked' : 'unblocked' }  successfully !!`});
+})
+
+export const conversationDeletionController = asyncErrorHandler( async (request:NextRequest) => {
+    const url = new URL(request.nextUrl); // initializing request url...
+    const conversationid = url.searchParams.get('conversationid');
+
+    if (!conversationid?.trim()) {
+        console.log("Conversation ID unavailable !!");
+        return NextResponse.json({ message:'conversation id unavailable...' },{ status:404 });
+    }
+
+    // await conversationDeletionService(conversationid);
+    return NextResponse.json({ message:'Conversation deleted successfully !!' },{ status:200 });
 })

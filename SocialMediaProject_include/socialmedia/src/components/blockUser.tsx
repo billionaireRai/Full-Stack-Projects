@@ -32,7 +32,7 @@ export default function BlockUser({ closeBlockPop , username , updateblockState,
     <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       {/* Modal */}
       <div className="relative flex items-center justify-center">
-        <div className="bg-white dark:bg-black rounded-lg p-6 max-w-md mx-6 shadow-xl border border-gray-300 dark:border-gray-950">
+        <div className="bg-white dark:bg-black rounded-lg py-5 px-4 max-w-md mx-6 shadow-xl border border-gray-300 dark:border-gray-950">
           {/* Title */}
           <div className='flex flex-row items-center gap-2 mb-3'>
             <BanIcon size={20} />
@@ -40,7 +40,7 @@ export default function BlockUser({ closeBlockPop , username , updateblockState,
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
+          <p className="text-gray-700 dark:text-gray-300 text-sm max-w-sm mb-6">
             {isBlocked
               ? 'Are you sure you want to unblock this Account? You can follow them again after unblocking.'
               : 'Are you sure you want to block this Account ? If unblocked later, you will have to send a follow request again to the Account.'

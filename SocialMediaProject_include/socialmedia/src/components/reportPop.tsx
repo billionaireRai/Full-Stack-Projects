@@ -47,12 +47,13 @@ export default function reportPop({ closeReportModal , username, convid , postId
   // report handler function...
   const reportSubmit = async (data:formDataType) => {
     const loadingToast = toast.loading('submitting your report...')
+    const intoast = convid ? `Conversation ${convid}` : ( `Post ${postId}` ? postId : username) ;
     try {
-      let finalData = { ...data , selectedOne , postId } ; // data to be send to backend...
-      const repostApi = await axiosInstance.post(`/api/profile/${data.reportedFor}`,{ reportInfo: finalData });
+      let finalData = { ...data , selectedOne , postId , convid } ; // data to be send to backend...
+      const repostApi = await axiosInstance.post(`/api/profile/username`,{ reportInfo: finalData });
       if (repostApi.status === 200) {
         toast.dismiss(loadingToast);
-        toast.success(`Report successfull for @${username}`);
+        toast.success(`Report successfull for ${intoast}`);
         closeReportModal();
   
       } else {
@@ -66,8 +67,9 @@ export default function reportPop({ closeReportModal , username, convid , postId
   }
 
   // function handling copy to clipboard
-  const copeToClipboard = (toCopy:string) => { 
-
+  const copeToClipboard = async (toCopy:string) => { 
+    await navigator.clipboard.writeText(toCopy);
+    toast.success(`Chat ID ${toCopy} copied !!`);
    }
 
   return (
@@ -93,9 +95,9 @@ export default function reportPop({ closeReportModal , username, convid , postId
               type="text"
               id="reportedFor"
               {...reportForm.register('reportedFor',{required:true,pattern:/@([a-zA-Z0-9_]{8,20})\b/g})}
-              value={`${username}`}
+              value={username}
               placeholder="user handle @username"
-              className="w-full cursor-none px-3 py-2 border focus:border-yellow-300 dark:focus:border-yellow-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-yellow-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 text-sm"
+              className="w-full cursor-none px-3 py-2 border focus:border-yellow-300 dark:focus:border-yellow-500 transition-all duration-300 rounded-md dark:bg-black placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-yellow-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 text-sm"
             />
           </div>
           { postId?.trim() && (
@@ -122,7 +124,7 @@ export default function reportPop({ closeReportModal , username, convid , postId
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Related Conversation
               </label>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-900 rounded-lg">
                 <div className="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
                   <FileText className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
@@ -152,7 +154,7 @@ export default function reportPop({ closeReportModal , username, convid , postId
               {...reportForm.register('description',{required:true})}
               placeholder="Please provide details about the issue..."
               rows={4}
-              className="w-full px-3 py-2 border focus:border-yellow-300 dark:focus:border-yellow-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-yellow-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
+              className="w-full px-3 py-2 border focus:border-yellow-300 dark:focus:border-yellow-500 transition-all duration-300 rounded-md dark:bg-black placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-yellow-400/20 focus:ring-yellow-200/20 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
             />
           </div>
 

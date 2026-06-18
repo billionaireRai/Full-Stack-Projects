@@ -9,6 +9,7 @@ import Block from "../models/blocked";
 import { getDevicePublicIP } from "@/lib/pairedkeys";
 import { infoForChatCard } from "@/components/chataccountcard";
 import pubkeys from "../models/pubkeys";
+import Mutes from "../models/mute";
 
 export const getConversationsService = async () => {
     await connectWithMongoDB() ;
@@ -19,16 +20,12 @@ export const getConversationsService = async () => {
     const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
     if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
 
-    // blocked conversations...
-    const blockedChatsAccIds = (await Block.find({ blockedByAcc:activeAcc._id , source:'chat' })).map((block) => block.blockedAcc);
-
     // get converations of this account...
-    const conversationDocs = await conversation.find({ participants:{ $in:[activeAcc._id] , $nin:blockedChatsAccIds } });
+    const conversationDocs = await conversation.find({ participants:{ $in:[activeAcc._id] } , deletedBy:{ $nin:[activeAcc] } });
     const finalConvs = await Promise.all(conversationDocs.map( async (conversation) => {
 
-        const chatWithAcc = await accounts.findOne({
-            _id: { $in: conversation.participants, $ne: activeAcc._id },
-            'account.status': { $in: ['ACTIVE', 'DEACTIVATED'] }
+        const chatWithAcc = await accounts.findOne({ 
+            _id: { $in: conversation.participants, $ne: activeAcc._id },'account.status': { $in: ['ACTIVE', 'DEACTIVATED'] }
         });
 
         if (!chatWithAcc) return null ;
@@ -45,6 +42,11 @@ export const getConversationsService = async () => {
 
         // getting pinned state...
         const pinned = (Array.isArray(conversation.pinnedBy) && conversation.pinnedBy.includes(activeAcc._id)) ? true : false ;
+
+        // getting mute and blocked state...
+        const muteDoc = await Mutes.exists({ mutedByAcc:activeAcc._id , mutedAcc:chatWithAcc._id , source:'chat' , isActive:true });
+        const blockedToChat = await Block.exists({ blockedByAcc:activeAcc._id , blockedAcc:chatWithAcc._id , source:'chat' , isActive:true });
+        const blockedByChat = await Block.exists({ blockedByAcc:chatWithAcc._id , blockedAcc:activeAcc._id , source:'chat' , isActive:true });
 
         // getting unseen incoming messages
         const unseenMessages = await messages.countDocuments({ fromId: chatWithAcc._id, toId: activeAcc._id, status: { $ne: 'seen' }}) ;
@@ -64,6 +66,9 @@ export const getConversationsService = async () => {
             lastMessage:lastMessage.content,
             timestamp: new Date(lastMessage.createdAt).toDateString(),
             isVerified: chatWithAcc.isverified.value,
+            isMuted:muteDoc ? true : false,
+            blockedTo:blockedToChat ? true : false,
+            blockedBy:blockedByChat ? true : false ,
             avatarUrl: chatWithAcc.avatar.url,
             pinned:pinned,
             unreadCount:unseenMessages,
@@ -111,7 +116,7 @@ export const chatCardOpenService = async (card:infoForChatCard) => {
    if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
 
    // getting the conversation required...
-   const conv = await conversation.findOne({ _id:card.id , participants:{ $in:[activeAcc._id] } });
+   const conv = await conversation.findOne({ _id:card.id , participants:{ $in:[activeAcc._id] } , deletedBy:{ $nin:[activeAcc._id] }});
 
    // marking all non-seen messages as seen...
    await messages.updateMany(
@@ -120,7 +125,7 @@ export const chatCardOpenService = async (card:infoForChatCard) => {
    );
 }
 
-export const chatBlockingService = async (convid:string,updateTo:boolean) => {
+export const chatBlockingService = async (handle:string,convid:string,updateTo:boolean) => {
    await connectWithMongoDB() ;
     
    const user = await getDecodedDataFromCookie("accessToken");
@@ -130,25 +135,46 @@ export const chatBlockingService = async (convid:string,updateTo:boolean) => {
    if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
     
    // fetching the conversation...
-   const conv = await conversation.findOne({ _id:convid , participants:{ $in:[activeAcc._id] } });
+   const conv = await conversation.findOne({ _id:convid , participants:{ $in:[activeAcc._id] ,deletedBy:{ $nin:[activeAcc._id] } } });
+
+   // target account...
+   const targetAcc = await accounts.findOne({ username:handle.trim() , 'account.status':'ACTIVE' });
+
+   const blockdoc = await Block.findOne({ blockedByAcc:activeAcc._id , blockedAcc:targetAcc._id , source:'chat' });
 
    // making updation on conversation...
-   if (updateTo && conv.blockedBy.includes(activeAcc._id)) {
+   if (updateTo && blockdoc) {
     console.log("Logically incorrect action !!");
     return NextResponse.json({ message:'Already blocked this chat...' },{ status:404 });
    }
 
-   if (!updateTo && !conv.blockedBy.includes(activeAcc._id)) {
+   if (!updateTo && !blockdoc) {
     console.log("Logically incorrect action !!");
     return NextResponse.json({ message:'Not already blocked yet...' },{ status:404 });
    }
 
-   if (updateTo && !conv.blockedBy.includes(activeAcc._id)) {
-    await conversation.findOneAndUpdate({ _id: conv._id },{ $addToSet: { blockedBy: activeAcc._id } },{ new: true });
+   if (updateTo && !blockdoc) {
+    await Block.create({ blockedByAcc:activeAcc._id , blockedAcc:targetAcc._id , source:'chat' });
    }
 
-   if (!updateTo && conv.blockedBy.includes(activeAcc._id)) {
-    await conversation.findOneAndUpdate({ _id: conv._id },{ $pull: { blockedBy: activeAcc._id } },{ new: true });
+   if (!updateTo && blockdoc) {
+    await Block.findOneAndUpdate({ blockedByAcc:activeAcc._id , blockedAcc:targetAcc._id , source:'chat' },{ isActive:false });
    }
 }
 
+export const conversationDeletionService = async (cnvsnID:string) => {
+    await connectWithMongoDB() ;
+    
+   const user = await getDecodedDataFromCookie("accessToken");
+   if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    
+   const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+   if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
+
+   // adding account id in deletedBy...
+   await conversation.findOneAndUpdate(
+     { _id: cnvsnID, participants: { $in: [activeAcc._id] } },
+     { $addToSet: { deletedBy: activeAcc._id } },
+     { new: true }
+   );
+}

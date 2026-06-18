@@ -8,6 +8,7 @@ import axios from "axios";
 export interface reportInfoType {
   reportedFor: string,
   postId?:string,
+  convid?:string,
   description: string
   selectedOne: { label: string , value: string , priority: string }
 }
@@ -108,6 +109,7 @@ export const accountRepostSubmittionController = asyncErrorHandler( async (reque
         return NextResponse.json({ message:'report credential missing...' },{ status:400 });
     }
 
+    console.log(reportInfo);
     // await userReportService(reportInfo); // calling the database function...
     return NextResponse.json({ message:'Report submittion successfull...' },{ status:200 });
 })

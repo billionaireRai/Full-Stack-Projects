@@ -2,12 +2,13 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import { usernameRegex } from '@/app/controllers/regex'
 import Image from 'next/image'
 import { motion , AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import EmojiPicker, { EmojiClickData ,Theme } from 'emoji-picker-react'
 import { useSound } from 'use-sound'
-import { BanIcon, Eraser, Flag, Folder, Images, Mic, Music, Paperclip, PhoneIcon, SendIcon, Smile, Trash, Video, CheckCircle, MessageCirclePlus, User, PinIcon, SearchIcon, BellOff, Lock, Bell, PinOff, Ban, LockOpenIcon, MicOff, X } from 'lucide-react'
+import { BanIcon, Eraser, Flag, Folder, Images, Mic, Music, Paperclip, PhoneIcon, SendIcon, Smile, Trash, Video, CheckCircle, MessageCirclePlus, User, PinIcon, SearchIcon, BellOff, Lock, Bell, PinOff, Ban, LockOpenIcon, MicOff, X, AtSign } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import AudioRecordModal from '@/components/audioRecordModal'
 import Sharecontactonchat from '@/components/sharecontactonchat'
@@ -43,9 +44,10 @@ interface MessageCardProps {
   updateCardDetail: (msg: string, time: string) => void
   openBlockPop:() => void
   openReportPop:() => void
+  openDeletePop:() => void
 }
 
-export default function MessageCard({ chatCardDetails,openBlockPop, openReportPop , handleAudioPop, handleAddChat, updateCardDetail }: MessageCardProps) {
+export default function MessageCard({ chatCardDetails,openBlockPop, openReportPop , handleAudioPop, handleAddChat, updateCardDetail ,openDeletePop }: MessageCardProps) {
   const { resolvedTheme , } = useTheme()
   const [play] = useSound('/audio/notification.mp3')
   const heightGap: number = 200
@@ -61,6 +63,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   const [imgUrls, setimgUrls] = useState<string[]>([]);
   const [videoUrls, setvideoUrls] = useState<string[]>([]);
   const [audioUrls, setaudioUrls] = useState<string[]>([]);
+  const [mentions, setmentions] = useState<string[]>([]);
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false)
   const [loadingChat, setloadingChat] = useState<boolean>(false);
   const [sendingMessage, setsendingMessage] = useState<boolean>(false);
@@ -69,12 +72,13 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false)
   const [shareContact, setshareContact] = useState<boolean>(false)
 
+  const hasAddedMediaOrMention = MediaFiles.length > 0 || mentions.length > 0 ; // if some media is added to share...
   // Attachments option
   const attachFileoptions = useMemo(() => [
       { icon: <Images className="w-3 h-3 text-blue-500" />, label: 'Photos' , reference:imageRef },
       { icon: <Video className="w-3 h-3 text-purple-500" />, label: 'Videos' , reference:videoRef },
       { icon: <Music className="w-3 h-3 text-pink-500" />, label: 'Audio' , reference:audioRef },
-      { icon: <PhoneIcon className="w-3 h-3 text-red-500" />, label: 'Contact' },
+      { icon: <AtSign className="w-3 h-3 text-red-500" />, label: 'Mention' },
     ],
   [],)
 
@@ -299,7 +303,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   }
 
   const handleFileOptionClick = (option:attachmentOptionType) => {
-    if (option.label === 'Contact') {
+    if (option.label === 'Mention') {
       setshareContact(true);
     } else {
       setShowFilePopup(false);
@@ -371,6 +375,30 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
       e.target.value = '';
     };
 
+  // function for parsing mentions into Link...
+  const makeMentionsAsLink = (msg: string) => {
+    if (!msg?.trim()) return null ;
+  
+    const parts = msg.split(/(@[a-zA-Z0-9_]{8,20})/g);
+  
+    return parts.map((part, idx) => {
+      if (part.startsWith("@") && usernameRegex.test(part.slice(1))) {
+  
+       return (
+        <Link
+          key={idx}
+          href={`/${part}`}
+          className="text-yellow-500 hover:text-shadow-xs text-shadow-yellow-400"
+        >
+          {part}
+        </Link>
+       );
+      }
+        
+      return <React.Fragment key={idx}>{part}</React.Fragment>;
+    });
+  };
+
   return (
     <div className="flex flex-col h-full rounded-md">
       {!chatCardDetails ? (
@@ -432,13 +460,13 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
           </div>
           <div className='flex items-center justify-end gap-1 p-2 rounded-full flex-1'>
             {chatCardDetails.pinned && <PinIcon className="w-5 h-5 rotate-45 text-yellow-500" /> }
-            {chatCardDetails.blocked && <Ban className="w-5 h-5 text-red-500" /> }
+            {chatCardDetails.blockedTo && <Ban className="w-5 h-5 text-red-500" /> }
             {chatCardDetails.isMuted && <MicOff className="w-5 h-5 text-blue-500" /> }
           </div>
           <div className="relative">
             <button
               onClick={() => setopenChatThreeDot(!openChatThreeDot)}
-              className={`px-3 py-1 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition ${chatCardDetails.blocked && 'blur-none'}`}
+              className={`px-3 py-1 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition ${chatCardDetails.blockedTo && 'blur-none'}`}
             >
               <span>⋮</span>
             </button>
@@ -462,52 +490,52 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                 </Link>
 
                 <button
-                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
-                  disabled={chatCardDetails.blocked}
+                  disabled={chatCardDetails.blockedTo}
                 >
                   <Folder className="w-4 h-4" />
                   <div>View all attachements</div>
                 </button>
 
                 <button
-                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
-                  disabled={chatCardDetails.blocked}
+                  disabled={chatCardDetails.blockedTo}
                 >
                   {chatCardDetails.isMuted ? <Bell className="w-4 h-4"/> : <BellOff className="w-4 h-4" /> }
                   <div>{chatCardDetails.isMuted ? <b>UnMute</b> : 'Mute'} notifications</div>
                 </button>
 
                 <button
-                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
-                  disabled={chatCardDetails.blocked}
+                  disabled={chatCardDetails.blockedTo}
                 >
                   {chatCardDetails.pinned ? <PinOff className="w-4 h-4"/> : <PinIcon className="w-4 h-4 rotate-45" /> }
                   <div>{chatCardDetails.pinned ? <b>UnPin</b> : 'Pin'} chat</div>
                 </button>
 
                 <button
-                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
-                  disabled={chatCardDetails.blocked}
+                  disabled={chatCardDetails.blockedTo}
                 >
                   <SearchIcon className="w-4 h-4" />
                   <div>Search messages</div>
                 </button>
 
                 <button
-                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'blur-sm cursor-not-allowed'}`}
+                  className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
                   onClick={() => setopenChatThreeDot(false)}
-                  disabled={chatCardDetails.blocked}
+                  disabled={chatCardDetails.blockedTo}
                 >
                   <Eraser className="w-4 h-4" />
                   <div>Clear chat history</div>
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-gray-950"
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
                   onClick={() => { openReportPop() ; setopenChatThreeDot(false)}}
                 >
                   <Flag className="w-4 h-4" />
@@ -515,18 +543,18 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-gray-950"
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
                   onClick={() => { openBlockPop() ; setopenChatThreeDot(false) }}
                 >
-                  {chatCardDetails.blocked ? <LockOpenIcon className="w-4 h-4"/> : <Ban className="w-4 h-4" /> }
+                  {chatCardDetails.blockedTo ? <LockOpenIcon className="w-4 h-4"/> : <Ban className="w-4 h-4" /> }
                   <div>
-                    {chatCardDetails.blocked ? <b>UnBlock</b> : 'Block' } chats <b>{chatCardDetails?.handle}</b>
+                    {chatCardDetails.blockedTo ? <b>UnBlock</b> : 'Block' } chats <b>{chatCardDetails?.handle}</b>
                   </div>
                 </button>
 
                 <button
-                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-gray-950"
-                  onClick={() => setopenChatThreeDot(false)}
+                  className="w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-red-700 dark:text-red-700 hover:bg-red-100 dark:hover:bg-red-950"
+                  onClick={() => { openDeletePop?.()  ; setopenChatThreeDot(false)}}
                 >
                   <Trash className="w-4 h-4" />
                   <div>
@@ -539,7 +567,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
         </div>
 
         {/* Messages */}
-        <div ref={msgsection} className={`overflow-y-auto overflow-x-hidden flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blocked && 'blur-sm'}`}>
+        <div ref={msgsection} className={`overflow-y-auto overflow-x-hidden flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blockedTo && 'blur-sm'}`}>
          <AnimatePresence>
           {Messages.map((message) => (
             <motion.div
@@ -601,7 +629,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                       ))}
                     </div>
                   )}
-                  <p className="text-sm leading-relaxed break-words">{message.text}</p>
+                  <p className="text-sm leading-relaxed break-words">{makeMentionsAsLink(message.text)}</p>
                 </motion.div>
 
                 <div className={`flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 ${message.isOwn ? 'flex-row-reverse' : 'flex-row'}`}
@@ -635,44 +663,63 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
         </AnimatePresence>
       </div>
       {/* Message composer */}
-       <div className='flex flex-col justify-start gap-2 rounded-xl'>
+       <div className={`flex flex-col justify-start gap-2 ${hasAddedMediaOrMention && 'mt-5'} rounded-xl`}>
         <div className="flex flex-wrap gap-2 items-center rounded-xl">
+          {/* media user want to send... */}
           {[...imgUrls.map((url, index) => ({ url, index, kind: 'image' })),...videoUrls.map((url, index) => ({ url, index, kind: 'video' })),...audioUrls.map((url, index) => ({ url, index, kind: 'audio' }))].map((item) => (
             <div
               key={`${item.kind}-${item.index}-${item.url}`}
               className={`relative group rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden bg-gray-50 dark:bg-black ${item.kind === 'audio' ? 'w-xs' : 'w-50'} h-42`}
             >
+              <AnimatePresence>
               {item.kind === 'image' && (
+                <motion.div
+                 initial={{ scale: 0.9, opacity: 0 }}
+                 animate={{ scale: 1, opacity: 1 }}
+                 exit={{ scale:0.9 , opacity:0 }}
+                 transition={{ delay: item.index * 0.05 }}
+                 >
                 <Image
                   src={item.url}
                   alt={`preview image ${item.index + 1}`}
                   fill
-                  className="object-cover"
+                  className="object-cover cursor-pointer transition-transform duration-200 hover:scale-102"
+                  onClick={() => { handleMediaPop({ url:item.url , media_type:item.kind }) }}
                 />
+                </motion.div>
               )}
 
+
               {item.kind === 'video' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                  <video src={item.url} className="w-full h-full object-cover" controls />
-                </div>
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: item.index * 0.05 }}
+                  className="absolute inset-0 cursor-pointer transition-transform duration-200 hover:scale-102 flex items-center justify-center bg-black/10"
+                >
+                  <video src={item.url} className="w-full h-full object-cover" controls onClick={() => { handleMediaPop({ url:item.url , media_type:item.kind }) }} />
+                </motion.div>
               )}
 
               {item.kind === 'audio' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-2">
-                  <span className="text-yellow-500 rounded-full bg-yellow-100 dark:bg-yellow-950 p-4">
-                    <Music className="w-8 h-8" />
-                  </span>
-                  <span className="text-[10px] text-gray-600 dark:text-gray-300 w-full">
-                    <audio
-                      controls
-                      preload="metadata"
-                    >
-                      <source src={item.url} type="audio/mpeg" />
-                      Your browser does not support audio.
-                    </audio>
-                  </span>
-                </div>
+                 <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: item.index * 0.05 }}
+                  className="absolute inset-0 cursor-pointer transition-transform duration-200 hover:scale-102 flex flex-col items-center justify-center gap-3 p-2"
+                >
+                   <span className="text-yellow-500 rounded-full bg-yellow-100 dark:bg-yellow-950 p-4">
+                     <Music className="w-8 h-8" />
+                   </span>
+                   <span className="text-[10px] text-gray-600 dark:text-gray-300 w-full" >
+                     <audio controls preload="metadata">
+                       <source src={item.url} type="audio/mpeg" />
+                       Your browser does not support audio.
+                     </audio>
+                   </span>
+                 </motion.div>
               )}
+              </AnimatePresence>
 
               <button
                 type="button"
@@ -684,20 +731,44 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                       ? removeArrayElement([setvideoUrls, setMediaFiles], item.index)
                       : removeArrayElement([setaudioUrls, setMediaFiles], item.index)
                 }
-                className="absolute top-1 right-1 w-7 h-7 cursor-pointer rounded-full bg-black dark:bg-black/80 shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 w-7 h-7 rounded-full cursor-pointer bg-black dark:bg-black/80 shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity"
               >
                 <X className="w-4 h-4 text-red-500" />
               </button>
             </div>
           ))}
+          {/* accounts user wanna mention */}
+          {Array.isArray(mentions) && mentions.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+            {mentions.map((handle,idx) => (
+               <div>
+                <Link
+                  key={handle}
+                  href={`/${handle}`}
+                  className="text-xs font-medium text-yellow-600 dark:text-blue-400 bg-yellow-50 dark:bg-blue-950 px-2 py-1 rounded-full hover:underline"
+                >
+                  {handle}
+                </Link>
+              <button
+                type="button"
+                aria-label="remove media"
+                onClick={() => setmentions(mentions.filter((mention) => mention !== handle))}
+                className="absolute top-1 right-1 w-7 h-7 rounded-full cursor-pointer bg-black dark:bg-black/80 shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity"
+              >
+                <X className="w-4 h-4 text-red-500" />
+              </button>
+             </div>
+            ))}
+            </div>
+          )}
         </div>
-        <div className={`messagesendsection relative border border-gray-200 dark:border-gray-900 inset-shadow-yellow-200 w-full rounded-xl px-4 py-1 mt-3 bg-white dark:bg-black flex flex-row flex-nowrap items-center gap-3 z-10 ${chatCardDetails.blocked && 'blur-sm'}`}>
+        <div className={`messagesendsection relative border border-gray-200 dark:border-gray-900 inset-shadow-yellow-200 w-full rounded-xl px-4 py-1 mt-3 bg-white dark:bg-black flex flex-row flex-nowrap items-center gap-3 z-10 ${chatCardDetails.blockedTo && 'blur-sm'}`}>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                disabled={chatCardDetails.blocked}
-                className={`p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${chatCardDetails.blocked && 'cursor-not-allowed'}`}
+                disabled={chatCardDetails.blockedTo}
+                className={`p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'cursor-not-allowed'}`}
               >
                 <Smile className="w-4 h-4 dark:invert" />
               </button>
@@ -724,7 +795,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowFilePopup(!showFilePopup)}
-                  disabled={chatCardDetails.blocked}
+                  disabled={chatCardDetails.blockedTo}
                   className='p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950'
                 >
                   <Paperclip className="w-4 h-4 dark:invert" />
@@ -740,15 +811,15 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                 transition={{ duration: 0.3 }}
                 className='file_popup absolute bottom-12 left-20 transform -translate-x-1/2 mt-3 z-50 w-44 bg-white dark:bg-black border rounded-lg shadow-xl overflow-hidden'
               >
-                <div className="flex flex-col p-2">
+                <div className="flex flex-col p-1.5">
                   {attachFileoptions.map((item, index) => (
                     <button
                       key={index}
                       onClick={() => handleFileOptionClick(item)}
-                      className="flex items-center cursor-pointer rounded-lg gap-3 px-3 py-2 w-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-950"
+                      className="flex items-center cursor-pointer rounded-lg gap-3 px-3 py-2 w-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-950"
                     >
                       <div 
-                        className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800">
+                        className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-950">
                         {item.icon}
                       </div>
                       <span className="tracking-wide">{item.label}</span>
@@ -764,18 +835,18 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
               type="text"
               value={messageText}
               onChange={(e) => { setmessageText(e.target.value) }}
-              disabled={chatCardDetails.blocked}
+              disabled={chatCardDetails.blockedTo}
               placeholder="type a message..."
-              className={`w-full text-sm dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-yellow-100 dark:focus:bg-gray-950 ${chatCardDetails.blocked && 'cursor-not-allowed'}`}
+              className={`w-full text-sm dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-yellow-100 dark:focus:bg-gray-950 ${chatCardDetails.blockedTo && 'cursor-not-allowed'}`}
             />
           </div>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              {messageText ? (
+              {(messageText.trim() || hasAddedMediaOrMention) ? (
                 <button
                   onClick={() => handleSendMessage(messageText)}
-                  disabled={chatCardDetails.blocked}
+                  disabled={chatCardDetails.blockedTo}
                   className='p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950'
                 >
                   <SendIcon className="w-4 h-4 dark:invert" />
@@ -783,7 +854,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
               ) : (
                 <button
                   onClick={handleAudioPop}
-                  disabled={chatCardDetails.blocked}
+                  disabled={chatCardDetails.blockedTo}
                   className='p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950'
                 >
                   <Mic className="w-4 h-4 dark:invert" />
@@ -829,6 +900,17 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   )}
 {showMedia && PopMedia && (
   <Mediapopmodal closepop={() => { setshowMedia(false) }} media={PopMedia}/>
+)}
+
+{shareContact && (
+  <Sharecontactonchat
+    closeShareContact={() => {
+      setshareContact(false)
+    }}
+    addInMention={(handle) => {
+      setmentions((prev) => (prev ? [...prev, handle] : prev))
+    }}
+  />
 )}
 
 </div>

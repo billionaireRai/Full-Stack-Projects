@@ -13,6 +13,7 @@ import users from "../models/users";
 import { newAccType } from "@/app/controllers/user";
 import { generateReportEmailHTML } from "@/components/report";
 import { sendFollowNotification } from "./notifications";
+import conversation from "../models/conversation";
 
 export async function userFollowService(handle: string, follow: boolean) {
     await connectWithMongoDB(); // establishing DB connection...
@@ -63,41 +64,42 @@ export async function userReportService(report: reportInfoType) {
     await connectWithMongoDB();
 
     const user = await getDecodedDataFromCookie("accessToken");
-    if (user instanceof Error)
-        return NextResponse.json({ message: user.message }, { status: 401 });
+    if (user instanceof Error)  return NextResponse.json({ message: user.message }, { status: 401 });
 
-    const myAccount = await accounts.findOne({
-        userId: user.id,
-        'account.Active': true
+    const myAccount = await accounts.findOne({ userId: user.id, 'account.Active': true });
+
+    if (!myAccount) return NextResponse.json({ message: 'Your account not found' }, { status: 404 });
+
+    let reportedEntityId , reportedEntityType ; // declaring required varaibles...
+
+
+    const reportedAccount = await accounts.findOne({ 
+        username: report.reportedFor.substring(1) , 'account.status':{ $nin:['DELETION_PENDING', 'DELETED', 'SUSPENDED']} 
     });
 
-    if (!myAccount)
-        return NextResponse.json({ message: 'Your account not found' }, { status: 404 });
-
-    let reportedEntityId;
-    let reportedEntityType;
+    if (!reportedAccount) return NextResponse.json({ message: 'Account to Report for not found !!' }, { status: 404 });
 
     if (report.postId) {
         // POST REPORT FLOW...
         const reportedPost = await Post.findById(report.postId);
 
-        if (!reportedPost)
-            return NextResponse.json({ message: 'Post not found' }, { status: 404 });
+        if (!reportedPost) return NextResponse.json({ message: 'Post not found' }, { status: 404 });
 
         reportedEntityId = reportedPost._id;
         reportedEntityType = 'post';
 
-    } else {
-        // ACCOUNT REPORT FLOW...
-        const reportedAccount = await accounts.findOne({
-            username: report.reportedFor.substring(1)
-        });
+    } else if (report.convid){
+        const conv = await conversation.findOne({ _id:report.convid , participants:{ $in:[myAccount._id] } , isDeleted:false });
 
-        if (!reportedAccount)
-            return NextResponse.json({ message: 'Account not found' }, { status: 404 });
+        if (!conv) return NextResponse.json({ message: 'Conversation to report not found !!' }, { status: 404 });
+
+        reportedEntityId = conv._id ;
+        reportedEntityType = 'chat';
+
+    } else {
 
         reportedEntityId = reportedAccount._id;
-        reportedEntityType = 'account';
+        reportedEntityType = 'profile';
     }
 
     const reportEntry = new reports({
@@ -109,12 +111,12 @@ export async function userReportService(report: reportInfoType) {
         priority: report.selectedOne.priority
     });
 
-    await reportEntry.save();
+    await reportEntry.save(); // saving to the collection...
 
     await sendEmailFunction({
         to: user.email,
         subject: "Report Submitted Successfully - Briezl",
-        html: generateReportEmailHTML({ description: report.description, reason: report.selectedOne.label, reportedFor: report.reportedFor}),
+        html: generateReportEmailHTML({ description: report.description, reason: report.selectedOne.label, reportedFor: report.reportedFor , postid:report.postId , convid:report.convid }),
     });
 
     return NextResponse.json({ message: 'Report submitted successfully' }, { status: 200 });

@@ -44,7 +44,7 @@ const messageSchema = new mongoose.Schema(
       maxlength: 5000,
       default: null
     },
-    postLink:{
+    link:{
       type:String ,
       default:null,
       trim:true

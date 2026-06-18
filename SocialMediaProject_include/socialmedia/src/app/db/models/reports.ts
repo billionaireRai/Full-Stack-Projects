@@ -18,7 +18,7 @@ const reportSchema = new mongoose.Schema(
     reportedEntityType: {
       type: String,
       required: true,
-      enum: ["post", "comment", "chat","message","profile"],
+      enum: ["post","comment","chat","message","profile"],
       index: true
     },
 

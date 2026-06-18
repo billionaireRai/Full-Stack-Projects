@@ -36,7 +36,7 @@ export const connectWithMongoDB = async () => {
 
 
     const collections = await db.collections() ;
-    const toCreate = [process.env.DB_COL_USERS,process.env.DB_COL_POSTS,process.env.DB_COL_COMMENTS,process.env.DB_COL_FOLLOWS,process.env.DB_COL_LIKES,process.env.DB_COL_VIEWS,process.env.DB_COL_NOTIFICATIONS,process.env.DB_COL_MESSAGES,process.env.DB_COL_SUBSCRIPTION,process.env.DB_COL_REPORTS,process.env.DB_COL_FEEDBACK,process.env.DB_COL_BLOCKED,process.env.DB_COL_ACCOUNTS,process.env.DB_COL_SETTINGS,process.env.DB_COL_OAUTH,process.env.DB_COL_BOOKMARK,process.env.DB_COL_POLLS,process.env.DB_COL_PRESENSE,process.env.DB_COL_CONVERSATION,process.env.DB_COL_PUBKEYS] ;
+    const toCreate = [process.env.DB_COL_USERS,process.env.DB_COL_POSTS,process.env.DB_COL_COMMENTS,process.env.DB_COL_FOLLOWS,process.env.DB_COL_LIKES,process.env.DB_COL_VIEWS,process.env.DB_COL_NOTIFICATIONS,process.env.DB_COL_MESSAGES,process.env.DB_COL_SUBSCRIPTION,process.env.DB_COL_REPORTS,process.env.DB_COL_FEEDBACK,process.env.DB_COL_BLOCKED,process.env.DB_COL_ACCOUNTS,process.env.DB_COL_SETTINGS,process.env.DB_COL_OAUTH,process.env.DB_COL_BOOKMARK,process.env.DB_COL_POLLS,process.env.DB_COL_PRESENSE,process.env.DB_COL_CONVERSATION,process.env.DB_COL_PUBKEYS,process.env.DB_COL_MUTES] ;
     const validCollections = toCreate.filter((name) => {
       if (!name) {
         console.warn("Warning: One of the MongoDB collection env variables is missing.");

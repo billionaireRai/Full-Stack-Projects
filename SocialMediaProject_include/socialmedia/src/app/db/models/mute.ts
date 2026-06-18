@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 
-const blockSchema = new mongoose.Schema(
+const muteSchema = new mongoose.Schema(
   {
-    blockedByAcc: {
+    mutedByAcc: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "account",
       required: true,
       index: true
     },
-    blockedAcc: {
+    mutedAcc: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "account",
       required: true,
@@ -29,7 +29,7 @@ const blockSchema = new mongoose.Schema(
 );
 
 // Prevent duplicate blocks....
-blockSchema.index( { blockedByAcc: 1, blockedAcc: 1 }, { unique: true });
+muteSchema.index( { mutedByAcc: 1, mutedAcc: 1 }, { unique: true });
 
-const Block = mongoose.models.Block || mongoose.model("Block", blockSchema);
-export default Block;
+const Mutes = mongoose.models.mutes || mongoose.model("mutes", muteSchema);
+export default Mutes;

@@ -22,6 +22,9 @@ export const gettingAccountService = async (text:string) => {
     const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' });
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
+    const blockedDocs = await Block.find({ blockedByAcc:activeAcc._id , isActive:true , source:'profile' });
+    const blockedAccIds = blockedDocs.map(block => block.blockedAcc);
+
     async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
         const paticularAcc = await accounts.findById(accountId) ;
         // getting count of followers and followings...
@@ -61,7 +64,8 @@ export const gettingAccountService = async (text:string) => {
     const accountsMatched = await accounts.find({
         $and: [
             { $or: [{ name: { $regex: text, $options: 'i' } }, { username: { $regex: text, $options: 'i' } }] },
-            { 'account.status': 'ACTIVE' }
+            { 'account.status': 'ACTIVE' },
+            { _id:{ $nin:blockedAccIds }}
         ]
     }) ;
 
@@ -84,7 +88,7 @@ export const exploreDetailsForAccountService = async () => {
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     // Fetch blocked account IDs
-    const blockedDocs = await Block.find({ blockedByAcc: activeAcc._id, isActive: true });
+    const blockedDocs = await Block.find({ blockedByAcc: activeAcc._id, isActive: true , source:'profile'});
     const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
     // generating the follow suggestions...
     const followingDocs: InstanceType<typeof follows>[] = await follows.find({ followerId : activeAcc._id , isDeleted:false});

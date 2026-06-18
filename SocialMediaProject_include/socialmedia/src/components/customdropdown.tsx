@@ -20,7 +20,11 @@ export default function CustomDropdown({ selectedValue, onChange, options }: Cus
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const selectedOption = options.find(option => option.value === selectedValue.value);
   
-  const handleSelect = (option: Option) => {
+  const handleSelect = (option: Option, e: React.MouseEvent) => {
+    // Preventing accidental submission when used inside <form>
+    e.preventDefault()
+    e.stopPropagation()
+
     onChange(option);
     setIsOpen(false);
   };
@@ -56,7 +60,7 @@ export default function CustomDropdown({ selectedValue, onChange, options }: Cus
           {options.map((option) => (
             <div
               key={option.value}
-              onClick={() => handleSelect(option)}
+              onClick={(e) => handleSelect(option,e)}
               className={`px-4 py-2 cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-black transition-colors duration-150 ${
                 selectedValue.value === option.value ? 'dark:bg-gray-950 bg-yellow-300 text-yellow-600 dark:text-blue-300' : 'text-gray-900 dark:text-gray-100'
               }`}

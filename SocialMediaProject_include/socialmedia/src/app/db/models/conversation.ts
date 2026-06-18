@@ -20,19 +20,12 @@ const conversationSchema = new mongoose.Schema(
         ref: "account",
       }
     ],
-    mutedBy:[
+    deletedBy:[
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "account",
+        ref: "account"
       }
     ],
-    blockedBy:[
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "account",
-      }
-    ],
-    
     isGroup: {
       type: Boolean,
       default: false,
@@ -48,7 +41,6 @@ conversationSchema.path("participants").validate(function (value: any[]) {
 
 conversationSchema.index({ participants: 1 });
 conversationSchema.index({ lastMessage: 1, "updatedAt": -1 });
-conversationSchema.index({ participants: 1 }, { unique: true });
 
 const conversation = mongoose.models.conversation || mongoose.model("conversation", conversationSchema);
 

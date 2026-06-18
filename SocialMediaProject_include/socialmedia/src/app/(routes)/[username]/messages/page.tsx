@@ -4,7 +4,6 @@ import React,{ useState , useEffect }from 'react'
 import ChatAccountcard from '@/components/chataccountcard'
 import ReportPop from '@/components/reportPop'
 import Link from 'next/link'
-// import useUnreadMessage from '@/app/states/unreadmessage'; 
 import Image from 'next/image';
 import AudioRecordModal from '@/components/audioRecordModal';
 import BlockChatPop from '@/components/blockchat';
@@ -16,6 +15,7 @@ import { SearchIcon, PlusCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, User
 import toast from 'react-hot-toast';
 import { infoForChatCard } from '@/components/chataccountcard'
 import axiosInstance from '@/lib/interceptor';
+import DeleteModal from '@/components/deletemodal'
 
 export default function Messages() {
   const [ChatSearch, setChatSearch] = useState('') ; // input for searching a paticular chat...
@@ -24,7 +24,7 @@ export default function Messages() {
   const [addChatPop, setaddChatPop] = useState<boolean>(false);
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false) ;
   const [blockChatPop, setblockChatPop] = useState<boolean>(false);
-  const [shareContact, setshareContact] = useState<boolean>(false);
+  const [showDeletePop, setshowDeletePop] = useState<boolean>(false);
   const [showReportChat, setshowReportChat] = useState<boolean>(false);
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false) ;
   const [showAudioModal, setShowAudioModal] = useState<boolean>(false) ;
@@ -38,7 +38,8 @@ export default function Messages() {
       isVerified: true,
       pinned:false,
       isMuted:true,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2,
       publicKey:'abcdefgh'
@@ -52,7 +53,8 @@ export default function Messages() {
       isVerified: false,
       pinned:true,
       isMuted:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKey:'ijklmnop'
@@ -66,7 +68,8 @@ export default function Messages() {
       isVerified:true,
       pinned:true,
       isMuted:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKey:'qrstuvwx'
@@ -80,7 +83,8 @@ export default function Messages() {
       isVerified:false,
       isMuted:false,
       pinned:false,
-      blocked:true,
+      blockedTo:true,
+      blockedBy:false,      
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 4,
       publicKey:'yzagdgtebv'
@@ -94,7 +98,8 @@ export default function Messages() {
       isVerified:true,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKey:'rppwmlmbint'
@@ -108,7 +113,8 @@ export default function Messages() {
       isVerified:false,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKey:'30mr3m0gnkfs'
@@ -122,7 +128,8 @@ export default function Messages() {
       isVerified:true,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1,
       publicKey:'39jjnnnubfnef'
@@ -136,7 +143,8 @@ export default function Messages() {
       isVerified:true,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1,
       publicKey:'dkmwdibvettt'
@@ -150,7 +158,8 @@ export default function Messages() {
       isVerified:false,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 3,
       publicKey:'rnniogr2rpr'
@@ -164,7 +173,8 @@ export default function Messages() {
       isVerified:false,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKey:'0n1o39njje9'
@@ -178,7 +188,8 @@ export default function Messages() {
       isVerified:false,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2,
       publicKey:'wlmwnnivrmwp'
@@ -192,7 +203,8 @@ export default function Messages() {
       isVerified:true,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1,
       publicKey:'ofnndisbntuc'
@@ -206,7 +218,8 @@ export default function Messages() {
       isVerified:true,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKey:'jsinjwenoi5rn'
@@ -220,7 +233,8 @@ export default function Messages() {
       isVerified:false,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 5,
       publicKey:'eon2nigkmvort'
@@ -234,7 +248,8 @@ export default function Messages() {
       isVerified:false,
       isMuted:false,
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKey:'utbgnhskrnohwe'
@@ -256,12 +271,13 @@ export default function Messages() {
       handle: String(AccForChat.decodedHandle),
       isVerified: Boolean(AccForChat.account?.isVerified),
       pinned:false,
-      blocked:false,
+      blockedTo:false,
+      blockedBy:false,
       isMuted:false,
       lastMessage: 'New chat created just now !!',
       timestamp: 'Just now',
       publicKey:pubkey.trim(),
-      avatarUrl: AccForChat.account?.avatarUrl ?? '/images/myProfile.jpg',
+      avatarUrl: String(AccForChat.account?.avatarUrl),
       unreadCount: 0,
     };
     // handling some edge cases...
@@ -360,6 +376,32 @@ export default function Messages() {
     });
   }
 
+  // function returning next chat...
+  function giveNextChat(CHATID?:string) : infoForChatCard {
+    const currentChatIndex = conversations.findIndex(conv => conv.id === CHATID);
+    const targetIndex = currentChatIndex === (conversations.length - 1) ? 0 : (currentChatIndex + 1) ; 
+    return conversations[targetIndex] ;
+  }
+  const handleChatDeletion = async () => {
+    const loadingT = toast.loading(`Deleting your chat with ${CurrentOpenChat?.handle}`);
+    try {
+      const deletionApi = await axiosInstance.delete(`/api/account/conversations?conversationid=${CurrentOpenChat?.id}`);
+      if (deletionApi.status === 200) {
+        toast.dismiss(loadingT);
+        toast.success(`Chat deleted successfully !!`);
+        setshowDeletePop(false);
+        setCurrentOpenChat(giveNextChat(CurrentOpenChat?.id));
+        setconversations(conversations.filter((conv) => conv.id !== CurrentOpenChat?.id));
+      } else {
+        toast.error(`Server status unfavourable ${deletionApi.status}`);
+        toast.dismiss(loadingT);
+      }
+    } catch (error) {
+      toast.error("An error occured in deletion !!");
+      toast.dismiss(loadingT);
+    }
+  }
+
   return (
     <div className='h-full flex flex-col lg:flex-row p-1 gap-1 font-poppins rounded-md dark:bg-black'>
         <div className={`relative chatList h-full flex-col gap-1 min-w-xs rounded-md overflow-y-auto overflow-x-hidden ${chatSlideOpen ? 'hidden lg:flex' : 'flex'}`}>
@@ -428,6 +470,7 @@ export default function Messages() {
           handleAddChat={() => { setaddChatPop(true) }}
           openBlockPop={() => { setblockChatPop(true) }}
           openReportPop={() => { setshowReportChat(true) }}
+          openDeletePop={() => { setshowDeletePop(true) }}
          />
         </div>
         
@@ -440,8 +483,8 @@ export default function Messages() {
        {showReportChat && CurrentOpenChat && (
         <ReportPop closeReportModal={() => { setshowReportChat(false) }} username={CurrentOpenChat.handle} convid={CurrentOpenChat.id} />
        )}
-       {shareContact && (
-         <Sharecontactonchat closeShareContact={() => setshareContact(false)}  />
+       {showDeletePop && CurrentOpenChat && (
+        <DeleteModal closePopUp={() => { setshowDeletePop(false) }} itemType='entire chat' onDelete={handleChatDeletion}/>
        )}
 
        {/* correct this */}
@@ -452,9 +495,6 @@ export default function Messages() {
          updateblockState={(updatedState) => {setCurrentOpenChat((prev) => (prev ? { ...prev, blocked: updatedState } : prev)) }}
 
         />
-       )}
-       {shareContact && (
-         <Sharecontactonchat closeShareContact={() => setshareContact(false)} />
        )}
     </div>
 )}

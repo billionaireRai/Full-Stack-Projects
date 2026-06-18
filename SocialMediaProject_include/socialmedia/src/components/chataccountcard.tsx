@@ -16,7 +16,8 @@ export interface infoForChatCard {
   timestamp: string;
   avatarUrl: string; 
   pinned:boolean;
-  blocked:boolean;
+  blockedTo:boolean;
+  blockedBy:boolean;
   isMuted:boolean;
   publicKey:string;
   unreadCount: number;
@@ -58,7 +59,7 @@ export default function ChatAccountcard({ cardInfo , currentChat , countUpdate ,
    <div className='rounded-xl'>
      <div className='rounded-full w-fit flex items-center justify-start gap-1.5 absolute'>
       {cardInfo.pinned && ( <Pin className='w-5 h-5 rotate-45 text-yellow-500'/> )}
-      {cardInfo.blocked && ( <BanIcon className='w-5 h-5 text-red-500' />)}
+      {cardInfo.blockedTo && ( <BanIcon className='w-5 h-5 text-red-500' />)}
       {cardInfo.isMuted && ( <MicOffIcon className='w-5 h-5 text-blue-500' />)}
      </div>
     <div
