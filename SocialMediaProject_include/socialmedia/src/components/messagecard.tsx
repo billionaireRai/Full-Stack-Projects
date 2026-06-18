@@ -18,6 +18,7 @@ import AddAccinchatlist from '@/components/adduserinchatlist'
 import toast from 'react-hot-toast'
 import { userCardProp } from '@/components/usercard'
 import { infoForChatCard } from './chataccountcard'
+import Attachmentpop from './attachmentpop'
 
 interface Message {
   id: string
@@ -68,6 +69,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   const [loadingChat, setloadingChat] = useState<boolean>(false);
   const [sendingMessage, setsendingMessage] = useState<boolean>(false);
   const [showMedia, setshowMedia] = useState<boolean>(false);
+  const [showAttachments, setshowAttachments] = useState<boolean>(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false)
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false)
   const [shareContact, setshareContact] = useState<boolean>(false)
@@ -75,10 +77,10 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   const hasAddedMediaOrMention = MediaFiles.length > 0 || mentions.length > 0 ; // if some media is added to share...
   // Attachments option
   const attachFileoptions = useMemo(() => [
-      { icon: <Images className="w-3 h-3 text-blue-500" />, label: 'Photos' , reference:imageRef },
-      { icon: <Video className="w-3 h-3 text-purple-500" />, label: 'Videos' , reference:videoRef },
-      { icon: <Music className="w-3 h-3 text-pink-500" />, label: 'Audio' , reference:audioRef },
-      { icon: <AtSign className="w-3 h-3 text-red-500" />, label: 'Mention' },
+      { icon: <Images className="w-5 h-5 text-blue-500" />, label: 'Photos' , reference:imageRef },
+      { icon: <Video className="w-5 h-5 text-purple-500" />, label: 'Videos' , reference:videoRef },
+      { icon: <Music className="w-5 h-5 text-pink-500" />, label: 'Audio' , reference:audioRef },
+      { icon: <AtSign className="w-5 h-5 text-red-500" />, label: 'Mention' },
     ],
   [],)
 
@@ -289,6 +291,8 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
       if (showFilePopup && !target.closest('.file_popup')) setShowFilePopup(false);
       
       if (showEmojiPicker && !target.closest('.emoji_picker_wrapper'))  setShowEmojiPicker(false);
+
+      if (shareContact && !target.closest('.mentionpop'))  setshareContact(false);
     }
 
     document.addEventListener('mousedown', handleClickOutside) ;
@@ -296,15 +300,22 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
     return () => {
       document.removeEventListener('mousedown', handleClickOutside) ;
     }
-  }, [openChatThreeDot, showFilePopup,showEmojiPicker])
+  }, [openChatThreeDot,showFilePopup,showEmojiPicker,shareContact])
 
   const onEmojiClick = (emojiData: EmojiClickData) => {
     setmessageText((prev) => prev + emojiData.emoji)
   }
 
+  // function for handling mention adding...
+  const handleMentionAdd = (handle:string) => { 
+    setmentions((prev) => (prev ? [...prev, handle] : prev));
+    toast.success(`Mentioned account ${handle}`);
+   }
+
   const handleFileOptionClick = (option:attachmentOptionType) => {
     if (option.label === 'Mention') {
       setshareContact(true);
+      setShowFilePopup(false);
     } else {
       setShowFilePopup(false);
       option.reference?.current?.click();
@@ -491,7 +502,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
 
                 <button
                   className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
-                  onClick={() => setopenChatThreeDot(false)}
+                  onClick={() => { setshowAttachments(true) ; setopenChatThreeDot(false) }}
                   disabled={chatCardDetails.blockedTo}
                 >
                   <Folder className="w-4 h-4" />
@@ -737,15 +748,22 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
               </button>
             </div>
           ))}
-          {/* accounts user wanna mention */}
+        </div>
+          {/* accounts which user wanna mention */}
           {Array.isArray(mentions) && mentions.length > 0 && (
             <div className="flex flex-wrap gap-2">
             {mentions.map((handle,idx) => (
-               <div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }} 
+                  key={idx} 
+                  className='group relative border rounded-full flex items-center justify-center'
+                >
                 <Link
                   key={handle}
                   href={`/${handle}`}
-                  className="text-xs font-medium text-yellow-600 dark:text-blue-400 bg-yellow-50 dark:bg-blue-950 px-2 py-1 rounded-full hover:underline"
+                  className="text-sm font-semibold text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-gray-950 py-2 px-3 rounded-full "
                 >
                   {handle}
                 </Link>
@@ -753,15 +771,15 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                 type="button"
                 aria-label="remove media"
                 onClick={() => setmentions(mentions.filter((mention) => mention !== handle))}
-                className="absolute top-1 right-1 w-7 h-7 rounded-full cursor-pointer bg-black dark:bg-black/80 shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity"
+                className="absolute -top-2 -right-2 p-1 w-5 h-5 rounded-full cursor-pointer bg-black dark:bg-black/80 shadow-sm flex items-center justify-center opacity-0 group-hover: group-hover:opacity-50 hover:opacity-100 transition-opacity"
               >
-                <X className="w-4 h-4 text-red-500" />
+                <X className="text-red-500" />
               </button>
-             </div>
+             </motion.div>
             ))}
             </div>
           )}
-        </div>
+
         <div className={`messagesendsection relative border border-gray-200 dark:border-gray-900 inset-shadow-yellow-200 w-full rounded-xl px-4 py-1 mt-3 bg-white dark:bg-black flex flex-row flex-nowrap items-center gap-3 z-10 ${chatCardDetails.blockedTo && 'blur-sm'}`}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -804,12 +822,27 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
               <TooltipContent>Attach file</TooltipContent>
             </Tooltip>
 
+            {/* mention pop container... */}
+            {shareContact && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }} 
+                className='mentionpop absolute bottom-10 left-0 border border-gray-200 dark:border-gray-800 rounded-xl'>
+              <Sharecontactonchat 
+                closeShareContact={() => { setshareContact(false) }}
+                addInMention={(handle) => { handleMentionAdd(handle) }}
+              />
+              </motion.div>
+            )}
+
+            {/* attachment controller options... */}
             {showFilePopup && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className='file_popup absolute bottom-12 left-20 transform -translate-x-1/2 mt-3 z-50 w-44 bg-white dark:bg-black border rounded-lg shadow-xl overflow-hidden'
+                className='file_popup absolute bottom-10 left-0 mt-3 z-50 w-44 bg-white dark:bg-black border rounded-lg shadow-xl overflow-hidden'
               >
                 <div className="flex flex-col p-1.5">
                   {attachFileoptions.map((item, index) => (
@@ -836,8 +869,8 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
               value={messageText}
               onChange={(e) => { setmessageText(e.target.value) }}
               disabled={chatCardDetails.blockedTo}
-              placeholder="type a message..."
-              className={`w-full text-sm dark:bg-black text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-xl px-5 py-2.5 outline-none border-transparent border-none focus:bg-yellow-100 dark:focus:bg-gray-950 ${chatCardDetails.blockedTo && 'cursor-not-allowed'}`}
+              placeholder="Type your message..."
+              className={`w-full text-sm backdrop-blur-sm outline-none border border-transparent focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30 rounded-md px-3 py-2 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500 transition duration-300 ${chatCardDetails.blockedTo && 'cursor-not-allowed'}`}
             />
           </div>
 
@@ -902,15 +935,8 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   <Mediapopmodal closepop={() => { setshowMedia(false) }} media={PopMedia}/>
 )}
 
-{shareContact && (
-  <Sharecontactonchat
-    closeShareContact={() => {
-      setshareContact(false)
-    }}
-    addInMention={(handle) => {
-      setmentions((prev) => (prev ? [...prev, handle] : prev))
-    }}
-  />
+{showAttachments && (
+  <Attachmentpop closePop={() => { setshowAttachments(false) }} menuOptions={attachFileoptions} />
 )}
 
 </div>

@@ -285,16 +285,17 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
    
 
   return (
-    <div className="w-[400px] max-w-xl min-h-[400px] mx-auto flex flex-col gap-2 p-3 bg-white dark:bg-black rounded-xl">
+    <div className="w-[500px] max-w-2xl min-h-[400px] mx-auto flex flex-col gap-2 p-3 bg-white dark:bg-black rounded-xl">
       {/* Search Input */}
       <div className="relative">
         <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
           type="text"
+          autoFocus
           value={searchValue}
           onChange={(e) => { setsearchValue(e.target.value)}}
           placeholder={placeholder}
-          className="w-full pl-10 pr-4 py-3 text-sm outline-none border-none rounded-t-lg bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+          className="w-full pl-10 pr-4 py-3 text-sm outline-none border border-transparent focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30 rounded-md text-gray-900 dark:text-gray-100 dark:placeholder-gray-500 transition duration-300"
         />
       </div>
 
