@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import useCreatePost from '@/app/states/createpost';
 import { useTheme } from "next-themes";
+import Videoplayer from "./videoplayer";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { userCardProp } from "./usercard";
@@ -333,9 +334,9 @@ export default function CreatePost() {
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ delay: index * 0.05 }}
-                            className="relative group rounded-xl overflow-hidden shadow-md"
+                            className="relative group rounded-xl overflow-hidden bg-black shadow-md"
                           >
-                            <video src={url} className="w-full h-70 object-cover" controls />
+                            <Videoplayer url={url} controls={true} />
                             <button
                               onClick={() => removeArrayElement([setVideoArr, setVideoFiles], index)}
                               className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 backdrop-blur-sm cursor-pointer"

@@ -19,6 +19,7 @@ import toast from 'react-hot-toast'
 import { userCardProp } from '@/components/usercard'
 import { infoForChatCard } from './chataccountcard'
 import Attachmentpop from './attachmentpop'
+import Videoplayer from './videoplayer'
 
 interface Message {
   id: string
@@ -77,10 +78,10 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   const hasAddedMediaOrMention = MediaFiles.length > 0 || mentions.length > 0 ; // if some media is added to share...
   // Attachments option
   const attachFileoptions = useMemo(() => [
-      { icon: <Images className="w-5 h-5 text-blue-500" />, label: 'Photos' , reference:imageRef },
-      { icon: <Video className="w-5 h-5 text-purple-500" />, label: 'Videos' , reference:videoRef },
-      { icon: <Music className="w-5 h-5 text-pink-500" />, label: 'Audio' , reference:audioRef },
-      { icon: <AtSign className="w-5 h-5 text-red-500" />, label: 'Mention' },
+      { icon: <Images className="w-5 h-5 text-blue-500" />, label: 'image' , reference:imageRef },
+      { icon: <Video className="w-5 h-5 text-purple-500" />, label: 'video' , reference:videoRef },
+      { icon: <Music className="w-5 h-5 text-pink-500" />, label: 'audio' , reference:audioRef },
+      { icon: <AtSign className="w-5 h-5 text-red-500" />, label: 'mentions' },
     ],
   [],)
 
@@ -708,7 +709,12 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                   transition={{ delay: item.index * 0.05 }}
                   className="absolute inset-0 cursor-pointer transition-transform duration-200 hover:scale-102 flex items-center justify-center bg-black/10"
                 >
-                  <video src={item.url} className="w-full h-full object-cover" controls onClick={() => { handleMediaPop({ url:item.url , media_type:item.kind }) }} />
+                  <div 
+                    className="w-full h-full object-cover" 
+                    onClick={() => { handleMediaPop({ url:item.url , media_type:item.kind }) }} 
+                  >
+                    <Videoplayer url={item.url} />
+                  </div>
                 </motion.div>
               )}
 

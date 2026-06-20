@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import Videoplayer from './videoplayer';
 
 export interface mediaType {
   url: string;
@@ -30,15 +31,21 @@ export default function Mediapopmodal({ closepop, media }: modalProps) {
       className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200"
       onClick={closepop}
     >
-      <div className="relative p-2 flex rounded-lg w-full h-full" >
+      <div
+        className="relative p-2 flex rounded-lg w-full h-full"
+      >
         <div className="flex items-center justify-center w-full h-full rounded-lg">
           {isVideo ? (
-            <video
-              src={media?.url}
-              controls
-              autoPlay
-              className="w-auto h-4/5 rounded-xl object-contain"
-            />
+            <div onClick={(e) => e.stopPropagation()} className="w-auto h-4/5 rounded-xl object-contain">
+              <Videoplayer url={media?.url} showFullScreenIcon={false} />
+            </div>
+
+            // <video
+            //   src={media?.url}
+            //   controls
+            //   autoPlay
+            //   className="w-auto h-4/5 rounded-xl object-contain"
+            // />
           ) : (
             <img
               src={media?.url}

@@ -31,6 +31,7 @@ import IframeOfEmbed from './iframeOfEmbed';
 import NotInterestedPop from './NotInterestedPop';
 import SharePopup from './sharePopUp';
 import useMediaPop from '@/app/states/mediapop';
+import Videoplayer from './videoplayer';
 
 interface locationTaggedType {
   text: string,
@@ -685,12 +686,13 @@ export default function PostCard({
             <div className="mt-2 rounded-xl overflow-hidden">
               {displayMedia.filter(item => item.url && item.url.trim() !== '').length === 1 ? (
                 displayMedia[0].media_type === 'video' ? (
-                   <video
-                     onClick={() => { handleMediaPop(displayMedia[0]) }}
-                     src={displayMedia[0].url}
-                     controls
-                     className="w-full max-h-[28rem] object-cover"
-                   />
+                  <Videoplayer url={displayMedia[0].url} />
+                  //  <video
+                  //    onClick={() => { handleMediaPop(displayMedia[0]) }}
+                  //    src={displayMedia[0].url}
+                  //    controls
+                  //    className="w-full max-h-[28rem] object-cover"
+                  //  />
                 ) : (
                     <img
                      onClick={() => { handleMediaPop(displayMedia[0]) }}
@@ -703,13 +705,14 @@ export default function PostCard({
                 <div className="grid grid-cols-2 gap-1">
                   {displayMedia.filter(item => item.url && item.url.trim() !== '').map((item,index) => (
                     item.media_type === 'video' ? (
-                      <video
-                        onClick={() => { handleMediaPop(item) }}
-                        key={index}
-                        src={item.url}
-                        controls
-                        className="w-full h-40 sm:h-52 object-cover"
-                      />
+                      <Videoplayer url={displayMedia[0].url} />
+                      // <video
+                      //   onClick={() => { handleMediaPop(item) }}
+                      //   key={index}
+                      //   src={item.url}
+                      //   controls
+                      //   className="w-full h-40 sm:h-52 object-cover"
+                      // />
                     ) : (
                       <img
                         onClick={() => { handleMediaPop(item) }}

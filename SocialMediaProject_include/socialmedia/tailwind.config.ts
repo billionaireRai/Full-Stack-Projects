@@ -20,6 +20,8 @@ export default {
         poppins: ["var(--font-poppins)", "sans-serif"],
       },
     },
+    
   },
   plugins: [],
+  
 };
