@@ -403,8 +403,8 @@ export default function Messages() {
   }
 
   return (
-    <div className='h-full flex flex-col lg:flex-row p-1 gap-1 font-poppins rounded-md dark:bg-black'>
-        <div className={`relative chatList h-full flex-col gap-1 min-w-xs rounded-md overflow-y-auto overflow-x-hidden ${chatSlideOpen ? 'hidden lg:flex' : 'flex'}`}>
+    <div className='h-full flex flex-col md:flex-row p-1 gap-1 font-poppins rounded-md dark:bg-black'>
+        <div className={`relative chatList ${chatSlideOpen ? 'h-1/4' : 'h-3/4'} md:h-full flex-col gap-1 rounded-md overflow-y-auto overflow-x-hidden`}>
             <div className='searchSection sticky top-0 backdrop-blur-md flex items-center w-full mx-auto p-2 m-2 rounded-lg  shadow-md border border-gray-200 dark:border-gray-700'>
                 <span 
                   onClick={() => { handleSearch(ChatSearch) }}
@@ -463,7 +463,7 @@ export default function Messages() {
               <div className='flex items-center justify-center gap-2'><PlusCircleIcon  /><span>Add Account</span></div>
             </div>
         </div>
-        <div className="flex flex-col gap-4 p-2 h-full flex-1 dark:bg-black rounded-md min-h-0">
+        <div className="flex flex-col gap-4 p-2 h-1/4 md:h-full flex-1 dark:bg-black rounded-md">
          <MessageCard 
           updateCardDetail={(msg,time) => { handleCardDetailUpdate(msg,time) }} 
           chatCardDetails={CurrentOpenChat} handleAudioPop={() => { setShowAudioModal(true) }} 

@@ -3,7 +3,9 @@ import { motion } from 'framer-motion'
 import { ArrowLeftCircleIcon, ArrowRightCircleIcon, BookOpen, ImageOff, Music, X } from 'lucide-react'
 import { mediaType } from './mediapopmodal'
 import Usercard, { userCardProp } from './usercard'
+import Audioplayer from './Audioplayer'
 import Videoplayer from './videoplayer'
+import Mediacontrols from './mediacontrols'
 
 interface attachmentOptionType {
   icon: React.ReactNode
@@ -12,12 +14,12 @@ interface attachmentOptionType {
 }
 
 interface AttachmentPopProps {
-  closePop: () => void
-  menuOptions: attachmentOptionType[]
+  menuOptions: attachmentOptionType[] ;
+  handleMediaClick:(m:mediaType) => void ;
+  closePop: () => void ;
 }
 
-export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopProps) {
-  const [page, setpage] = useState(1)
+export default function Attachmentpop({ closePop, menuOptions , handleMediaClick }: AttachmentPopProps) {
   const [activeMenuIndex, setActiveMenuIndex] = useState(0)
   const [activeMediaIndex, setactiveMediaIndex] = useState(0)
 
@@ -27,6 +29,10 @@ export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopPr
     { url: '/images/comment.png', media_type: 'image' },
     { url: '/images/insert-picture-icon.png', media_type: 'image' },
     { url: '/images/myProfile.jpg', media_type: 'image' },
+    { url: '/images/twitter.png', media_type: 'image' },
+    { url: '/images/whatsapp.png', media_type: 'image' },
+    { url: '/images/instagram.png', media_type: 'image' },
+    { url: '/images/facebook.png', media_type: 'image' },
   ]
 
   const videoExamples: mediaType[] = [
@@ -179,6 +185,7 @@ export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopPr
   const [Attachements, setAttachements] = useState<mediaType[]>(allAttachmentExamples)
   const [specificAttachments, setspecificAttachments] = useState<mediaType[]>([])
   const [mentions, setmentions] = useState<userCardProp[]>(mentionExamples)
+  const [zoom, setZoom] = useState(1);
 
   // operations related to state variables...
   const safeMenuOptions = useMemo(() => (Array.isArray(menuOptions) ? menuOptions : []), [menuOptions])
@@ -191,24 +198,32 @@ export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopPr
     setspecificAttachments(Attachements.filter((attachment) => attachment.media_type === label));
   }, [activeMenuIndex, activeLabel, Attachements])
 
-  // useeffect triggered on page change...
+  // function for fetching details...
+  async function getAllAttachments() {
+    try {
+      
+    } catch (error) {
+      
+    }
+  }
+  // useeffect triggered on page load...
   useEffect(() => {
-    
-  }, [page])
+    // getAllAttachments() ;
+  }, [])
 
   return (
-    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
-      <div className="h-4/5 min-w-3/4 flex flex-col rounded-xl bg-white shadow-xl ring-1 p-1 ring-yellow-100/70 overflow-hidden">
+    <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-40 animate-in fade-in-0 zoom-in-95 duration-200">
+      <div className="h-11/12 min-w-3/4 flex flex-col rounded-xl bg-white dark:bg-black shadow-xl border border-gray-300 dark:border-gray-900 p-1 overflow-hidden">
         {/* Header */}
-        <div className="menu rounded-xl flex items-center justify-between p-2 bg-gradient-to-r from-yellow-50 via-white to-yellow-50">
+        <div className="menu rounded-xl flex items-center justify-between p-2 bg-yellow-50 dark:bg-black">
           <div className="flex items-center justify-between mb-3">
             <div className="flex flex-col gap-2">
-              <div className="text-sm font-semibold text-yellow-800 flex items-center justify-start gap-1">
+              <div className="text-sm font-semibold text-yellow-800 dark:text-yellow-600 flex items-center justify-start gap-1">
                 {safeMenuOptions[activeMenuIndex]?.icon}
                 <span>{activeLabel}</span>
               </div>
               <span className="text-xs text-yellow-600/90 max-w-md">
-                {activeLabel !== 'Mention' ? (
+                {activeLabel !== 'mention' ? (
                   `These are the ${activeLabel} shared by you or the account you’re chatting with in this conversation.`
                 ) : (
                   'These are the accounts mentioned by you or the account you’re chatting with in this conversation.'
@@ -226,7 +241,7 @@ export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopPr
                     type="button"
                     onClick={() => setActiveMenuIndex(idx)}
                     className={`flex items-center cursor-pointer justify-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 border
-                      ${isActive ? 'bg-yellow-100 text-yellow-900 border-yellow-500 shadow-md shadow-yellow-300/40' : 'bg-white text-yellow-500 border-yellow-200 hover:bg-yellow-100 hover:border-yellow-300'}`}
+                      ${isActive ? 'bg-yellow-100 dark:bg-yellow-300 text-black border-yellow-500 shadow-md dark:shadow-yellow-500/40 shadow-yellow-300/40' : 'bg-white dark:bg-black text-yellow-500 border-yellow-200 dark:border-yellow-700 hover:bg-yellow-100 hover:border-yellow-300'}`}
                     aria-current={isActive ? 'page' : undefined}
                   >
                     <span className={`inline-flex items-center justify-center transition-colors duration-150 ${isActive ? 'text-white' : 'text-yellow-700'} `}>
@@ -242,7 +257,7 @@ export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopPr
           <button
             type="button"
             onClick={closePop}
-            className="p-1.5 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100 bg-white ring-1 ring-gray-200"
+            className="p-1.5 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100 dark:bg-gray-900 bg-white ring-1 ring-gray-200 dark:ring-gray-900"
             aria-label="Close"
           >
             <X size={17} />
@@ -251,7 +266,7 @@ export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopPr
 
         {/* Body */}
         <div className="container overflow-x-hidden flex-1 rounded-xl" aria-label={activeLabel ? `Active: ${activeLabel}` : 'Attachment menu'}>
-          {activeLabel === 'mentions' ? (
+          {activeLabel === 'mention' ? (
             <div className="h-full w-full p-4">
               <div className="h-full flex flex-col gap-2">
                 {mentions.length > 0 && mentions.map((u, idx) => (
@@ -319,28 +334,24 @@ export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopPr
                           style={{ transform, zIndex, opacity }}
                         >
                           <div
-                            className={`overflow-hidden rounded-3xl bg-white shadow-xl
+                            onClick={() => { handleMediaClick(m) }}
+                            className={`overflow-hidden rounded-3xl bg-white dark:bg-gray-300 shadow-xl
                               ${isActive ? 'border ring-3 ring-yellow-500/30 border-yellow-500' : 'border border-yellow-200'}`}
                           >
-                            {m.media_type === 'image' && <img src={m.url} className="w-md h-[400px] object-cover" />}
+                            {m.media_type === 'image' && <img src={m.url} className="w-md h-[400px] md:h-[450px] object-cover" />}
 
                             {m.media_type === 'video' && (
-                              <div className='w-md h-[400px]'>
+                              <div className='w-md h-[400px] md:h-[450px]'>
                                 <Videoplayer url={m.url} />
                               </div>
                             )}
 
                             {m.media_type === 'audio' && (
-                              <div className="w-md h-[400px] flex flex-col gap-2 items-center justify-center bg-gradient-to-b from-yellow-50 to-white">
-                                 <span className="text-yellow-500 rounded-full bg-yellow-100 dark:bg-yellow-950 p-4">
+                              <div className="w-md h-[300px] md:h-[400px] flex flex-col gap-2 items-center justify-center bg-yellow-50 dark:bg-black">
+                                 <span className="text-yellow-500 rounded-full bg-yellow-100 dark:bg-gray-950 p-4">
                                    <Music className="w-8 h-8" />
                                  </span>
-                                 <span className="text-[10px] text-gray-600 dark:text-gray-300 w-fit" >
-                                   <audio controls preload="metadata">
-                                     <source src={m.url} type="audio/mpeg" />
-                                     Your browser does not support audio.
-                                   </audio>
-                                 </span>
+                                <Audioplayer url={m.url} />
                                </div>
                             )}
                           </div>
@@ -355,11 +366,11 @@ export default function Attachmentpop({ closePop, menuOptions }: AttachmentPopPr
         </div>
 
         {/* Footer */}
-        <section className="footer px-4 py-3 border-t border-yellow-100 bg-white/80">
+        <section className="footer px-4 py-3 border-t rounded-xl bg-white/80 dark:bg-black/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center rounded-full justify-between gap-2">
               {specificAttachments.length > 0 && (
-                <div className="flex items-center text-xs bg-yellow-50 ring-2 ring-yellow-500/40 border border-yellow-500 text-yellow-600 p-2 rounded-full justify-center gap-1">
+                <div className="flex items-center text-xs bg-yellow-50 dark:bg-black ring-2 ring-yellow-500/40 border border-yellow-500 text-yellow-600 p-2 rounded-full justify-center gap-1">
                   <BookOpen size={18} />
                   <span>
                     {activeMediaIndex + 1}/{specificAttachments.length}

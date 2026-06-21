@@ -31,6 +31,9 @@ interface chatAccCardProp {
 }
 
 export default function ChatAccountcard({ cardInfo , currentChat , countUpdate ,openChat ,currentOpenChat }:chatAccCardProp) {
+  // ensure the card takes full width of the chatList container
+  // (absolute/fit children can otherwise cause it to visually look narrower)
+
   const chatCardRef = useRef<HTMLDivElement | null>(null);
   const [isTargetChat, setisTargetChat] = useState(false) ;
   if (!cardInfo) return null ;
@@ -65,7 +68,7 @@ export default function ChatAccountcard({ cardInfo , currentChat , countUpdate ,
     <div
      ref={chatCardRef}
      onClick={handleClick}
-     className={`shadow-sm hover:shadow-md dark:border-gray-600 max-w-sm rounded-xl py-3 px-2 flex items-center gap-3 bg-white hover:bg-yellow-50 dark:bg-black hover:scale-102 cursor-pointer ${isTargetChat ? 'dark:border-1 bg-yellow-100 dark:bg-zinc-950 shadow-lg' : ''}`}>
+     className={`shadow-sm hover:shadow-md dark:border-gray-600 w-full rounded-xl py-3 px-2 flex items-center gap-3 bg-white hover:bg-yellow-50 dark:bg-black hover:scale-102 cursor-pointer ${isTargetChat ? 'dark:border-1 bg-yellow-100 dark:bg-zinc-950 shadow-lg' : ''}`}>
       <img
         src={cardInfo.avatarUrl}
         alt={cardInfo.name}

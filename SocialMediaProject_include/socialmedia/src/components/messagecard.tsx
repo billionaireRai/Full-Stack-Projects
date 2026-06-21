@@ -20,6 +20,7 @@ import { userCardProp } from '@/components/usercard'
 import { infoForChatCard } from './chataccountcard'
 import Attachmentpop from './attachmentpop'
 import Videoplayer from './videoplayer'
+import Audioplayer from './Audioplayer'
 
 interface Message {
   id: string
@@ -81,7 +82,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
       { icon: <Images className="w-5 h-5 text-blue-500" />, label: 'image' , reference:imageRef },
       { icon: <Video className="w-5 h-5 text-purple-500" />, label: 'video' , reference:videoRef },
       { icon: <Music className="w-5 h-5 text-pink-500" />, label: 'audio' , reference:audioRef },
-      { icon: <AtSign className="w-5 h-5 text-red-500" />, label: 'mentions' },
+      { icon: <AtSign className="w-5 h-5 text-red-500" />, label: 'mention' },
     ],
   [],)
 
@@ -314,7 +315,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
    }
 
   const handleFileOptionClick = (option:attachmentOptionType) => {
-    if (option.label === 'Mention') {
+    if (option.label === 'mention') {
       setshareContact(true);
       setShowFilePopup(false);
     } else {
@@ -414,7 +415,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
   return (
     <div className="flex flex-col h-full rounded-md">
       {!chatCardDetails ? (
-        <div className="flex flex-col items-center justify-center h-full text-center p-6">
+        <div className="flex flex-col items-center justify-center h-fit text-center p-6">
           {/* message circle beep section */}
           <div className="relative inline-flex">
             <span className="absolute inset-0 rounded-full bg-yellow-200 dark:bg-yellow-950 animate-ping opacity-75"></span>
@@ -621,20 +622,20 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                       {message.media.map((m, idx) => (
                         <div key={`${m.media_type}-${idx}`}>
                           {m.media_type === 'image' && (
-                            <div onClick={() => { handleMediaPop(m) }} className="relative w-70 h-60">
-                              <Image src={m.url} alt="message-image" fill className="w-full cursor-pointer hover:scale-103 transition-transform duration-200 rounded-xl object-cover" />
+                            <div onClick={() => { handleMediaPop(m) }} className="relative w-80 h-70">
+                              <Image src={m.url} alt="message-image" fill className="w-full cursor-pointer hover:scale-101 transition-transform duration-200 rounded-xl object-cover" />
                             </div>
                           )}
                           {m.media_type === 'video' && (
-                            <div onClick={() => { handleMediaPop(m) }} className="w-70 h-60">
-                              <video src={m.url} controls className="w-full cursor-pointer hover:scale-103 transition-transform duration-200 rounded-xl" />
+                            <div onClick={() => { handleMediaPop(m) }} className="w-80 h-70">
+                              <video src={m.url} controls className="w-full cursor-pointer hover:scale-101 transition-transform duration-200 rounded-xl" />
                             </div>
                           )}
                           {m.media_type === 'audio' && (
-                            <div className="w-70">
-                              <audio controls preload="metadata" className="w-full cursor-pointer hover:scale-103 transition-transform duration-200">
-                                <source src={m.url} />
-                              </audio>
+                            <div>
+                              <div className="w-full cursor-pointer transition-transform duration-200">
+                                <Audioplayer url={m.url} />
+                              </div>
                             </div>
                           )}
                         </div>
@@ -729,10 +730,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
                      <Music className="w-8 h-8" />
                    </span>
                    <span className="text-[10px] text-gray-600 dark:text-gray-300 w-full" >
-                     <audio controls preload="metadata">
-                       <source src={item.url} type="audio/mpeg" />
-                       Your browser does not support audio.
-                     </audio>
+                    <Audioplayer url={item.url} />
                    </span>
                  </motion.div>
               )}
@@ -942,7 +940,7 @@ export default function MessageCard({ chatCardDetails,openBlockPop, openReportPo
 )}
 
 {showAttachments && (
-  <Attachmentpop closePop={() => { setshowAttachments(false) }} menuOptions={attachFileoptions} />
+  <Attachmentpop handleMediaClick={(m:mediaType) => { handleMediaPop(m) }} closePop={() => { setshowAttachments(false) }} menuOptions={attachFileoptions} />
 )}
 
 </div>
