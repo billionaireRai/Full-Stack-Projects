@@ -6,6 +6,8 @@ export const getShareLinks = (url: string, text: string) => {
     twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+    instagram:'https://www.instagram.com',
+    github:'https://www.github.com',
     gmail: `https://mail.google.com/mail/?view=cm&su=${encodedText}&body=${encodedUrl}`,
   };
 };

@@ -938,7 +938,7 @@ export default function PostCard({
      {shareCardPop && (
       <Shareviadm closemodal={() => { setshareCardPop(false) }} link={`${window.location.origin}/${handle}/post/${postId}?section=All`} />
      )}
-     {isMediaPop && (
+     {isMediaPop && mediaDetail && (
       <Mediapopmodal closepop={() => { setMediaPop(false) }} media={mediaDetail} />
      )}
     </div>

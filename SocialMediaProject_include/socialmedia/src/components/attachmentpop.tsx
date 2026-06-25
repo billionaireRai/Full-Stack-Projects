@@ -6,6 +6,8 @@ import Usercard, { userCardProp } from './usercard'
 import Audioplayer from './Audioplayer'
 import Videoplayer from './videoplayer'
 import Mediacontrols from './mediacontrols'
+import axiosInstance from '@/lib/interceptor'
+import toast from 'react-hot-toast'
 
 interface attachmentOptionType {
   icon: React.ReactNode
@@ -17,9 +19,10 @@ interface AttachmentPopProps {
   menuOptions: attachmentOptionType[] ;
   handleMediaClick:(m:mediaType) => void ;
   closePop: () => void ;
+  targetHandle:string
 }
 
-export default function Attachmentpop({ closePop, menuOptions , handleMediaClick }: AttachmentPopProps) {
+export default function Attachmentpop({ closePop, menuOptions , handleMediaClick , targetHandle }: AttachmentPopProps) {
   const [activeMenuIndex, setActiveMenuIndex] = useState(0)
   const [activeMediaIndex, setactiveMediaIndex] = useState(0)
 
@@ -185,7 +188,6 @@ export default function Attachmentpop({ closePop, menuOptions , handleMediaClick
   const [Attachements, setAttachements] = useState<mediaType[]>(allAttachmentExamples)
   const [specificAttachments, setspecificAttachments] = useState<mediaType[]>([])
   const [mentions, setmentions] = useState<userCardProp[]>(mentionExamples)
-  const [zoom, setZoom] = useState(1);
 
   // operations related to state variables...
   const safeMenuOptions = useMemo(() => (Array.isArray(menuOptions) ? menuOptions : []), [menuOptions])
@@ -201,9 +203,14 @@ export default function Attachmentpop({ closePop, menuOptions , handleMediaClick
   // function for fetching details...
   async function getAllAttachments() {
     try {
-      
+      const attachmentres = await axiosInstance.get(`/api/chat/attachments?targetAccHandle=${targetHandle}`);
+      if (attachmentres.status === 200) {
+        setAttachements(attachmentres.data.attachments)
+        setmentions(attachmentres.data.mentions);
+      }
     } catch (error) {
-      
+      console.log("An Error occured...");
+      toast.error("Error occured in getting attachments !!");
     }
   }
   // useeffect triggered on page load...

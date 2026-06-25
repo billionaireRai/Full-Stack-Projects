@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Mediacontrols from './mediacontrols';
 import Videoplayer from './videoplayer';
+import Audioplayer from './Audioplayer';
 
 export interface mediaType {
   url: string;
@@ -21,6 +22,8 @@ interface modalProps {
 
 export default function Mediapopmodal({ closepop, media }: modalProps) {
   const isVideo = media?.media_type === 'video';
+  const isAudio = media?.media_type === 'audio';
+
   const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export default function Mediapopmodal({ closepop, media }: modalProps) {
   const handleZoomOut = () => setZoom((z) => Math.max(0.5, Number((z - 0.2).toFixed(2))));
   const handleResetZoom = () => setZoom(1);
 
+
   return (
     <div
       className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200"
@@ -52,13 +56,17 @@ export default function Mediapopmodal({ closepop, media }: modalProps) {
           className="flex flex-col gap-1 items-center justify-center h-full group rounded-lg"
         >
           <div
-            className="w-auto h-4/5 rounded-xl object-contain transform-gpu transition-transform duration-150"
+            className="min-w-full w-auto h-4/5 relative rounded-xl object-contain transform-gpu transition-transform duration-150"
             style={{ transform: `scale(${zoom})` }}
           >
             {isVideo ? (
               <div className="w-full h-full">
                 <Videoplayer url={media?.url} showFullScreenIcon={false} />
               </div>
+            ) : isAudio ? (
+               <div className="w-full h-fit absolute bottom-10">
+                <Audioplayer url={media?.url} />
+               </div>
             ) : (
               <img src={media?.url} alt="Media" className="w-full h-full rounded-xl object-contain" />
             )}

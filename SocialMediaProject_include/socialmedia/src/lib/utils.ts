@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { saveAs } from "file-saver";
+import axios from "axios";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -12,3 +14,11 @@ export const fmt = (n: number): string => {
     return String(n);
 };
 
+
+export const handleDownload = async (mediaUrl: string, filename: string) => {
+  const res = await axios.get(mediaUrl, { responseType: "blob" });
+
+  if (res.status !== 200) throw new Error("Download failed");
+
+  saveAs(res.data, filename);
+};

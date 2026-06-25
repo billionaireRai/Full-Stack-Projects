@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { usernameRegex } from "@/app/controllers/regex";
 
 const mediaUrlSchema = new mongoose.Schema({
   url: {
@@ -45,15 +46,24 @@ const messageSchema = new mongoose.Schema(
       default: null
     },
     link:{
-      type:String ,
-      default:null,
-      trim:true
+      type:[String] ,
+      required:false,
+    },
+    mentions: {
+      type: [String],
+      ref: "accounts",
+      default: [],
+      validate: {
+        validator: function (v: string[]) {
+          return v.every((handle: string) => usernameRegex.test(handle))
+        }
+      },
+        message: "Mentions must contain valid ObjectIds"
     },
     mediaUrls: {
       type: [mediaUrlSchema],
       default: []
     },
-
     messageType: {
       type: String,
       enum: ["text", "image", "video",'audio','contact'],

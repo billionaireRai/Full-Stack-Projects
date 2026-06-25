@@ -107,9 +107,9 @@ const SharePopup: React.FC<SharePopupProps> = ({
           <ShareOption label="Gmail" iconUrl="/images/search.png" link={shareLinks.gmail} />
           <ShareOption label="Facebook" iconUrl="/images/facebook.png" link={shareLinks.facebook} />
           <ShareOption label="WhatsApp" iconUrl="/images/whatsapp.png" link={shareLinks.whatsapp} />
-          <ShareOption label="Instagram" iconUrl="/images/instagram.png" link='https://www.instagram.com' />
+          <ShareOption label="Instagram" iconUrl="/images/instagram.png" link={shareLinks.instagram} />
           <ShareOption label="X" iconUrl="/images/twitter.png" link={shareLinks.twitter} />
-          <ShareOption label="Github" iconUrl="/images/github.png" link='https://www.github.com' />
+          <ShareOption label="Github" iconUrl="/images/github.png" link={shareLinks.github} />
         </div>
 
         {/* Share Link */}
