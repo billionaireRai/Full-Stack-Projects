@@ -4,6 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { makeMentionsAsLink } from '@/app/(routes)/[username]/page'
 import { Eye } from 'lucide-react'
 import axiosInstance from '@/lib/interceptor'
 import { AxiosResponse } from 'axios'
@@ -116,7 +117,7 @@ return (
         {/* Bio */}
         {user.bio && (
           <p className="mt-2 text-left text-gray-900 dark:text-gray-500 text-xs leading-relaxed">
-            {user.bio}
+            {makeMentionsAsLink(user.bio)}
           </p>
         )}
 

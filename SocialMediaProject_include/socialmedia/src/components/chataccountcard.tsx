@@ -19,7 +19,7 @@ export interface infoForChatCard {
   blockedTo:boolean;
   blockedBy:boolean;
   isMuted:boolean;
-  publicKey:string;
+  publicKeyReciever:string;
   unreadCount: number;
 }
 interface chatAccCardProp {

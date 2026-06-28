@@ -42,7 +42,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2,
-      publicKey:'abcdefgh'
+      publicKeyReciever:'abcdefgh'
     },
     {
       id: '2',
@@ -57,7 +57,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
-      publicKey:'ijklmnop'
+      publicKeyReciever:'ijklmnop'
     },
     {
       id: '291f0n4t4bnb03',
@@ -72,7 +72,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
-      publicKey:'qrstuvwx'
+      publicKeyReciever:'qrstuvwx'
     },
     {
       id: '4',
@@ -87,7 +87,7 @@ export default function Messages() {
       blockedBy:false,      
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 4,
-      publicKey:'yzagdgtebv'
+      publicKeyReciever:'yzagdgtebv'
     },
     {
       id: '5',
@@ -102,7 +102,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
-      publicKey:'rppwmlmbint'
+      publicKeyReciever:'rppwmlmbint'
     },
     {
       id: '6',
@@ -117,7 +117,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
-      publicKey:'30mr3m0gnkfs'
+      publicKeyReciever:'30mr3m0gnkfs'
     },
     {
       id: '7',
@@ -132,7 +132,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1,
-      publicKey:'39jjnnnubfnef'
+      publicKeyReciever:'39jjnnnubfnef'
     },
     {
       id: '8',
@@ -147,7 +147,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1,
-      publicKey:'dkmwdibvettt'
+      publicKeyReciever:'dkmwdibvettt'
     },
     {
       id: '9',
@@ -162,7 +162,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 3,
-      publicKey:'rnniogr2rpr'
+      publicKeyReciever:'rnniogr2rpr'
     },
     {
       id: '10',
@@ -177,7 +177,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
-      publicKey:'0n1o39njje9'
+      publicKeyReciever:'0n1o39njje9'
     },
     {
       id: '11',
@@ -192,7 +192,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 2,
-      publicKey:'wlmwnnivrmwp'
+      publicKeyReciever:'wlmwnnivrmwp'
     },
     {
       id: '12',
@@ -207,7 +207,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 1,
-      publicKey:'ofnndisbntuc'
+      publicKeyReciever:'ofnndisbntuc'
     },
     {
       id: '13',
@@ -222,7 +222,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
-      publicKey:'jsinjwenoi5rn'
+      publicKeyReciever:'jsinjwenoi5rn'
     },
     {
       id: '4t3ghur0o3oe',
@@ -237,7 +237,7 @@ export default function Messages() {
       blockedBy:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 5,
-      publicKey:'eon2nigkmvort'
+      publicKeyReciever:'eon2nigkmvort'
     },
     {
       id: '15',
@@ -252,7 +252,7 @@ export default function Messages() {
       blockedBy:false,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
-      publicKey:'utbgnhskrnohwe'
+      publicKeyReciever:'utbgnhskrnohwe',
     }
   ])
   const attachFileoptions = [
@@ -276,7 +276,7 @@ export default function Messages() {
       isMuted:false,
       lastMessage: 'New chat created just now !!',
       timestamp: 'Just now',
-      publicKey:pubkey.trim(),
+      publicKeyReciever:pubkey.trim(),
       avatarUrl: String(AccForChat.account?.avatarUrl),
       unreadCount: 0,
     };
@@ -402,6 +402,22 @@ export default function Messages() {
     }
   }
 
+  // function for mute toggeling in UI...
+  function muteSwitching() {
+    if (CurrentOpenChat) {
+      const currentMuteState = CurrentOpenChat?.isMuted ;
+      setCurrentOpenChat((chat) => { chat ? setCurrentOpenChat({ ...chat , isMuted:!currentMuteState }) : chat });
+    }
+  }
+
+  // function for pin UI toggleing
+  function pinSwitchingOnChat() {
+    if (CurrentOpenChat) {
+      const currentPinState = CurrentOpenChat?.pinned ;
+      setCurrentOpenChat((chat) => { chat ? setCurrentOpenChat({ ...chat , pinned:!currentPinState }) : chat });
+    }
+  }
+
   return (
     <div className='h-full flex flex-col md:flex-row p-1 gap-1 font-poppins rounded-md dark:bg-black'>
         <div className={`relative chatList ${chatSlideOpen ? 'h-1/4' : 'h-3/4'} md:h-full flex-col gap-1 rounded-md overflow-y-auto overflow-x-hidden`}>
@@ -466,7 +482,10 @@ export default function Messages() {
         <div className="flex flex-col gap-4 p-2 h-1/4 md:h-full flex-1 dark:bg-black rounded-md">
          <MessageCard 
           updateCardDetail={(msg,time) => { handleCardDetailUpdate(msg,time) }} 
-          chatCardDetails={CurrentOpenChat} handleAudioPop={() => { setShowAudioModal(true) }} 
+          chatCardDetails={CurrentOpenChat} 
+          muteToggleAction={muteSwitching}
+          pinToggleAction={pinSwitchingOnChat}
+          handleAudioPop={() => { setShowAudioModal(true) }} 
           handleAddChat={() => { setaddChatPop(true) }}
           openBlockPop={() => { setblockChatPop(true) }}
           openReportPop={() => { setshowReportChat(true) }}

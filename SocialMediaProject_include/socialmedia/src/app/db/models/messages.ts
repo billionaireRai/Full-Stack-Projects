@@ -39,11 +39,27 @@ const messageSchema = new mongoose.Schema(
       ref:'conversation',
       required:true
     },
-    content: {
+    encryptedMsg: {
       type: String,
       trim: true,
       maxlength: 5000,
       default: null
+    },
+    iv: {
+      type: String,
+      required: true
+    },
+    senderEncryptedKey: {
+        type: String,
+        required: true
+    },
+    receiverEncryptedKey: {
+        type: String,
+        required: true
+    },
+    algorithm: {
+        type: String,
+        default: "AES-256-GCM"
     },
     link:{
       type:[String] ,

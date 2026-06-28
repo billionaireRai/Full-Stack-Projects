@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 // import { functionToTriggerSchedule } from "@/app/cronjob/accDeletionSchedule";
 import { connectWithMongoDB } from "@/app/db/dbConnection";
+import { getDevicePublicIP } from "@/lib/pairedkeys";
+import pubkeys from "../models/pubkeys";
 import { loginDataType, registrationDataType } from "@/app/controllers/auth";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import cloudinary from "@/lib/cloudinary";
@@ -31,6 +33,7 @@ interface resType {
     refreshToken:string,
     accountId:string,
     accountInfo:userCardProp
+    key?:string
 }
 
 export interface accountType {
@@ -155,6 +158,10 @@ export async function logginUserService(data:loginDataType) : Promise<any> {
         console.log(`Account with userId ${userdoc._id} not found !!`);
         return NextResponse.json({ message: 'Account not found' }, { status: 404 });
     }
+
+    // getting public key if exists for this device...
+    // const deviceip = await getDevicePublicIP() ;
+    // const publickey = await pubkeys.findOne({ accountId:account._id , deviceIP:deviceip , status:'active' });
      
     const posts = await Post.find({ authorId : userdoc._id , isDeleted:false }); // taking out all the posts...
     // getting count of followers and followings... 
@@ -186,7 +193,8 @@ export async function logginUserService(data:loginDataType) : Promise<any> {
         accessToken:accessToken,
         refreshToken:refreshToken.token,
         accountId:account._id,
-        accountInfo:accountData
+        accountInfo:accountData,
+        // key:publickey.publicKey
     }
 
     return info;

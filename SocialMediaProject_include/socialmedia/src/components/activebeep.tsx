@@ -4,7 +4,6 @@ export default function activebeep () {
   return (
     <div className='main-animate-div bg-yellow-400 rounded-full w-4 h-4 flex items-center justify-center animate-ping'>
         <div className='core-div bg-yellow-600 rounded-full w-1 h-1'>
-
         </div>
     </div>
   )

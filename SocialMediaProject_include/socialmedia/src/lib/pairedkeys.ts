@@ -1,6 +1,7 @@
 
 import axios from "axios";
 import axiosInstance from "./interceptor";
+import usePublicKey from "@/app/states/accountpublickey";
 import toast from "react-hot-toast";
 
 export interface keyObjType {
@@ -110,10 +111,11 @@ export const generateKeyPairAndStoreBoth = async (accountid:string) => {
   };;
 
   const { privateKey , publicKey } = await subtle.generateKey(algo, true, ["encrypt", "decrypt"]);
+  const { setpublickey } = usePublicKey() ; 
 
   // Export as SPKI (public) and PKCS8 (private) DER.
   const spkiDer = await subtle.exportKey("spki",publicKey);
-  const pkcs8Der = await subtle.exportKey("pkcs8",privateKey)
+  const pkcs8Der = await subtle.exportKey("pkcs8",privateKey);
 
   // Converting DER -> PEM for easier storage/transport.
   const publicPem = derToPem(spkiDer, "PUBLIC_KEY");
@@ -122,7 +124,8 @@ export const generateKeyPairAndStoreBoth = async (accountid:string) => {
   // await sendingPubkeyToBackend(publicPem,accountid);
   // const storeobj:keyObjType = await handleIndexedDBStorage(privatePem,accountid);
   // localStorage.setItem('privatekey',storeobj.value);
-
+  // setpublickey(publicPem);
+  
 };
 
 // function to check private key storage in IDB...

@@ -4,7 +4,8 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import axiosInstance from "@/lib/interceptor";
-import { generateKeyPairAndStoreBoth, isKeyObjType} from "@/lib/pairedkeys";
+import { generateKeyPairAndStoreBoth, isKeyObjType } from "@/lib/pairedkeys";
+import usePublicKey from "@/app/states/accountpublickey";
 import toast from "react-hot-toast"; 
 import useUserInfo from "@/app/states/userinfo";
 import useActiveAccount from "@/app/states/useraccounts";
@@ -30,6 +31,7 @@ export default function LogIn() {
   const { setisAuth } = useAuthenticationState() ;
   const { setAccount } = useActiveAccount() ;
   const { setUserInfo } = useUserInfo();
+  const { setpublickey } = usePublicKey() ;
   const { register , handleSubmit , formState:{ errors , isSubmitting }} = useForm({ resolver:zodResolver(loginInfoType) })  ; // intializing useForm hook...
   
   // function for handling login...
@@ -46,7 +48,10 @@ export default function LogIn() {
       setAccount(loginRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${loginRes.data.handle}`);
-      // if (isKeyObjType(output)) localStorage.setItem('privatekey', output.value);
+      // if (isKeyObjType(output)) { 
+      //   localStorage.setItem('privatekey', output.value);
+      //   setpublickey(loginRes.data.userCred.key);
+      // }
       // else generateKeyPairAndStoreBoth(loginRes.data.userCred.accountId);
       // useWebSocket(loginRes.data.userCred.accountId,'login'); // generating websocket connection client => server...
       return 'success';

@@ -22,3 +22,4 @@ export const handleDownload = async (mediaUrl: string, filename: string) => {
 
   saveAs(res.data, filename);
 };
+

@@ -1,5 +1,7 @@
 import { NextRequest , NextResponse , userAgent } from "next/server";
 import { cookies } from "next/headers";
+import pubkeys from "../db/models/pubkeys";
+import { getDevicePublicIP } from "@/lib/pairedkeys";
 import asyncErrorHandler from "@/app/middleware/errorMiddleware";
 import { userRegistrationService, userCardProp , logginUserService, creatingUserAfterOauth } from '@/app/db/services/user';
 import sendEmailFunction from "@/lib/email";
@@ -299,8 +301,16 @@ export const o_authGoogleCallbackController = asyncErrorHandler(async (request:N
     //     html: generateWelcomeEmailHTML({ name: name, email: email, handle: `@${userData.accountInfo.decodedHandle}`, baseUrl: baseUrl }),
     // });
 
+    
+    var publickeySen = '' ;
+    if (STATE?.intent === 'login') {   
+        const deviceip = await getDevicePublicIP() ;
+        const publickey = await pubkeys.findOne({ accountId:userData.accountId , deviceIP:deviceip , status:'active' });
+        publickeySen = publickey.publickey ;
+    }
     // Redirect to profile page
-    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userData.accountInfo.decodedHandle}?utm_source=google&accid=${userData.accountId}&intent=${STATE?.intent}`;
+    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userData.accountInfo.decodedHandle}?utm_source=google&accid=${userData.accountId}&intent=${STATE?.intent}&key=${publickeySen}`;
+
     return NextResponse.redirect(profileUrl);
 
 })
@@ -388,8 +398,15 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
     //     html: generateWelcomeEmailHTML({ name: name, email: email, handle: `@${userinfo.accountInfo.decodedHandle}`, baseUrl: baseUrl }),
     // });
 
+    var publickeySen = '' ;
+    if (STATE?.intent === 'login') {   
+        const deviceip = await getDevicePublicIP() ;
+        const publickey = await pubkeys.findOne({ accountId:userinfo.accountId , deviceIP:deviceip , status:'active' });
+        publickeySen = publickey.publickey ;
+    }
+
     // Redirect to profile page
-    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userinfo.accountInfo.decodedHandle}?utm_source=facebook&accid=${userinfo.accountId}&intent=${STATE?.intent}`;
+    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userinfo.accountInfo.decodedHandle}?utm_source=facebook&accid=${userinfo.accountId}&intent=${STATE?.intent}&key=${publickeySen}`;
     return NextResponse.redirect(profileUrl);
 })
     

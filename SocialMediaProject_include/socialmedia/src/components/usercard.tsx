@@ -4,6 +4,7 @@ import Image from 'next/image';
 import React, { useState, useRef } from 'react'
 import { createPortal } from 'react-dom';
 import AccountDetailPop from './accountdetailpop';
+import { makeMentionsAsLink } from '@/app/(routes)/[username]/page';
 import axiosInstance from '@/lib/interceptor';
 import { AxiosResponse } from 'axios';
 import Spinner from '@/components/spinner';
@@ -128,7 +129,7 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
                  </div>
                    <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-xs">{decodedHandle}</Link>
                  <p className="text-xs w-full text-gray-500 mt-1">
-                   {content ? content : ''}
+                   {content ? makeMentionsAsLink(content) : ''}
                  </p>
                </div>
 

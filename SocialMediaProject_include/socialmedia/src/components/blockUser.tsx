@@ -40,7 +40,7 @@ export default function BlockUser({ closeBlockPop , username , updateblockState,
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 dark:text-gray-300 text-sm max-w-sm mb-6">
+          <p className="text-gray-700 dark:text-gray-300 text-xs max-w-sm mb-6">
             {isBlocked
               ? 'Are you sure you want to unblock this Account? You can follow them again after unblocking.'
               : 'Are you sure you want to block this Account ? If unblocked later, you will have to send a follow request again to the Account.'

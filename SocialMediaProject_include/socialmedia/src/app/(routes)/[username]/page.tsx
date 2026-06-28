@@ -3,6 +3,7 @@
 import React, { useState , useEffect, useRef } from 'react';
 import ReportPop from '@/components/reportPop';
 import RequireSubscription from "@/components/requireSubscription"
+import usePublicKey from '@/app/states/accountpublickey';
 import BlockUser from '@/components/blockUser';
 import useUpgradePop from "@/app/states/upgradePop";
 import Link from 'next/link';
@@ -134,6 +135,30 @@ interface tabsTypes {
   label:string
 }
 
+  // function to make mentions a link in bio...
+  export const makeMentionsAsLink = (Bio: string) => {
+   if (!Bio?.trim()) return null ;
+
+    const parts = Bio.split(/(@[a-zA-Z0-9_]{8,20})/g);
+
+    return parts.map((part, idx) => {
+      if (part.startsWith("@") && usernameRegex.test(part.slice(1))) {
+
+       return (
+        <Link
+          key={idx}
+          href={`/${part}`}
+          className="text-yellow-500 hover:text-shadow-xs text-shadow-yellow-400"
+        >
+          {part}
+        </Link>
+       );
+      }
+      
+      return <React.Fragment key={idx}>{part}</React.Fragment>;
+    });
+};
+
 export default function UserProfilePage() {
   const isTab = (id: string) => activeTab.id === id || activeTab.id === 'all';
 
@@ -143,9 +168,12 @@ export default function UserProfilePage() {
   const utmsource = searchParams.get('utm_source') ;
   const accid = searchParams.get('accid');
   const intent = searchParams.get('intent');
+  const key = searchParams.get('key');
+
   const { isPop , setisPop } = useUpgradePop() ;
   const { isMediaPop , mediaDetail , setDetails, setMediaPop } = useMediaPop() ;
   const { username } = useParams() ; // taking the username from URL...
+  const { setpublickey } = usePublicKey() ;
   const fetchedHandlesRef = useRef<Set<string>>(new Set()); // ref to track fetched handles
   const isSelf = Account.decodedHandle === decodeURIComponent(String(username)) ? true : false ;
   const [isFollowing, setisFollowing] = useState<boolean>(false);
@@ -620,7 +648,7 @@ export default function UserProfilePage() {
         }
       }
     };
-    // fetchAccountData();
+    fetchAccountData();
   }, [Account.account, username])
   
   useEffect(() => {
@@ -754,40 +782,19 @@ export default function UserProfilePage() {
         generateKeyPairAndStoreBoth(accountid); // for public-private key generation...
         useWebSocket(accountid,intent) // registering web-socket id... 
       }
-      if (intent === 'login') {
+      if (intent === 'login' && key?.trim()) {
         const output = await checkForPrivateKeyIDB(accountid);
-        if (isKeyObjType(output)) localStorage.setItem('privatekey',output.value);
+        if (isKeyObjType(output)) { 
+          localStorage.setItem('privatekey',output.value);
+          // setpublickey(key);
+        }
         else generateKeyPairAndStoreBoth(accountid);
         useWebSocket(accountid,intent) // updating presence state web-socket id...
       }    
     }
     // if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
-  }, [utmsource,accid,intent])
+  }, [utmsource,accid,intent,key])
   
-  
-  // function to make mentions a link in bio...
-  const makeMentionsAsLink = (Bio: string) => {
-   if (!Bio?.trim()) return null ;
-
-    const parts = Bio.split(/(@[a-zA-Z0-9_]{8,20})/g);
-
-    return parts.map((part, idx) => {
-      if (part.startsWith("@") && usernameRegex.test(part.slice(1))) {
-
-       return (
-        <Link
-          key={idx}
-          href={`/${part}`}
-          className="text-yellow-500 hover:text-shadow-xs text-shadow-yellow-400"
-        >
-          {part}
-        </Link>
-       );
-      }
-      
-      return <React.Fragment key={idx}>{part}</React.Fragment>;
-    });
-};
 
   return (
 
@@ -1517,7 +1524,7 @@ export default function UserProfilePage() {
         {ShowQRPop && (
           <Qrcodepop Category='profile' copyLink={handleProfileLinkCopy} doneScanning={() => { setShowQRPop(false) }} path={window.location.origin} timestamp={new Date().toDateString()} owner={AccountInfo.handle}/>
         )}
-        {isMediaPop && (
+        {isMediaPop && mediaDetail && (
           <Mediapopmodal closepop={() => { setMediaPop(false) }} media={mediaDetail} />
         )}
       </>

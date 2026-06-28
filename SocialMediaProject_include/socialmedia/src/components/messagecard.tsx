@@ -4,38 +4,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
+import useActiveAccount from '@/app/states/useraccounts'
 import { useTheme } from 'next-themes'
+import useMessageSocket from '@/app/hooks/useMessageSocket'
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react'
-import { useSound } from 'use-sound'
-import {
-  AtSign,
-  CheckCircle,
-  Eraser,
-  Flag,
-  Folder,
-  Images,
-  Lock,
-  LockOpenIcon,
-  Mic,
-  MicOff,
-  Music,
-  Paperclip,
-  PinIcon,
-  PinOff,
-  SearchIcon,
-  SendIcon,
-  Smile,
-  Trash,
-  Video,
-  Bell,
-  BellOff,
-  X,
-  Ban,
-  User,
-  MessageCirclePlus,
-} from 'lucide-react'
+import { AtSign, CheckCircle, Eraser, Flag, Folder, Images, Lock, LockOpenIcon, Mic, MicOff, Music, Paperclip, PinIcon, PinOff, SearchIcon, SendIcon, Smile, Trash, Video, Bell, BellOff, X, Ban, User, MessageCirclePlus, CameraIcon, LockKeyholeIcon, MessageCircleMore } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import Sharecontactonchat from '@/components/sharecontactonchat'
+import useActiveChatMessages from '@/app/states/activechatmessage'
 import Mediapopmodal, { mediaType } from './mediapopmodal'
 import toast from 'react-hot-toast'
 import { infoForChatCard } from './chataccountcard'
@@ -43,6 +19,8 @@ import Attachmentpop from './attachmentpop'
 import Videoplayer from './videoplayer'
 import Audioplayer from './Audioplayer'
 import axiosInstance from '@/lib/interceptor'
+import Messagesearch from './messagesearch'
+import Clearchatpop from './clearchatpop'
 
 interface Message {
   id: string
@@ -64,7 +42,9 @@ interface attachmentOptionType {
 
 interface MessageCardProps {
   chatCardDetails?: infoForChatCard
+  pinToggleAction:() => void
   handleAudioPop: () => void
+  muteToggleAction:() => void
   handleAddChat: () => void
   updateCardDetail: (msg: string, time: string) => void
   openBlockPop: () => void
@@ -73,19 +53,15 @@ interface MessageCardProps {
 }
 
 
-export default function MessageCard({
-  chatCardDetails,
-  openBlockPop,
-  openReportPop,
-  handleAudioPop,
-  handleAddChat,
-  updateCardDetail,
-  openDeletePop,
-}: MessageCardProps) {
-  const { resolvedTheme } = useTheme()
-  const [play] = useSound('/audio/notification.mp3')
+export default function MessageCard({ chatCardDetails, openBlockPop, openReportPop, handleAudioPop, handleAddChat, updateCardDetail, openDeletePop , muteToggleAction , pinToggleAction }: MessageCardProps) {
+  const { resolvedTheme } = useTheme() ;
+  const { Account } = useActiveAccount();
+  const { messages, addMessages } = useActiveChatMessages() ;
+  const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
 
-  const heightGap = 200
+  const heightGap = 200;
+  const [backPage, setbackPage] = useState<number>(1);
+  const [hasMoreMessages, sethasMoreMessages] = useState<boolean>(true);
   const msgsection = useRef<HTMLDivElement | null>(null)
 
   const imageRef = useRef<HTMLInputElement | null>(null)
@@ -108,6 +84,8 @@ export default function MessageCard({
   const [showAttachments, setshowAttachments] = useState<boolean>(false)
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false)
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false)
+  const [ShowMessageSearch, setShowMessageSearch] = useState<boolean>(false)
+  const [ClearChatPop, setClearChatPop] = useState<boolean>(false)
   const [shareContact, setshareContact] = useState<boolean>(false)
 
   const hasAddedMediaOrMention = MediaFiles.length > 0 || mentions.length > 0
@@ -121,66 +99,6 @@ export default function MessageCard({
     ],
     []
   )
-
-  const MessagesArray = useMemo<Message[]>(
-    () => [
-      {
-        id: '1',
-        sendername: 'Alice Johnson',
-        senderhandle: '@alicejhonson',
-        text: 'Hey, how are you doing?',
-        timestamp: new Date().toLocaleString(),
-        isOwn: false,
-        avatar: '/images/myProfile.jpg',
-        status: 'seen',
-        media: [
-          {
-            url: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=800&q=60',
-            media_type: 'image',
-          },
-        ],
-      },
-      {
-        id: '2',
-        sendername: 'Amritansh Rai',
-        senderhandle: '@amritanshdev__',
-        text: "I'm doing great! Thanks for asking. How about you?",
-        timestamp: new Date().toLocaleString(),
-        isOwn: true,
-        avatar:
-          'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
-        status: 'seen',
-        media: [
-          {
-            url: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=800&q=60',
-            media_type: 'image',
-          },
-          {
-            media_type: 'audio',
-            url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-          },
-        ],
-      },
-      {
-        id: '3',
-        sendername: 'Alice Johnson',
-        senderhandle: '@alicejhonson',
-        text: "I'm good too. Just working on some projects. What are you up to?",
-        timestamp: new Date().toLocaleString(),
-        isOwn: false,
-        avatar: '/images/myProfile.jpg',
-        status: 'seen',
-      },
-    ],
-    []
-  )
-
-  const [Messages, setMessages] = useState<Message[]>([])
-
-  useEffect(() => {
-    if (!chatCardDetails) return
-    setMessages(MessagesArray)
-  }, [chatCardDetails, MessagesArray])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -196,14 +114,34 @@ export default function MessageCard({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [openChatThreeDot, showFilePopup, showEmojiPicker, shareContact])
 
+  // updating parent only when the *last message* changes...
+  const lastMessageKey = messages.length ? `${messages[messages.length - 1].id}` : ''
+
   useEffect(() => {
     if (!msgsection.current) return
-    if (Messages.length === 0) return
+    if (!messages.length) return
 
-    const lastmessage = Messages[Messages.length - 1]
     msgsection.current.scrollTop = msgsection.current.scrollHeight
-    updateCardDetail(lastmessage.text, lastmessage.timestamp)
-  }, [Messages, updateCardDetail])
+    updateCardDetail(messages[messages.length - 1].text, messages[messages.length - 1].timestamp)
+
+  }, [lastMessageKey])
+
+  // fetching messages on msgsection scrolling...
+  useEffect(() => {
+    const section = msgsection.current ;
+    if (!section) return ;
+
+    const onScroll = () => {
+      if ((section?.scrollTop <= heightGap) && hasMoreMessages) {
+        // getting more old messages...
+      }
+      
+      section.addEventListener('scroll', onScroll, { passive: true }) ;
+      return () => section.removeEventListener('scroll', onScroll) ;
+    }
+  }, [heightGap, messages.length,msgsection.current?.scrollTop])
+
+  
 
   const onEmojiClick = (emojiData: EmojiClickData) => {
     setmessageText((prev) => prev + emojiData.emoji)
@@ -224,33 +162,40 @@ export default function MessageCard({
     }
   }
 
-  const handleSendMessage = (_msg: string) => {
-    if (!_msg.trim()) return
+  const handleSendMessage = async (_msg: string) => {
+    if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
 
-    const trimmedmsg = _msg.trim()
-
+    const trimmedmsg = _msg.trim() ;
+    // instant message push UI
     const newMessage: Message = {
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      sendername: 'Amritansh Rai',
-      senderhandle: '@amritanshdev__',
+      id: String(messages.length) ,
+      sendername: String(Account.name),
+      senderhandle: String(Account.decodedHandle),
       text: trimmedmsg,
       timestamp: new Date().toLocaleString(),
-      media: [
-        {
-          url: '/images/twitter.png',
-          media_type: 'image',
-        },
-      ],
       isOwn: true,
-      avatar:
-        'https://res.cloudinary.com/dvgcc6gts/image/upload/v1778002271/briezl-media/%40amritanshdevProfilePic.jpeg.jpg',
+      avatar:String(Account.account?.avatarUrl),
       status: 'sent',
     }
 
-    setMessages((prevmessages) => [...prevmessages, newMessage])
+    addMessages([newMessage])
     setmessageText('')
-    play()
+
+    try {
+      await sendMessage({ message: trimmedmsg,mentions:mentions ,mediaFiles:MediaFiles })
+
+      // clearing local states after sending message...
+      setmentions([])
+      setMediaFiles([])
+      setimgUrls([])
+      setvideoUrls([])
+      setaudioUrls([])
+    } catch (e) {
+      console.error('Failed to send message', e)
+      toast.error('Failed to send message')
+    }
   }
+
 
   const handleMediaPop = (media: mediaType) => {
     setPopMedia(media)
@@ -285,11 +230,50 @@ export default function MessageCard({
   }
 
   const handleMuteToggleChat = async () => {
+    const loadingtoast = toast.loading(`${chatCardDetails?.isMuted ? 'Unmuting' : 'Muting'} chat with ${chatCardDetails?.handle}...`)
     try {
-      await axiosInstance.patch('/api/chat/attachments', { chat: chatCardDetails })
+      const muteapi = await axiosInstance.patch('/api/chat/attachments', { chat: chatCardDetails });
+      if (muteapi.status === 200) {
+        toast.dismiss(loadingtoast);
+        toast.success(`${chatCardDetails?.isMuted ? 'Unmuted' : 'Muted'} chat successfully !!`);
+        muteToggleAction(); // for chat UI toggle of mute....   
+      } else {
+        toast.dismiss(loadingtoast);
+        toast.error("Some issue occured in action !!");
+      }
     } catch {
-      // ignore
+      console.log("An error occured");
+      toast.dismiss(loadingtoast);
+      toast.error('An error occured');
     }
+  }
+
+  const handlePinToggle = async () => {
+    const loadingtoast = toast.loading(`${chatCardDetails?.pinned ? 'Unpinning' : 'Pinning'} chat with ${chatCardDetails?.handle}...`);
+    try {
+      const muteapi = await axiosInstance.put('/api/chat/attachments', { chat: chatCardDetails });
+      if (muteapi.status === 200) {
+        toast.dismiss(loadingtoast);
+        toast.success(`${chatCardDetails?.pinned ? 'Unpinned' : 'Pinned'} chat successfully !!`);
+        pinToggleAction();
+      } else {
+        toast.dismiss(loadingtoast);
+        toast.error("Some issue occured in action !!");
+      }
+    } catch {
+      console.log("An error occured");
+      toast.dismiss(loadingtoast);
+      toast.error('An error occured');
+    }
+  }
+
+  // function to scroll to searched message...
+  const scrollToTargetMessage = (messageindex:number) => {
+    if (!msgsection.current) return ;
+    const target = msgsection.current.querySelector<HTMLDivElement>(`[data-message-index="${messageindex}"]`);
+
+    if (target)  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    else msgsection.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   return (
@@ -297,8 +281,7 @@ export default function MessageCard({
       {!chatCardDetails ? (
         <div className="flex flex-col items-center justify-center h-fit text-center p-6">
           {/* message circle beep section */}
-          <div className="relative inline-flex">
-            <span className="absolute inset-0 rounded-full bg-yellow-200 dark:bg-yellow-950 animate-ping opacity-75"></span>
+         <div className="relative flex flex-col items-center justify-center">
             <div className="relative rounded-full p-2">
               <MessageCirclePlus
                 onClick={handleAddChat}
@@ -314,7 +297,8 @@ export default function MessageCard({
             <p>Select any chat to start a conversation or add an account to Send messages, share media, and keep up with the latest updates.you chats are (End-To-End Encrypted)</p>
             <div><Lock className='text-black dark:text-white'/></div>
           </div>
-          </div>
+         </div>
+        </div>
       ) : (
         <div className='flex flex-col h-full rounded-xl'>
           {/* Chat Header */}
@@ -400,7 +384,7 @@ export default function MessageCard({
 
                 <button
                   className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
-                  onClick={() => setopenChatThreeDot(false)}
+                  onClick={() => { handlePinToggle() ; setopenChatThreeDot(false)}}
                   disabled={chatCardDetails.blockedTo}
                 >
                   {chatCardDetails.pinned ? <PinOff className="w-4 h-4"/> : <PinIcon className="w-4 h-4 rotate-45" /> }
@@ -409,7 +393,7 @@ export default function MessageCard({
 
                 <button
                   className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
-                  onClick={() => setopenChatThreeDot(false)}
+                  onClick={() => { setShowMessageSearch(true) ; setopenChatThreeDot(false)}}
                   disabled={chatCardDetails.blockedTo}
                 >
                   <SearchIcon className="w-4 h-4" />
@@ -418,7 +402,7 @@ export default function MessageCard({
 
                 <button
                   className={`w-full cursor-pointer rounded-md truncate flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${chatCardDetails.blockedTo && 'blur-sm cursor-not-allowed'}`}
-                  onClick={() => setopenChatThreeDot(false)}
+                  onClick={() =>  { setClearChatPop(true) ; setopenChatThreeDot(false)}}
                   disabled={chatCardDetails.blockedTo}
                 >
                   <Eraser className="w-4 h-4" />
@@ -455,16 +439,18 @@ export default function MessageCard({
               </motion.div>
             )}
           </div>
+         </div>
         {/* Messages */}
         <div ref={msgsection} className={`overflow-y-auto overflow-x-hidden flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blockedTo && 'blur-sm'}`}>
          <AnimatePresence>
-          {Messages.map((message) => (
+          {messages.length > 0 && messages.map((message, idx) => (
             <motion.div
               layout
-              key={message.id}
+              key={`${message.id}-${idx}`}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
+              data-message-index={idx}
               className={`flex items-start gap-3 ${message.isOwn ? 'flex-row-reverse' : 'flex-row'}`}
             >
               <div className="flex-shrink-0">
@@ -551,6 +537,65 @@ export default function MessageCard({
               <span className="animate-bounce w-2 h-2 rounded-full border border-yellow-500 bg-yellow-500" style={{ animationDelay: "0.4s" }} ></span>
             </div>
           )}
+
+          {/* when chat gets cleared no messages... */}
+          {messages.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="w-full h-full flex items-center justify-center p-5 rounded-xl"
+            >
+              <div className="w-full max-w-xl h-fit rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white/70 dark:bg-black/40 backdrop-blur p-6 shadow-sm">
+                <div className="flex items-center gap-3 justify-center">
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.05, duration: 0.25 }}
+                    className="relative"
+                  >
+                    <div className="absolute rounded-full" />
+                    <div className="relative w-14 h-14 rounded-2xl bg-yellow-100 dark:bg-yellow-950/60 flex items-center justify-center border border-yellow-200/80 dark:border-yellow-900/40">
+                      <MessageCircleMore className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                    </div>
+                  </motion.div>
+                </div>
+
+                <div className="mt-4 text-center">
+                  <p className="text-md font-semibold text-gray-900 dark:text-gray-100">No messages yet</p>
+                  <p className="mt-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                    Send a message to <b>{chatCardDetails.handle}</b> & start your conversation.
+                  </p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.08, duration: 0.25 }}
+                    className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2"
+                  >
+                    <div className="inline-flex items-center rounded-full border border-yellow-200/80 dark:border-yellow-900/40 bg-yellow-50 dark:bg-yellow-950/30 gap-2 px-3 py-1 text-xs text-yellow-700 dark:text-yellow-300">
+                      <CameraIcon />
+                      <span>Attach different media</span>
+                    </div>
+                    <div className="inline-flex items-center rounded-full border border-yellow-200/80 dark:border-yellow-900/40 bg-yellow-50 dark:bg-yellow-950/30 gap-2 px-3 py-1 text-xs text-yellow-700 dark:text-yellow-300">
+                      <Smile />
+                      <span>Emojis for feelings</span>
+                    </div>
+                    <div className="inline-flex items-center rounded-full border border-yellow-200/80 dark:border-yellow-900/40 bg-yellow-50 dark:bg-yellow-950/30 gap-2 px-3 py-1 text-xs text-yellow-700 dark:text-yellow-300">
+                      <AtSign />
+                      <span>Mention other accounts</span>
+                    </div>
+                    <div className="inline-flex items-center rounded-full border border-gray-200/80 dark:border-gray-800 bg-white/50 dark:bg-black/30 gap-2 px-3 py-1 text-xs text-gray-800 dark:text-gray-400">
+                      <LockKeyholeIcon />
+                      <span>Secure chat</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
         </AnimatePresence>
       </div>
       {/* Message composer */}
@@ -666,7 +711,8 @@ export default function MessageCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                type="button"
+                onClick={() => setShowEmojiPicker((v) => !v)}
                 disabled={chatCardDetails?.blockedTo}
                 className={`p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${chatCardDetails?.blockedTo && 'cursor-not-allowed'}`}
               >
@@ -819,4 +865,13 @@ export default function MessageCard({
       menuOptions={attachFileoptions}
     />
   )}
-</div>
+
+  {ShowMessageSearch && chatCardDetails && (
+    <Messagesearch close={() => { setShowMessageSearch(false) }} scrollInMsgSection={scrollToTargetMessage} />
+  )}
+
+  {ClearChatPop && chatCardDetails && (
+    <Clearchatpop chat={chatCardDetails} close={() => { setClearChatPop(false) }}/>
+  )}
+ </div>
+)}

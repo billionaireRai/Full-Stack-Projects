@@ -53,10 +53,10 @@ export const getConversationsService = async () => {
 
         // getting the publickey of this account...
         const deviceip = await getDevicePublicIP() ;
-        const publickey = await pubkeys.findOne({ accountId:activeAcc._id , deviceIP:deviceip , status:'active' });
+        const publickeyRec = await pubkeys.findOne({ accountId:chatWithAcc._id , deviceIP:deviceip , status:'active' });
 
-        if (!publickey) {
-            console.log("Public key missing !!");
+        if (!publickeyRec) {
+            console.log("Any of public key missing !!");
             return NextResponse.json({ message:'Public key missing' },{ status:404 });
         }
         return {
@@ -72,7 +72,7 @@ export const getConversationsService = async () => {
             avatarUrl: chatWithAcc.avatar.url,
             pinned:pinned,
             unreadCount:unseenMessages,
-            publicKey:publickey.publicKey
+            publicKeyReciever:publickeyRec.publicKey,
         }
     })) 
     

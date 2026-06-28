@@ -46,7 +46,7 @@ export default function BlockChatPop({ closeBlockPop , updateblockState , conv }
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 text-left dark:text-gray-300 text-sm max-w-sm mb-6">
+          <p className="text-gray-700 text-left dark:text-gray-300 text-xs max-w-sm mb-6">
             {conv.blockedTo
               ? <>Are you sure you want to <b>UnBlock</b> this Chat with <Link href={`/${conv.handle}`}><b>{conv.handle}</b></Link>? You can start chatting again after unblocking.</>
               : <>Are you sure you want to <b>Block</b> this Chat with <Link href={`/${conv.handle}`}><b>{conv.handle}</b></Link> ? All the notifications , chats , media wont be accessable...</>
