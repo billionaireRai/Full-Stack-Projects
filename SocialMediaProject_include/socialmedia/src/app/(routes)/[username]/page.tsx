@@ -14,11 +14,11 @@ import Spinner from '@/components/spinner';
 import PostCard from '@/components/postcard';
 import ProfileEditor from '@/components/profileeditor';
 import useWebSocket from '@/app/hooks/useWebSocket';
+import { handleScrollToTop } from '@/lib/windowtopscroll'; 
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
-import { handleScrollToTop } from '@/lib/windowtopscroll';
 import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon, VideoOffIcon, File} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
@@ -794,7 +794,6 @@ export default function UserProfilePage() {
     }
     // if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
   }, [utmsource,accid,intent,key])
-  
 
   return (
 
@@ -1489,7 +1488,10 @@ export default function UserProfilePage() {
                     { ShowLess ? 'Show less' : 'Show more' }
                   </button>
                 </div>
-                <button onClick={() => { handleScrollToTop(window) }} className='fixed right-5 bottom-10 rounded-full p-1 hover:bg-yellow-100 dark:hover:bg-gray-950 cursor-pointer z-50'>
+                <button
+                  onClick={() => { handleScrollToTop('main-scrollable') }}
+                  className='fixed right-5 bottom-10 rounded-full p-1 hover:bg-yellow-100 dark:hover:bg-gray-950 cursor-pointer z-50'
+                >
                   <ArrowBigUpIcon width={40} height={40} stroke='5' className='fill-yellow-400'/>
                 </button>
               </div>

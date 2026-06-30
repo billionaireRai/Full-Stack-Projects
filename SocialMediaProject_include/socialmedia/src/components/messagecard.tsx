@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import useActiveAccount from '@/app/states/useraccounts'
 import { useTheme } from 'next-themes'
-import useMessageSocket from '@/app/hooks/useMessageSocket'
+// import useMessageSocket from '@/app/hooks/useMessageSocket'
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react'
 import { AtSign, CheckCircle, Eraser, Flag, Folder, Images, Lock, LockOpenIcon, Mic, MicOff, Music, Paperclip, PinIcon, PinOff, SearchIcon, SendIcon, Smile, Trash, Video, Bell, BellOff, X, Ban, User, MessageCirclePlus, CameraIcon, LockKeyholeIcon, MessageCircleMore } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -57,7 +57,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   const { resolvedTheme } = useTheme() ;
   const { Account } = useActiveAccount();
   const { messages, addMessages } = useActiveChatMessages() ;
-  const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
+  // const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
 
   const heightGap = 200;
   const [backPage, setbackPage] = useState<number>(1);
@@ -163,7 +163,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   }
 
   const handleSendMessage = async (_msg: string) => {
-    if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
+    // if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
 
     const trimmedmsg = _msg.trim() ;
     // instant message push UI
@@ -182,7 +182,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     setmessageText('')
 
     try {
-      await sendMessage({ message: trimmedmsg,mentions:mentions ,mediaFiles:MediaFiles })
+      // await sendMessage({ message: trimmedmsg,mentions:mentions ,mediaFiles:MediaFiles })
 
       // clearing local states after sending message...
       setmentions([])

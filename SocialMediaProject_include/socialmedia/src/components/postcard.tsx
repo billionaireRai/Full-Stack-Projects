@@ -9,6 +9,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/lib/interceptor';
 import { useRouter } from 'next/navigation';
+import PollInPost from './pollinpost';
 import useActiveAccount from '@/app/states/useraccounts';
 import Commentpopcard from './Commentpopcard';
 import Mediapopmodal from './mediapopmodal';
@@ -680,6 +681,12 @@ export default function PostCard({
             <div>{content}</div>
             <div className='flex flex-wrap'>{parseHashAndMentions(hashTags, mentions)}</div>
           </div>
+
+          {poll && (
+            <div className="mt-2">
+              <PollInPost poll={poll} />
+            </div>
+          )}
 
           {/* Media */}
           {displayMedia && displayMedia.length > 0 && displayMedia.some(item => item.url && item.url.trim() !== '') && (

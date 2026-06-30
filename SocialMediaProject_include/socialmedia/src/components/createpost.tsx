@@ -5,6 +5,7 @@ import useCreatePost from '@/app/states/createpost';
 import { useTheme } from "next-themes";
 import Videoplayer from "./videoplayer";
 import toast from "react-hot-toast";
+import { scrollToBottom } from "@/lib/windowtopscroll";
 import Link from "next/link";
 import { userCardProp } from "./usercard";
 import usePoll from "@/app/states/poll";
@@ -235,6 +236,7 @@ export default function CreatePost() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
+      id="createpost-scroll"
       className='fixed inset-0 bg-black/10 backdrop-blur-xs z-50 flex items-center overflow-y-scroll justify-center p-4'
     >
       <div className="flex flex-col lg:flex-row gap-4 items-center justify-center w-full h-full">
@@ -278,7 +280,7 @@ export default function CreatePost() {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-6">
           <div className="flex gap-4">
             <div className="flex-1 min-w-0">
               <textarea
@@ -336,7 +338,7 @@ export default function CreatePost() {
                             transition={{ delay: index * 0.05 }}
                             className="relative group rounded-xl overflow-hidden bg-black shadow-md"
                           >
-                            <Videoplayer url={url} controls={true} />
+                            <Videoplayer url={url} showFullScreenIcon={true} />
                             <button
                               onClick={() => removeArrayElement([setVideoArr, setVideoFiles], index)}
                               className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 backdrop-blur-sm cursor-pointer"
@@ -507,7 +509,7 @@ export default function CreatePost() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => setShowPollModal(!showPollModal)}
+                      onClick={() => { setShowPollModal(!showPollModal); requestAnimationFrame(() => scrollToBottom('createpost-scroll')); }}
                       className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group create-poll"
                       disabled={isPosting}
                     >
@@ -520,7 +522,7 @@ export default function CreatePost() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => setShowLocationSearchModal(!showLocationSearchModal)}
+                      onClick={() => { setShowLocationSearchModal(!showLocationSearchModal) ; requestAnimationFrame(() => scrollToBottom('createpost-scroll')); }}
                       className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group"
                       disabled={isPosting}
                     >
@@ -584,14 +586,14 @@ export default function CreatePost() {
                         <span className="text-sm text-gray-700 dark:text-gray-300">Add GIF</span>
                       </button>
                       <button
-                        onClick={() => { setShowPollModal(true); setOpenOptions(false); }}
+                        onClick={() => { setShowPollModal(true); requestAnimationFrame(() => scrollToBottom('createpost-scroll')); ;setOpenOptions(false); }}
                         className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
                       >
                         <Image src="/images/poll.png" width={20} height={20} alt="poll" className="dark:invert" />
                         <span className="text-sm text-gray-700 dark:text-gray-300">Poll</span>
                       </button>
                       <button
-                        onClick={() => { setShowLocationSearchModal(true); setOpenOptions(false); }}
+                        onClick={() => { setShowLocationSearchModal(true); requestAnimationFrame(() => scrollToBottom('createpost-scroll')); ;setOpenOptions(false); }}
                         className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
                       >
                         <Image src="/images/location.png" width={20} height={20} alt="location" className="dark:invert" />
