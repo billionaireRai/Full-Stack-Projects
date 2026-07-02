@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import PollInPost from "./pollinpost";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { userCardProp } from "./usercard";
@@ -282,6 +283,12 @@ export default function EditPostPop({
             rows={4}
             className="w-full resize-none border-none outline-none text-sm text-gray-900 dark:text-gray-100 bg-transparent placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 focus:outline-none"
           />
+
+          {poll && (
+            <div className="mt-2">
+               <PollInPost poll={poll} />
+            </div>
+          )}
 
           <motion.div
             className="section-for-extra-info flex flex-col gap-1 rounded-lg p-2"
@@ -613,13 +620,13 @@ export default function EditPostPop({
               </motion.div>
             )}
 
-            {showPollModal && (
+            {showPollModal && Account.account && (
               <motion.div
                 initial={{ opacity: 0, y: 500, x: -250, scale: 0.8 }}
                 animate={{ opacity: 1, y: 400, x: -250, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
                 className='create-poll absolute z-60 -right-70 -top-30 sm:left-[35%] w-screen sm:w-lg'>
-                <CreatePoll />
+                <CreatePoll plan={Account.account?.plan} questionLen={maxPostLength} />
               </motion.div>
             )}
 

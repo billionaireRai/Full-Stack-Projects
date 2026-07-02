@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { Clock } from "lucide-react";
 import { useTheme } from "next-themes";
+import { fmt } from "@/lib/utils";
+import { formatDuration } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 interface pollInfoType {
@@ -30,31 +32,20 @@ export default function PollInPost({ poll }: PollInPostProps) {
     }
   };
 
-  const formatDuration = (seconds: number) => {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""}`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""}`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""}`;
-    return "Less than a minute";
-  };
-
   const totalVotes = votes.reduce((a, b) => a + b, 0);
 
   return (
-    <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+    <div className="mt-4 p-4 bg-gray-50 dark:bg-black rounded-xl border border-gray-200 dark:border-gray-700">
       {/* Header with duration */}
       <div className="flex items-center gap-2 mb-4">
         <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-xs text-gray-500 dark:text-gray-400">
           Poll ends in {formatDuration(poll.duration)}
         </span>
       </div>
 
       {/* Question */}
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
         {poll.question}
       </h3>
 
@@ -62,7 +53,7 @@ export default function PollInPost({ poll }: PollInPostProps) {
       <div className="space-y-3">
         {poll.options.map((option, index) => {
           const percentage = totalVotes > 0 ? (votes[index] / totalVotes) * 100 : 0;
-          const hue = percentage * 1.2; // 0-120 for red to green
+          const hue = percentage * 1.2; // 0-120 for red to green...
 
           return (
             <motion.div
@@ -80,7 +71,7 @@ export default function PollInPost({ poll }: PollInPostProps) {
             >
               <div className="flex items-center justify-between mb-2">
                 <span
-                  className={`text-gray-900 dark:text-white ${
+                  className={`text-gray-900 text-xs dark:text-white ${
                     selectedOption === index ? "font-medium" : ""
                   }`}
                 >
@@ -88,8 +79,8 @@ export default function PollInPost({ poll }: PollInPostProps) {
                 </span>
                 {hasVoted && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {votes[index]} ({percentage.toFixed(1)}%)
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {fmt(votes[index])} ({percentage.toFixed(1)}%)
                     </span>
                     {selectedOption === index && (
                       <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
@@ -103,9 +94,7 @@ export default function PollInPost({ poll }: PollInPostProps) {
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{
-                      backgroundColor: `hsl(${hue}, 70%, 50%)`,
-                    }}
+                    style={{ backgroundColor: `hsl(${hue}, 70%, 50%)` }}
                     initial={{ width: 0 }}
                     animate={{ width: `${percentage}%` }}
                     transition={{ duration: 1, delay: index * 0.1 }}
@@ -119,8 +108,8 @@ export default function PollInPost({ poll }: PollInPostProps) {
 
       {/* Total votes */}
       {hasVoted && (
-        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-          Total votes: {totalVotes}
+        <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+          Total votes: {fmt(totalVotes)}
         </div>
       )}
     </div>

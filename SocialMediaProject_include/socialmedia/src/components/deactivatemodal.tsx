@@ -16,7 +16,7 @@ export default function DeactivateModal({ closePopUp, onDeactivate }: Deactivate
           <h2 className="text-black dark:text-white text-xl font-bold mb-4 flex items-center gap-2"><AlertTriangle className="w-8 h-8 text-red-500" /> Deactivate Account</h2>
 
           {/* Description */}
-          <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
+          <p className="text-gray-700 dark:text-gray-300 text-xs mb-6">
             Deactivating your account will <b>temporarily disable</b> it. Your profile and posts will be hidden from others, but you can reactivate it anytime by logging back in. <b>This action is reversible.</b>
           </p>
 

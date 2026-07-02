@@ -5,6 +5,7 @@ import Image from 'next/image';
 import EmojiPicker ,{ EmojiClickData, Theme } from 'emoji-picker-react';
 import useActiveAccount from '@/app/states/useraccounts';
 import { motion, AnimatePresence } from 'framer-motion';
+import PollInPost from './pollinpost';
 import { useTheme } from 'next-themes';
 import { X, Smile, ImageIcon, Send, MessageCircle, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -13,6 +14,7 @@ import Link from 'next/link';
 import AccountSearch from './accountsearch';
 import LocationSearch from './locationsearch';
 import axiosInstance from '@/lib/interceptor';
+import { pollInfoType } from './createpoll';
 
 interface mediaType {
   url: string;
@@ -25,12 +27,13 @@ interface CommentCardInfo {
   handle?:string ,
   timestamp?:string,
   content?:string ,
+  poll?:pollInfoType
   media?: mediaType[],
   updateState?:() => void,
   handleClose:() => void
 }
 
-export default function Commentpopcard({updateState,postId ,avatar , name, handle, timestamp , content ,media , handleClose }:CommentCardInfo) {
+export default function Commentpopcard({updateState,postId,poll ,avatar , name, handle, timestamp , content ,media , handleClose }:CommentCardInfo) {
   const { Account } = useActiveAccount() ;
   const [replyText, setReplyText] = useState<string>(''); // state containing text to be commented..
   const [EmojiPop, setEmojiPop] = useState<boolean>(false) ; // emoji pop state...
@@ -236,6 +239,11 @@ export default function Commentpopcard({updateState,postId ,avatar , name, handl
                 />
               </div>
               <div className="flex-1 min-w-0">
+                {poll && (
+                  <div className="mb-2">
+                     <PollInPost poll={poll} />
+                  </div>
+                )}
                <div className={`relative flex flex-row items-center rounded-3xl border transition-all duration-300 ease-out ${
                      isFocused
                        ? 'border-yellow-500/80 dark:border-yellow-400/80 ring-2 ring-yellow-400/20 dark:ring-yellow-500/30 bg-white/95 dark:bg-gray-900 shadow-lg shadow-yellow-500/10 backdrop-blur-sm scale-[1.005]'

@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { fmt } from "@/lib/utils";
+import { formatDuration } from "@/lib/utils";
 import { X, Clock } from "lucide-react";
 
 interface pollInfoType {
@@ -17,17 +19,6 @@ interface AccountPollProps {
 
 export default function AccountPoll({ poll, isOpen, onClose }: AccountPollProps) {
   if (!poll) return null;
-
-  const formatDuration = (seconds: number) => {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''}`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''}`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''}`;
-    return 'Less than a minute';
-  };
 
   const totalVotes = poll.options.reduce((sum, option) => sum + option.votes, 0);
 
@@ -69,7 +60,7 @@ export default function AccountPoll({ poll, isOpen, onClose }: AccountPollProps)
             {/* Options */}
             <div className="space-y-4">
               <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                Total votes: {totalVotes}
+                Total votes: {fmt(totalVotes)}
               </div>
               {poll.options.map((option, index) => (
                 <div
@@ -81,7 +72,7 @@ export default function AccountPoll({ poll, isOpen, onClose }: AccountPollProps)
                       {option.text}
                     </span>
                     <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {option.votes} votes
+                      {fmt(option.votes)} votes
                     </span>
                   </div>
                 </div>

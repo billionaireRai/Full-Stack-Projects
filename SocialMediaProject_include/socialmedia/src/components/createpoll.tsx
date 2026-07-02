@@ -21,7 +21,7 @@ interface Option {
 }
 
 
-export default function CreatePoll() {
+export default function CreatePoll({ plan , questionLen } : { plan:string , questionLen:number }) {
   const { resolvedTheme } = useTheme();
   const { setPoll, setIsCreateOpen, setIsDisplayOpen } = usePoll();
   const [question, setQuestion] = useState("");
@@ -88,6 +88,15 @@ export default function CreatePoll() {
     }
   };
 
+  // function returning poll option length...
+  function allowedPollOptionLength() : number {
+    if (plan.trim() && plan !== 'Free') {
+      return 200 ;
+    } else {
+      return 50 ;
+    }
+  }
+
 
   return (
     <AnimatePresence>
@@ -119,11 +128,11 @@ export default function CreatePoll() {
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="What would you like to ask?"
                 rows={3}
-                maxLength={280}
+                maxLength={questionLen}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-yellow-300/50 focus:border-transparent bg-white dark:bg-gray-950 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none outline-none"
               />
               <div className="text-right text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {question.length}/280
+                {question.length}/{questionLen}
               </div>
             </div>
               {/* Duration */}
@@ -152,11 +161,11 @@ export default function CreatePoll() {
                         value={option.text}
                         onChange={(e) => updateOption(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
-                        maxLength={50}
+                        maxLength={allowedPollOptionLength()}
                         className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-yellow-300/50 focus:border-transparent bg-white dark:bg-gray-950 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
                       />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
-                        {option.text.length}/50
+                        {option.text.length}/{allowedPollOptionLength()}
                       </div>
                     </div>
                     {options.length > 2 && (

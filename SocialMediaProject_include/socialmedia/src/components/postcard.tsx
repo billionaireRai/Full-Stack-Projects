@@ -841,7 +841,7 @@ export default function PostCard({
 
       {ShowDeletePop && <DeletePostPop postId={postId} postOwner={handle} requestBy={String(Account.decodedHandle)} closePopUp={() => { setShowDeletePop(false) }} />}
 
-      { CommentCardPop && ( <Commentpopcard updateState={() => { handleCommentStateUpdate() }} postId={postId} avatar={avatar} name={username} handle={handle}  timestamp={timestamp} content={content} media={displayMedia} handleClose={() => { setCommentCardPop(false) }}/> )}
+      { CommentCardPop && ( <Commentpopcard updateState={() => { handleCommentStateUpdate() }} poll={poll} postId={postId} avatar={avatar} name={username} handle={handle}  timestamp={timestamp} content={content} media={displayMedia} handleClose={() => { setCommentCardPop(false) }}/> )}
 
       { viewPop && (<ViewClickPop closePopUp={() => { setviewPop(false) }}/> )}
 

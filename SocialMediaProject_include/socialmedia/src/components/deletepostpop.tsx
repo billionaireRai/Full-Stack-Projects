@@ -41,7 +41,7 @@ export default function DeletePostPop({ closePopUp, postId, postOwner, requestBy
           <h2 className="text-black dark:text-white text-xl font-bold mb-4">Confirm Deletion</h2>
 
           {/* Description */}
-          <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
+          <p className="text-gray-700 dark:text-gray-300 text-xs mb-6">
             Are you sure you want to <b>delete</b> this post? <b>This action cannot be undone.</b>
           </p>
 

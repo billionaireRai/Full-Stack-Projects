@@ -20,7 +20,7 @@ export default function DeleteModal({closePopUp, onDelete , itemType = 'item'}: 
           </h2>
 
           {/* Description */}
-          <p className="text-gray-800 dark:text-gray-300 text-sm mb-6">
+          <p className="text-gray-800 dark:text-gray-300 text-xs mb-6">
             Are you sure you want to <b>delete</b> this {itemType} ? <b>This action cannot be undone.</b>
           </p>
 
