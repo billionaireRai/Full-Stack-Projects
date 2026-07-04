@@ -90,7 +90,6 @@ const postSchema = new mongoose.Schema(
         message: "Hashtags cannot contain empty strings"
       }
     },
-
     mentions: {
       type: [String],
       ref: "accounts",

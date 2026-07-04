@@ -160,7 +160,7 @@ interface tabsTypes {
 };
 
 export default function UserProfilePage() {
-  const isTab = (id: string) => activeTab.id === id || activeTab.id === 'all';
+  const isTab = (id: string) => activeTab.id === id ;
 
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
   const router = useRouter() ;
@@ -215,7 +215,6 @@ export default function UserProfilePage() {
 
   const [AccountInfo,setAccountInfo] = useState<accountType>(user) ;
   const tabs = [
-    {id:'all' , label:'All'},
     { id: 'posts', label: 'Posts' },
     { id: 'replies', label: 'Replied-Posts' },
     { id: 'media', label: 'Media' },
@@ -223,7 +222,7 @@ export default function UserProfilePage() {
     { id: 'highlights', label: 'Highlights' }
   ];
 
-  const [activeTab, setActiveTab] = useState<tabsTypes>({id:'all',label:'All'}); // current active tab state...
+  const [activeTab, setActiveTab] = useState<tabsTypes>({id:'posts',label:'Posts'}); // current active tab state...
 
   // random follow suggestions data
   const [FollowSuggesstions, setFollowSuggesstions] = useState<userCardProp[]>([

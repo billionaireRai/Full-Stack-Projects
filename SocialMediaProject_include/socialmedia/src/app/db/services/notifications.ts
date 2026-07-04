@@ -71,7 +71,7 @@ export const createAndSendNotification = async (params: CreateNotificationParams
   // Send notification via socket server...
   if (presense && presense?.onlineStatus === 'online') {
    try {
-     const emitReq = await axios.post("http://localhost:4000/emit-notification", {
+     const emitReq = await axios.post("http://localhost:5000/emit-notification", {
        headers: { "Content-Type": "application/json" },
        body: JSON.stringify({
          recipientSocketId: presense?.socketId,

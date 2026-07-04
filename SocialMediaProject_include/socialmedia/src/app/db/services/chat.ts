@@ -180,9 +180,9 @@ export const messageCreationService = async (data:messageCreationPayload) => {
     
     const [ withAccId ] = Conversation.participants.filter((accid:string) => accid !== (activeAcc._id));
     
-    const presenseState = await Presense.findOne({ accountId:withAccId , onlineStatus:'online' }) ; // getting presense state of for acc...
+    const presense = await Presense.findOne({ accountId:activeAcc._id , onlineStatus:'online' }) ; // getting presense state of for acc...
 
-    await messages.create({
+    const newmsg = await messages.create({
         fromId:activeAcc._id,
         toId:withAccId,
         conversationId,
@@ -195,5 +195,6 @@ export const messageCreationService = async (data:messageCreationPayload) => {
         status: 'sent',
     });
     
-    return presenseState ;
+    const Data:{ socketid:string , msgID:string } = { socketid:presense.socketId , msgID:newmsg._id } ;
+    return Data ;
 }

@@ -12,7 +12,7 @@ export default function useWebSocket(accountId: string, type: string) {
   useEffect(() => {
     if (!accountId) return; // Avoid connecting without an account id...
 
-    const socket = io("http://localhost:4000", { autoConnect: true, transports: ["websocket"] });
+    const socket = io("http://localhost:5000", { autoConnect: true, transports: ["websocket"] });
 
     socketRef.current = socket;
 

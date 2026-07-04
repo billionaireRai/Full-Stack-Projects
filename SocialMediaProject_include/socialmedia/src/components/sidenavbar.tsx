@@ -74,7 +74,7 @@ export default function SideNavbar() {
       {/* Sidebar */}
       {shouldShowSidebar && (
         <aside
-          className={`fixed top-0 left-0 h-screen z-40 font-poppins border-r transition-transform duration-300 ease-in-out
+          className={`fixed top-0 left-0 h-screen z-40 font-poppins border-none outline-none transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           w-72 bg-white dark:bg-black rounded-md`}
         >

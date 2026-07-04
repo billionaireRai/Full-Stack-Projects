@@ -26,7 +26,8 @@ import {
   AtSign, 
   MapPin,
   Loader2,
-  ChevronDown
+  ChevronDown,
+  MessagesSquareIcon
 } from 'lucide-react';
 import { TooltipContent, TooltipTrigger, Tooltip } from "./ui/tooltip";
 import CreatePoll from "./createpoll";
@@ -258,9 +259,9 @@ export default function CreatePost() {
               />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Create Post
-              </h2>
+              <h4 className="text-xl font-bold text-gray-900 dark:text-white">
+                {Account.name}
+              </h4>
               <Link href={`/${Account.decodedHandle}`} className="hover:opacity-80 transition-opacity">
                 <span className="text-sm text-gray-500 dark:text-zinc-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
                   {Account.decodedHandle}
@@ -627,10 +628,10 @@ export default function CreatePost() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute bottom-12 right-0 mt-2 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-700 p-4 z-50"
+                      className="absolute bottom-10 right-0 mt-2 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-700 p-4 z-50"
                     >
                       <div className="mb-4">
-                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Who can reply?</h3>
+                        <h3 className="font-semibold flex items-center gap-1 text-gray-900 dark:text-white text-lg"><MessagesSquareIcon /><span>Who can reply ?</span></h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Choose who can reply to this post</p>
                       </div>
                       <div className="space-y-2">

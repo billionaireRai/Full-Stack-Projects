@@ -44,8 +44,8 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [isPosting, setIsPosting] = useState<boolean>(false);
   const { resolvedTheme } = useTheme() ;
-  const [maxChars,setmaxChars] = useState(100);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const maxChars : number = Account.account?.isVerified ? 500 : 100 ; // conditional length...
 
   const handlePostReply = async () => {
     try { 
