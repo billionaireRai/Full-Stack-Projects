@@ -14,8 +14,9 @@ import { usePathname } from 'next/navigation'
 import LogoutModal from './logoutmodal';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
-import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon } from 'lucide-react'
+import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon, SparklesIcon, List, BadgeQuestionMark, PlusCircle } from 'lucide-react'
 import useMessageCount from '@/app/states/unreadmessages';
+import { MdDrafts, MdGroups } from 'react-icons/md';
 
 export default function SideNavbar() {
   const { setCreatePop } = useCreatePost()
@@ -29,6 +30,9 @@ export default function SideNavbar() {
   const { theme, setTheme } = useTheme()
   const isDark = theme === 'dark'
   const [mounted, setMounted] = useState<boolean>(false)
+
+  // More dropdown (top list)
+  const [isMoreOpen, setIsMoreOpen] = useState<boolean>(false)
 
   const shouldShowSidebar =
     !pathname.startsWith('/auth/') && pathname !== '/' && !pathname.endsWith('/create-account') && !pathname.startsWith('/embed');
@@ -53,16 +57,23 @@ export default function SideNavbar() {
       ) {
         setDotClick(false)
       }
+
+      if (
+        isMoreOpen &&
+        !(event.target as Element).closest('.more-dropdown-container')
+      ) {
+        setIsMoreOpen(false)
+      }
     }
 
-    if (DotClick) {
+    if (DotClick || isMoreOpen) {
       document.addEventListener('click', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('click', handleClickOutside)
     }
-  }, [DotClick])
+  }, [DotClick, isMoreOpen])
 
   // Set mounted to true after component mounts
   useEffect(() => {
@@ -135,8 +146,8 @@ export default function SideNavbar() {
         )}
         </div>
             {/* Nav Links */}
-            <nav className="flex-1">
-              <ul className="flex flex-col">
+            <nav className="flex-1 ">
+              <ul className="flex flex-col gap-1">
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/feed`
@@ -144,7 +155,7 @@ export default function SideNavbar() {
                   }`}
                   href={`/${Account.decodedHandle}/feed`}
                 >
-                  <NavItem icon={<HomeIcon className={`${pathname === `/${Account.decodedHandle}/feed` ? 'fill-black dark:fill-white' : ''}`} />} label="Feed" />
+                  <NavItem icon={<HomeIcon className={`${pathname === `/${Account.decodedHandle}/feed` && 'fill-black dark:fill-white'}`} />} label="Feed" />
                 </Link>
                 <Link
                   className={`${
@@ -153,7 +164,7 @@ export default function SideNavbar() {
                   }`}
                   href="/explore"
                 >
-                  <NavItem icon={<SearchIcon className={`${pathname === '/explore' ? 'fill-black dark:fill-white' : ''}`} />} label="Explore" />
+                  <NavItem icon={<SearchIcon className={`${pathname === '/explore' && 'fill-black dark:fill-white' }`} />} label="Explore" />
                 </Link>
                 <Link
                   className={`${
@@ -162,7 +173,7 @@ export default function SideNavbar() {
                   }`}
                   href={`/${Account.decodedHandle}/notifications`}
                 >
-                  <NavItem icon={<BellIcon className={`${pathname === `/${Account.decodedHandle}/notifications` ? 'fill-black dark:fill-white' : ''}`} />} label="Notifications" />
+                  <NavItem icon={<BellIcon className={`${pathname === `/${Account.decodedHandle}/notifications` && 'fill-black dark:fill-white'}`} />} label="Notifications" />
                 </Link>
                 <Link
                   className={`${
@@ -171,7 +182,7 @@ export default function SideNavbar() {
                   } flex items-center gap-2`}
                   href={`/${Account.decodedHandle}/messages`}
                 >
-                  <NavItem icon={<MessageCircleIcon className={`${pathname === `/${Account.decodedHandle}/messages` ? 'fill-black dark:fill-white' : ''}`} />} label="Messages" />
+                  <NavItem icon={<MessageCircleIcon className={`${pathname === `/${Account.decodedHandle}/messages` && 'fill-black dark:fill-white'}`} />} label="Messages" />
                 </Link>
                 <Link
                   className={`${
@@ -180,7 +191,7 @@ export default function SideNavbar() {
                   }`}
                   href="/subscription"
                 >
-                  <NavItem icon={<UserPlusIcon className={`${pathname === '/subscription' ? 'fill-black dark:fill-white' : ''}`} />} label="Subscription" />
+                  <NavItem icon={<UserPlusIcon className={`${pathname === '/subscription' && 'fill-black dark:fill-white' }`} />} label="Subscription" />
                 </Link>
                 <Link
                   className={`${
@@ -189,50 +200,111 @@ export default function SideNavbar() {
                   }`}
                   href={`/${Account.decodedHandle}`}
                 >
-                  <NavItem icon={<UserIcon className={`${pathname === `/${Account.decodedHandle}` ? 'fill-black dark:fill-white' : ''}`} />} label="Profile" />
+                  <NavItem icon={<UserIcon className={`${pathname === `/${Account.decodedHandle}` && 'fill-black dark:fill-white' }`} />} label="Profile" />
                 </Link>
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/account-analytics`
                       && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
-                  } 'flex flex-row items-center justify-center' `}
-                  href={`/${Account.decodedHandle}/account-analytics`}
+                 } 'flex flex-row items-center justify-center' `}
+                 href={`/${Account.decodedHandle}/account-analytics`}
                 >
-                  <NavItem icon={<LayoutDashboard className={`${pathname === `/${Account.decodedHandle}/account-analytics` ? 'fill-black dark:fill-white' : ''}`} />} label="Dashboard" />
+                  <NavItem icon={<LayoutDashboard className={`${pathname === `/${Account.decodedHandle}/account-analytics` && 'fill-black dark:fill-white'}`} />} label="Dashboard" />
                 </Link>
                 <Link
                   className={`${
-                    pathname === `/${Account.decodedHandle}/bookmarked`
-                      && 'text-white rounded-md bg-yellow-100 dark:dark:bg-white/5'
-                  }`}
-                  href={`/${Account.decodedHandle}/bookmarked`}
-                >
-                  <NavItem icon={<BookmarkIcon className={`${pathname === `/${Account.decodedHandle}/bookmarked` ? 'fill-black dark:fill-white' : ''}`} />} label="Bookmarked" />
-                </Link>
-                <Link
-                  className={`${
-                    pathname === '/monetization'
-                      && 'text-white rounded-md bg-yellow-100 dark:dark:bg-white/5'
-                  }`}
-                  href="/monetization"
-                >
+                     pathname === '/monetization' && 'text-white rounded-md bg-yellow-100 dark:dark:bg-white/5'
+                    }`}
+                    href="/monetization"
+                    >
                   <NavItem
-                    icon={<DollarSignIcon className={`${pathname === '/monetization' ? 'fill-black dark:fill-white' : ''}`} />}
+                    icon={<DollarSignIcon className={`${pathname === '/monetization' && 'fill-black dark:fill-white' }`} />}
                     label="Monetization"
-                  />
+                    />
                 </Link>
-                <Link
-                  className={`${
-                    pathname === `/${Account.decodedHandle}/settings/account`
-                    && 'text-white rounded-md bg-yellow-100 dark:bg-white/5'
-                  }`}
-                  href={`/${Account.decodedHandle}/settings/account`}
-                >
-                  <NavItem
-                    icon={<SettingsIcon className={`${pathname === `/${Account.decodedHandle}/settings/account` ? 'fill-black dark:fill-white' : ''}`} />}
-                    label="Settings & Privacy"
-                  />
-                </Link>
+                {/* More dropdown trigger */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsMoreOpen((v) => !v)}
+                    className="w-full text-left"
+                  >
+                    <NavItem icon={<MoreVerticalIcon className='border-2 border-black rounded-full p-1' />} label="More" />
+                  </button>
+                  {/* More dropdown container */}
+                 {isMoreOpen && (
+                   <motion.div
+                     initial={{ opacity: 0, scale: 0.8 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     exit={{ opacity: 0, scale: 0.8 }}
+                     className="more-dropdown-container absolute left-0 bottom-0 w-full mt-1 p-1 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[55] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm overflow-hidden"
+                   >
+                     {/* Settings */}
+                     <Link
+                       href={`/${Account.decodedHandle}/settings/account`}
+                       className={`${
+                         pathname === `/${Account.decodedHandle}/settings/account`
+                           && "bg-yellow-100 dark:bg-white/5 rounded-md"
+                       }`}
+                     >
+                       <NavItem
+                         icon={<SettingsIcon className={`${pathname === `/${Account.decodedHandle}/settings/account` && 'fill-black    dark:fill-white'}`}
+                           />
+                         }
+                         label="Privacy Settings"
+                       />
+                     </Link>
+                     {/* AI search */}
+                     <Link href={`/asking-ai`}>
+                        <NavItem
+                          icon={<SparklesIcon />}
+                          label="Asking AI"
+                        />
+                     </Link>
+                    {/* Bookmarks */}
+                      <Link
+                        className={`${
+                          pathname === `/${Account.decodedHandle}/bookmarked` && 'text-white rounded-md bg-yellow-100 dark:dark:bg-white/5'
+                        }`}
+                        href={`/${Account.decodedHandle}/bookmarked`}
+                     >
+                        <NavItem icon={<BookmarkIcon className={`${pathname === `/${Account.decodedHandle}/bookmarked` && 'fill-black    dark:fill-white'}`} />} label="Bookmarked" />
+                      </Link>
+
+                     {/* Lists */}
+                     <Link href={`/${Account.decodedHandle}/lists`}>
+                       <NavItem
+                         icon={<List />}
+                         label="Lists"
+                       />
+                     </Link>
+
+                     {/* Communities */}
+                     <Link href={`/communities`}>
+                       <NavItem
+                         icon={<MdGroups />}
+                         label="Communities"
+                       />
+                     </Link>
+
+                    {/* Saved Drafts */}
+                    <Link href={`/${Account.decodedHandle}/drafts-posts`}>
+                      <NavItem
+                        icon={<MdDrafts />}
+                        label="Draft Posts"
+                      />
+                    </Link>
+
+                    {/* Help Center */}
+                    <Link href={`/${Account.decodedHandle}/help`}>
+                      <NavItem
+                        icon={<BadgeQuestionMark />}
+                        label="Need Help"
+                      />
+                    </Link>
+                 </motion.div>
+                )}
+                </div>
               </ul>
             </nav>
 
@@ -243,6 +315,7 @@ export default function SideNavbar() {
                 onClick={() => { setCreatePop(true) }}
                 className="flex items-center justify-center gap-2 w-full p-3 cursor-pointer rounded-full shadow-md hover:shadow-lg shadow-yellow-200 dark:shadow-yellow-900 dark:text-white bg-yellow-400 active:bg-yellow-500 text-black font-bold hover:scale-105 transition-transform duration-150"
               >
+                <PlusCircle/>
                 <span>CREATE POST</span>
               </button>
 
@@ -307,7 +380,6 @@ export default function SideNavbar() {
                     </button>
                     <div className="my-1 border-t border-gray-200 dark:border-gray-800"></div>
                     <button
-                    //  onClick={() => {  }}
                      onClick={() => { setloguOutModal(true)  }}
                      className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-200 flex items-center gap-3">
                       <LogOutIcon className="w-5 h-5 text-red-500 dark:text-red-500 dark:group-hover:text-red-400 transition-colors" />
@@ -388,3 +460,4 @@ function NavItem({
     </li>
   )
 }
+

@@ -102,6 +102,10 @@ export default function useMessageSocket(chat?: infoForChatCard) {
       updateMessageStatus(msgidx,status) ;
     });
 
+    socket.on("message_status_update_final",(payload:statusUpdateReq) => { 
+      const { msgidx , status } = payload ; // getting the data out of payload...
+      updateMessageStatus(msgidx,status);
+    })
 
 
     return () => {

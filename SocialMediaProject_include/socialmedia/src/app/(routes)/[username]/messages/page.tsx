@@ -99,7 +99,7 @@ export default function Messages() {
       isMuted:false,
       pinned:false,
       blockedTo:false,
-      blockedBy:false,
+      blockedBy:true,
       avatarUrl: '/images/myProfile.jpg',
       unreadCount: 0,
       publicKeyReciever:'rppwmlmbint'

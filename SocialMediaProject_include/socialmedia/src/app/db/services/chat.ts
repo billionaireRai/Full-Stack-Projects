@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import accounts from "../models/accounts";
 import { connectWithMongoDB } from "../dbConnection";
+import { uploadMediaOnCloudinary } from "@/app/controllers/cloudinary";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import follows from "../models/follows";
 import Post from "../models/posts";
@@ -20,6 +21,13 @@ interface messageCreationPayload {
   mediaFiles?: File[];
   mentions?: string[];
 };
+
+interface uploadedObj {
+  success: boolean;
+  url: string;
+  public_id: string;
+  resource_type: "image" | "video" | "raw" | "auto";
+}
 
 export const getAttachmentsOfChatService = async (targetHandle:string) => {
     await connectWithMongoDB() ; // connecting with mongodb...
@@ -173,6 +181,20 @@ export const messageCreationService = async (data:messageCreationPayload) => {
 
     const { conversationId , encryptedMessage , mediaFiles , mentions } = data ;
 
+    let finalMediaArr ;
+    if (mediaFiles && mediaFiles.length > 0) {
+        // uploading media on cloudinary...
+        const uploadedMediaObjs = await Promise.all(mediaFiles.map(async (file:File) => {
+            const bytes = await file.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+            const uploadedObj = await uploadMediaOnCloudinary(buffer, file.name);
+            return uploadedObj.success ? uploadedObj : null;
+        }));
+        
+        const filteredUploadedMediaObjs: uploadedObj[] = uploadedMediaObjs.filter((m) => m !== null);
+        
+        finalMediaArr = filteredUploadedMediaObjs.map(media => ({ url: media.url,public_id: media.public_id,media_type: media.resource_type }));
+    }
     
     const Conversation = await conversation.findOne(
         { _id:conversationId , participants:{ $in:[activeAcc._id] } , deletedBy:{ $nin:[activeAcc._id]} }
@@ -186,6 +208,7 @@ export const messageCreationService = async (data:messageCreationPayload) => {
         fromId:activeAcc._id,
         toId:withAccId,
         conversationId,
+        mediaUrls:finalMediaArr,
         encryptedMsg: encryptedMessage.cipherText,
         iv: encryptedMessage.iv ,
         senderEncryptedKey: encryptedMessage.senderEncryptedKey,
@@ -197,4 +220,8 @@ export const messageCreationService = async (data:messageCreationPayload) => {
     
     const Data:{ socketid:string , msgID:string } = { socketid:presense.socketId , msgID:newmsg._id } ;
     return Data ;
+}
+
+export const messageFinalStatusUpdation = async (status:string,msgid:string) => {
+    
 }

@@ -2,8 +2,10 @@ import http from 'http';
 import { Server } from 'socket.io';
 import express,{ Request , Response } from 'express';
 import Presense from '@/app/db/models/presense';
+import { messageFinalStatusUpdation } from '@/app/db/services/chat';
 import { notificationPayloadType } from '@/app/db/services/notifications';
 import { messageCreationService } from '@/app/db/services/chat';
+import { NextResponse } from 'next/server';
 
 const app = express();
 const port = 5000 ;
@@ -51,10 +53,13 @@ io.on("connection", (socket) => {
   })
 
   // last status update...
-  socket.on('message_final_update',(payload) => { 
+  socket.on('message_final_update', async (payload) => { 
     const { sent , msgID } = payload ;
+    const socketid = await messageFinalStatusUpdation(sent,msgID);
 
-    
+    if (typeof socketid !== 'string')  return ; // If socketid is not returned...
+
+    socket.to(socketid).emit('message_status_update_final', { msgidx:msgID, status: sent });
    });
   
 });

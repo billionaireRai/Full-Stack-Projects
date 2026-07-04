@@ -6,9 +6,9 @@ import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import useActiveAccount from '@/app/states/useraccounts'
 import { useTheme } from 'next-themes'
-import useMessageSocket from '@/app/hooks/useMessageSocket'
+// import useMessageSocket from '@/app/hooks/useMessageSocket'
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react'
-import { AtSign, CheckCircle, Eraser, Flag, Folder, Images, Lock, LockOpenIcon, Mic, MicOff, Music, Paperclip, PinIcon, PinOff, SearchIcon, SendIcon, Smile, Trash, Video, Bell, BellOff, X, Ban, User, MessageCirclePlus, CameraIcon, LockKeyholeIcon, MessageCircleMore } from 'lucide-react'
+import { AtSign, CheckCircle, Eraser, Flag, Folder, Images, Lock, LockOpenIcon, Mic, MicOff, Music, Paperclip, PinIcon, PinOff, SearchIcon, SendIcon, Smile, Trash, Video, Bell, BellOff, X, Ban, User, MessageCirclePlus, CameraIcon, LockKeyholeIcon, MessageCircleMore, MessageCircleOff, LucideArrowBigDown } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import Sharecontactonchat from '@/components/sharecontactonchat'
 import useActiveChatMessages from '@/app/states/activechatmessage'
@@ -57,7 +57,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   const { resolvedTheme } = useTheme() ;
   const { Account } = useActiveAccount();
   const { messages, addMessages } = useActiveChatMessages() ;
-  const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
+  // const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
 
   const heightGap = 200;
   const [backPage, setbackPage] = useState<number>(1);
@@ -80,6 +80,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
 
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false)
   const [sendingMessage, setsendingMessage] = useState<boolean>(false)
+  const [showDownArrow, setshowDownArrow] = useState<boolean>(true);
   const [showMedia, setshowMedia] = useState<boolean>(false)
   const [showAttachments, setshowAttachments] = useState<boolean>(false)
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false)
@@ -108,38 +109,56 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
       if (showFilePopup && !target.closest('.file_popup')) setShowFilePopup(false)
       if (showEmojiPicker && !target.closest('.emoji_picker_wrapper')) setShowEmojiPicker(false)
       if (shareContact && !target.closest('.mentionpop')) setshareContact(false)
-    }
-
+      }
+    
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [openChatThreeDot, showFilePopup, showEmojiPicker, shareContact])
-
+  
   // updating parent only when the *last message* changes...
   const lastMessageKey = messages.length ? `${messages[messages.length - 1].id}` : ''
+  
+  // function scrolling messages section to bottom...
+  function handleMsgBottomScroll() {
+    const msgElement = msgsection.current ;
+    if (!msgElement) return ;
+
+    msgElement?.scrollTo({ top:msgElement.scrollHeight , left: 0,behavior: "smooth" });
+  }
 
   useEffect(() => {
-    if (!msgsection.current) return
-    if (!messages.length) return
-
-    msgsection.current.scrollTop = msgsection.current.scrollHeight
+    if (!msgsection.current) return ;
+    if (!messages.length) return ;
+    
+    handleMsgBottomScroll();
     updateCardDetail(messages[messages.length - 1].text, messages[messages.length - 1].timestamp)
-
+    
   }, [lastMessageKey])
-
-  // fetching messages on msgsection scrolling...
+  
+  // for fetching older messages...
   useEffect(() => {
     const section = msgsection.current ;
     if (!section) return ;
 
-    const onScroll = () => {
-      if ((section?.scrollTop <= heightGap) && hasMoreMessages) {
+    const handleScroll = () => {
+      // scrolled near the bottom...
+      const distanceFromBottom = section.scrollHeight - section.scrollTop - section.clientHeight ;
+      setshowDownArrow(distanceFromBottom > 1) ;
+
+      if (section.scrollTop <= heightGap && hasMoreMessages) {
         // getting more old messages...
       }
-      
-      section.addEventListener('scroll', onScroll, { passive: true }) ;
-      return () => section.removeEventListener('scroll', onScroll) ;
     }
-  }, [heightGap, messages.length,msgsection.current?.scrollTop])
+
+    // calling scroll function...
+    handleScroll()
+
+    section.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      section.removeEventListener('scroll', handleScroll)
+    }
+  }, [heightGap,hasMoreMessages, messages.length])
+
 
   
 
@@ -163,7 +182,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   }
 
   const handleSendMessage = async (_msg: string) => {
-    if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
+    // if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
 
     const trimmedmsg = _msg.trim() ;
     // instant message push UI
@@ -200,10 +219,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     setshowMedia(true)
   }
 
-  const removeArrayElement = (
-    setters: React.Dispatch<React.SetStateAction<any[]>>[],
-    index: number
-  ) => {
+  const removeArrayElement = (setters: React.Dispatch<React.SetStateAction<any[]>>[],index: number) => {
     setters.forEach((setter) => setter((prev) => prev.filter((_, i) => i !== index)))
   }
 
@@ -226,6 +242,8 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
 
     e.target.value = ''
   }
+
+
 
   const handleMuteToggleChat = async () => {
     const loadingtoast = toast.loading(`${chatCardDetails?.isMuted ? 'Unmuting' : 'Muting'} chat with ${chatCardDetails?.handle}...`)
@@ -438,9 +456,9 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
             )}
           </div>
          </div>
-        {/* Messages */}
-        <div ref={msgsection} className={`overflow-y-auto overflow-x-hidden flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blockedTo && 'blur-sm'}`}>
-         <AnimatePresence>
+      {/* Messages */}
+      <AnimatePresence> 
+      <div ref={msgsection} className={`overflow-y-auto relative overflow-x-hidden flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blockedTo && 'blur-sm'}`}>
           {messages.length > 0 && messages.map((message, idx) => (
             <motion.div
               layout
@@ -594,8 +612,42 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
             </motion.div>
           )}
 
-        </AnimatePresence>
+          {/* If other account has blocked me */}
+          {chatCardDetails.blockedBy && (
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="rounded-xl p-3"
+            >
+              <div className='rounded-xl border border-gray-300 dark:border-gray-800 flex flex-col items-center justify-center p-3'>
+                <span className='border border-gray-300 text-gray-500 text-md p-4 rounded-full'><MessageCircleOff size={50} /></span>
+                <div className='font-semibold'>
+                  Chat blocked by 
+                  <Link className='px-1 py-2 hover:bg-gray-100 rounded-full' href={`/${chatCardDetails.handle}`}>{chatCardDetails.handle}</Link>
+                </div>
+                <div className='text-xs'>
+                  {chatCardDetails.handle} have blocked this chat , so you wont be able to interact with this chat
+                </div>
+              </div>
+            </motion.div>
+          )}
+        {showDownArrow && (
+          <motion.div 
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className='sticky bottom-0 rounded-xl flex items-center justify-center p-2'
+          >
+            <span onClick={handleMsgBottomScroll} className='p-2 rounded-full bg-yellow-100 cursor-pointer'>
+              <LucideArrowBigDown size={30} stroke='5' className='fill-yellow-400' />
+            </span>
+          </motion.div>
+        )}
       </div>
+        </AnimatePresence>
       {/* Message composer */}
        <div className={`flex flex-col justify-start gap-2 ${hasAddedMediaOrMention && 'mt-5'} rounded-xl`}>
         <div className="flex flex-wrap gap-2 items-center rounded-xl">
@@ -711,8 +763,8 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
               <button
                 type="button"
                 onClick={() => setShowEmojiPicker((v) => !v)}
-                disabled={chatCardDetails?.blockedTo}
-                className={`p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${chatCardDetails?.blockedTo && 'cursor-not-allowed'}`}
+                disabled={chatCardDetails?.blockedTo || chatCardDetails?.blockedBy}
+                className={`p-2 rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${(chatCardDetails?.blockedTo || chatCardDetails?.blockedBy) ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <Smile className="w-4 h-4 dark:invert" />
               </button>
@@ -725,6 +777,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
+
               className='absolute bottom-14 left-0 z-50 emoji_picker_wrapper'
             >
               <EmojiPicker
@@ -739,8 +792,8 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowFilePopup(!showFilePopup)}
-                  disabled={chatCardDetails.blockedTo}
-                  className='p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950'
+                  disabled={chatCardDetails?.blockedTo || chatCardDetails?.blockedBy}
+                  className={`p-2 rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${(chatCardDetails?.blockedTo || chatCardDetails?.blockedBy) ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <Paperclip className="w-4 h-4 dark:invert" />
                 </button>
@@ -796,7 +849,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
               onChange={(e) => { setmessageText(e.target.value) }}
               disabled={chatCardDetails?.blockedTo}
               placeholder="Type your message..."
-              className={`w-full text-sm backdrop-blur-sm outline-none border border-transparent focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30 rounded-md px-3 py-2 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500 transition duration-300 ${chatCardDetails?.blockedTo && 'cursor-not-allowed'}`}
+              className={`w-full text-sm backdrop-blur-sm outline-none border border-transparent focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30 rounded-md px-3 py-2 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500 transition duration-300 ${(chatCardDetails?.blockedTo || chatCardDetails?.blockedBy) && 'cursor-not-allowed'}`}
             />
           </div>
 
@@ -813,8 +866,8 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
               ) : (
                 <button
                   onClick={handleAudioPop}
-                  disabled={chatCardDetails.blockedTo}
-                  className='p-2 cursor-pointer rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950'
+                  disabled={chatCardDetails?.blockedTo || chatCardDetails?.blockedBy}
+                  className={`p-2 rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${(chatCardDetails?.blockedTo || chatCardDetails?.blockedBy) ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <Mic className="w-4 h-4 dark:invert" />
                 </button>

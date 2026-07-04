@@ -61,10 +61,6 @@ const messageSchema = new mongoose.Schema(
         type: String,
         default: "AES-256-GCM"
     },
-    link:{
-      type:[String] ,
-      required:false,
-    },
     mentions: {
       type: [String],
       ref: "accounts",
@@ -79,12 +75,6 @@ const messageSchema = new mongoose.Schema(
     mediaUrls: {
       type: [mediaUrlSchema],
       default: []
-    },
-    messageType: {
-      type: String,
-      enum: ["text", "image", "video",'audio','contact'],
-      default: "text",
-      index: true
     },
     status: {
       type: String,
