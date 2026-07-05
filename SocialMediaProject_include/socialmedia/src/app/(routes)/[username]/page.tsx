@@ -19,7 +19,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
-import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon, VideoOffIcon, File} from 'lucide-react';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon, VideoOffIcon, File, SparklesIcon} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
@@ -647,7 +647,7 @@ export default function UserProfilePage() {
         }
       }
     };
-    fetchAccountData();
+    // fetchAccountData();
   }, [Account.account, username])
   
   useEffect(() => {
@@ -869,49 +869,83 @@ export default function UserProfilePage() {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }} 
-                        className={`more-dropdown absolute right-5 top-8 w-54 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
+                        className={`more-dropdown absolute right-5 top-8 w-62 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
                         <ul className='p-2'>
                           { isSelf ? (
                             <>
                                <li
                               onClick={() => { setOpenProfileEditor(true) }}
                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                <span>Edit Account</span><Edit2Icon size={15} />
+                                <div className='flex items-center justify-center gap-3'>
+                                  <Edit2Icon size={15} />
+                                  <span>Edit Account</span>
+                                </div>
                                </li>
                                <li
                                 onClick={() => { setSharePop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                  <span>Share Account via</span><Share2Icon size={15} />
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <Share2Icon size={15} />
+                                    <span>Share Account via</span>
+                                  </div>
                                 </li>
                                 <li
                                 onClick={() => { handleProfileLinkCopy() }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Copy Link</span><CopyIcon size={15}/>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <CopyIcon size={15}/>
+                                    <span>Copy Link</span>
+                                  </div>
                                 </li>
                                 <li
                                 onClick={() => { setShowQRPop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Generate QR code</span><QrCodeIcon size={15}/>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <QrCodeIcon size={15}/>
+                                    <span>Generate QR code</span>
+                                  </div>
                                 </li>
                                 <li
                                 onClick={() => { toast.success('View Analytics feature coming soon!') }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>View Analytics</span><BarChart3 size={15}/>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <BarChart3 size={15}/>
+                                    <span>View Analytics</span>
+                                  </div>
                                 </li>
+                                <li
+                                 onClick={() => {  }}
+                                 className={`w-full flex items-center justify-between px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                                >
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <SparklesIcon className="h-4 w-4" />
+                                    <span>Summarize Account</span>
+                                  </div>
+                                    <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
+                                </li>                                
                                 <li
                                 onClick={() => { toast.success('Manage Notifications feature coming soon!') }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Manage Notifications</span><Bell size={15}/>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <Bell size={15}/>
+                                    <span>Manage Notifications</span>
+                                  </div>
                                 </li>
                                 <li
                                 onClick={() => { toast.success('Account Settings feature coming soon!') }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Account Settings</span><Settings size={15}/>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <Settings size={15}/>
+                                    <span>Account Settings</span>
+                                  </div>
                                 </li>
                                 <li
                                 onClick={() => { setshowDeleteAccPop(true)  }}
-                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
-                                 <span>Delete Account <b>{AccountInfo.handle}</b></span><Delete size={15}/>
+                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm   hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
+                                  <div className='flex items-center justify-center gap-3'>
+                                   <Delete size={15}/>
+                                   <span>Delete <b>{AccountInfo.handle}</b></span>
+                                  </div>
                                 </li>
                             </>
                           ) : (
@@ -919,47 +953,85 @@ export default function UserProfilePage() {
                               <li
                                 onClick={() => { handleProfileLinkCopy() }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Copy Link</span><CopyIcon size={15}/>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <CopyIcon size={15}/>
+                                    <span>Copy Link</span>
+                                  </div>
                               </li>
                               <li
                                 onClick={() => { setSharePop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                  <span>Share Account via</span><Share2Icon size={15} />
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <Share2Icon size={15} />
+                                    <span>Share Account via</span>
+                                  </div>
                               </li>
+                              <li
+                                onClick={() => {  }}
+                                className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors`}
+                              >
+                                <div className='flex items-center justify-center gap-3'>
+                                 <SparklesIcon size={15} />
+                                 <span>Summarize Account</span>
+                                </div>
+                                <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
+                              </li>                              
                               <li
                                 onClick={() => { setShowQRPop(true) }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Generate QR code</span><QrCodeIcon size={15}/>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <QrCodeIcon size={15}/>
+                                    <span>Generate QR code</span>
+                                  </div>
                               </li>
                               <li
                                onClick={() => { toast.success('Send Message feature coming soon!') }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Send Message</span><MessageCircle size={15}/>
+                                <div className='flex items-center justify-center gap-3'>
+                                  <MessageCircle size={15}/>
+                                  <span>Send Message</span>
+                                </div>
                                </li>
                                <Link 
                                 href={`/${AccountInfo.handle}/mutual-accounts`}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>View Mutual Friends</span><Users size={15}/>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <Users size={15}/>
+                                    <span>View Mutual Friends</span>
+                                  </div>
                                </Link>
                                <li
                                onClick={() => { toast.success('Add to List feature coming soon!') }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Add to favourite</span><List size={15}/><Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
+                                <div className='flex items-center justify-center gap-3'>
+                                  <List size={15}/>
+                                  <span>Add to favourite</span>
+                                </div>
+                                 <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                                </li>
                                <li
                                onClick={() => { toast.success('Mute Account feature coming soon!') }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                 <span>Mute Account</span><VolumeX size={15}/>
+                                <div className='flex items-center justify-center gap-3'>
+                                  <VolumeX size={15}/>
+                                  <span>Mute Account</span>
+                                </div>
                                </li>
                               <li
                                onClick={() => { setshowBlockPop(true) }}
-                               className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors ${IsBlocked ? 'dark:bg-red-950/50 bg-red-100      text-red-500' : ''}`}>
-                                 <span>Block Account</span><BanIcon size={15}/>
+                               className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm    hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors ${IsBlocked ? 'dark:bg-red-950/50 bg-red-100 text-red-500' : ''}`}>
+                                <div className='flex items-center justify-center gap-3'>
+                                  <BanIcon size={15}/>
+                                  <span>Block Account</span>
+                                </div>
                                </li>
                                <li
                                onClick={() => { setOpenReportPop(true) }}
-                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm      hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
-                                 <span>Report Account</span><Flag size={15} />
+                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm    hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
+                                <div className='flex items-center justify-center gap-3'>
+                                  <Flag size={15} />
+                                  <span>Report Account</span>
+                                </div>
                                </li>
                             </>
                           )}

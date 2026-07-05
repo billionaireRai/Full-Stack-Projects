@@ -15,7 +15,10 @@ const subscriptionSchema = new mongoose.Schema(
       default: "free",
       index: true
     },
-
+    priceId: {
+      type: String,
+      required:true 
+    },
     status: {
       type: String,
       enum: ["active","trialing","past_due","canceled","paused","expired"],
@@ -45,10 +48,6 @@ const subscriptionSchema = new mongoose.Schema(
       type: String,
       default: "USD",
       uppercase: true
-    },
-    amount: {
-      type: Number,
-      min: 0
     },
   },
   { timestamps: true , versionKey: false }

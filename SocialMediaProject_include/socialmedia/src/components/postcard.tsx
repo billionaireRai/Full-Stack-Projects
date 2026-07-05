@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef , ReactElement } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MoreVerticalIcon,Trash2,Edit3,Pin,Star,List,BarChart3,Code,TrendingUp,FileText,Share2,Mail,Link as LinkIcon,X,SendHorizontalIcon,Eye,EyeOff,VolumeX,Slash,Flag,Frown,UserPlus,ListPlus,Ban,Code2,Megaphone,PodcastIcon,DollarSign,QrCodeIcon,MessagesSquare,RefreshCw,ThumbsUp,BookmarkPlus,ExternalLink,ArrowBigDownDash,BookOpen } from 'lucide-react';
+import { MoreVerticalIcon,Trash2,Edit3,Pin,Star,List,BarChart3,Code,TrendingUp,FileText,Share2,Mail,Link as LinkIcon,X,SendHorizontalIcon,Eye,EyeOff,VolumeX,Slash,Flag,Frown,UserPlus,ListPlus,Ban,Code2,Megaphone,PodcastIcon,DollarSign,QrCodeIcon,MessagesSquare,RefreshCw,ThumbsUp,BookmarkPlus,ExternalLink,ArrowBigDownDash,BookOpen, SparklesIcon } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/lib/interceptor';
@@ -592,6 +592,13 @@ export default function PostCard({
                  </div>
                  <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                 </button>
+                <button
+                  onClick={() => {  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                >
+                 <SparklesIcon className="h-4 w-4" />
+                 Summarize Post by AI
+                </button>
                 <Link
                   href={`/${handle}/post/${postId}?section=Metric`}
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
@@ -611,9 +618,16 @@ export default function PostCard({
                 <Link href={`/${handle}/post/${postId}?section=Comments`}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
-                    <PodcastIcon className="w-4 h-4" />
-                    view full post
+                  <PodcastIcon className="w-4 h-4" />
+                  view full post
                 </Link>
+               <button
+                onClick={() => {  }}
+                className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+               >
+                 <SparklesIcon className="h-4 w-4" />
+                 Summarize post by AI
+               </button>
                <button
                 onClick={() => { setNotInterested(true) }}
                 className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}

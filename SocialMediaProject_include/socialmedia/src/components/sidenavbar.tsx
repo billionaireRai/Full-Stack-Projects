@@ -14,7 +14,7 @@ import { usePathname } from 'next/navigation'
 import LogoutModal from './logoutmodal';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
-import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon, SparklesIcon, List, BadgeQuestionMark, PlusCircle } from 'lucide-react'
+import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon, SparklesIcon, List, BadgeQuestionMark, PlusCircle, OptionIcon } from 'lucide-react'
 import useMessageCount from '@/app/states/unreadmessages';
 import { MdDrafts, MdGroups } from 'react-icons/md';
 
@@ -51,17 +51,11 @@ export default function SideNavbar() {
   // Close dropdown when clicking outside...
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        DotClick &&
-        !(event.target as Element).closest('.dropdown-container')
-      ) {
+      if (DotClick && !(event.target as Element).closest('.dropdown-container')) {
         setDotClick(false)
       }
 
-      if (
-        isMoreOpen &&
-        !(event.target as Element).closest('.more-dropdown-container')
-      ) {
+      if (isMoreOpen && !(event.target as Element).closest('.more-dropdown-container')) {
         setIsMoreOpen(false)
       }
     }
@@ -239,6 +233,13 @@ export default function SideNavbar() {
                      exit={{ opacity: 0, scale: 0.8 }}
                      className="more-dropdown-container absolute left-0 bottom-0 w-full mt-1 p-1 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[55] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm overflow-hidden"
                    >
+                     <div className='rounded-xl p-2 flex flex-col items-start justify-center'>
+                      <div className='flex items-center justify-between w-full'>
+                        <span className='font-semibold'>More options</span>
+                        <OptionIcon className='border border-gray-400 text-gray-400 p-1 rounded-full'/>
+                      </div>
+                      <div className='text-xs text-gray-500 dark:text-gray-400'>Some of these options are <b>under development</b> phase, they'll be active soon for you guys</div>
+                     </div>
                      {/* Settings */}
                      <Link
                        href={`/${Account.decodedHandle}/settings/account`}
@@ -254,13 +255,6 @@ export default function SideNavbar() {
                          label="Privacy Settings"
                        />
                      </Link>
-                     {/* AI search */}
-                     <Link href={`/asking-ai`}>
-                        <NavItem
-                          icon={<SparklesIcon />}
-                          label="Asking AI"
-                        />
-                     </Link>
                     {/* Bookmarks */}
                       <Link
                         className={`${
@@ -270,19 +264,26 @@ export default function SideNavbar() {
                      >
                         <NavItem icon={<BookmarkIcon className={`${pathname === `/${Account.decodedHandle}/bookmarked` && 'fill-black    dark:fill-white'}`} />} label="Bookmarked" />
                       </Link>
+                     {/* AI search */}
+                     <Link href={`/asking-ai`}>
+                        <NavItem
+                          icon={<SparklesIcon className={`${pathname === '/asking-ai' && 'fill-black    dark:fill-white'}`} />}
+                          label="Asking AI"
+                        />
+                     </Link>
 
                      {/* Lists */}
-                     <Link href={`/${Account.decodedHandle}/lists`}>
+                     <Link href={`/${Account.decodedHandle}/stack`}>
                        <NavItem
-                         icon={<List />}
-                         label="Lists"
+                         icon={<List className={`${pathname === `/${Account.decodedHandle}/stack` && 'fill-black dark:fill-white'}`} />}
+                         label="Stack"
                        />
                      </Link>
 
                      {/* Communities */}
                      <Link href={`/communities`}>
                        <NavItem
-                         icon={<MdGroups />}
+                         icon={<MdGroups className={`${pathname === '/communities' && 'fill-black    dark:fill-white'}`} />}
                          label="Communities"
                        />
                      </Link>
@@ -290,7 +291,7 @@ export default function SideNavbar() {
                     {/* Saved Drafts */}
                     <Link href={`/${Account.decodedHandle}/drafts-posts`}>
                       <NavItem
-                        icon={<MdDrafts />}
+                        icon={<MdDrafts className={`${pathname === `/${Account.decodedHandle}/drafts-posts` && 'fill-black    dark:fill-white'}`}  />}
                         label="Draft Posts"
                       />
                     </Link>
@@ -298,7 +299,7 @@ export default function SideNavbar() {
                     {/* Help Center */}
                     <Link href={`/${Account.decodedHandle}/help`}>
                       <NavItem
-                        icon={<BadgeQuestionMark />}
+                        icon={<BadgeQuestionMark className={`${pathname === `/${Account.decodedHandle}/help` && 'fill-black    dark:fill-white'}`}  />}
                         label="Need Help"
                       />
                     </Link>

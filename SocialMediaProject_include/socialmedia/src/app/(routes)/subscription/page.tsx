@@ -9,13 +9,15 @@ import { useSearchParams } from "next/navigation";
 
 type termType = 'monthly' | 'yearly' ;
 
-interface billingYearlyType {
-  monthly:string ;
-  saved:string ;
-}
 interface planPriceType {
-  monthly: number;
-  yearly: number;
+  monthly: {
+    value:number ;
+    priceId:string ;
+  },
+  yearly: {
+    value:number ;
+    priceId:string ;
+  };
   saved: number; // equivalent % saved when switching from monthly to yearly
 }
 
@@ -41,8 +43,8 @@ export const plans: SubsPlanType[] = [
   {
     name: "Free",
     prices: {
-      monthly: 0,
-      yearly: 0,
+      monthly: { value: 0, priceId: "" },
+      yearly: { value: 0, priceId: "" },
       saved: 0,
     },
 
@@ -64,8 +66,8 @@ export const plans: SubsPlanType[] = [
   {
     name: "Pro",
     prices: {
-      monthly: 14.9,
-      yearly: 149,
+      monthly: { value: 14.9, priceId: "prod_UpRRHT5xOpbeeY" },
+      yearly: { value: 149, priceId: "prod_UpRWnY5jml8X1U" },
       saved: 17,
     },
     desc: "For professionals who want predictable visibility",
@@ -86,8 +88,8 @@ export const plans: SubsPlanType[] = [
   {
     name: "Creator",
     prices: {
-      monthly: 29,
-      yearly: 290,
+      monthly: { value: 29, priceId: "prod_UpRZcrFsYqbluw" },
+      yearly: { value: 290, priceId: "prod_UpRbVzpN9XR6Qo" },
       saved: 19,
     },
     desc: "Turn content into authority and popularity",
@@ -108,8 +110,8 @@ export const plans: SubsPlanType[] = [
   {
     name: "Premium",
     prices: {
-      monthly: 59,
-      yearly: 590,
+      monthly: { value: 59, priceId: "prod_UpRcnmkD8uBUIE" },
+      yearly: { value: 590, priceId: "" },
       saved:20,
     },
     desc: "Ultimate solo control with advanced tools",
@@ -130,14 +132,17 @@ export default function SubscriptionPage() {
   const searchParams = useSearchParams() ; // intializing useParams() hook...
   const [currentTerm, setcurrentTerm] = useState<termType>('monthly');
   const [selectedPlan, setSelectedPlan] = useState<SubsPlanType | null>(null);
+  type billingYearlyType = { monthly: string; saved: string }; 
+
   const [billingYearly, setbillingYearly] = useState<billingYearlyType>();
   
   // function returning monthly billing and saved...
-  function getYearlyBilling(plan:SubsPlanType) : billingYearlyType {
-    const saved = ((plan.prices.saved/100) * plan.prices.yearly).toFixed(1) ;
-    const monthly = ((plan.prices.yearly - parseFloat(saved))/12).toFixed(1) ;
+function getYearlyBilling(plan: SubsPlanType): billingYearlyType {
+    const yearlyValue = plan.prices.yearly.value;
+    const saved = ((plan.prices.saved / 100) * yearlyValue).toFixed(1);
+    const monthly = ((yearlyValue - parseFloat(saved)) / 12).toFixed(1);
 
-    return { monthly , saved }; 
+    return { monthly, saved };
   }
 
   useEffect(() => {
@@ -164,7 +169,7 @@ export default function SubscriptionPage() {
       {/* Floating Payment CTA */}
       {selectedPlan && selectedPlan?.name !== 'Free'  && (
         <Link
-          href={`/payment-page?plan=${selectedPlan.name}`}
+          href={`/payment-page?plan=${selectedPlan.name}&term=${currentTerm}`}
           className="fixed right-6 top-6 z-50 flex items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-500 px-6 py-3 font-semibold text-white shadow-lg hover:scale-105 transition"
         >
           <CreditCard className="w-5 h-5" />
@@ -229,7 +234,7 @@ export default function SubscriptionPage() {
                   {plan.desc}
                 </p>
                 <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                  <div>{(currentTerm === 'yearly' ? `$${plan.prices.yearly} / year` : `$${plan.prices.monthly} / month`)}</div>
+                  <div>{(currentTerm === 'yearly' ? `$${plan.prices.yearly.value} / year` : `$${plan.prices.monthly.value} / month`)}</div>
                   {selectedPlan !== null && currentTerm === 'yearly' && plan === selectedPlan && (
                     <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-yellow-50/70 px-3 py-1 text-xs text-gray-700 dark:bg-yellow-500/10 dark:text-yellow-200">
                       <span className="font-semibold">${billingYearly?.monthly}</span>

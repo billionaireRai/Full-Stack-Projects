@@ -12,6 +12,7 @@ import { AtSign, CheckCircle, Eraser, Flag, Folder, Images, Lock, LockOpenIcon, 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import Sharecontactonchat from '@/components/sharecontactonchat'
 import useActiveChatMessages from '@/app/states/activechatmessage'
+import AudioRecordModal from './audioRecordModal'
 import Mediapopmodal, { mediaType } from './mediapopmodal'
 import toast from 'react-hot-toast'
 import { infoForChatCard } from './chataccountcard'
@@ -43,7 +44,6 @@ interface attachmentOptionType {
 interface MessageCardProps {
   chatCardDetails?: infoForChatCard
   pinToggleAction:() => void
-  handleAudioPop: () => void
   muteToggleAction:() => void
   handleAddChat: () => void
   updateCardDetail: (msg: string, time: string) => void
@@ -53,7 +53,7 @@ interface MessageCardProps {
 }
 
 
-export default function MessageCard({ chatCardDetails, openBlockPop, openReportPop, handleAudioPop, handleAddChat, updateCardDetail, openDeletePop , muteToggleAction , pinToggleAction }: MessageCardProps) {
+export default function MessageCard({ chatCardDetails, openBlockPop, openReportPop, handleAddChat, updateCardDetail, openDeletePop , muteToggleAction , pinToggleAction }: MessageCardProps) {
   const { resolvedTheme } = useTheme() ;
   const { Account } = useActiveAccount();
   const { messages, addMessages } = useActiveChatMessages() ;
@@ -81,6 +81,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   const [openChatThreeDot, setopenChatThreeDot] = useState<boolean>(false)
   const [sendingMessage, setsendingMessage] = useState<boolean>(false)
   const [showDownArrow, setshowDownArrow] = useState<boolean>(true);
+  const [showAudioModal, setShowAudioModal] = useState<boolean>(false) ;
   const [showMedia, setshowMedia] = useState<boolean>(false)
   const [showAttachments, setshowAttachments] = useState<boolean>(false)
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false)
@@ -242,6 +243,20 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
 
     e.target.value = ''
   }
+
+  // function for audio adding...
+  function handleAddAudio(audioChunks: Blob[]) {
+    if (audioChunks.length === 0) return ;
+
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' })
+    const url = URL.createObjectURL(audioBlob)
+
+    setaudioUrls((prev) => [...prev, url])
+    // wrapping blob in file...
+    const audioFile = new File([audioBlob], 'audio-note.webm', { type: 'audio/webm' })
+    setMediaFiles((prev) => [...prev, audioFile])
+  }
+
 
 
 
@@ -628,7 +643,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
                   <Link className='px-1 py-2 hover:bg-gray-100 rounded-full' href={`/${chatCardDetails.handle}`}>{chatCardDetails.handle}</Link>
                 </div>
                 <div className='text-xs'>
-                  {chatCardDetails.handle} have blocked this chat , so you wont be able to interact with this chat
+                  You can no longer interact with this chat. {chatCardDetails.handle} has blocked this conversation.
                 </div>
               </div>
             </motion.div>
@@ -847,7 +862,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
               type="text"
               value={messageText}
               onChange={(e) => { setmessageText(e.target.value) }}
-              disabled={chatCardDetails?.blockedTo}
+              disabled={chatCardDetails?.blockedTo || chatCardDetails?.blockedBy}
               placeholder="Type your message..."
               className={`w-full text-sm backdrop-blur-sm outline-none border border-transparent focus:border-yellow-400 focus:ring-3 focus:ring-yellow-400/30 rounded-md px-3 py-2 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500 transition duration-300 ${(chatCardDetails?.blockedTo || chatCardDetails?.blockedBy) && 'cursor-not-allowed'}`}
             />
@@ -865,7 +880,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
                 </button>
               ) : (
                 <button
-                  onClick={handleAudioPop}
+                  onClick={() => { setShowAudioModal(true) }}
                   disabled={chatCardDetails?.blockedTo || chatCardDetails?.blockedBy}
                   className={`p-2 rounded-full bg-white dark:bg-black text-black hover:bg-gray-200 dark:hover:bg-gray-950 ${(chatCardDetails?.blockedTo || chatCardDetails?.blockedBy) ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                 >
@@ -914,6 +929,13 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
       handleMediaClick={(m: mediaType) => { handleMediaPop(m) }}
       closePop={() => { setshowAttachments(false) }}
       menuOptions={attachFileoptions}
+    />
+  )}
+
+  {showAudioModal && (
+    <AudioRecordModal
+      closePopUp={() => setShowAudioModal(false)}
+      addAudioInAttachments={(audioChunks:Blob[]) => { handleAddAudio(audioChunks) }}
     />
   )}
 

@@ -27,7 +27,6 @@ export default function Messages() {
   const [showDeletePop, setshowDeletePop] = useState<boolean>(false);
   const [showReportChat, setshowReportChat] = useState<boolean>(false);
   const [showFilePopup, setShowFilePopup] = useState<boolean>(false) ;
-  const [showAudioModal, setShowAudioModal] = useState<boolean>(false) ;
   const [conversations, setconversations] = useState<infoForChatCard[]>([
     {
       id: '1',
@@ -485,17 +484,13 @@ export default function Messages() {
           chatCardDetails={CurrentOpenChat} 
           muteToggleAction={muteSwitching}
           pinToggleAction={pinSwitchingOnChat}
-          handleAudioPop={() => { setShowAudioModal(true) }} 
           handleAddChat={() => { setaddChatPop(true) }}
           openBlockPop={() => { setblockChatPop(true) }}
           openReportPop={() => { setshowReportChat(true) }}
           openDeletePop={() => { setshowDeletePop(true) }}
          />
         </div>
-        
-        {showAudioModal && (
-          <AudioRecordModal closePopUp={() => setShowAudioModal(false)} />
-        )}
+
        {addChatPop && (
          <AddAccinchatlist closePop={() => setaddChatPop(false)} onAddChat={handleAddUser} />
        )}

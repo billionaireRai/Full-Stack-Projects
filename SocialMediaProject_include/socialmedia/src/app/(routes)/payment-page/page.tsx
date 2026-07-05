@@ -2,55 +2,67 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import axios from 'axios';
 import toast from "react-hot-toast";
 import { plans } from "../subscription/page";
-import { subsPlanType } from "../subscription/page";
+import { SubsPlanType } from "../subscription/page";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { MdSecurity, MdArrowBack } from "react-icons/md";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 const stripePromise = loadStripe(String(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)); // loading stripe instance on our page...
 
 
-const PaymentFormInner = () => {
+export default function PaymentPage() {
+  const [sessionURL, setsessionURL] = useState<string>(''); // state for client secret...
   const router = useRouter() ; // initializing useRouter() hook...
   const searchParams = useSearchParams();
   
-  // stripe related variable declarations...
-  const stripe = useStripe();
-  const elements = useElements();
-  
   // plan related info...
-  const [plan, setPlan] = useState<subsPlanType | null>(null) ;
+  const [Term, setTerm] = useState<String>('');
+  const [plan, setPlan] = useState<SubsPlanType | null>(null) ;
   
   // function for setting right plan...
   function getAndSetPlan() : void {
     const planParam = searchParams.get('plan');
+    const term = searchParams.get('term');
     const pursuedPlan = plans.find((eachPlan) => eachPlan.name === planParam);
-    setPlan(pursuedPlan || null);
+    
+    if (term?.trim() && planParam?.trim() && pursuedPlan) {
+      setPlan(pursuedPlan);
+      setTerm(term);
+    }
   }
+
+  // function giving price based on term
+  const respectivePrice = () => { 
+    if (Term === 'monthly') return plan?.prices.monthly.value ;
+    
+    return plan?.prices.yearly.value ;
+  }
+  
+  // Fetching client secret from API...
+  const getSessionURL = async () => {
+    try {
+      const amount = 10 ;
+      const response = await axios.post('/api/subscription/create-session', { headers: { 'Content-Type': 'application/json',}, data: JSON.stringify({ amount }),
+      });
+      if (response.status === 200) {
+        const { url } = await response.data ;
+        setsessionURL(url);
+      }
+      } catch (error) {
+      console.error('Error fetching client secret:', error);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
     getAndSetPlan() ; // for getting right payment for user...
   }, []);
-  
-  // function handling payment submit...
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements || !plan) return;
-    const { error } = await stripe.confirmPayment({
-      elements, confirmParams: { return_url: `${window.location.origin}/payment-success?plan=${plan.name}` },
-    });
-    if (error) {
-      console.error(error.message);
-      toast.error(String(error.message));
-    }
-  };
-  
+   
 
   if (!plan) {
     return (
@@ -108,8 +120,8 @@ const PaymentFormInner = () => {
               Review your plan before proceeding to payment.
             </p>
             <div className="border-t border-gray-200 my-2" />
-            <h3 className="text-lg mt-3 font-semibold">{plan!.name}</h3> {/* plan! this is called non-null checking  */}
-            <p className="text-gray-600 dark:text-gray-200 text-sm mb-3 font-semibold">1 Month - Auto Recurring Payment</p>
+            <h3 className="text-lg mt-3 font-semibold">{plan.name}</h3> {/* plan! this is called non-null checking  */}
+            <p className="text-gray-600 dark:text-gray-200 text-sm mb-3 font-semibold">Auto Recurring Payment</p>
             <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-400">
               {plan!.features.map((f, i) => (
                 <li key={i} className="flex items-center gap-2">
@@ -122,7 +134,7 @@ const PaymentFormInner = () => {
           <div className="mt-5 flex items-center justify-between border-t pt-3">
             <span className="text-gray-600 dark:text-gray-200 font-medium">Total</span>
             <span className="text-lg font-semibold text-green-600">
-              {plan!.price}
+              {respectivePrice()}
             </span>
           </div>
         </div>
@@ -133,17 +145,13 @@ const PaymentFormInner = () => {
           <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">
             Enter your payment information securely.
           </p>
-          <form onSubmit={handleSubmit}>
-            <PaymentElement />
-            <motion.button
+            <button
               type="submit"
-              whileTap={{ scale: 0.98 }}
-              className="mt-4 w-full cursor-pointer bg-green-500 text-white py-3 rounded-lg font-medium text-lg shadow hover:bg-green-600 transition"
-              disabled={!stripe}
+              onClick={getSessionURL}
+              className="mt-4 w-full active:scale-103 cursor-pointer bg-black text-white py-3 rounded-lg font-medium text-lg shadow hover:bg-zinc-950 transition"
             >
               Pay Now
-            </motion.button>
-          </form>
+            </button>
         </div>
 
         {/* Right - Order Summary */}
@@ -160,22 +168,22 @@ const PaymentFormInner = () => {
                 <span>{plan!.name}</span>
               </div>
               <div className="flex justify-between">
-                <span>Duration:</span>
-                <span>1 Month</span>
+                <span>Billing Cycle Duration:</span>
+                <span>1 {Term.substring(0,Term.length - 3)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Subtotal:</span>
-                <span>{plan!.price}</span>
+                <span>{respectivePrice()}</span>
               </div>
               <div className="flex justify-between">
                 <span>GST (18%):</span>
-                <span>${(parseInt((plan!.price).split(' ')[0].substring(1)) * 0.18).toFixed(0)}</span>
+                <span>${(parseInt((String(respectivePrice())).split(' ')[0].substring(1)) * 0.18).toFixed(0)}</span>
               </div>
-              <div className="border-t border-gray-200 my-2" />
-              <div className="flex justify-between font-semibold dark:text-white border border-green-500 p-2 rounded-lg">
+              <div className="border-t border-yellow-200 my-2" />
+              <div className="flex justify-between font-semibold dark:text-white border border-yellow-500 p-2 rounded-lg">
                 <span>Total:</span>
-                <span className="text-green-600 dark:text-green-400">
-                  ${(parseInt((plan!.price).split(' ')[0].substring(1)) * 1.18).toFixed(0)}
+                <span className="text-yellow-600 dark:text-yellow-400">
+                  ${(parseInt(String((respectivePrice())).split(' ')[0].substring(1)) * 1.18).toFixed(0)}
                 </span>
               </div>
             </div>
@@ -187,70 +195,20 @@ const PaymentFormInner = () => {
       <div className="w-full max-w-5xl mt-12 text-center text-sm text-gray-500">
         <p>
           By completing this payment, you agree to our{" "}
-          <span className="text-green-600 hover:underline cursor-pointer">
+          <span className="text-yellow-600 hover:underline cursor-pointer">
             Terms & Conditions
           </span>{" "}
           and{" "}
-          <span className="text-green-600 hover:underline cursor-pointer">
-            Privacy Policy
+          <span className="text-yellow-600 hover:underline cursor-pointer">
+            Privacy Policy for automatic billing
           </span>
           .
         </p>
-        <p className="mt-2 flex flex-row gap-3 items-center justify-center"><span>© {new Date().getFullYear()} Briezly</span><span><Image src='/images/letter-B.png' className="rounded-full" width={35} height={35} alt="logo" /></span></p>
+        <Link href='/@__briezlofficial' className="mt-2 flex flex-row gap-3 items-center justify-center">
+          <span>© {new Date().getFullYear()} Briezl</span>
+          <span><Image src='/images/letter-B.png' className="rounded-full" width={35} height={35} alt="logo" /></span>
+        </Link>
       </div>
     </div>
-  );
-}
-
-export default function PaymentPage() {
-  const [clientSecret, setClientSecret] = useState<string | null>(null); // will be returned from backend on api hitting...
-
-  useEffect(() => {
-    // Fetching client secret from API
-    const fetchClientSecret = async () => {
-      try {
-        const amount = 10 ;
-        const response = await axios('/api/payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: JSON.stringify({ amount }),
-        });
-        const { clientSecret } = await response.data ;
-        setClientSecret(clientSecret);
-      } catch (error) {
-        console.error('Error fetching client secret:', error);
-      }
-    };
-    fetchClientSecret();
-  }, []);
-
-  if (!clientSecret) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-white dark:bg-black">
-        <motion.div
-          className="flex flex-row justify-center items-center gap-4"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.div
-            className="w-12 h-12 border-4 border-green-200 border-t-green-500 rounded-full"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-gray-700">Preparing secure payment...</span>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <PaymentFormInner />
-    </Elements>
   );
 }
