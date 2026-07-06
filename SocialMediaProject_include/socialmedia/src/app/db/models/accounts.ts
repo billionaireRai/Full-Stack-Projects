@@ -92,12 +92,6 @@ const accountSchema = new mongoose.Schema({
             type:Date,
             required:false
         },
-        Type:{
-            type:String,
-            trim:true,
-            enum:['Private','Public','Creator','Business'],
-            default:'Private'
-        },
         completed:{
             type:Boolean,
             default:false
@@ -112,7 +106,7 @@ const accountSchema = new mongoose.Schema({
             type:String,
             default:'Free',
             trim:true,
-            enum:['Free','Pro','Creator','Enterprise']
+            enum:['Free','Pro','Creator','Premium']
         },
     },
     interests: {

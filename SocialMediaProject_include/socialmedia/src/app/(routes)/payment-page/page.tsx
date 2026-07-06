@@ -4,62 +4,60 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from 'axios';
-import toast from "react-hot-toast";
 import { plans } from "../subscription/page";
 import { SubsPlanType } from "../subscription/page";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { MdSecurity, MdArrowBack } from "react-icons/md";
-import { loadStripe } from "@stripe/stripe-js";
-
-const stripePromise = loadStripe(String(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)); // loading stripe instance on our page...
+import toast from "react-hot-toast";
 
 
 export default function PaymentPage() {
-  const [sessionURL, setsessionURL] = useState<string>(''); // state for client secret...
   const router = useRouter() ; // initializing useRouter() hook...
   const searchParams = useSearchParams();
   
   // plan related info...
   const [Term, setTerm] = useState<String>('');
-  const [plan, setPlan] = useState<SubsPlanType | null>(null) ;
+  const [plan, setplan] = useState<SubsPlanType | null>(null) ;
   
   // function for setting right plan...
   function getAndSetPlan() : void {
     const planParam = searchParams.get('plan');
     const term = searchParams.get('term');
+
     const pursuedPlan = plans.find((eachPlan) => eachPlan.name === planParam);
     
     if (term?.trim() && planParam?.trim() && pursuedPlan) {
-      setPlan(pursuedPlan);
+      setplan(pursuedPlan);
       setTerm(term);
     }
   }
 
-  // function giving price based on term
+  // function giving price based on term..
   const respectivePrice = () => { 
-    if (Term === 'monthly') return plan?.prices.monthly.value ;
+    if (Term === 'monthly') return plan?.prices.monthly ;
     
-    return plan?.prices.yearly.value ;
+    return plan?.prices.yearly ;
   }
   
   // Fetching client secret from API...
-  const getSessionURL = async () => {
+  const getSubscriptionSessionURL = async () => {
+    const loadingtoast = toast.loading('Redirecting to stripe payment...');
     try {
-      const amount = 10 ;
-      const response = await axios.post('/api/subscription/create-session', { headers: { 'Content-Type': 'application/json',}, data: JSON.stringify({ amount }),
-      });
+      const response = await axios.post('/api/subscription/create-session',{ plan:plan?.name , term:Term , clienturl:window.location.href });
+
       if (response.status === 200) {
         const { url } = await response.data ;
-        setsessionURL(url);
+        router.push(url) ;
+        toast.dismiss(loadingtoast);
       }
       } catch (error) {
+      toast.dismiss(loadingtoast);
       console.error('Error fetching client secret:', error);
     }
   };
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     getAndSetPlan() ; // for getting right payment for user...
   }, []);
    
@@ -74,12 +72,12 @@ export default function PaymentPage() {
           transition={{ duration: 0.5 }}
         >
           <motion.div
-            className="w-12 h-12 border-4 border-green-200 dark:border-green-300 border-t-green-500 dark:border-t-green-400 rounded-full"
+            className="w-12 h-12 border-4 border-green-200 dark:border-green-300 border-t-yellow-500 dark:border-t-yellow-400 rounded-full"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
           <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">Loading plan details...</span>
+            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">Preparing secure payment for your plan...</span>
           </div>
         </motion.div>
       </div>
@@ -147,7 +145,7 @@ export default function PaymentPage() {
           </p>
             <button
               type="submit"
-              onClick={getSessionURL}
+              onClick={getSubscriptionSessionURL}
               className="mt-4 w-full active:scale-103 cursor-pointer bg-black text-white py-3 rounded-lg font-medium text-lg shadow hover:bg-zinc-950 transition"
             >
               Pay Now

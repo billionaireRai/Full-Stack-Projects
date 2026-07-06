@@ -11,8 +11,8 @@ const subscriptionSchema = new mongoose.Schema(
 
     plan: {
       type: String,
-      enum: ["free", "pro", "creator", "enterprise"],
-      default: "free",
+      enum: ["Free", "Pro", "Creator", "Enterprise"],
+      default: "Free",
       index: true
     },
     priceId: {
@@ -22,19 +22,27 @@ const subscriptionSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["active","trialing","past_due","canceled","paused","expired"],
-      default: "active",
+      default: "trialing",
       index: true
     },
     stripeCustomerId: {
       type: String,
-      required: true,
+      default:null,
       index: true
     },
     stripeSubscriptionId: {
       type: String,
-      required: true,
+      default:null,
       unique: true,
       index: true
+    },
+    currentCycleStart:{
+      type: Date,
+      default: null
+    },
+    currentCycleEnd:{
+      type: Date,
+      default: null
     },
     cancelAtCycleEnd: {
       type: Boolean,

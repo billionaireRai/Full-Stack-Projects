@@ -11,7 +11,7 @@ import likes from "../models/likes";
 import { fmt } from "@/lib/utils";
 import accounts from "../models/accounts";
 
-type Plan = "Free" | "Pro" | "Creator" | "Enterprise";
+type Plan = "Free" | "Pro" | "Creator" | "Premium";
 
 export const gettingAccountService = async (text:string) => {
     await connectWithMongoDB() ; // connecting to db...
@@ -182,7 +182,7 @@ export const exploreDetailsForAccountService = async () => {
     // removing the duplicacy from account array...
     const uniqueAccArr = [...new Set([...filteredMutualFriendAccounts,...moreAccounts,...filteredLikedToAcc,...filteredAccountsWhosPost])];
     // sorting the array based on subscription level...
-    const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Enterprise: 3 };
+    const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
 
     // sorting logic...
     const suggesstionsArr = uniqueAccArr.sort((a, b) => {

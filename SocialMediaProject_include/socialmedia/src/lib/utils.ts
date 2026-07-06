@@ -3,6 +3,25 @@ import { twMerge } from "tailwind-merge"
 import { saveAs } from "file-saver";
 import axios from "axios";
 
+
+type StripePlanKey = "Pro" | "Creator" | "Premium";
+type StripeTermKey = "Monthly" | "Yearly";
+
+const PRICE_IDS: Record<StripePlanKey, Record<StripeTermKey, string>> = {
+  Pro: {
+    Monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID!,
+    Yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID!,
+  },
+  Creator: {
+    Monthly: process.env.STRIPE_CREATOR_MONTHLY_PRICE_ID!,
+    Yearly: process.env.STRIPE_CREATOR_YEARLY_PRICE_ID!,
+  },
+  Premium: {
+    Monthly: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID!,
+    Yearly: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID!,
+  },
+};
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -32,4 +51,8 @@ export const handleDownload = async (mediaUrl: string, filename: string) => {
   if (res.status !== 200) throw new Error("Download failed");
 
   saveAs(res.data, filename);
+};
+
+export const getStripePriceId = (plan:StripePlanKey, term: StripeTermKey) => {
+  return PRICE_IDS[plan][term];
 };

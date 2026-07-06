@@ -6,21 +6,17 @@ import React, { useState, useEffect } from "react";
 import Activebeep from "@/components/activebeep";
 import { CreditCard } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import useActiveAccount from "@/app/states/useraccounts";
 
-type termType = 'monthly' | 'yearly' ;
+type termType = 'Monthly' | 'Yearly' ;
 
 interface planPriceType {
-  monthly: {
-    value:number ;
-    priceId:string ;
-  },
-  yearly: {
-    value:number ;
-    priceId:string ;
-  };
+  monthly: number ;
+  yearly: number ;
   saved: number; // equivalent % saved when switching from monthly to yearly
 }
 
+type billingYearlySavingType = { monthly: string; saved: string }; 
 
 export interface SubsPlanType {
   name: string;
@@ -43,8 +39,8 @@ export const plans: SubsPlanType[] = [
   {
     name: "Free",
     prices: {
-      monthly: { value: 0, priceId: "" },
-      yearly: { value: 0, priceId: "" },
+      monthly: 0 ,
+      yearly: 0 ,
       saved: 0,
     },
 
@@ -66,8 +62,8 @@ export const plans: SubsPlanType[] = [
   {
     name: "Pro",
     prices: {
-      monthly: { value: 14.9, priceId: "prod_UpRRHT5xOpbeeY" },
-      yearly: { value: 149, priceId: "prod_UpRWnY5jml8X1U" },
+      monthly: 14.9,
+      yearly: 149 ,
       saved: 17,
     },
     desc: "For professionals who want predictable visibility",
@@ -88,8 +84,8 @@ export const plans: SubsPlanType[] = [
   {
     name: "Creator",
     prices: {
-      monthly: { value: 29, priceId: "prod_UpRZcrFsYqbluw" },
-      yearly: { value: 290, priceId: "prod_UpRbVzpN9XR6Qo" },
+      monthly: 29,
+      yearly: 290,
       saved: 19,
     },
     desc: "Turn content into authority and popularity",
@@ -110,8 +106,8 @@ export const plans: SubsPlanType[] = [
   {
     name: "Premium",
     prices: {
-      monthly: { value: 59, priceId: "prod_UpRcnmkD8uBUIE" },
-      yearly: { value: 590, priceId: "" },
+      monthly: 59,
+      yearly: 590,
       saved:20,
     },
     desc: "Ultimate solo control with advanced tools",
@@ -130,15 +126,19 @@ export const plans: SubsPlanType[] = [
 
 export default function SubscriptionPage() {
   const searchParams = useSearchParams() ; // intializing useParams() hook...
-  const [currentTerm, setcurrentTerm] = useState<termType>('monthly');
+  const { Account } = useActiveAccount() ;
+  const [currentTerm, setcurrentTerm] = useState<termType>('Monthly');
   const [selectedPlan, setSelectedPlan] = useState<SubsPlanType | null>(null);
-  type billingYearlyType = { monthly: string; saved: string }; 
 
-  const [billingYearly, setbillingYearly] = useState<billingYearlyType>();
+  const Plan = searchParams.get('plan');
+  const Term = searchParams.get('term');
+
+  const [billingYearly, setbillingYearly] = useState<billingYearlySavingType  | null>(null);
+
   
   // function returning monthly billing and saved...
-function getYearlyBilling(plan: SubsPlanType): billingYearlyType {
-    const yearlyValue = plan.prices.yearly.value;
+function getYearlyBilling(plan: SubsPlanType): billingYearlySavingType {
+    const yearlyValue = plan.prices.yearly;
     const saved = ((plan.prices.saved / 100) * yearlyValue).toFixed(1);
     const monthly = ((yearlyValue - parseFloat(saved)) / 12).toFixed(1);
 
@@ -146,13 +146,23 @@ function getYearlyBilling(plan: SubsPlanType): billingYearlyType {
   }
 
   useEffect(() => {
-    plans.forEach(plan => {
-      if (plan.name === searchParams.get('plan')) setSelectedPlan(plan) ;
-    })
+    if (Term === 'Monthly' || Term === 'Yearly')  setcurrentTerm(Term);
 
-    if (selectedPlan !== null) setbillingYearly(getYearlyBilling(selectedPlan));
-  }, [selectedPlan]);
+    const found = plans.find(plan => plan.name === Plan);
+    if (found) setSelectedPlan(found);
+  }, [Plan, Term]);
 
+  useEffect(() => {
+    if (selectedPlan !== null && currentTerm === 'Yearly') {
+      setbillingYearly(getYearlyBilling(selectedPlan));
+    } else {
+      setbillingYearly(null);
+    }
+  }, [selectedPlan, currentTerm]);
+
+
+
+  // change is as per the latest plans...
   const comparisonFeatures = [
     { name: "Unlimited Posting", plans: ["Pro", "Creator", "Premium"] },
     { name: "Predictable Reach Boost", plans: ["Pro", "Creator", "Premium"] },
@@ -192,13 +202,13 @@ function getYearlyBilling(plan: SubsPlanType): billingYearlyType {
       <div className="toggle-term flex items-center justify-center w-full rounded-lg">
         <div className="border border-yellow-500 p-1 flex items-center shadow-xl justify-center gap-2 rounded-full">
           <span 
-            onClick={() => { setcurrentTerm('monthly') }}
-            className={`py-2 px-4 rounded-full text-md cursor-pointer ${currentTerm === 'monthly' ? 'bg-yellow-400 text-white font-semibold' : 'text-yellow-600 hover:bg-yellow-100'}`}>Monthly</span>
+            onClick={() => { setcurrentTerm('Monthly') }}
+            className={`py-2 px-4 rounded-full text-md cursor-pointer ${currentTerm === 'Monthly' ? 'bg-yellow-400 text-white font-semibold' : 'text-yellow-600 hover:bg-yellow-100'}`}>Monthly</span>
           <div 
-            onClick={() => { setcurrentTerm('yearly') }}
-            className={`flex items-center justify-center text-yellow-600 gap-1.5 py-2 px-4 rounded-full text-md cursor-pointer ${currentTerm === 'yearly' ? 'bg-yellow-400 text-white font-semibold' : 'hover:bg-yellow-100'}`}>
-            <span className={`${currentTerm === 'yearly' && 'text-white'}`}>Yearly🔥</span>
-            <div className={`text-xs text-gray-400 ${currentTerm === 'yearly' && 'text-white'}`}>Save upto 20%</div>
+            onClick={() => { setcurrentTerm('Yearly') }}
+            className={`flex items-center justify-center text-yellow-600 gap-1.5 py-2 px-4 rounded-full text-md cursor-pointer ${currentTerm === 'Yearly' ? 'bg-yellow-400 text-white font-semibold' : 'hover:bg-yellow-100'}`}>
+            <span className={`${currentTerm === 'Yearly' && 'text-white'}`}>Yearly🔥</span>
+            <div className={`text-xs text-gray-400 ${currentTerm === 'Yearly' && 'text-white'}`}>Save upto 20%</div>
           </div>
         </div>
       </div>
@@ -219,9 +229,14 @@ function getYearlyBilling(plan: SubsPlanType): billingYearlyType {
               {/* Plan Header */}
               <div>
                 <div className="flex justify-between items-center mb-3">
+                 <div className="w-fit flex gap-1 items-center justify-center">
                   <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     {plan.name}
                   </h2>
+                  { Account.account?.plan === plan.name && (
+                    <span className="border border-yellow-500 text-yellow-500 bg-yellow-100 dark:bg-black py-1 px-2 rounded-full text-xs">Active Plan</span>
+                  )}
+                 </div>
                   <span className={`text-xs px-3 py-2 rounded-full bg-gray-100 dark:bg-gray-950 text-gray-700 dark:text-gray-300`}>
                     <div className="bg-gray-100 dark:bg-gray-950 rounded-full flex flex-row items-center gap-1.5">
                       <span>{plan.highlight}</span>
@@ -234,8 +249,8 @@ function getYearlyBilling(plan: SubsPlanType): billingYearlyType {
                   {plan.desc}
                 </p>
                 <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                  <div>{(currentTerm === 'yearly' ? `$${plan.prices.yearly.value} / year` : `$${plan.prices.monthly.value} / month`)}</div>
-                  {selectedPlan !== null && currentTerm === 'yearly' && plan === selectedPlan && (
+                  <div>{(currentTerm === 'Yearly' ? `$${plan.prices.yearly} / year` : `$${plan.prices.monthly} / month`)}</div>
+                  {currentTerm === 'Yearly' && plan === selectedPlan && (
                     <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-yellow-50/70 px-3 py-1 text-xs text-gray-700 dark:bg-yellow-500/10 dark:text-yellow-200">
                       <span className="font-semibold">${billingYearly?.monthly}</span>
                       <span className="text-gray-500 dark:text-yellow-100">/month</span>
