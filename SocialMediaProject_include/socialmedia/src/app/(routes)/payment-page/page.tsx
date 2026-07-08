@@ -35,7 +35,7 @@ export default function PaymentPage() {
 
   // function giving price based on term..
   const respectivePrice = () => { 
-    if (Term === 'monthly') return plan?.prices.monthly ;
+    if (Term === 'Monthly') return plan?.prices.monthly ;
     
     return plan?.prices.yearly ;
   }
@@ -132,24 +132,9 @@ export default function PaymentPage() {
           <div className="mt-5 flex items-center justify-between border-t pt-3">
             <span className="text-gray-600 dark:text-gray-200 font-medium">Total</span>
             <span className="text-lg font-semibold text-green-600">
-              {respectivePrice()}
+              ${respectivePrice()}/-
             </span>
           </div>
-        </div>
-
-        {/* Middle - Payment Form */}
-        <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 shadow-sm">
-          <h2 className="text-xl font-semibold mb-2">Payment Details</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">
-            Enter your payment information securely.
-          </p>
-            <button
-              type="submit"
-              onClick={getSubscriptionSessionURL}
-              className="mt-4 w-full active:scale-103 cursor-pointer bg-black text-white py-3 rounded-lg font-medium text-lg shadow hover:bg-zinc-950 transition"
-            >
-              Pay Now
-            </button>
         </div>
 
         {/* Right - Order Summary */}
@@ -167,7 +152,7 @@ export default function PaymentPage() {
               </div>
               <div className="flex justify-between">
                 <span>Billing Cycle Duration:</span>
-                <span>1 {Term.substring(0,Term.length - 3)}</span>
+                <span>{Term}</span>
               </div>
               <div className="flex justify-between">
                 <span>Subtotal:</span>
@@ -181,11 +166,20 @@ export default function PaymentPage() {
               <div className="flex justify-between font-semibold dark:text-white border border-yellow-500 p-2 rounded-lg">
                 <span>Total:</span>
                 <span className="text-yellow-600 dark:text-yellow-400">
-                  ${(parseInt(String((respectivePrice())).split(' ')[0].substring(1)) * 1.18).toFixed(0)}
+                  {/* ${(parseInt((String(respectivePrice())).split(' ')[0].substring(1)) * 0.18).toFixed(0) + respectivePrice()} */}
                 </span>
               </div>
             </div>
           </div>
+        </div>
+        <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 shadow-sm">
+            <button
+              type="submit"
+              onClick={getSubscriptionSessionURL}
+              className="mt-4 w-full active:scale-103 cursor-pointer bg-black text-white py-3 rounded-lg font-medium text-lg shadow hover:bg-zinc-950 transition"
+            >
+              Pay Now
+            </button>
         </div>
       </motion.div>
 

@@ -1,7 +1,7 @@
 import asyncErrorHandler from "../middleware/errorMiddleware";
 import { CheckHasAlreadySubscribed } from "../db/services/stripe";
 import { stripe } from '@/lib/stripeinstance';
-import { handleCheckoutCompleted , handleCustomerPaidInvoice } from "../db/services/stripe";
+import { handleCheckoutCompleted , handleInvoicePaidService , handleInvoicePaymentFailed , handleCustomerSubscriptionUpgrade ,handleCustomerSubscriptionDeletion } from "../db/services/stripe";
 import { getStripePriceId } from "@/lib/utils";
 import { NextRequest , NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -9,6 +9,7 @@ import Stripe from "stripe";
 interface checkingSubsReturnType {
     email:string ;
     accid:string ;
+    subs:any ;
 }
 
 export const CreateSubscriptionSessionURLController = asyncErrorHandler( async(request:NextRequest) => {
@@ -29,7 +30,7 @@ export const CreateSubscriptionSessionURLController = asyncErrorHandler( async(r
         
         cancel_url:`${clienturl}/subscription`,
         
-        metadata: { accountId: accid.toString() }
+        metadata: { accountId: accid.toString() , plan }
         
         
     })
@@ -37,10 +38,32 @@ export const CreateSubscriptionSessionURLController = asyncErrorHandler( async(r
     return NextResponse.json({ message:'Checkout session URL generated...' , url:session.url },{ status:200 });
 })
 
-export const CancelSubscriptionController = asyncErrorHandler( async(request:NextRequest) => {
-    // get stripeSubscriptionId from a service funtion...;
-    // await stripe.subscriptions.update( subscriptionId ,{ cancel_at_period_end:true });
-    return NextResponse.json({ message:'Subscription cancelled successfully...' },{ status:200 });
+export const SubscriptionUpgradeController = asyncErrorHandler(async (request: NextRequest): Promise<NextResponse> => { 
+  const { plan , term  } = await request.json();
+
+  const newPriceId = getStripePriceId(plan,term); // getting new stripe price ID...
+
+  const { subs } = await CheckHasAlreadySubscribed(newPriceId) as checkingSubsReturnType ;
+
+  // upgrading stripe priceID for this customers billing...
+  await stripe.subscriptions.update(subs.stripeSubscriptionId, {
+    items: [{ price: newPriceId }],
+    proration_behavior: "create_prorations"
+  });
+
+  return NextResponse.json({ message: "Subscription upgrade initiated successfully...",subscription: subs },{ status: 200 });
+})
+
+export const CancelSubscriptionController = asyncErrorHandler( async (request: NextRequest) => {
+  const { plan , term  } = await request.json();
+
+  const priceId = getStripePriceId(plan,term); // getting new stripe price ID...
+  const { subs } = await CheckHasAlreadySubscribed(priceId) as checkingSubsReturnType ;
+
+  // setting cancellation at current cycle end...
+  await stripe.subscriptions.update(subs.stripeSubscriptionId, { cancel_at_period_end: true });
+
+  return NextResponse.json({ message: "Subscription cancellation initiated successfully...", subscription: subs },{ status: 200 });
 })
 
 export const StripeWebhookResponseController = asyncErrorHandler( async(request: NextRequest) => {
@@ -75,17 +98,14 @@ export const StripeWebhookResponseController = asyncErrorHandler( async(request:
         case "invoice.paid": {
 
           const invoice = event.data.object as Stripe.Invoice;
-          await handleCustomerPaidInvoice(invoice);
+          await handleInvoicePaidService(invoice);
 
           break;
         }
 
         case "invoice.payment_failed": {
-
           const invoice = event.data.object as Stripe.Invoice;
-
-          // Mark subscription as past_due
-          // Notify user (optional)
+          await handleInvoicePaymentFailed(invoice);
 
           break;
         }
@@ -93,22 +113,14 @@ export const StripeWebhookResponseController = asyncErrorHandler( async(request:
         case "customer.subscription.updated": {
 
           const subscription = event.data.object as Stripe.Subscription;
-
-          // Update:
-          // status
-          // cancelAtPeriodEnd
-          // currentPeriodEnd
-          // latest priceId
+          await handleCustomerSubscriptionUpgrade(subscription);
 
           break;
         }
 
         case "customer.subscription.deleted": {
-
           const subscription = event.data.object as Stripe.Subscription;
-
-          // Downgrade user to Free
-          // Remove premium privileges
+          await handleCustomerSubscriptionDeletion(subscription);
 
           break;
         }

@@ -188,14 +188,14 @@ function getYearlyBilling(plan: SubsPlanType): billingYearlySavingType {
       )}
 
       {/* Header */}
-      <div className="flex flex-col items-center gap-2 mb-16 mt-6 max-w-3xl">
+      <div className="flex flex-col items-center gap-2 mb-16 mt-6 max-w-full">
         <div>
           <Image src='/images/letter-B.png' className="dark:invert rounded-full" width={100} height={100} alt="logo" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-900 dark:text-gray-100 mb-4">
+        <h1 className="text-4xl md:text-5xl max-w-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-4">
           Choose the plan that grows with you
         </h1>
-        <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-400 max-w-2xl">
+        <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-400 max-w-4/5">
           Briezl is built for professionals, creators, founders, developers, and teams who value meaningful conversations over endless noise, genuine connections over vanity metrics, and ownership over their content and audience. Upgrade your subscription to unlock advanced publishing tools, enhanced privacy and security features, premium collaboration capabilities, priority support, deeper analytics, and exclusive features designed to help you work smarter, build your personal brand, and grow with confidence.
         </p>
       </div>

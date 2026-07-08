@@ -17,7 +17,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     priceId: {
       type: String,
-      required:true 
+      default:null
     },
     status: {
       type: String,

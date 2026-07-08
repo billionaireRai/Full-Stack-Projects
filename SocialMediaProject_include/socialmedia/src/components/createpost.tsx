@@ -27,12 +27,15 @@ import {
   MapPin,
   Loader2,
   ChevronDown,
-  MessagesSquareIcon
+  MessagesSquareIcon,
+  SparklesIcon,
+  Text
 } from 'lucide-react';
 import { TooltipContent, TooltipTrigger, Tooltip } from "./ui/tooltip";
 import CreatePoll from "./createpoll";
 import LocationSearch from "./locationsearch";
 import axiosInstance from "@/lib/interceptor";
+import { MdDrafts } from "react-icons/md";
 
 export default function CreatePost() {
   const [post, setPost] = useState('');
@@ -45,6 +48,7 @@ export default function CreatePost() {
   const { resolvedTheme } = useTheme();
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [showTagSomeone, setShowTagSomeone] = useState<boolean>(false);
+  const [isAIPop, setisAIPop] = useState<boolean>(false);
   const [showLocationSearchModal, setShowLocationSearchModal] = useState<boolean>(false);
   const [openOptions, setOpenOptions] = useState(false);
   const [whoCanReply, setWhoCanReply] = useState<'everyone' | 'following' | 'mentioned' | 'verified'>('everyone');
@@ -64,6 +68,29 @@ export default function CreatePost() {
   const { poll: PollInfo, isCreateOpen: showPollModal, setIsCreateOpen: setShowPollModal, isDisplayOpen: showDisplayModal, setIsDisplayOpen: setShowDisplayModal, resetPoll } = usePoll();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const maxPostLength : number = Account.account?.isVerified ? 500 : 100 ; // conditional length...
+
+  const postAIfeatures =  [
+    {
+      title: 'AI recommended mention',
+      desc: 'Get smart mention suggestions based on your text.',
+      icon: <AtSign size={18} className="text-yellow-500" />
+    },
+    {
+      title: 'Tone & rewrite',
+      desc: 'Make your post friendly, professional, or punchy.',
+      icon: <Text size={18} className="text-yellow-500" />
+    },
+    {
+      title: 'Summarize & shorten',
+      desc: 'Turn long drafts into crisp, engaging posts.',
+      icon: <ChevronDown size={18} className="text-yellow-500" />
+    },
+    {
+      title: 'Hashtag & keywords',
+      desc: 'Auto-suggest relevant hashtags and keywords.',
+      icon: <Globe size={18} className="text-yellow-500" />
+    }
+  ]
 
   // Auto-resize textarea
   useEffect(() => {
@@ -94,15 +121,18 @@ export default function CreatePost() {
       if (showLocationSearchModal && !(event.target as Element).closest('.location-search')) {
         setShowLocationSearchModal(false);
       }
+      if (isAIPop && !(event.target as Element).closest('.AI-features')) {
+        setisAIPop(false);
+      }
     };
 
-    if (openOptions || openReplyOptions || showEmojiPicker || showTagSomeone || showPollModal || showLocationSearchModal) {
+    if (openOptions || openReplyOptions || showEmojiPicker || showTagSomeone || showPollModal || showLocationSearchModal || isAIPop) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [openOptions, openReplyOptions, showEmojiPicker, showTagSomeone, showPollModal, showLocationSearchModal]);
+  }, [openOptions, openReplyOptions, showEmojiPicker, showTagSomeone, showPollModal, showLocationSearchModal,isAIPop]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -249,8 +279,8 @@ export default function CreatePost() {
           className="bg-white dark:bg-black w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-900 max-h-[90vh] flex flex-col flex-shrink-0"
         >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-zinc-950 bg-white dark:bg-black rounded-2xl">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-zinc-950 bg-white dark:bg-black rounded-2xl">
+          <div className="flex items-center gap-2">
             <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-yellow-400/30 ring-offset-2 ring-offset-white dark:ring-offset-zinc-900">
               <img
                 className="w-full h-full object-cover"
@@ -258,15 +288,63 @@ export default function CreatePost() {
                 alt="profile-pic"
               />
             </div>
-            <div>
-              <h4 className="text-xl font-bold text-gray-900 dark:text-white">
+            <div className="flex flex-col items-start">
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white">
                 {Account.name}
               </h4>
               <Link href={`/${Account.decodedHandle}`} className="hover:opacity-80 transition-opacity">
-                <span className="text-sm text-gray-500 dark:text-zinc-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
+                <span className="text-xs text-gray-500 dark:text-zinc-400 rounded-full px-2 hover:text-yellow-500 hover:bg-yellow-100 dark:hover:text-yellow-400 dark:hover:bg-gray-950 transition-colors">
                   {Account.decodedHandle}
                 </span>
               </Link>
+            </div>
+            <div className="flex items-end rounded-full p-1"> 
+              <button type="button" onClick={() => { setisAIPop(!isAIPop) }} className="relative hover:bg-yellow-100 dark:hover:bg-gray-950 transition-transform duration-300 p-1 rounded-full">
+                <SparklesIcon size={15} />
+                {isAIPop && (
+                  <motion.div
+                  initial={{ opacity: 0, scale: 0.90 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="absolute left-0 top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden"
+                >
+                  <div className="px-5 py-4 border-b rounded-xl flex gap-1.5 items-center border-gray-100 dark:border-zinc-900">
+                    <SparklesIcon size={30} />
+                    <div className="flex flex-col items-start gap-1">
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white">AI based features</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Boost your posts with helpful AI suggestions.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3">
+                    {postAIfeatures.map((opt) => (
+                      <button
+                        key={opt.title}
+                        type="button"
+                        onClick={() => setCreatePop(false)}
+                        className="w-full cursor-pointer text-left flex items-start gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-yellow-950/20 transition-colors"
+                      >
+                        <div className="mt-0.5 w-9 h-9 rounded-full bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
+                          {opt.icon}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{opt.title}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                            {opt.desc}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+              </button>
+              <button type="button" className="hover:bg-yellow-100 dark:hover:bg-gray-950 transition-transform duration-300 p-1 rounded-full">
+                <MdDrafts size={15} />
+              </button>
             </div>
           </div>
           <button

@@ -236,7 +236,7 @@ export default function SideNavbar() {
                      <div className='rounded-xl p-2 flex flex-col items-start justify-center'>
                       <div className='flex items-center justify-between w-full'>
                         <span className='font-semibold'>More options</span>
-                        <OptionIcon className='border border-gray-400 text-gray-400 p-1 rounded-full'/>
+                        <OptionIcon className='p-1 rounded-full'/>
                       </div>
                       <div className='text-xs text-gray-500 dark:text-gray-400'>Some of these options are <b>under development</b> phase, they'll be active soon for you guys</div>
                      </div>
@@ -252,7 +252,7 @@ export default function SideNavbar() {
                          icon={<SettingsIcon className={`${pathname === `/${Account.decodedHandle}/settings/account` && 'fill-black    dark:fill-white'}`}
                            />
                          }
-                         label="Privacy Settings"
+                         label="Account Settings"
                        />
                      </Link>
                     {/* Bookmarks */}
@@ -264,19 +264,11 @@ export default function SideNavbar() {
                      >
                         <NavItem icon={<BookmarkIcon className={`${pathname === `/${Account.decodedHandle}/bookmarked` && 'fill-black    dark:fill-white'}`} />} label="Bookmarked" />
                       </Link>
-                     {/* AI search */}
-                     <Link href={`/asking-ai`}>
-                        <NavItem
-                          icon={<SparklesIcon className={`${pathname === '/asking-ai' && 'fill-black    dark:fill-white'}`} />}
-                          label="Asking AI"
-                        />
-                     </Link>
-
                      {/* Lists */}
-                     <Link href={`/${Account.decodedHandle}/stack`}>
+                     <Link href={`/${Account.decodedHandle}/stacks`}>
                        <NavItem
                          icon={<List className={`${pathname === `/${Account.decodedHandle}/stack` && 'fill-black dark:fill-white'}`} />}
-                         label="Stack"
+                         label="Stacks"
                        />
                      </Link>
 
