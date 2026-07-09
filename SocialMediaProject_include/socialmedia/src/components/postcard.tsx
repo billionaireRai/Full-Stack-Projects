@@ -33,6 +33,7 @@ import NotInterestedPop from './NotInterestedPop';
 import SharePopup from './sharePopUp';
 import useMediaPop from '@/app/states/mediapop';
 import Videoplayer from './videoplayer';
+import { MdAttachEmail, MdImportExport } from 'react-icons/md';
 
 interface locationTaggedType {
   text: string,
@@ -544,7 +545,7 @@ export default function PostCard({
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="dropdown-container font-semibold animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
+              className="dropdown-container font-semibold animate-in slide-in-from-top-2 duration-200 cursor-pointer absolute right-0 top-0 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
                 <button
                   onClick={() => { setShowDeletePop(true); }}
                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950`}
@@ -582,6 +583,14 @@ export default function PostCard({
                   <Star className={`w-4 h-4 ${(IsHighlighted) ? 'stroke-yellow-500 fill-yellow-600':''}`} />
                   {!IsHighlighted ? "Highlight on profile" : 'UnHighlight on Profile'}
                 </button>
+                {/* exporting as blog */}
+                 <button
+                    onClick={() => {  }}
+                    className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                 >
+                   <MdImportExport className="h-4 w-4" />
+                   Export as blog
+                 </button>
                 <button
                   onClick={() => { handleAddFavourite() }} 
                   className={`w-full flex items-center justify-between px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
@@ -614,7 +623,7 @@ export default function PostCard({
              initial={{ opacity: 0, scale: 0.8 }}
              animate={{ opacity: 1, scale: 1 }}
              exit={{ opacity: 0, scale: 0.8 }}  
-             className="dropdown-container font-semibold cursor-pointer absolute right-0 top-10 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
+             className="dropdown-container font-semibold cursor-pointer absolute right-0 top-0 w-fit p-2 bg-white dark:bg-black shadow-gray-700 dark:shadow-gray-900 shadow-lg border border-gray-200 dark:border-gray-900 rounded-xl z-50 overflow-hidden">
                 <Link href={`/${handle}/post/${postId}?section=Comments`}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
@@ -650,6 +659,14 @@ export default function PostCard({
                  <span>Add to Favourite</span>
                  <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                </button>
+              {/* exporting as blog */}
+               <button
+                  onClick={() => {  }}
+                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+               >
+                 <MdImportExport className="h-4 w-4" />
+                 Export as blog
+               </button>
                <button
                   onClick={() => { setHighlighPop(true)  }}
                   className={`w-full ${(isHighlighted && ('highlight on profile'.toLowerCase().includes('highlight') || 'unhighlight on profile'.toLowerCase().includes('unhighlight'))) ? 'bg-yellow-100 dark:bg-yellow-950' : ''} flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
@@ -663,7 +680,6 @@ export default function PostCard({
                  <BarChart3 className="h-4 w-4" />
                  View post analytics
                </Link>
-
               {/* embeding post means controlled remote rendering... */}
                <button
                   onClick={() => { setshowEmbedPop(true); }}
@@ -791,14 +807,14 @@ export default function PostCard({
                   </div>
                 </div>
                 <button
-                  className="group w-full flex items-center gap-2 px-3 py-2.5 text-left cursor-pointer rounded-lg transition-all duration-150 hover:bg-gray-50 dark:hover:bg-gray-950/60"
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left cursor-pointer rounded-lg transition-all duration-150 hover:bg-gray-50 dark:hover:bg-gray-950/60"
                 >
                   <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-black text-white dark:bg-white dark:text-black transition-colors group-hover:bg-yellow-500 group-hover:text-black">
                     <DollarSign className="w-4 h-4" />
                   </span>
                   <span className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 dark:group-hover:text-yellow-400">Monetize</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Earn from your audience</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Monetize Your Post</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Earn from your audience views</span>
                   </span>
                 </button>
                 <button
@@ -808,7 +824,7 @@ export default function PostCard({
                     <TrendingUp className="w-4 h-4" />
                   </span>
                   <span className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 dark:group-hover:text-yellow-400">Boost</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Quick Boost</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">Reach more people</span>
                   </span>
                 </button>

@@ -19,7 +19,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
-import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, List, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon, VideoOffIcon, File, SparklesIcon} from 'lucide-react';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon, VideoOffIcon, File, SparklesIcon} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
@@ -32,6 +32,7 @@ import useMediaPop from '@/app/states/mediapop';
 import Mediapopmodal from '@/components/mediapopmodal';
 import { usernameRegex } from '@/app/controllers/regex';
 import { checkForPrivateKeyIDB, generateKeyPairAndStoreBoth, isKeyObjType } from '@/lib/pairedkeys';
+import { MdAttachEmail } from 'react-icons/md';
 
 interface mediaType {
   url: string;
@@ -869,7 +870,7 @@ export default function UserProfilePage() {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }} 
-                        className={`more-dropdown absolute right-5 top-8 w-62 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
+                        className={`more-dropdown absolute right-0 top-0 w-62 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl dark:shadow-gray-950 z-20 ${IsBlocked ? 'blur-none pointer-events-auto' : ''}`}>
                         <ul className='p-2'>
                           { isSelf ? (
                             <>
@@ -896,6 +897,13 @@ export default function UserProfilePage() {
                                     <CopyIcon size={15}/>
                                     <span>Copy Link</span>
                                   </div>
+                                </li>
+                                <li
+                                   onClick={() => {  }}
+                                   className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                                 >
+                                   <MdAttachEmail className="h-4 w-4" />
+                                   Copy account email
                                 </li>
                                 <li
                                 onClick={() => { setShowQRPop(true) }}
@@ -968,6 +976,13 @@ export default function UserProfilePage() {
                               </li>
                               <li
                                 onClick={() => {  }}
+                                className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
+                              >
+                               <MdAttachEmail className="h-4 w-4" />
+                               Copy account email
+                             </li>
+                              <li
+                                onClick={() => {  }}
                                 className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors`}
                               >
                                 <div className='flex items-center justify-center gap-3'>
@@ -1004,7 +1019,7 @@ export default function UserProfilePage() {
                                onClick={() => { toast.success('Add to List feature coming soon!') }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                 <div className='flex items-center justify-center gap-3'>
-                                  <List size={15}/>
+                                  <Star size={15}/>
                                   <span>Add to favourite</span>
                                 </div>
                                  <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
@@ -1080,7 +1095,7 @@ export default function UserProfilePage() {
                       )}
                       <Link href={`/${AccountInfo.handle}/favourites`} className='border border-black-500 text-white bg-black hover:opacity-85 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full transition-colors'>
                         <span>favourites</span>
-                        <List className='w-4 h-4 text-white'/>
+                        <Star className='w-4 h-4 text-white'/>
                       </Link>
                     </div>
                   </div>

@@ -14,7 +14,7 @@ import { usePathname } from 'next/navigation'
 import LogoutModal from './logoutmodal';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
-import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon, SparklesIcon, List, BadgeQuestionMark, PlusCircle, OptionIcon } from 'lucide-react'
+import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon, SparklesIcon, List, BadgeQuestionMark, PlusCircle, OptionIcon, CalendarClock } from 'lucide-react'
 import useMessageCount from '@/app/states/unreadmessages';
 import { MdDrafts, MdGroups } from 'react-icons/md';
 
@@ -279,15 +279,20 @@ export default function SideNavbar() {
                          label="Communities"
                        />
                      </Link>
-
-                    {/* Saved Drafts */}
+                    {/* draft posts */}
                     <Link href={`/${Account.decodedHandle}/drafts-posts`}>
                       <NavItem
                         icon={<MdDrafts className={`${pathname === `/${Account.decodedHandle}/drafts-posts` && 'fill-black    dark:fill-white'}`}  />}
                         label="Draft Posts"
                       />
                     </Link>
-
+                    {/* scheduled posts */}
+                    <Link href={`/${Account.decodedHandle}/scheduled-posts`}>
+                      <NavItem
+                        icon={<CalendarClock className={`${pathname === `/${Account.decodedHandle}/scheduled-posts` && 'fill-black    dark:fill-white'}`}  />}
+                        label="Scheduled Posts"
+                      />
+                    </Link>
                     {/* Help Center */}
                     <Link href={`/${Account.decodedHandle}/help`}>
                       <NavItem

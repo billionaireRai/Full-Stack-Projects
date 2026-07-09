@@ -48,7 +48,7 @@ export const plans: SubsPlanType[] = [
     highlight: "Started here",
     features: [
       "Access public content feed",
-      "maximum 5 pinned post",
+      "Maximum 5 pinned post",
       "Upload upto 10 media via content per month",
       "Create up to 20 posts & comments per month",
       "Basic engagement counts likes & replies every post",
@@ -71,6 +71,7 @@ export const plans: SubsPlanType[] = [
     features: [
       "Everything in Free",
       "Upload upto 50 media via content per month",
+      "Maximum 15 pinned posts",
       "Unlimited posts and comments",
       "Get verified badge",
       "Edit your existing posts anytime",
@@ -92,10 +93,11 @@ export const plans: SubsPlanType[] = [
     highlight: "Best for creators",
     features: [
       "Everything in Pro",
-      // "Monetize posts and get paid !",
+      // "Monetize posts and get paid on its reach !",
       "Unlimited media uploads available",
-      // "Boost your best post by a click", later I'll add it...
-      "Unlimited pinned posts",
+      // "Boost your best post by click with predictable reach", later I'll add it...
+      "50 AI requests a day",
+      "Unlimited pinned posts and draft posts",
       "Advance feed recommendation feature",
       "Higher recommendation weight in eligible feeds",
       "Improved analytics dashboard (views, saves, visits)",
@@ -115,6 +117,7 @@ export const plans: SubsPlanType[] = [
     features: [
       "Everything in Creator",
       "Create unlimited draft posts",
+      "500 AI requests a day",
       "AI suggestions for comment , hashtag , writing post",
       "Automated post scheduling",
       "Set custom profile background theme",
@@ -162,17 +165,21 @@ function getYearlyBilling(plan: SubsPlanType): billingYearlySavingType {
 
 
 
-  // change is as per the latest plans...
+  // plan comparison feature rows.
+  // Keep this section in sync with solo-founder plan capabilities; edit rows here only.
   const comparisonFeatures = [
     { name: "Unlimited Posting", plans: ["Pro", "Creator", "Premium"] },
-    { name: "Predictable Reach Boost", plans: ["Pro", "Creator", "Premium"] },
-    { name: "Advanced Analytics", plans: ["Pro", "Creator", "Premium"] },
-    { name: "Creator Monetization", plans: ["Creator", "Premium"] },
+    { name: "Advanced Analytics", plans: ["Pro", "Creator"] },
     { name: "Advanced analytics dashboard", plans: ["Creator", "Premium"] },
+    { name: "Unlimited media uploads", plans: ["Creator", "Premium"] },
+    { name: "Unlimited pinned posts and draft posts", plans: ["Creator", "Premium"] },
+    { name: "PDF data export", plans: ["Creator"] },
+    { name: "AI suggestions", plans: ["Premium"] },
+    { name: "Automated post scheduling", plans: ["Premium"] },
+    { name: "Top Priority support & report analysis", plans: ["Premium"] },
     { name: "Personal API Access", plans: ["Premium"] },
-    { name: "Greater User Credit Score", plans: ["Pro", "Creator", "Premium"] },
-    { name: "Priority Email Support", plans: ["Creator", "Premium"] },
   ];
+
 
   return (
     <div className="min-h-screen flex flex-col gap-3 items-center py-10 px-6 md:px-20 bg-white dark:bg-black font-poppins">

@@ -10,6 +10,8 @@ import Link from "next/link";
 import { userCardProp } from "./usercard";
 import usePoll from "@/app/states/poll";
 import AccountSearch from "./accountsearch";
+import DraftConfirmPop from "./draftconfirm";
+import Aifeaturespost from "./aifeaturespost";
 import { useRouter } from "next/navigation";
 import AccountPoll from "./accountpoll";
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
@@ -29,13 +31,18 @@ import {
   ChevronDown,
   MessagesSquareIcon,
   SparklesIcon,
-  Text
+  Text,
+  CalendarClock
 } from 'lucide-react';
 import { TooltipContent, TooltipTrigger, Tooltip } from "./ui/tooltip";
 import CreatePoll from "./createpoll";
 import LocationSearch from "./locationsearch";
 import axiosInstance from "@/lib/interceptor";
 import { MdDrafts } from "react-icons/md";
+import Schedulepop from "./schedulepop";
+
+
+type poststatustype = "draft" | "scheduled" | "published" ;
 
 export default function CreatePost() {
   const [post, setPost] = useState('');
@@ -49,8 +56,12 @@ export default function CreatePost() {
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [showTagSomeone, setShowTagSomeone] = useState<boolean>(false);
   const [isAIPop, setisAIPop] = useState<boolean>(false);
+  const [draftPop, setdraftPop] = useState<boolean>(false);
+  const [showSchedule, setshowSchedule] = useState(false);
   const [showLocationSearchModal, setShowLocationSearchModal] = useState<boolean>(false);
   const [openOptions, setOpenOptions] = useState(false);
+  const [status, setstatus] = useState<poststatustype>('published');
+  const [scheduleTime, setscheduleTime] = useState<{ Date:string ; Time:string } | null>(null)
   const [whoCanReply, setWhoCanReply] = useState<'everyone' | 'following' | 'mentioned' | 'verified'>('everyone');
   const { setCreatePop } = useCreatePost();
   const imageRef = useRef<HTMLInputElement>(null);
@@ -63,34 +74,13 @@ export default function CreatePost() {
   const [videoFiles, setVideoFiles] = useState<File[]>([]);
   const [gifFiles, setGifFiles] = useState<File[]>([]);
   const [MentionedTo, setMentionedTo] = useState<string[]>([]);
+  const [hashtags, sethashtags] = useState<string[]>([]);
   const [AddLocation, setAddLocation] = useState<{ name: string; coordinates: number[] }[]>([]);
   const [openReplyOptions, setOpenReplyOptions] = useState(false);
   const { poll: PollInfo, isCreateOpen: showPollModal, setIsCreateOpen: setShowPollModal, isDisplayOpen: showDisplayModal, setIsDisplayOpen: setShowDisplayModal, resetPoll } = usePoll();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const maxPostLength : number = Account.account?.isVerified ? 500 : 100 ; // conditional length...
 
-  const postAIfeatures =  [
-    {
-      title: 'AI recommended mention',
-      desc: 'Get smart mention suggestions based on your text.',
-      icon: <AtSign size={18} className="text-yellow-500" />
-    },
-    {
-      title: 'Tone & rewrite',
-      desc: 'Make your post friendly, professional, or punchy.',
-      icon: <Text size={18} className="text-yellow-500" />
-    },
-    {
-      title: 'Summarize & shorten',
-      desc: 'Turn long drafts into crisp, engaging posts.',
-      icon: <ChevronDown size={18} className="text-yellow-500" />
-    },
-    {
-      title: 'Hashtag & keywords',
-      desc: 'Auto-suggest relevant hashtags and keywords.',
-      icon: <Globe size={18} className="text-yellow-500" />
-    }
-  ]
 
   // Auto-resize textarea
   useEffect(() => {
@@ -124,15 +114,21 @@ export default function CreatePost() {
       if (isAIPop && !(event.target as Element).closest('.AI-features')) {
         setisAIPop(false);
       }
+      if (draftPop && !(event.target as Element).closest('.draft-post')) {
+        setdraftPop(false);
+      }
+      if (showSchedule && !(event.target as Element).closest('.schedule-post')) {
+        setshowSchedule(false);
+      }
     };
 
-    if (openOptions || openReplyOptions || showEmojiPicker || showTagSomeone || showPollModal || showLocationSearchModal || isAIPop) {
+    if (openOptions || openReplyOptions || showEmojiPicker || showTagSomeone || showPollModal || showLocationSearchModal || isAIPop || draftPop || showSchedule) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [openOptions, openReplyOptions, showEmojiPicker, showTagSomeone, showPollModal, showLocationSearchModal,isAIPop]);
+  }, [openOptions, openReplyOptions, showEmojiPicker, showTagSomeone, showPollModal, showLocationSearchModal,isAIPop,draftPop,showSchedule]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -299,52 +295,65 @@ export default function CreatePost() {
               </Link>
             </div>
             <div className="flex items-end rounded-full p-1"> 
-              <button type="button" onClick={() => { setisAIPop(!isAIPop) }} className="relative hover:bg-yellow-100 dark:hover:bg-gray-950 transition-transform duration-300 p-1 rounded-full">
-                <SparklesIcon size={15} />
+             <div className="relative">
+              <button type="button" onClick={() => { setisAIPop(!isAIPop) }} className="hover:bg-yellow-100 dark:hover:bg-gray-950 transition-transform duration-300 p-1 rounded-full">
+                <SparklesIcon size={20} />
+              </button>
                 {isAIPop && (
                   <motion.div
                   initial={{ opacity: 0, scale: 0.90 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  className="absolute left-0 top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden"
+                  className="absolute -right-30 -top-5 sm:left-0 sm:top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden"
                 >
-                  <div className="px-5 py-4 border-b rounded-xl flex gap-1.5 items-center border-gray-100 dark:border-zinc-900">
-                    <SparklesIcon size={30} />
-                    <div className="flex flex-col items-start gap-1">
-                      <h3 className="text-sm font-bold text-gray-900 dark:text-white">AI based features</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Boost your posts with helpful AI suggestions.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-3">
-                    {postAIfeatures.map((opt) => (
-                      <button
-                        key={opt.title}
-                        type="button"
-                        onClick={() => setCreatePop(false)}
-                        className="w-full cursor-pointer text-left flex items-start gap-3 p-3 rounded-xl hover:bg-yellow-50 dark:hover:bg-yellow-950/20 transition-colors"
-                      >
-                        <div className="mt-0.5 w-9 h-9 rounded-full bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
-                          {opt.icon}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{opt.title}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug">
-                            {opt.desc}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  <Aifeaturespost/>
                 </motion.div>
               )}
-              </button>
-              <button type="button" className="hover:bg-yellow-100 dark:hover:bg-gray-950 transition-transform duration-300 p-1 rounded-full">
-                <MdDrafts size={15} />
-              </button>
+             </div>
+              <div className="relative">
+                <button type="button" onClick={() => { setdraftPop(true) }} className="hover:bg-yellow-100 dark:hover:bg-gray-950 transition-transform duration-300 p-1 rounded-full">
+                  <MdDrafts size={20} />
+                </button>
+
+                {draftPop && (
+                  <motion.div
+                  initial={{ opacity: 0, scale: 0.90 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="absolute -right-30 -top-5 sm:left-0 sm:top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden"
+                >
+                  <DraftConfirmPop onConfirm={() => { setstatus('draft') ; handlePostSubmission() }} />
+                </motion.div>
+               )}
+              </div>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setshowSchedule(true)}
+                  className="hover:bg-yellow-100 dark:hover:bg-gray-950 transition-transform duration-300 p-1 rounded-full"
+                >
+                  <CalendarClock size={20} />
+                </button>
+
+                {showSchedule && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="absolute -right-30 -top-5 sm:left-0 sm:top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden schedule-post"
+                  >
+                    <Schedulepop
+                      onSchedule={(Date, Time) => {
+                        setscheduleTime({ Date, Time });
+                      }}
+                      onClose={() => setshowSchedule(false)}
+                    />
+                  </motion.div>
+                )}
+              </div>
             </div>
           </div>
           <button
@@ -370,7 +379,7 @@ export default function CreatePost() {
                 onBlur={() => setIsFocused(false)}
                 placeholder="what's happening guys ??"
                 rows={1}
-                className="w-full resize-none border-none outline-none text-xl text-gray-900 dark:text-white bg-transparent placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 min-h-[100px] max-h-[300px]"
+                className="w-full resize-none border-none outline-none text-sm text-gray-900 dark:text-white bg-transparent placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 min-h-[100px] max-h-[300px]"
               />
 
               {/* Media Preview Section */}

@@ -79,6 +79,15 @@ const postSchema = new mongoose.Schema(
       ref: "Post",
       default: null
     },
+    category:{
+      type:String,
+      required:true,
+      trim:true
+    },
+    keywords:{
+      type:[String],
+      required:true
+    },
     // Discovery
     hashtags: {
       type: [String],
@@ -111,7 +120,20 @@ const postSchema = new mongoose.Schema(
         default: [] // lat,long
       }
     }],
-    // for future moderation and visibility....
+    status: {
+      type: String,
+      enum: ["draft","scheduled","published"],
+      default: "published"
+    },
+    
+    scheduledAt: {
+      type:Date,
+      default:null
+    },
+    publishedAt: {
+      type:Date,
+      default:null
+    },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -33,19 +33,12 @@ export default function createNewAccount() {
   const userid = searchParam.get('userId');
   // initializing the react-hook-form...
   const { register , handleSubmit , formState:{ errors , isSubmitting }} = useForm({ resolver:zodResolver(newAccCreation) }) ;
-  const [accOptions, setaccOptions] = useState<Option[]>([
-    { value:'Private Account' , label:'Private' , icon:<Lock width={15} height={15}/> },
-    { value:'Public Account' , label:'Public' , icon:<Globe width={15} height={15}/> },
-    { value:'Creator Account' , label:'Creator',icon:<Palette width={15} height={15}/> },
-    { value:'Business Account' , label:'Business' , icon:<Briefcase width={15} height={15}/> }
-  ])
-  const [currAccType, setcurrAccType] = useState<Option>({ value:'Private Account' , label:'Private', icon:<Lock/> }); // will get this from the accounts array state...
 
   // function handling form submittion...
   const handleDataSubmission = async (data: z.infer<typeof newAccCreation>) => {
     const loadingToast = toast.loading('creating new account...');
     try {
-      const finalData = { ...data , userid:userid , accType: { value: currAccType.value, label: currAccType.label } } ;
+      const finalData = { ...data , userid:userid } ;
       const apires = await axiosInstance.patch(`/api/profile/username?currentHandle=${params.username}`,{ finalData }) ;
       if (apires.status === 200) {
         toast.dismiss(loadingToast);
@@ -111,20 +104,6 @@ export default function createNewAccount() {
               />
             </div>
             {errors.Username && <p className="text-red-500 text-xs p-1 flex items-center"><Image src='/images/warning.png' width={20} height={20} alt="warning"/><span className="ml-2">{errors.Username.message}</span></p>}
-          </div>
-          <div className="mb-3">
-            <label className="block text-sm text-black mb-1 dark:text-white">Account Type</label>
-            <div className="grid grid-cols-2 grid-rows-2 sm:flex sm:items-center justify-evenly p-1 rounded-md">
-              {accOptions.map((option,index) => (
-                  <div 
-                  onClick={() => { setcurrAccType(option) }}
-                  key={index} className={`border border-gray-300 text-sm cursor-pointer py-1 px-4 rounded-full flex items-center gap-1 ${(currAccType.label === option.label) && 'border-yellow-500 bg-yellow-50 text-yellow-500'} shadow-sm hover:shadow-md`}>
-                    <span>{option.icon}</span>
-                    <span>{option.label}</span>
-                  </div>
-                )
-              )}
-            </div>
           </div>
           <button
             disabled={isSubmitting}

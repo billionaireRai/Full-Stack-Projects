@@ -140,8 +140,7 @@ export const newAccountCreationService = async (newAcc:newAccType) => {
         username:newAcc.Username,
         'avatar.url':'/images/default-profile-pic.png', 
         'banner.url':'/images/default-banner.jpg',
-        'account.Active':false ,
-        'account.Type':newAcc.accType.label,
+        'account.Active':false
     }) ;
 
     await NewAccount.save() ; // saving the createed doc...
