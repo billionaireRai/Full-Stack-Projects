@@ -20,10 +20,10 @@ export default function DraftConfirmPop({ onConfirm }: DraftConfirmPopProps) {
               </div>
             </div>
 
-            <div className="px-5 py-4 flex gap-3">
+            <div className="px-5 py-4 flex items-center justify-center gap-3">
               <div
                 onClick={ async () => { onConfirm?.() }}
-                className="cursor-pointer flex-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="cursor-pointer text-center flex-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 Save draft
               </div>

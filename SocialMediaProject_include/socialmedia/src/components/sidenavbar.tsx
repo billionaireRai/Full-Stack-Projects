@@ -17,12 +17,14 @@ import { useTheme } from 'next-themes'
 import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon, SparklesIcon, List, BadgeQuestionMark, PlusCircle, OptionIcon, CalendarClock } from 'lucide-react'
 import useMessageCount from '@/app/states/unreadmessages';
 import { MdDrafts, MdGroups } from 'react-icons/md';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export default function SideNavbar() {
   const { setCreatePop } = useCreatePost()
   const { User } = useUserInfo();
   const { Account } = useActiveAccount();
-  const [DotClick, setDotClick] = useState<boolean>(false)
+  const [DotClick, setDotClick] = useState<boolean>(false);
   const { setisPopOpen } = useSwitchAccount() ; // initializing the switchaccount state...
   const [isOpen, setIsOpen] = useState<boolean>(true)
   const [loguOutModal, setloguOutModal] = useState<boolean>(false);
@@ -74,74 +76,87 @@ export default function SideNavbar() {
     setMounted(true)
   }, [])
 
+  const handleOneTimeScriptTrigger = async () => {
+    const res = await axios.get('/api/one-time-script');
+    if (res.data.success) {
+      toast.success("Post collection created and updated !!");
+    }
+  }
+
   return (
     <>
       {/* Sidebar */}
       {shouldShowSidebar && (
         <aside
-          className={`fixed top-0 left-0 h-screen z-40 font-poppins border-none outline-none transition-transform duration-300 ease-in-out
+          className={`fixed top-0 left-0 h-screen z-40 font-poppins transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          w-72 bg-white dark:bg-black rounded-md`}
+          w-72 bg-white/80 dark:bg-black/80 backdrop-blur-md
+          border-r border-gray-200/70 dark:border-gray-800/70
+          rounded-none`}
         >
           <div className="flex flex-col h-full p-3">
-            <div className='flex flex-row items-center justify-between'>
-            {/* Logo */}
-            <Tooltip>
-              <Link
-                href="/"
-                className="flex w-fit rounded-full items-center justify-start mb-4"
-              >
-                <TooltipTrigger>
-                  <img
-                    className="rounded-full cursor-pointer dark:invert"
-                    width={90}
-                    height={45}
-                    src={`/images/letter-B.png`}
-                    alt="logo"
-                  />
-                </TooltipTrigger>
-              </Link>
-              <TooltipContent>Briezl.com</TooltipContent>
-            </Tooltip>
-          {mounted && (
-          <div className="themetoggler border-none flex items-center justify-end">
-            <div
-              onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="relative group"
-            >
-             <div className="flex items-center justify-center w-10 h-10">
-               <Tooltip>
-                 <TooltipTrigger asChild>
-                   <button
-                     className="cursor-pointer rounded-full bg-white dark:bg-black p-2 transform hover:scale-110 ring-2 ring-transparent"
-                   >
-                     <div
-                       className={`transition-transform duration-500 ${
-                         isDark ? "rotate-180" : "rotate-0"
-                       }`}
-                     >
-                       {isDark ? (
-                         <Sun size={20} className="text-white" />
-                       ) : (
-                         <Moon size={20} className="text-black" />
-                       )}
-                     </div>
-                   </button>
-                 </TooltipTrigger>
+            <div className="flex flex-row items-center justify-between">
+              {/* Logo */}
+              <Tooltip>
+                <Link href="/" className="flex w-fit items-center justify-start mb-4">
+                  <TooltipTrigger asChild>
+                    <div className="p-1 rounded-full hover:bg-yellow-50 dark:hover:bg-white/5 transition-colors">
+                      <img
+                        className="rounded-full cursor-pointer dark:invert"
+                        width={90}
+                        height={45}
+                        src={`/images/letter-B.png`}
+                        alt="logo"
+                      />
+                    </div>
+                  </TooltipTrigger>
+                </Link>
+                <TooltipContent>Briezl.com</TooltipContent>
+              </Tooltip>
 
-                 <TooltipContent>
-                   <p>Switch to {isDark ? "Light" : "Dark"} Mode</p>
-                 </TooltipContent>
-               </Tooltip>
-             </div>
-              <div className="absolute inset-0 rounded-full bg-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300 border border-gray-300 dark:border-gray-600"></div>
+              {mounted && (
+                <div className="themetoggler border-none flex items-center justify-end">
+                  <div
+                    onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                    className="relative group"
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="flex items-center justify-center w-10 h-10">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            className="cursor-pointer rounded-full bg-white dark:bg-black p-2 transform hover:scale-110 transition-transform ring-1 ring-gray-200 dark:ring-gray-800"
+                            aria-label="Toggle theme"
+                          >
+                            <div
+                              className={`transition-transform duration-500 ${
+                                isDark ? 'rotate-180' : 'rotate-0'
+                              }`}
+                            >
+                              {isDark ? (
+                                <Sun size={20} className="text-gray-900" />
+                              ) : (
+                                <Moon size={20} className="text-gray-900" />
+                              )}
+                            </div>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Switch to {isDark ? 'Light' : 'Dark'} Mode</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <div className="absolute inset-0 rounded-full bg-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300 border border-gray-300 dark:border-gray-600" />
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
-        </div>
+
             {/* Nav Links */}
-            <nav className="flex-1 ">
+            <nav className="flex-1">
               <ul className="flex flex-col gap-1">
+
                 <Link
                   className={`${
                     pathname === `/${Account.decodedHandle}/feed`
@@ -345,24 +360,27 @@ export default function SideNavbar() {
                   </span>
                 </Link>
                 <MoreVerticalIcon
-                  onClick={() => {
-                    setDotClick(!DotClick)
-                  }}
+                  onClick={() => { setDotClick(!DotClick) }}
                   className={`ml-auto cursor-pointer rounded-full p-1 w-7 h-7 text-gray-600 dark:text-gray-300 ${
                     DotClick ? 'bg-gray-200 dark:bg-gray-950' : ''
                   }`}
                 />
               </div>
               
-
               {/* Dropdown */}
               {DotClick && (
                 <motion.div                         
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}  
-                  className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-fit mt-2 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
-                  <div className="p-1.5 font-medium">
+                  className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-fit mt-2 p-1 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
+                  <div className="p-1 font-medium">
+                    <button
+                     onClick={() => { handleOneTimeScriptTrigger() }}
+                     className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">
+                      <UserIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
+                      <span className="font-medium">One time script</span>
+                    </button>
                     <Link  
                      href={`/${Account.decodedHandle}/create-account?userId=${User.userId}`}
                      className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">

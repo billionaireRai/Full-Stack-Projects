@@ -77,9 +77,9 @@ export default function SchedulePop({ onSchedule, onClose }: SchedulePopProps) {
             Scheduled For
           </p>
           {canSchedule ? (
-            <div className="mt-3 flex items-center justify-center gap-4">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">To be scheduled on {date}</h3>
-              <p className="mt-1 text-zinc-700 dark:text-zinc-300">at {time}</p>
+            <div className="mt-3 flex items-center gap-4">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">{date}</h3>
+              <p className="mt-1 text-zinc-700 dark:text-zinc-300">{time}</p>
             </div>
           ) : (
             <p className="mt-3 text-xs text-zinc-600 dark:text-zinc-400">

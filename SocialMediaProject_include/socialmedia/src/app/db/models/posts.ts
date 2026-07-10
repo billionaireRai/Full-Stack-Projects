@@ -125,12 +125,7 @@ const postSchema = new mongoose.Schema(
       enum: ["draft","scheduled","published"],
       default: "published"
     },
-    
     scheduledAt: {
-      type:Date,
-      default:null
-    },
-    publishedAt: {
       type:Date,
       default:null
     },

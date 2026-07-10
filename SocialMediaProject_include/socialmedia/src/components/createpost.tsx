@@ -384,7 +384,7 @@ export default function CreatePost() {
 
               {/* Media Preview Section */}
               <AnimatePresence>
-                {(imageArr.length > 0 || videoArr.length > 0 || gifArr.length > 0 || MentionedTo.length > 0 || AddLocation.length > 0) && (
+                {(imageArr.length > 0 || videoArr.length > 0 || gifArr.length > 0 || MentionedTo.length > 0 || AddLocation.length > 0 || hashtags.length > 0) && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
@@ -461,6 +461,29 @@ export default function CreatePost() {
                       </div>
                     )}
 
+                    {/* hashtags */}
+                    {hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {hashtags.map((hash, index) => (
+                          <motion.div
+                            key={`mention-${index}`}
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="flex items-center justify-center gap-1 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 px-3 py-2.5 rounded-full text-sm font-medium shadow-sm"
+                          >
+                            <Link href={`/explore?q=${encodeURIComponent('#'.concat(hash))}&utm_source=create-post-pop`} >
+                              #{hash}
+                            </Link>
+                            <button
+                              onClick={() => removeArrayElement([sethashtags], index)}
+                              className="ml-1 hover:text-yellow-900 dark:hover:text-yellow-300 cursor-pointer"
+                            >
+                              <X size={14} />
+                            </button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
                     {/* Mentions */}
                     {MentionedTo.length > 0 && (
                       <div className="flex flex-wrap gap-2">
