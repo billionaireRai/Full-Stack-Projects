@@ -1,64 +1,71 @@
 import { mediaType } from '@/components/mediapopmodal';
-import { GoogleGenAI } from "@google/genai";
+import OpenAI from 'openai';
+
 interface categoryAndKeywordType {
   category: string;
   keywords: string[];
 }
 
-// making instance of gemini..
-const geminiAiClient = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+// OpenAI client instance...
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
+
+
+const OPENAI_MODEL_FOR_CLASSIFICATION = 'gpt-4o-mini';
 
 // function for generating category and keywords of post...
 export async function generateCategoryAndKeywords(postContent: string,mediaArr: mediaType[]): Promise<categoryAndKeywordType> {
   try {
-  const geminires = await geminiAiClient.models.generateContent({
-    model: "gemini-2.5-flash-lite",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: `You are an AI content classification assistant.
-            Task:
-            - Analyze the given social media post caption.
-            - Identify the single most relevant post category.
-            - Generate exactly 20 unique one-word keywords.
-            - Keywords should be lowercase.
-            - Do not use hashtags (#).
-            - Do not generate phrases or sentences.
-            - Do not repeat keywords.
-            - media information may not be present.
-            - keyword should be SEO-friendly and searchable not random.
-            - Return ONLY valid JSON in the following format:
-            {
-              "category": "string",
-              "keywords": ["string", "string", "..."]
-            }
+    const mediaSummary = Array.isArray(mediaArr) && mediaArr.length > 0 ? JSON.stringify(mediaArr) : '[]';
 
-            Caption: ${postContent}`,
-          },
-        ],
-      },
-    ],
-  });
+    const prompt = `You are an AI content classification assistant.
+     Task:
+     - Analyze the given social media post caption.
+     - Identify the single most relevant post category.
+     - Generate exactly 20 unique one-word keywords.
+     - Keywords should be lowercase.
+     - Do not use hashtags (#).
+     - Do not generate phrases or sentences.
+     - Do not repeat keywords.
+     - Media information may be present. Use media_type/url hints only when helpful.
+     - keyword should be SEO-friendly and searchable not random.
+     - Return ONLY valid JSON in the following format:
+     {
+      "category": "string",
+      "keywords": ["string", "string", "..." ]
+     }
 
-  const text = (geminires as any)?.response?.text?.() ?? (geminires as any)?.text;
+     Caption: ${postContent}
 
-  return JSON.parse(text) as categoryAndKeywordType;
+     Media: ${mediaSummary}`;
+
+    const completion = await openai.chat.completions.create({
+      model: OPENAI_MODEL_FOR_CLASSIFICATION,
+      temperature: 0.2,
+      messages: [
+        { role: 'system', content: 'Return only valid JSON. No markdown.' },
+        { role: 'user', content: prompt },
+      ],
+      response_format: { type: 'json_object' },
+    });
+
+    const text = completion.choices?.[0]?.message?.content ?? '';
+
+    return JSON.parse(text) as categoryAndKeywordType;
+    
   } catch (err) {
-    console.error("Gemini Error:", err);
+    console.error('OpenAI Error:', err);
     throw err;
   }
 }
 
-// Task - Recommended Gemini Model (Cost Optimized)
 
-// Caption generation - Gemini 2.5 Flash
-// Category generation - Gemini 2.5 Flash-Lite
-// Keyword generation - Gemini 2.5 Flash-Lite
-// Hashtag generation - Gemini 2.5 Flash-Lite
-// Content moderation - Gemini 2.5 Flash-Lite
-// AI rewrite / improve caption - Gemini 2.5 Flash
+  // OpenAI model mapping
+  // Caption generation - OpenAI: best text model (gpt-4o-mini used elsewhere)
+  // Category generation - OpenAI: fast/cheap (gpt-4o-mini)
+  // Keyword generation - OpenAI: fast/cheap (gpt-4o-mini)
+  // Hashtag generation - OpenAI: fast/cheap (gpt-4o-mini)
+  // Content moderation - OpenAI: fast/cheap (gpt-4o-mini)
+  // AI rewrite / improve caption - OpenAI: best text model (gpt-4o-mini or upgrade if needed)

@@ -76,13 +76,6 @@ export default function SideNavbar() {
     setMounted(true)
   }, [])
 
-  const handleOneTimeScriptTrigger = async () => {
-    const res = await axios.get('/api/one-time-script');
-    if (res.data.success) {
-      toast.success("Post collection created and updated !!");
-    }
-  }
-
   return (
     <>
       {/* Sidebar */}
@@ -375,12 +368,6 @@ export default function SideNavbar() {
                   exit={{ opacity: 0, scale: 0.8 }}  
                   className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-fit mt-2 p-1 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
                   <div className="p-1 font-medium">
-                    <button
-                     onClick={() => { handleOneTimeScriptTrigger() }}
-                     className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">
-                      <UserIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
-                      <span className="font-medium">One time script</span>
-                    </button>
                     <Link  
                      href={`/${Account.decodedHandle}/create-account?userId=${User.userId}`}
                      className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">

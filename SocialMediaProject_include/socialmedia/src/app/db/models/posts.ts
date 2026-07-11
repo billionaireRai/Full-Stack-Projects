@@ -81,12 +81,12 @@ const postSchema = new mongoose.Schema(
     },
     category:{
       type:String,
-      required:true,
+      default:null,
       trim:true
     },
     keywords:{
       type:[String],
-      required:true
+      default:[]
     },
     // Discovery
     hashtags: {
