@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState , useEffect } from 'react';
+import React, { useState , useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { SettingsIcon , SearchIcon, X , Users, TrendingUp, BadgeQuestionMark, MessageCircleHeartIcon } from 'lucide-react';
@@ -77,16 +77,20 @@ interface PostType {
 export default function explore() {
   const searchparam = useSearchParams() ; // initializing search param hook...
   const pagesize:number = 20 ;
-  const autoHeightGap:number = 200 ;
+  const autoHeightGap:number = 400 ;
+  const hashtopic = searchparam.get('t') ;
   const { Account } = useActiveAccount() ;
   const [Page, setPage] = useState<number>(1) ;
-  const [hasExplore, sethasExplore] = useState<boolean>(false);
+  const [hasExplore, sethasExplore] = useState<boolean>(true);
   const pageCategory : "feed" | "profile" | "direct" | "explore" = "explore" ;
+
   const [openSettings, setopenSettings] = useState(false);
   const [LocationSetting, setLocationSetting] = useState(false);
   const [hpninPopUp, sethpninPopUp] = useState(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
+
+  const leftSectionRef = useRef<HTMLDivElement | null>(null);
 
   const [suggestionAcc,setsuggestionAcc] =useState<userCardProp[]>([
         {
@@ -174,9 +178,9 @@ export default function explore() {
       const [newsData, setnewsData] = useState<newsCardType[]>([
         {
           source: "CNN",
-          category: `${(Account.account?.location.text)}-News`,
+          category: `${(Account.account?.location.text) ?? 'World'}-News`,
           gradient: 'from-blue-500 via-purple-500 to-indigo-600',
-          title: `Major Breaking News from ${Account.account?.location.text}...`,
+          title: `Major Breaking News from ${Account.account?.location.text ?? 'world'}...`,
           timeAgo: "about 12hr",
           location: "Politics",
           href: `/news?n=${encodeURIComponent(`Major-Breaking-News-from-politics&cat=politics&utm_source=news-click`)}`
@@ -487,7 +491,7 @@ export default function explore() {
           handle: '@chrisbumstead',
           avatar: '/images/default-profile-pic.png',
           bio: 'Gym bro',
-          content: 'Morning workout done 💪 What\'s your go-to exercise? #Fitness #GymLife @davidlaid',
+          content: 'Morning workout done 💪 What\'s your go-to exercise?',
           postedAt: '1d ago',
           likes: 1123,
           reposts: 289,
@@ -553,10 +557,7 @@ export default function explore() {
         }
       }
 
-      useEffect(() => {
-        // getOtherExploreInfo() ;
-      }, [])
-
+      
       // function to get posts...
       async function functionFetchPosts(hashtag?:string) {
         const postapi = await axiosInstance.get(`/api/explore?hashtag=${hashtag}&size=${pagesize}&page=${Page}`);
@@ -565,19 +566,46 @@ export default function explore() {
           sethasExplore(postapi.data.hasNext) ;
         }
       }
-      // useeffect for search params...
-      // useEffect(() => {
-        // if ((window.innerHeight - window.scrollY) <= autoHeightGap) {
+      
+      useEffect(() => {
+        // getOtherExploreInfo() ;
+        if (hashtopic) {
+          const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
+            functionFetchPosts(decodedT); // getting explore posts 
+            setPage(Page + 1);
+          } else {
+            functionFetchPosts() ;
+            setPage(Page + 1);
+        }
+      }, [])
 
-          // if (searchparam.get('t')) {
-          //   const decodedT = decodeURIComponent(String(searchparam.get('t'))); // pattern #something
-          //   functionFetchPosts(decodedT); // getting explore posts 
-          // } else {
-          //  functionFetchPosts() ;
-          // }
-          
-        // }
-      // }, [searchparam.get('t'),window.scrollY]) 
+    // fetching posts by pagination...
+    useEffect(() => {
+      const exploreSection = leftSectionRef.current ;
+      if (!exploreSection) return ;
+      
+      const handleScroll = () => {
+        const distanceFromBottom = exploreSection.scrollHeight - exploreSection.scrollTop - exploreSection.clientHeight ;
+  
+        if (distanceFromBottom <= autoHeightGap && hasExplore) {
+           if (hashtopic) {
+            const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
+            functionFetchPosts(decodedT); // getting explore posts 
+            setPage(Page + 1);
+          } else {
+            functionFetchPosts() ;
+            setPage(Page + 1);
+          }
+        }
+       }
+       // calling scroll function...
+       handleScroll() ;
+      
+       exploreSection.addEventListener('scroll', handleScroll, { passive: true })
+       return () => {
+        exploreSection.removeEventListener('scroll', handleScroll)
+      }
+   }, [autoHeightGap,hasExplore,explorePosts.length])
       
   // function for showing more suggestions...
   const handleSuggesstionShow = () => {
@@ -593,31 +621,18 @@ export default function explore() {
       }
     }
   }
+  
 
   return (
-    <div className='h-fit flex flex-row-reverse font-poppins rounded-lg dark:bg-black'>
-      <div className='mainbox hidden dark:bg-black w-fit h-fit rounded-lg xl:flex flex-col lg:flex-row-reverse gap-8 p-6 max-w-7xl mx-auto font-poppins'>
-        <div className='right w-fit lg:w-80 xl:w-96 space-y-2'>
+    <div className='h-fit flex flex-row-reverse font-poppins overflow-y-hidden rounded-lg dark:bg-black'>
+      <div className='mainbox hidden dark:bg-black w-fit max-h-screen rounded-lg xl:flex flex-col lg:flex-row-reverse gap-4 p-4 max-w-7xl mx-auto font-poppins'>
+        <div
+          className={`right w-fit overflow-y-auto no-scrollbar lg:w-80 xl:w-96 space-y-2 overscroll-contain sticky top-0`}
+        >
            {/* Today's News */}
            {/* On hover of each redirect => '/explore?n=endcodeurlcomponent(newstitle)&utm_source=news-click*/}
            <div className='bg-white p-2 dark:bg-black rounded-xl shadow-lg'>
-               <div className='p-4 rounded-lg border-b border-gray-200 dark:border-slate-700 flex justify-between'>
-                   <h2 className='text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3'><span>Today's News</span><Activebeep /></h2>
-                  <Image className='dark:invert' src='/images/newspaper-folded.png' height={25} width={25} alt='newspaper' />
-               </div>
                <div className='flex flex-col items-center gap-1.5'>
-                     {newsData.map((newsItem, index) => (
-                       <Newscard key={index} {...newsItem} />
-                     ))}
-                        </div>
-                        <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
-                           <Link  href={`/explore?q=${encodeURIComponent('todays-news')}&utm_source=show-more`} className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
-                                Show more
-                            </Link>
-                         </div>
-                    </div>
-
-                    {/* Who to Follow */}
                     {/* account suggestions according to my preference... */}
                     {suggestionAcc && (
                     <div className='relative bg-white dark:bg-black rounded-xl shadow-lg'>
@@ -636,18 +651,34 @@ export default function explore() {
                         <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
                            <button 
                             onClick={() => { handleSuggesstionShow() }}
-                            className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
+                            className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
                              { 'Show more' }
                            </button>
                          </div>
                       </div>
                     )}
+                    <div className='p-4 rounded-lg border-b w-full border-gray-200 dark:border-slate-700 flex items-center justify-between'>
+                      <h2 className='text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3'><span>Today's News</span><Activebeep /></h2>
+                      <Image className='dark:invert' src='/images/newspaper-folded.png' height={25} width={25} alt='newspaper' />
+                    </div>
+                    {newsData.map((newsItem, index) => (
+                       <Newscard key={index} {...newsItem} />
+                     ))}
+                      </div>
+                        <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
+                           <Link  href={`/explore?q=${encodeURIComponent('todays-news')}&utm_source=show-more`} className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
+                                Show more
+                            </Link>
+                         </div>
+                    </div>
                 </div>
-
         </div>
 
-        {/* Main Feed Area - Left Side */}
-        <div className='left flex flex-col gap-2 h-fit flex-1 bg-white dark:bg-black rounded-xl font-poppins'>
+        {/* Main explore post Area - Left Side */}
+        <div
+          className={`left flex flex-col gap-2 h-fit flex-1 bg-white dark:bg-black rounded-xl font-poppins max-h-screen no-scrollbar overscroll-contain overflow-y-auto`}
+          ref={leftSectionRef}
+        >
             {/* Search Box */}
             <div className='p-4 flex flex-row rounded-lg items-center justify-between'>
               <div className='flex flex-row items-center gap-2 flex-1'>

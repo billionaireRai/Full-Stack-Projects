@@ -161,7 +161,6 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   }, [heightGap,hasMoreMessages, messages.length])
 
 
-  
 
   const onEmojiClick = (emojiData: EmojiClickData) => {
     setmessageText((prev) => prev + emojiData.emoji)

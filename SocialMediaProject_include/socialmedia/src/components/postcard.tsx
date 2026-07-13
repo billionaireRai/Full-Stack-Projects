@@ -203,35 +203,35 @@ export default function PostCard({
   const generalImage = '/images/broken-laptop.jpg';
 
   // Function to parse content and make hashtags and mentions clickable...
- function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactElement[] {
-    let combinedArray: ReactElement[] = [] ;
-    // looping through hashtag array...
-    hashTags.forEach((eachHash) => {
-      combinedArray.push(
-        <Link
-          key={`hash-${eachHash}`}
-          href={`/explore?q=${encodeURIComponent('#'.concat(eachHash))}&utm_source=post-click`}
-          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
-        >
-          #{eachHash}
-        </Link>
-      )
-    });
-    // looping through mentions array...
-    mentions.forEach((eachMention) => {
-      combinedArray.push(
-        <Link
-          key={`mention-${eachMention}`}
-          href={`/@${eachMention}`}
-          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
-        >
-          @{eachMention}
-        </Link>
-      )
-    });
+function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactElement[] {
+  let combinedArray: ReactElement[] = [] ;
+  // looping through hashtag array...
+  hashTags.forEach((eachHash) => {
+    combinedArray.push(
+      <Link
+        key={`hash-${eachHash}`}
+        href={`/explore?q=${encodeURIComponent('#'.concat(eachHash))}&utm_source=post-click`}
+        className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+      >
+        #{eachHash}
+      </Link>
+    )
+  });
+  // looping through mentions array...
+  mentions.forEach((eachMention) => {
+    combinedArray.push(
+      <Link
+        key={`mention-${eachMention}`}
+        href={`/@${eachMention}`}
+        className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+      >
+        @{eachMention}
+      </Link>
+    )
+  });
 
-    return combinedArray;
-  }
+  return combinedArray;
+}
 
   // function handling repost logic...
   async function handleRepostToggle() {
@@ -516,11 +516,11 @@ export default function PostCard({
             )}
             <Link 
             href={`/${handle}`}
-            className={`text-gray-500 dark:text-gray-400 text-xs sm:text-base truncate`}>
+            className={`text-gray-500 dark:text-gray-400 text-xs truncate`}>
               {handle}
             </Link>
             <span className="text-gray-400">·</span>
-            <span className={`text-gray-500 dark:text-gray-400 ${!showActions ? 'text-xs' : 'text-sm'} truncate`}>
+            <span className={`text-gray-500 dark:text-gray-400 text-xs truncate`}>
               {timestamp}
             </span>
 
@@ -871,7 +871,7 @@ export default function PostCard({
 
       {ShowDeletePop && <DeletePostPop postId={postId} postOwner={handle} requestBy={String(Account.decodedHandle)} closePopUp={() => { setShowDeletePop(false) }} />}
 
-      { CommentCardPop && ( <Commentpopcard updateState={() => { handleCommentStateUpdate() }} poll={poll} postId={postId} avatar={avatar} name={username} handle={handle}  timestamp={timestamp} content={content} media={displayMedia} handleClose={() => { setCommentCardPop(false) }}/> )}
+      { CommentCardPop && ( <Commentpopcard Hashtags={hashTags} Mentions={mentions} Verified={isVerified} updateState={() => { handleCommentStateUpdate() }} poll={poll} postId={postId} avatar={avatar} name={username} handle={handle}  timestamp={timestamp} content={content} media={displayMedia} handleClose={() => { setCommentCardPop(false) }}/> )}
 
       { viewPop && (<ViewClickPop closePopUp={() => { setviewPop(false) }}/> )}
 

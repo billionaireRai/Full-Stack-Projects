@@ -249,3 +249,4 @@ export const exploreDetailsForAccountService = async () => {
 
     return NextResponse.json({ message: 'Explore details fetched', suggestions: suggesstionsArr, trendingHashtags: top5Tags }, { status: 200 });
 }
+

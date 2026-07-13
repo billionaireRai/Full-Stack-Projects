@@ -147,6 +147,7 @@ export default function CreatePost() {
   const handlePostSubmission = async () => {
     if (!post.trim()) return;
 
+    const scheduledAt = new Date(`${scheduleTime?.Date}T${scheduleTime?.Time}`);
     setIsPosting(true);
     try {
       const formData = new FormData(); // initializing formData instance...
@@ -155,6 +156,8 @@ export default function CreatePost() {
       formData.append('taggedLocation', JSON.stringify(AddLocation));
       formData.append('canBeRepliedBy', whoCanReply);
       formData.append('poll', JSON.stringify(poll));
+      formData.append('status',status);
+      formData.append('scheduleTime',scheduledAt.toISOString());
 
       imageFiles.forEach(file => formData.append('imgUrls', file));
       videoFiles.forEach(file => formData.append('videoUrls', file));
@@ -346,9 +349,7 @@ export default function CreatePost() {
                     className="absolute -right-30 -top-5 sm:left-0 sm:top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden schedule-post"
                   >
                     <Schedulepop
-                      onSchedule={(Date, Time) => {
-                        setscheduleTime({ Date, Time });
-                      }}
+                      onSchedule={(Date, Time) => { setscheduleTime({ Date, Time }) }}
                       onClose={() => setshowSchedule(false)}
                     />
                   </motion.div>
@@ -357,10 +358,7 @@ export default function CreatePost() {
             </div>
           </div>
           <button
-            onClick={() => {
-              setCreatePop(false);
-              resetForm();
-            }}
+            onClick={() => { setCreatePop(false) ; resetForm() }}
             className="cursor-pointer p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-950 transition-all duration-200 group"
           >
             <X className="w-5 h-5 text-gray-500 group-hover:text-gray-700 dark:text-zinc-400 dark:group-hover:text-zinc-200" />

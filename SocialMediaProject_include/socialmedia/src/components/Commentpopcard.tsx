@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState , useEffect, useRef } from 'react';
+import { ReactElement } from 'react';
 import Image from 'next/image';
 import EmojiPicker ,{ EmojiClickData, Theme } from 'emoji-picker-react';
 import useActiveAccount from '@/app/states/useraccounts';
@@ -29,11 +30,14 @@ interface CommentCardInfo {
   content?:string ,
   poll?:pollInfoType
   media?: mediaType[],
+  Verified?:boolean,
+  Hashtags?:string[],
+  Mentions?:string[],
   updateState?:() => void,
   handleClose:() => void
 }
 
-export default function Commentpopcard({updateState,postId,poll ,avatar , name, handle, timestamp , content ,media , handleClose }:CommentCardInfo) {
+export default function Commentpopcard({updateState,postId,poll ,avatar , name, handle, timestamp , content ,media , Verified , Hashtags , Mentions , handleClose }:CommentCardInfo) {
   const { Account } = useActiveAccount() ;
   const [replyText, setReplyText] = useState<string>(''); // state containing text to be commented..
   const [EmojiPop, setEmojiPop] = useState<boolean>(false) ; // emoji pop state...
@@ -47,6 +51,36 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const maxChars : number = Account.account?.isVerified ? 500 : 100 ; // conditional length...
 
+  // Function to parse content and make hashtags and mentions clickable...
+  function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactElement[] {
+    let combinedArray: ReactElement[] = [] ;
+    // looping through hashtag array...
+    hashTags.forEach((eachHash) => {
+      combinedArray.push(
+        <Link
+          key={`hash-${eachHash}`}
+          href={`/explore?q=${encodeURIComponent('#'.concat(eachHash))}&utm_source=post-click`}
+          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+        >
+          #{eachHash}
+        </Link>
+      )
+    });
+    // looping through mentions array...
+    mentions.forEach((eachMention) => {
+      combinedArray.push(
+        <Link
+          key={`mention-${eachMention}`}
+          href={`/@${eachMention}`}
+          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+        >
+          @{eachMention}
+        </Link>
+      )
+    });
+  
+    return combinedArray;
+  }
   const handlePostReply = async () => {
     try { 
       if (replyText.trim()) {
@@ -170,11 +204,17 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="font-bold text-gray-900 dark:text-white text-[15px] truncate">{name}</span>
-                  <span className="text-gray-500 dark:text-zinc-400 text-[15px] truncate">{handle}</span>
+                   {Verified && (
+                      <span><Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/></span>
+                   )}
+                  <span className="text-gray-500 dark:text-zinc-400 text-xs truncate">{handle}</span>
                   <span className="text-gray-400">·</span>
-                  <span className="text-gray-500 dark:text-zinc-400 text-[15px] truncate">{timestamp}</span>
+                  <span className="text-gray-500 dark:text-zinc-400 text-xs truncate">{timestamp}</span>
                 </div>
-                <p className="text-gray-700 dark:text-zinc-200 text-sm leading-relaxed mb-3 whitespace-pre-wrap">{content}</p>
+                <p className="text-gray-700 dark:text-zinc-200 text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+                  <span>{content}</span>
+                  <span>{parseHashAndMentions(Hashtags ?? [],Mentions ?? [])}</span>
+                </p>
                 
                 {/* Media Display */}
                 {(media && media.length > 0) && (

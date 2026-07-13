@@ -39,6 +39,15 @@ export default function PaymentPage() {
     
     return plan?.prices.yearly ;
   }
+
+  // function to calculate cost and gst...
+  const calculateCostMetric = () => { 
+    const price = Number(respectivePrice() ?? 0);
+    const gst = Math.round(price * 0.05);
+    const total = price + gst;
+
+    return { price , gst , total } ;
+  }
   
   // Fetching client secret from API...
   const getSubscriptionSessionURL = async () => {
@@ -94,11 +103,11 @@ export default function PaymentPage() {
            className="text-gray-600 dark:text-gray-400 p-1 rounded-full hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-950 cursor-pointer transition">
             <MdArrowBack size={26} />
           </button>
-          <h1 className="text-3xl cursor-default font-semibold tracking-tight">
+          <h1 className="text-2xl cursor-default font-semibold tracking-tight">
             Complete Your Payment
           </h1>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center cursor-default gap-1">
+        <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center cursor-default gap-1">
           <MdSecurity className="text-green-600 dark:text-green-400" /> Secure Payment Gateway
         </p>
       </div>
@@ -114,13 +123,13 @@ export default function PaymentPage() {
         <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 flex flex-col justify-between shadow-sm">
           <div>
             <h2 className="text-xl font-semibold mb-2">Selected Plan</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-3 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 mb-3 text-xs">
               Review your plan before proceeding to payment.
             </p>
             <div className="border-t border-gray-200 my-2" />
             <h3 className="text-lg mt-3 font-semibold">{plan.name}</h3> {/* plan! this is called non-null checking  */}
-            <p className="text-gray-600 dark:text-gray-200 text-sm mb-3 font-semibold">Auto Recurring Payment</p>
-            <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-200 text-xs mb-3 font-semibold">Auto Recurring Payment</p>
+            <ul className="space-y-2 text-xs text-gray-700 dark:text-gray-400">
               {plan!.features.map((f, i) => (
                 <li key={i} className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -137,11 +146,71 @@ export default function PaymentPage() {
           </div>
         </div>
 
-        {/* Right - Order Summary */}
+        {/* Middle section */}
         <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 flex flex-col justify-between shadow-sm">
           <div>
+            <h2 className="text-xl font-semibold mb-2">After you subscribe</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-4 text-xs">
+              Confirming payment activates your subscription based on the plan and billing cycle you selected.
+            </p>
+
+            <div className="border-t border-gray-200 my-2" />
+
+            <ul className="space-y-3 text-sm text-gray-700 dark:text-gray-400">
+              <li className="flex items-start gap-2">
+                <span className="text-xs">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">Auto-renewal:</span> your subscription will renew on the
+                  <span className="font-semibold"> {Term}</span> cycle until you cancel.
+                </span>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className="text-xs">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">Plan activation timing:</span> access updates after Stripe payment succeeds.
+                  (If you refresh this page before that completes, your latest status will be handled on the next successful flow.)
+                </span>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className="text-xs">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">Cancellation & changes:</span> you can cancel or change your plan.
+                  Your benefits typically remain active for the current billing period.
+                </span>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className="text-xs">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">Receipt & billing emails:</span> you’ll receive an email receipt for successful payments.
+                  You can use that for your records.
+                </span>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className="text-xs">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">What you’ll get:</span> your app features will unlock based on
+                  <span className="font-semibold"> {plan.name}</span> (including the plan’s recurring benefits).
+                </span>
+              </li>
+
+              <li className="flex items-start gap-2">
+                <span className="text-xs">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">If payment fails:</span> no subscription is activated and you can retry.
+                  Don’t refresh repeatedly—wait for the Stripe redirect to complete.
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="mt-5 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-neutral-900 p-3">
+            <p className="text-xs text-gray-600 dark:text-gray-300">
+              Security note: your payment is processed by Stripe. We only redirect you to complete checkout.
+            </p>
+          </div>
+        </div>
+        <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 shadow-sm">
+          <div>
             <h2 className="text-xl font-semibold mb-2">Order Summary</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+            <p className="text-gray-500 dark:text-gray-400 text-xs mb-4">
               Verify all details before confirming.
             </p>
             <div className="border-t border-gray-200 my-2" />
@@ -156,27 +225,25 @@ export default function PaymentPage() {
               </div>
               <div className="flex justify-between">
                 <span>Subtotal:</span>
-                <span>{respectivePrice()}</span>
+                <span>${calculateCostMetric().price}</span>
               </div>
               <div className="flex justify-between">
                 <span>GST (18%):</span>
-                <span>${(parseInt((String(respectivePrice())).split(' ')[0].substring(1)) * 0.18).toFixed(0)}</span>
+                <span>${calculateCostMetric().gst}</span>
               </div>
-              <div className="border-t border-yellow-200 my-2" />
-              <div className="flex justify-between font-semibold dark:text-white border border-yellow-500 p-2 rounded-lg">
+              <div className="border-t border-green-600 my-2" />
+              <div className="flex justify-between font-semibold dark:text-white border border-green-600 p-2 rounded-lg">
                 <span>Total:</span>
-                <span className="text-yellow-600 dark:text-yellow-400">
-                  {/* ${(parseInt((String(respectivePrice())).split(' ')[0].substring(1)) * 0.18).toFixed(0) + respectivePrice()} */}
+                <span className="text-green-600">
+                  ${calculateCostMetric().total}
                 </span>
               </div>
             </div>
           </div>
-        </div>
-        <div className="col-span-1 bg-white dark:bg-black rounded-xl border p-5 shadow-sm">
             <button
               type="submit"
               onClick={getSubscriptionSessionURL}
-              className="mt-4 w-full active:scale-103 cursor-pointer bg-black text-white py-3 rounded-lg font-medium text-lg shadow hover:bg-zinc-950 transition"
+              className="mt-4 w-full active:scale-103 cursor-pointer hover:opacity-80 bg-black text-white py-3 rounded-lg font-medium text-lg shadow hover:bg-zinc-950 transition"
             >
               Pay Now
             </button>

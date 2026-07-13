@@ -56,3 +56,4 @@ export const handleDownload = async (mediaUrl: string, filename: string) => {
 export const getStripePriceId = (plan:StripePlanKey, term: StripeTermKey) => {
   return PRICE_IDS[plan][term];
 };
+

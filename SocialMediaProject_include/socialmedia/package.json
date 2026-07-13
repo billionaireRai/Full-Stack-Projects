@@ -26,6 +26,7 @@
     "jose": "^6.1.3",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.542.0",
+    "luxon": "^3.7.2",
     "mongoose": "^8.18.0",
     "next": "15.5.2",
     "next-cloudinary": "^6.17.0",

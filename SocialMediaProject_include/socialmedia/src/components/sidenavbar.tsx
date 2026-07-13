@@ -148,7 +148,7 @@ export default function SideNavbar() {
 
             {/* Nav Links */}
             <nav className="flex-1">
-              <ul className="flex flex-col gap-1">
+              <ul className="flex flex-col">
 
                 <Link
                   className={`${
@@ -185,6 +185,14 @@ export default function SideNavbar() {
                   href={`/${Account.decodedHandle}/messages`}
                 >
                   <NavItem icon={<MessageCircleIcon className={`${pathname === `/${Account.decodedHandle}/messages` && 'fill-black dark:fill-white'}`} />} label="Messages" />
+                </Link>
+                <Link
+                  className={`${
+                    pathname === `/${Account.decodedHandle}/bookmarked` && 'text-white rounded-md bg-yellow-100 dark:dark:bg-white/5'
+                  }`}
+                  href={`/${Account.decodedHandle}/bookmarked`}
+               >
+                  <NavItem icon={<BookmarkIcon className={`${pathname === `/${Account.decodedHandle}/bookmarked` && 'fill-black    dark:fill-white'}`} />} label="Bookmarked" />
                 </Link>
                 <Link
                   className={`${
@@ -263,15 +271,6 @@ export default function SideNavbar() {
                          label="Account Settings"
                        />
                      </Link>
-                    {/* Bookmarks */}
-                      <Link
-                        className={`${
-                          pathname === `/${Account.decodedHandle}/bookmarked` && 'text-white rounded-md bg-yellow-100 dark:dark:bg-white/5'
-                        }`}
-                        href={`/${Account.decodedHandle}/bookmarked`}
-                     >
-                        <NavItem icon={<BookmarkIcon className={`${pathname === `/${Account.decodedHandle}/bookmarked` && 'fill-black    dark:fill-white'}`} />} label="Bookmarked" />
-                      </Link>
                      {/* Lists */}
                      <Link href={`/${Account.decodedHandle}/stacks`}>
                        <NavItem

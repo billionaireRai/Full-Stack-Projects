@@ -20,8 +20,9 @@ import Block from "../models/blocked";
 import subscriptions from "../models/subscriptions";
 import { userCardProp } from "./user";
 import { PostCardProps } from "@/components/postcard";
+import { generateCategoryAndKeywords } from "@/lib/aifeatures";
 
-type Plan = "Free" | "Pro" | "Creator" | "Enterprise";
+type Plan = "Free" | "Pro" | "Creator" | "Premium";
 
 interface uploadedObj {
      success: boolean;
@@ -57,7 +58,7 @@ interface commentDataType {
 export const createANewPostService = async ( data:any ) => { 
     await connectWithMongoDB() ; // establishing connection with mongoDB...
 
-    const { postText , imgUrls , videoUrls , mentions , gifsArr , taggedLocation , canBeRepliedBy , poll } = data ; // getting out the data...
+    const { postText , imgUrls , videoUrls , mentions , gifsArr , taggedLocation , canBeRepliedBy , poll , status , scheduleTime } = data ; // getting out the data...
 
     // getting credentials from cookies...
     const user = await getDecodedDataFromCookie("accessToken");
@@ -100,6 +101,9 @@ export const createANewPostService = async ( data:any ) => {
 
     const finalMediaArr = filteredUploadedMediaObjs.map(media => ({ url: media.url,public_id: media.public_id,media_type: media.resource_type }));
 
+    const structuredMedia = filteredUploadedMediaObjs.map((m) => ({ url:m.url , media_type:m.resource_type }));
+    const { category , keywords } = await generateCategoryAndKeywords(postText,structuredMedia);
+
     const newPost = new Post({
         authorId: activeAcc._id,
         content: postText,
@@ -107,6 +111,10 @@ export const createANewPostService = async ( data:any ) => {
         replyAllowedBy: canBeRepliedBy,
         mentions: mentions.map((mention:String) => mention.substring(1)),
         taggedLocation: taggedLocation,
+        status,
+        category,
+        keywords,
+        scheduleAt: ( status === 'scheduled' && scheduleTime ) ? new Date(scheduleTime) : null
     });
     
     if (poll && poll.question) {
@@ -993,7 +1001,7 @@ export const getBookmarkAndSuggestionService = async () => {
     const allSuggestions = [new Set([...filteredSuggestedFromMarked, ...filteredMutualFriendAccounts])];
 
 // sorting the array based on subscription level...
-    const planOrder: Record<Plan, number> = { "Free": 0, "Pro": 1, "Creator": 2, "Enterprise": 3 };
+    const planOrder: Record<Plan, number> = { "Free": 0, "Pro": 1, "Creator": 2, "Premium": 3 };
 
     const accountsWithSubs = Array.from(allSuggestions).map((acc: any) => {
         const account = accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
@@ -1310,38 +1318,42 @@ export const getAccountsBookmarkedAPostService = async ({ postid , page , pagesi
 }
 
 export const getExplorePostsService = async ({ hashtag , page , size } : { hashtag: string , page: number , size: number }) => {
+    await connectWithMongoDB() ; // connecting to database...
+    
     // extracting cookies data...
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
     // getting my active account...
+
     const activeAcc = await accounts.findOne({ userId: user.id, 'account.Active': true, 'account.status': 'ACTIVE' });
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
-    await connectWithMongoDB() ; // connecting to database...
 
-    const hashQuerySection = hashtag ? { hashtags: { $in: [hashtag] }} : { } ; // include hash in query only if exists...
+    const cleanedHashtag =
+        typeof hashtag === 'string' && hashtag.trim() !== '' && hashtag !== 'undefined'
+            ? hashtag.trim()
+            : null ;
+
+    const hashQuerySection = cleanedHashtag ? { hashtags: { $in: [cleanedHashtag] }} : {}; // include hash in query only if exists...
 
     // getting doc total count...
     const total = await Post.countDocuments({ $and:[ hashQuerySection ,{ isDeleted: false }] });
-        const skip = (page - 1) * size ;
-        const hasNext = (skip + size) < total ;
+    const skip = (page - 1) * size ;
+    const hasNext = (skip + size) < total ;
 
     // query including the paticular hasgtag...
-    const desiredPosts = await Post.find({ $and:[ hashQuerySection ,{ isDeleted: false }] })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(size)
+    const desiredPosts = await Post.find({ $and:[ hashQuerySection ,{ isDeleted: false }] }).sort({ createdAt: -1 }).skip(skip).limit(size)
 
-    const formattedPosts = [];
+    const formattedPosts = [] ; // array of total posts...
     for (const post of desiredPosts) {
         const postOwner = await accounts.findById(post.authorId);
-        if (!postOwner) continue;
+        if (!postOwner) continue ;
 
         const likesCount = await likes.countDocuments({ targetEntity: post._id.toString(), targetType: 'post' });
         const repostsCount = await Post.countDocuments({ repostId: post._id.toString(), postType: 'repost', isDeleted: false });
         const commentsCount = await Post.countDocuments({ replyToPostId: post._id.toString(), postType: 'comment', isDeleted: false });
         const viewStats = await viewStat.findOne({ postId: post._id.toString() });
-        const viewsCount = viewStats?.totalViews || 0;
+        const viewsCount = viewStats?.totalViews || 0 ;
 
         const userLiked = await likes.findOne({ accountId: activeAcc._id, targetEntity: post._id.toString(), targetType: 'post' });
         const userReposted = await Post.findOne({ authorId: activeAcc._id, repostId: post._id.toString(), postType: 'repost', isDeleted: false });
@@ -1396,18 +1408,36 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
         });
     }
 
-    // arranging posts with decreasing order of subscription plan...
-    const planArrange : Record<Plan,number> = { "Free": 0 , "Pro": 1 , "Creator": 2 , "Enterprise": 3 } ;
+    // arranging posts according to business conditions...
+    const planArrange : Record<Plan,number> = { "Free": 0 , "Pro": 1 , "Creator": 2 , "Premium": 3 } ;
+    const sortedExplorePosts = formattedPosts.sort((postA, postB) => {
+        const planA: Plan = postA.plan;
+        const planB: Plan = postB.plan;
 
-    const aarangedViaPlan = formattedPosts.sort((postA,postB) => {
-        const planA: Plan = postA.plan ;
-        const planB: Plan = postB.plan ;
+        const postAtA = new Date(postA.timestamp);
+        const postAtB = new Date(postB.timestamp);
+
         const planAValue = planArrange[planA];
         const planBValue = planArrange[planB];
-        if (planAValue !== planBValue) return planBValue - planAValue ; // higher subscription first...
-        if (postA.isVerified !== postB.isVerified) return postA.isVerified ? -1 : 1 ; // verified first...
-        return 0 ;
-    })
 
-    return NextResponse.json({ success: true, explore:aarangedViaPlan , hasNext }, { status: 200 });
+        // Higher subscription first
+        if (planAValue !== planBValue) return planBValue - planAValue;
+
+        const likesDiff = (postB.likes ?? 0) - (postA.likes ?? 0);
+        if (likesDiff !== 0) return likesDiff;
+
+        const viewsDiff = (postB.views ?? 0) - (postA.views ?? 0);
+        if (viewsDiff !== 0) return viewsDiff;
+
+        const followersDiff = (parseInt(postB.followers) ?? 0) - (parseInt(postA.followers) ?? 0);
+        if (followersDiff !== 0) return followersDiff;
+
+        const timeDiff = postAtB.getTime() - postAtA.getTime();
+        if (timeDiff !== 0) return timeDiff;
+
+        return 0;
+    });
+
+
+    return NextResponse.json({ success: true, explore:sortedExplorePosts , hasNext }, { status: 200 });
 }
