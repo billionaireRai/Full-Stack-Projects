@@ -124,12 +124,12 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
                  <div className="flex items-center gap-1">
                    <Link href={`/${decodedHandle}`} className="font-semibold">{name || 'Kr$na'}</Link>
                    {account.isVerified && (
-                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-user'/>
+                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-account'/>
                    )}
                  </div>
                    <Link href={`/${decodedHandle}`} className="text-gray-600 w-fit text-xs">{decodedHandle}</Link>
                  <p className="text-xs w-full text-gray-500 mt-1">
-                   {content ? makeMentionsAsLink(content) : ''}
+                   {content && makeMentionsAsLink(content) }
                  </p>
                </div>
 

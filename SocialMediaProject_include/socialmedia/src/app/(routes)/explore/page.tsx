@@ -14,6 +14,15 @@ import { userCardProp } from '@/components/usercard';
 import { useSearchParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
 import useActiveAccount from '@/app/states/useraccounts';
+interface newsCardType {
+  source: string;
+  category: string;
+  gradient: string;
+  title: string;
+  timeAgo: string;
+  location: string;
+  href: string;
+}
 
 interface mediaType {
   url: string;
@@ -31,17 +40,8 @@ interface pollInfoType {
   duration: number;
 }
 
-interface newsCardType {
-  source: string;
-  category: string;
-  gradient: string;
-  title: string;
-  timeAgo: string;
-  location: string;
-  href: string;
-}
 
-interface PostType {
+export interface PostType {
   postid: string;
   content: string;
   postedAt: string;
@@ -223,331 +223,8 @@ export default function explore() {
         }
       ]);
 
-      const [explorePosts, setexplorePosts] = useState<PostType[]>([
-        {
-          postid: 'post1',
-          username: 'Alice Developer',
-          handle: '@alice_dev',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Full-stack developer',
-          content: 'Just deployed my new React + Next.js app! 🚀 Loving the app router and server components. What frameworks are you using in 2024? #NextJS #React #WebDev',
-          hashTags: ['NextJS', 'React', 'WebDev'],
-          postedAt: '2h ago',
-          likes: 247,
-          reposts: 56,
-          comments: 34,
-          views: 1250,
-          mediaUrls: [],
-          mentions: [],
-          userBookmarked: false,
-          userliked: false,
-          usereposted: false,
-          usercommented: false,
-          userbookmarked: false,
-          cover: '/images/default-banner.jpg',
-          isVerified: true,
-          plan: 'Pro',
-          followers: '1.2k',
-          following: '234',
-          isFollowing: false,
-          isHighlighted: false,
-          isPinned: false,
-          taggedLocation: [],
-          poll: undefined
-        },
-        {
-          postid: 'post2',
-          username: 'Bob Designer',
-          handle: '@bob_designer',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Creative designer',
-          content: 'Minimalism isn\'t just a trend, it\'s a mindset. Clean interfaces = better UX. Here\'s my latest Figma design. Thoughts?',
-          postedAt: '4h ago',
-          likes: 189,
-          reposts: 23,
-          comments: 12,
-          views: 890,
-          mediaUrls: [{ url: 'https://picsum.photos/600/400?random=1', media_type: 'image' }],
-          mentions: [],
-          userBookmarked: false,
-          userliked: false,
-          usereposted: false,
-          usercommented: false,
-          userbookmarked: false,
-          cover: '/images/default-banner.jpg',
-          isVerified: true,
-          plan: 'Pro',
-          followers: '3.4k',
-          following: '567',
-          isFollowing: true,
-          isHighlighted: false,
-          isPinned: false,
-          taggedLocation: [],
-          poll: undefined
-        },
-        {
-          postid: 'post3',
-          username: 'Charlie Writer',
-          handle: '@charlie_writer',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Tech writer',
-          content: 'AI is changing writing forever. But human creativity still wins. What do you think about AI-generated content? Let\'s discuss.',
-          postedAt: '6h ago',
-          likes: 456,
-          reposts: 112,
-          comments: 89,
-          views: 3400,
-          mediaUrls: [{ url: 'https://picsum.photos/video/600/400?random=2', media_type: 'video' }],
-          mentions: [],
-          userBookmarked: false,
-          userliked: false,
-          usereposted: false,
-          usercommented: false,
-          userbookmarked: false,
-          cover: '/images/default-banner.jpg',
-          isVerified: false,
-          plan: 'Free',
-          followers: '5.6k',
-          following: '123',
-          isFollowing: false,
-          isHighlighted: false,
-          isPinned: false,
-          taggedLocation: [],
-          poll: undefined
-        },
-        {
-          postid: 'post4',
-          username: 'Tech Insider',
-          handle: '@tech_insider',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Tech updates',
-          content: 'Quick poll: What\'s your favorite backend?',
-          poll: {
-            question: 'Favorite backend framework?',
-            options: [
-              { text: 'Node.js', votes: 45 },
-              { text: 'Python/Django', votes: 32 },
-              { text: 'Go', votes: 28 },
-              { text: 'Rust', votes: 15 },
-              { text: 'Java/Spring', votes: 12 }
-            ],
-            duration: 86400
-          },
-          postedAt: '1h ago',
-          likes: 156,
-          reposts: 34,
-          comments: 67,
-          views: 2100,
-          mediaUrls: [],
-          mentions: [],
-          userBookmarked: false,
-          userliked: false,
-          usereposted: false,
-          usercommented: false,
-          userbookmarked: false,
-          cover: '/images/default-banner.jpg',
-          isVerified: true,
-          plan: 'Pro',
-          followers: '10k',
-          following: '500',
-          isFollowing: false,
-          isHighlighted: true,
-          isPinned: false,
-          taggedLocation: [],
-          hashTags: []
-        },
-        {
-          postid: 'post5',
-          username: 'Saket Gokhale',
-          handle: '@saketgokhale',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'SaaS builder',
-          content: 'Thread: 5 lessons I learned building my first SaaS. 1/5 👇 #SaaS #Startup',
-          postedAt: '8h ago',
-          likes: 678,
-          reposts: 201,
-          comments: 145,
-          views: 8900,
-          mediaUrls: [],
-          hashTags: ['SaaS', 'Startup'],
-          mentions: [],
-          userBookmarked: true,
-          userliked: true,
-          usereposted: false,
-          usercommented: false,
-          userbookmarked: true,
-          cover: '/images/default-banner.jpg',
-          isVerified: true,
-          plan: 'Pro',
-          followers: '20k',
-          following: '1k',
-          isFollowing: true,
-          isHighlighted: false,
-          isPinned: true,
-          taggedLocation: [],
-          poll: undefined
-        },
-        {
-          postid: 'post6',
-          username: 'David Laid',
-          handle: '@davidlaid',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Fitness enthusiast',
-          content: '@bob_designer loved your minimal design! This is gold 🔥',
-          mentions: ['bob_designer'],
-          postedAt: '3h ago',
-          likes: 234,
-          reposts: 45,
-          comments: 23,
-          views: 1450,
-          mediaUrls: [{ url: 'https://picsum.photos/500/300?random=3', media_type: 'image' }],
-          userBookmarked: false,
-          userliked: false,
-          usereposted: false,
-          usercommented: false,
-          userbookmarked: false,
-          cover: '/images/default-banner.jpg',
-          isVerified: true,
-          plan: 'Pro',
-          followers: '2.5k',
-          following: '300',
-          isFollowing: false,
-          isHighlighted: false,
-          isPinned: false,
-          taggedLocation: [],
-          hashTags: [],
-          poll: undefined
-        },
-        {
-          postid: 'post7',
-          username: 'CodeQueen',
-          handle: '@codequeen_dev',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Weekend coder',
-          content: 'Weekend project showcase! 4 screens from my portfolio site.',
-          postedAt: '12h ago',
-          likes: 389,
-          reposts: 78,
-          comments: 56,
-          views: 2780,
-          mediaUrls: [
-            { url: 'https://picsum.photos/300/300?random=4', media_type: 'image' },
-            { url: 'https://picsum.photos/300/300?random=5', media_type: 'image' },
-            { url: 'https://picsum.photos/300/300?random=6', media_type: 'image' },
-            { url: 'https://picsum.photos/300/300?random=7', media_type: 'image' }
-          ],
-          mentions: [],
-          userBookmarked: false,
-          userliked: false,
-          usereposted: false,
-          usercommented: false,
-          userbookmarked: false,
-          cover: '/images/default-banner.jpg',
-          isVerified: false,
-          plan: 'Free',
-          followers: '800',
-          following: '150',
-          isFollowing: true,
-          isHighlighted: false,
-          isPinned: false,
-          taggedLocation: [],
-          hashTags: [],
-          poll: undefined
-        },
-        {
-          postid: 'post8',
-          username: 'Dev Evangelist',
-          handle: '@dev_evangelist',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Live coder',
-          content: 'Live coding from SF! Building a real-time chat app. Join me!',
-          taggedLocation: [{ text: 'San Francisco, CA', coordinates: [-122.4194, 37.7749] }],
-          postedAt: '30m ago',
-          likes: 567,
-          reposts: 134,
-          comments: 98,
-          views: 4500,
-          mediaUrls: [{ url: 'https://picsum.photos/video/640/480?random=8', media_type: 'video' }],
-          mentions: [],
-          userBookmarked: false,
-          userliked: true,
-          usereposted:true,
-          usercommented: true,
-          userbookmarked: false,
-          cover: '/images/default-banner.jpg',
-          isVerified: true,
-          plan: 'Pro',
-          followers: '15k',
-          following: '2k',
-          isFollowing: false,
-          isHighlighted: false,
-          isPinned: false,
-          hashTags: [],
-          poll: undefined
-        },
-        {
-          postid: 'post9',
-          username: 'Chris Bumstead',
-          handle: '@chrisbumstead',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Gym bro',
-          content: 'Morning workout done 💪 What\'s your go-to exercise?',
-          postedAt: '1d ago',
-          likes: 1123,
-          reposts: 289,
-          comments:167,
-          views: 15600,
-          hashTags: ['Fitness', 'GymLife'],
-          mentions: ['davidlaid'],
-          mediaUrls: [],
-          userBookmarked: true,
-          userliked: false,
-          usereposted: true,
-          usercommented: false,
-          userbookmarked: true,
-          cover: '/images/default-banner.jpg',
-          isVerified: true,
-          plan: 'Pro',
-          followers: '500k',
-          following: '1k',
-          isFollowing: true,
-          isHighlighted: true,
-          isPinned: true,
-          taggedLocation: [],
-          poll: undefined
-        },
-        {
-          postid: 'post10',
-          username: 'Alex Lee',
-          handle: '@alexlee',
-          avatar: '/images/default-profile-pic.png',
-          bio: 'Open source dev',
-          content:'Just hit 10K stars on my open source project! Thank you community 🙏 Check it out: github.com/alexlee/awesome-nextjs',
-          postedAt: '2d ago',
-          likes: 2345,
-          reposts:678,
-          comments: 345,
-          views: 89000,
-          mediaUrls: [],
-          mentions: [],
-          userBookmarked: false,
-          userliked: true,
-          usereposted: false,
-          usercommented: false,
-          userbookmarked: false,
-          cover: '/images/default-banner.jpg',
-          isVerified: true,
-          plan: 'Pro',
-          followers: '50k',
-          following: '5k',
-          isFollowing:true,
-          isHighlighted: false,
-          isPinned: false,
-          taggedLocation: [],
-          hashTags: [],
-          poll: undefined
-        }
-      ])
+      const [explorePosts, setexplorePosts] = useState<PostType[]>([])
+      
       // function fetching trendings , follow-suggestions , news...
       async function getOtherExploreInfo() {
         const otherapi = await axiosInstance.post('/api/explore');
@@ -562,7 +239,7 @@ export default function explore() {
       async function functionFetchPosts(hashtag?:string) {
         const postapi = await axiosInstance.get(`/api/explore?hashtag=${hashtag}&size=${pagesize}&page=${Page}`);
         if (postapi.status === 200) {
-          setexplorePosts(postapi.data.explore) ;
+          setexplorePosts((prev) => [...prev,postapi.data.explore]) ;
           sethasExplore(postapi.data.hasNext) ;
         }
       }
@@ -722,8 +399,34 @@ export default function explore() {
                   <PostCard 
                     key={index} 
                     postId={post.postid}
-                    {...post} 
                     fromPage={pageCategory}
+                    avatar={post.avatar}
+                    cover={post.cover}
+                    username={post.username}
+                    handle={post.handle}
+                    bio={post.bio}
+                    content={post.content}
+                    media={post.mediaUrls}
+                    hashTags={post.hashTags}
+                    mentions={post.mentions}
+                    timestamp={post.postedAt}
+                    likes={post.likes}
+                    reposts={post.reposts}
+                    replies={post.comments}
+                    views={post.views}
+                    taggedLocation={post.taggedLocation}
+                    poll={post.poll}
+                    userliked={post.userliked}
+                    usereposted={post.usereposted}
+                    usercommented={post.usercommented}
+                    userbookmarked={post.userbookmarked}
+                    isPinned={post.isPinned}
+                    isVerified={post.isVerified}
+                    plan={post.plan}
+                    followers={post.followers}
+                    following={post.following}
+                    isFollowing={post.isFollowing}
+                    isHighlighted={post.isHighlighted}    
                   />
                 ))}
                 </div>

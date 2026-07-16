@@ -1363,46 +1363,50 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
         const isPinned = await tagged.findOne({ accountId: activeAcc._id, taggedAs: 'pinned', entityId: post._id });
         const isHighlighted = await tagged.findOne({ accountId: activeAcc._id, taggedAs: 'highlighted', entityId: post._id });
 
+        const followers = await follows.countDocuments({ followingId: postOwner._id, isDeleted: false });
+        const following = await follows.countDocuments({ followerId: postOwner._id, isDeleted: false });
         const isFollowing = await follows.findOne({ followerId: activeAcc._id, followingId: postOwner._id, isDeleted: false });
 
-        let poll = undefined;
+
+        // Get poll data if exists
         const pollData = await Poll.findOne({ authorPost: post._id, isActive: true, expiry: { $gt: new Date() } });
+        let poll: polltype | undefined;
         if (pollData) {
             poll = {
                 question: pollData.question,
-                options: pollData.options.map((opt: any) => ({ text: opt.text, votes: opt.votes })),
+                options: pollData.options.map((opt: pollOptionType) => ({ text: opt.text, votes: opt.votes })),
                 duration: pollData.duration
             };
         }
 
         formattedPosts.push({
-            id: post._id.toString(),
             postId: post._id.toString(),
             avatar: postOwner.avatar?.url ,
+            cover:postOwner.banner?.url,
             username: postOwner.name,
             handle: `@${postOwner.username}`,
             bio: postOwner.bio ,
             timestamp: new Date(post.createdAt).toUTCString(),
             content: post.content,
-            media: Array(post.mediaUrls)?.map((urlObj) => ({ url: urlObj.url, media_type: urlObj.media_type })),
+            mediaUrls: post.mediaUrls?.map((urlObj:any) => ({ url: urlObj?.url, media_type: urlObj?.media_type })),
             likes: likesCount,
             reposts: repostsCount,
-            replies: commentsCount,
+            comments: commentsCount,
             views: viewsCount,
-            isPinned: !!isPinned,
-            isHighlighted: !!isHighlighted,
-            userliked: !!userLiked,
-            usereposted: !!userReposted,
-            usercommented: !!userCommented,
-            userbookmarked: !!userBookmarked,
+            isPinned: isPinned ? true : false,
+            isHighlighted: isHighlighted ? true : false,
+            userliked: userLiked ? true : false,
+            usereposted: userReposted ? true : false,
+            usercommented: userCommented ? true : false,
+            userbookmarked: userBookmarked ? true : false ,
             isCompleted: postOwner.account?.completed ,
             isVerified: postOwner.isVerified?.value ,
             plan: postOwner.isVerified?.level ,
-            followers: fmt(await follows.countDocuments({ followingId: postOwner._id, isDeleted: false })),
-            following: fmt(await follows.countDocuments({ followerId: postOwner._id, isDeleted: false })),
+            followers: fmt(followers),
+            following: fmt(following),
             hashTags: post.hashTags ,
-            mentions: Array(post.mentions).map((u: any) => typeof u === 'string' ? u.trim() : u.toString().trim()),
-            isFollowing: !!isFollowing,
+            mentions: post.mentions,
+            isFollowing: isFollowing ? true : false ,
             taggedLocation: post.taggedLocation || [],
             poll
         });

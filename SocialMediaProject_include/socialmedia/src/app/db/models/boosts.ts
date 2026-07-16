@@ -14,6 +14,16 @@ const boostsSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    cost:{
+      type:Number,
+      required:true,
+      enum:[2,4,8]
+    },
+    currency: {
+      type: String,
+      default: "USD",
+      uppercase: true
+    },
     targetViews: {
       type: Number,
       required: true,

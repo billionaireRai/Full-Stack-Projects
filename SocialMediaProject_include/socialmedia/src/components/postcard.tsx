@@ -473,7 +473,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
   return (
     <div 
       ref={postref}
-      className={`bg-white dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-3 cursor-none' : 'my-1 sm:p-4'}`}>
+      className={`bg-white dark:bg-black shadow-sm z-50 hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-3 cursor-none' : 'my-1 sm:p-4'}`}>
         <div className='flex flex-row items-center justify-end gap-1 mb-2 transition-all duration-300'>
          {isReposted && (
            <div className='text-black dark:text-white text-xs font-semibold py-0.5 px-2 shadow-md dark:shadow-gray-800 rounded-lg flex gap-1 items-center justify-center'><RefreshCw size={20} /><span>you reposted</span></div>

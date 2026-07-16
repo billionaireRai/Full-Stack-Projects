@@ -648,7 +648,7 @@ export default function UserProfilePage() {
         }
       }
     };
-    // fetchAccountData();
+    fetchAccountData();
   }, [Account.account, username])
   
   useEffect(() => {
@@ -677,7 +677,7 @@ export default function UserProfilePage() {
     }
 
     // running only when username exists...
-    // if (username) functionToGetData();
+    if (username) functionToGetData();
   }, [username])
   
   // toggleing follow logic...
