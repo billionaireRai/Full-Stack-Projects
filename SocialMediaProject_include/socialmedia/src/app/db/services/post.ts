@@ -8,7 +8,7 @@ import accounts from "../models/accounts";
 import Post from "../models/posts";
 import Poll from "../models/polls";
 import tagged from "../models/tagged";
-import { fmt } from "@/lib/utils";
+import { fmt , shuffleArray } from "@/lib/utils";
 import Views from "../models/views";
 import viewStat from "../models/viewstat";
 import likes from "../models/likes";
@@ -1337,12 +1337,12 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
     const hashQuerySection = cleanedHashtag ? { hashtags: { $in: [cleanedHashtag] }} : {}; // include hash in query only if exists...
 
     // getting doc total count...
-    const total = await Post.countDocuments({ $and:[ hashQuerySection ,{ isDeleted: false }] });
+    const total = await Post.countDocuments({ $and:[ hashQuerySection ,{ isDeleted: false , postType:'original' , status:'published' }] });
     const skip = (page - 1) * size ;
     const hasNext = (skip + size) < total ;
 
     // query including the paticular hasgtag...
-    const desiredPosts = await Post.find({ $and:[ hashQuerySection ,{ isDeleted: false }] }).sort({ createdAt: -1 }).skip(skip).limit(size)
+    const desiredPosts = await Post.find({ $and:[ hashQuerySection ,{ isDeleted: false , postType:'original' , status:'published' }] }).sort({ createdAt: -1 }).skip(skip).limit(size)
 
     const formattedPosts = [] ; // array of total posts...
     for (const post of desiredPosts) {
@@ -1352,8 +1352,8 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
         const likesCount = await likes.countDocuments({ targetEntity: post._id.toString(), targetType: 'post' });
         const repostsCount = await Post.countDocuments({ repostId: post._id.toString(), postType: 'repost', isDeleted: false });
         const commentsCount = await Post.countDocuments({ replyToPostId: post._id.toString(), postType: 'comment', isDeleted: false });
-        const viewStats = await viewStat.findOne({ postId: post._id.toString() });
-        const viewsCount = viewStats?.totalViews || 0 ;
+        const views = await Views.countDocuments({ postId: post._id.toString() });
+        await viewStat.findOneAndUpdate({ postId:post._id.toString() },{ totalViews:views },{ new:true });
 
         const userLiked = await likes.findOne({ accountId: activeAcc._id, targetEntity: post._id.toString(), targetType: 'post' });
         const userReposted = await Post.findOne({ authorId: activeAcc._id, repostId: post._id.toString(), postType: 'repost', isDeleted: false });
@@ -1392,7 +1392,7 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
             likes: likesCount,
             reposts: repostsCount,
             comments: commentsCount,
-            views: viewsCount,
+            views: views,
             isPinned: isPinned ? true : false,
             isHighlighted: isHighlighted ? true : false,
             userliked: userLiked ? true : false,
@@ -1413,35 +1413,36 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
     }
 
     // arranging posts according to business conditions...
-    const planArrange : Record<Plan,number> = { "Free": 0 , "Pro": 1 , "Creator": 2 , "Premium": 3 } ;
-    const sortedExplorePosts = formattedPosts.sort((postA, postB) => {
-        const planA: Plan = postA.plan;
-        const planB: Plan = postB.plan;
+    // const planArrange : Record<Plan,number> = { "Free": 0 , "Pro": 1 , "Creator": 2 , "Premium": 3 } ;
+    // const sortedExplorePosts = formattedPosts.sort((postA, postB) => {
+    //     const planA: Plan = postA.plan;
+    //     const planB: Plan = postB.plan;
 
-        const postAtA = new Date(postA.timestamp);
-        const postAtB = new Date(postB.timestamp);
+    //     const postAtA = new Date(postA.timestamp);
+    //     const postAtB = new Date(postB.timestamp);
 
-        const planAValue = planArrange[planA];
-        const planBValue = planArrange[planB];
+    //     const planAValue = planArrange[planA];
+    //     const planBValue = planArrange[planB];
 
-        // Higher subscription first
-        if (planAValue !== planBValue) return planBValue - planAValue;
+    //     // Higher subscription first
+    //     if (planAValue !== planBValue) return planBValue - planAValue;
 
-        const likesDiff = (postB.likes ?? 0) - (postA.likes ?? 0);
-        if (likesDiff !== 0) return likesDiff;
+    //     const likesDiff = (postB.likes ?? 0) - (postA.likes ?? 0);
+    //     if (likesDiff !== 0) return likesDiff;
 
-        const viewsDiff = (postB.views ?? 0) - (postA.views ?? 0);
-        if (viewsDiff !== 0) return viewsDiff;
+    //     const viewsDiff = (postB.views ?? 0) - (postA.views ?? 0);
+    //     if (viewsDiff !== 0) return viewsDiff;
 
-        const followersDiff = (parseInt(postB.followers) ?? 0) - (parseInt(postA.followers) ?? 0);
-        if (followersDiff !== 0) return followersDiff;
+    //     const followersDiff = (parseInt(postB.followers) ?? 0) - (parseInt(postA.followers) ?? 0);
+    //     if (followersDiff !== 0) return followersDiff;
 
-        const timeDiff = postAtB.getTime() - postAtA.getTime();
-        if (timeDiff !== 0) return timeDiff;
+    //     const timeDiff = postAtB.getTime() - postAtA.getTime();
+    //     if (timeDiff !== 0) return timeDiff;
 
-        return 0;
-    });
+    //     return 0;
+    // });
 
+    const shuffledExplorePosts = shuffleArray(formattedPosts);
 
-    return NextResponse.json({ success: true, explore:sortedExplorePosts , hasNext }, { status: 200 });
+    return NextResponse.json({ success: true, explore:shuffledExplorePosts , hasNext }, { status: 200 });
 }

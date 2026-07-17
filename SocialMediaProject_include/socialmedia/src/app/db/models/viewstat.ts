@@ -7,8 +7,7 @@ const postViewStatsSchema = new mongoose.Schema({
     unique: true,
   },
   totalViews: { type: Number, default: 0 },
-  lastUpdatedAt: { type: Date, default: Date.now },
-});
+},{ timestamps:true });
 
 const viewStat = mongoose.models.viewStat || mongoose.model("viewStat", postViewStatsSchema);
 

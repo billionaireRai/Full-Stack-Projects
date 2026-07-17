@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState , useEffect } from 'react';
+import React, { useState , useEffect , useRef } from 'react';
 import PostCard from '@/components/postcard';
 import Activebeep from '@/components/activebeep';
 import AccountSearch from '@/components/accountsearch';
@@ -12,6 +12,7 @@ import { PostType } from '../../explore/page';
 import UserCard, { userCardProp } from '@/components/usercard';
 import { CalendarClockIcon, ImagesIcon, Infinity, InfinityIcon, SearchIcon, SparklesIcon, UserPlus2Icon } from 'lucide-react';
 import CompLoader from '@/components/componentloader';
+import axiosInstance from '@/lib/interceptor';
 
 interface featureDemoType {
   icon:React.JSX.Element ;
@@ -19,8 +20,13 @@ interface featureDemoType {
 }
 
 export default function feed() {
+  const { Account } = useActiveAccount() ;
 const pageCategory : "feed" | "profile" | "direct" | "explore" = "feed" ;
-const { Account } = useActiveAccount() ;
+const size:number = 20 ;
+const autoHeightGap:number = 400 ;
+const feedSection = useRef<HTMLDivElement | null>(null);
+const [Page, setPage] = useState<number>(1);
+const [hasFeed, sethasFeed] = useState<boolean>(false);
 const [ShowLess, setShowLess] = useState<boolean>(false);
 const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
 const [showSearchPop, setshowSearchPop] = useState<boolean>(false);
@@ -510,6 +516,42 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([
     }
   }
 
+  // function to fetch feed posts...
+   async function getFeedPosts() {
+     const feedApi = await axiosInstance.post(`/api/feed`,{ Page , size });
+     if (feedApi.status === 200) {
+       setfeedPosts((prev) => [...prev,feedApi.data.post]) ;
+       sethasFeed(feedApi.data.hasNext) ;
+     }
+   }
+        
+   useEffect(() => {
+    // getFeedPosts() ;
+    // setPage(Page + 1);
+   }, [])
+  
+  // fetching posts by pagination...
+  useEffect(() => {
+     const feedsection = feedSection.current ;
+     if (!feedsection) return ;
+     
+     const handleScroll = () => {
+       const distanceFromBottom = feedsection.scrollHeight - feedsection.scrollTop - feedsection.clientHeight ;
+
+       if (distanceFromBottom <= autoHeightGap && hasFeed) {
+         getFeedPosts();
+         setPage(Page + 1);
+       }
+      }
+      // calling scroll function...
+      handleScroll() ;
+     
+      feedsection.addEventListener('scroll', handleScroll, { passive: true })
+      return () => {
+       feedsection.removeEventListener('scroll', handleScroll)
+     }
+  }, [autoHeightGap,hasFeed,feedPosts.length])
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
        if (showSearchPop && !(event.target as Element).closest('.search-pop')) {
@@ -587,29 +629,19 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([
                     </div>
                 </div>
                 {/* Main Feed Area - Left Side */}
-                <div className='left relative flex-1 h-full overflow-y-scroll bg-white dark:bg-black rounded-xl'>
+                <div ref={feedSection} className='left relative flex-1 h-full overflow-y-scroll bg-white dark:bg-black rounded-xl'>
                   <div className="flex items-center justify-between sticky top-0 rounded-lg p-2 bg-white/70 dark:bg-black/70 backdrop-blur-md">
-                    <div className='flex w-fit items-center justify-center gap-2 p-2 rounded-lg'>
+                    <div className='flex w-fit items-center font-bold justify-center gap-2 p-2 rounded-lg'>
                       <ImagesIcon size={40} />
-                      <h2>Feed posts</h2>
+                      <span>Feed posts</span>
                     </div>
                     {/* Search Container */}
-                    <div className="search-pop relative z-[2000] w-fit rounded-xl p-1">
-                        <button onClick={() => { setshowSearchPop(true) }} type="button" className='cursor-pointer w-fit text-yellow-500 bg-yellow-100 dark:bg-yellow-950 hover:shadow-md shadow-sm shadow-yellow-100 dark:shadow-yellow-900 rounded-full flex items-center justify-center gap-2 p-2'>
+                    <div className="search-pop relative w-fit rounded-xl p-1">
+                        <button onClick={() => { setshowSearchPop(true) }} type="button" className='cursor-pointer w-fit text-white
+                       dark:text-black bg-black dark:bg-white hover:shadow-md shadow-sm rounded-full flex items-center justify-center gap-2 p-2'>
                           <SearchIcon size={25} />
                           <span>Search Account</span>
                         </button>
-                        {showSearchPop && (
-                         <AnimatePresence>
-                          <motion.div
-                            initial={{ opacity: 0 , y: 10 }}
-                            animate={{ opacity: 1 , duration:2000  , y: 0}}
-                            exit={{ opacity: 0 , y: -10 }}
-                            className="absolute top-0 right-0 z-[2000]">
-                              <AccountSearch placeholder='Search any account...' handle={String(Account.decodedHandle)} onSelect={() => { setshowSearchPop(false) }} />
-                          </motion.div>
-                         </AnimatePresence>
-                        )}
                     </div>
                   </div>
                     <div className='px-1 flex flex-col gap-0'>
@@ -667,6 +699,17 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([
                   </AnimatePresence>
                 </div>
             </div>
+             {showSearchPop && (
+               <AnimatePresence>
+                <motion.div
+                  initial={{ opacity: 0 , y: 10 }}
+                  animate={{ opacity: 1 , duration:1000  , y: 0}}
+                  exit={{ opacity: 0 , y: -10 }}
+                  className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-start z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+                    <AccountSearch placeholder='Search any account...' handle={String(Account.decodedHandle)} onSelect={() => { setshowSearchPop(false) }} />
+                </motion.div>
+               </AnimatePresence>
+              )}
         </div>
 
     )

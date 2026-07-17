@@ -57,3 +57,28 @@ export const getStripePriceId = (plan:StripePlanKey, term: StripeTermKey) => {
   return PRICE_IDS[plan][term];
 };
 
+// Return common elements between two arrays (works for any data type)
+export function getCommonElements<T>(a1: T[], a2: T[]) {
+  const commonItems = a1.filter((item) => a2.includes(item));
+  return commonItems;
+}
+
+// function to shuffle array randonmly...
+export function shuffleArray<T>(array:T[]) {
+    if (!Array.isArray(array)) {
+        throw new TypeError("Input must be an array");
+    }
+
+    let currentIndex = array.length;
+    while (currentIndex !== 0) {
+        // Pick a random index
+        const randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // Swap elements
+        [array[currentIndex], array[randomIndex]] = 
+        [array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
+}

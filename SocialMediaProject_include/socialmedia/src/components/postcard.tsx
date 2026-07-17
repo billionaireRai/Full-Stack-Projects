@@ -74,6 +74,8 @@ export interface PostCardProps {
   showActions?:boolean;
   isHighlighted?:boolean
   isFollowing?:boolean;
+  isBoosted?:boolean;
+  score?:number;
   readOnly?:boolean;
   fromPage?:"feed" | "profile" | "direct" | "explore";
 }
@@ -473,22 +475,15 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
   return (
     <div 
       ref={postref}
-      className={`bg-white dark:bg-black shadow-sm z-50 hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-3 cursor-none' : 'my-1 sm:p-4'}`}>
-        <div className='flex flex-row items-center justify-end gap-1 mb-2 transition-all duration-300'>
+      className={`bg-white dark:bg-black shadow-sm hover:shadow-gray-400 dark:hover:shadow-gray-900 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 ${!showActions ? ' shadow-none m-0 p-3 cursor-none' : 'my-1 sm:p-4'}`}>
+        <div className='flex flex-row items-center justify-end z-50 gap-1 mb-2 transition-all duration-300'>
          {isReposted && (
            <div className='text-black dark:text-white text-xs font-semibold py-0.5 px-2 shadow-md dark:shadow-gray-800 rounded-lg flex gap-1 items-center justify-center'><RefreshCw size={20} /><span>you reposted</span></div>
           )}
           { IsPinned && (
-            <Tooltip>
-               <TooltipTrigger>
-                 <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-blue-900/20 rounded-full border     border-yellow-200 dark:border-yellow-800/50">
-                   <Pin className="w-5 h-5 rotate-45 fill-yellow-500 stroke-yellow-500" />
-                 </span>
-               </TooltipTrigger>
-               <TooltipContent>
-                 Pinned post
-              </TooltipContent>
-            </Tooltip>
+            <span className="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-blue-900/20 rounded-full border     border-yellow-200 dark:border-yellow-800/50">
+              <Pin className="w-5 h-5 rotate-45 fill-yellow-500 stroke-yellow-500" />
+            </span>
           )}
         </div>
       <div className="flex items-start gap-3">
