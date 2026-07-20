@@ -16,9 +16,9 @@ export const getExplorePostsOfAccountController = asyncErrorHandler( async (requ
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
     } 
 
-    return getExplorePostsService({ hashtag , page , size });
+    return await getExplorePostsService({ hashtag , page , size });
 })
 
 export const getOtherExploreDetailsController = asyncErrorHandler( async (request:NextRequest) => {
-    // return await exploreDetailsForAccountService();
+    return await exploreDetailsForAccountService();
 })

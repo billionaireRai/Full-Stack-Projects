@@ -1,27 +1,32 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useRef } from 'react';
 import Link from 'next/link';
 import Usercard, { userCardProp } from '@/components/usercard';
+import { useRouter } from 'next/navigation';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
-import { Users, ArrowBigUpIcon, SettingsIcon , BellOff } from 'lucide-react';
+import { Users, ArrowBigUpIcon, SettingsIcon , BellOff, ArrowLeftCircle } from 'lucide-react';
 import Activebeep from '@/components/activebeep';
 import useActiveAccount from '@/app/states/useraccounts';
 import Trendcard from '@/components/trendcard';
-import NotificationCard, { Notification, NotificationCardSkeleton } from '@/components/notificationcard';
+import NotificationCard, { Notification } from '@/components/notificationcard';
 import { MdNotifications } from 'react-icons/md';
 import axiosInstance from '@/lib/interceptor';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
+import Notificationloader from '@/components/notificationloader';
 
 export default function notifications() {
   const params = useParams() ;
   const pagesize = 15 ;
   const autoHeightGap:number = 200 ;
   const { Account } = useActiveAccount() ;
+  const router = useRouter() ;
+  const notificationSec = useRef<HTMLDivElement | null>(null);
   const [Page, setPage] = useState<number>(1);
   const [hasMoreNotifications, sethasMoreNotifications] = useState<boolean>(true);
   const [Loading, setLoading] = useState<boolean>(false);
+  const [LoadingSuggestions, setLoadingSuggestions] = useState<boolean>(false);
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
   const [notificationList, setNotificationList] = useState<Notification[]>([
@@ -317,10 +322,6 @@ export default function notifications() {
   // trends array...
   const [Trends,setTrends] = useState([
     { rank: 1, region: "India", tag: "#Baaghi4Trailer", posts: 3592 },
-    { rank: 2, region: "India", tag: "#CricketWorldCup", posts: 45823 },
-    { rank: 3, region: "USA", tag: "#TarrifExposition", posts: 3352 },
-    { rank: 4, region: "Europe", tag: "#AirbusTransfer", posts: 67776 },
-    { rank: 5, region: "India", tag: "#10DayMBA", posts: 80385 }
   ]);
 
   // random follow suggestions data
@@ -396,151 +397,7 @@ export default function notifications() {
         bannerUrl: '/images/default-banner.jpg',
         avatarUrl: '/images/default-profile-pic.png',
       },
-    },
-    {
-      decodedHandle: '@diana_startup',
-      name: 'Diana Entrepreneur',
-      IsFollowing: true,
-      account: {
-        name: 'Diana Entrepreneur',
-        handle: '@diana_startup',
-        bio: 'Entrepreneur | AI enthusiast | Founder of innovative tech solutions.',
-        location: {
-          text: 'Seattle, WA',
-          coordinates: [47.6062, -122.3321] as [number, number],
-        },
-        website: 'https://diana-startup.com',
-        joinDate: '2021-02-28',
-        following: '345',
-        followers: '890',
-        Posts: '234',
-        isCompleted: true,
-        isVerified: false,
-        plan: 'Free',
-        bannerUrl: '/images/default-banner.jpg',
-        avatarUrl: '/images/default-profile-pic.png',
-      },
-    },
-    {
-      decodedHandle: '@eve_photographer',
-      name: 'Eve Photographer',
-      IsFollowing: false,
-      account: {
-        name: 'Eve Photographer',
-        handle: '@eve_photographer',
-        bio: 'Professional photographer | Nature lover | Sharing visual stories through lenses.',
-        location: {
-          text: 'Denver, CO',
-          coordinates: [39.7392, -104.9903] as [number, number],
-        },
-        website: 'https://eve-photography.com',
-        joinDate: '2017-07-04',
-        following: '678',
-        followers: '7.8k',
-        Posts: '2,345',
-        isCompleted: true,
-        isVerified: true,
-        plan: 'Pro',
-        bannerUrl: '/images/default-banner.jpg',
-        avatarUrl: '/images/default-profile-pic.png',
-      },
-    },
-    {
-      decodedHandle: '@frank_ml',
-      name: 'Frank ML',
-      IsFollowing: false,
-      account: {
-        name: 'Frank ML',
-        handle: '@frank_ml',
-        bio: 'Machine learning engineer | Loves building recommender systems and neat demos.',
-        location: {
-          text: 'Chicago, IL',
-          coordinates: [41.8781, -87.6298] as [number, number],
-        },
-        website: 'https://frankml.dev',
-        joinDate: '2018-04-19',
-        following: '412',
-        followers: '2.1k',
-        Posts: '612',
-        isCompleted: true,
-        isVerified: false,
-        plan: 'Free',
-        bannerUrl: '/images/default-banner.jpg',
-        avatarUrl: '/images/default-profile-pic.png',
-      },
-    },
-    {
-      decodedHandle: '@grace_garden',
-      name: 'Grace Garden',
-      IsFollowing: true,
-      account: {
-        name: 'Grace Garden',
-        handle: '@grace_garden',
-        bio: 'Urban gardening | Plant care tips | Growing calm one leaf at a time.',
-        location: {
-          text: 'Portland, OR',
-          coordinates: [45.5152, -122.6784] as [number, number],
-        },
-        website: 'https://gracegarden.io',
-        joinDate: '2020-09-07',
-        following: '305',
-        followers: '9.4k',
-        Posts: '1,102',
-        isCompleted: true,
-        isVerified: true,
-        plan: 'Pro',
-        bannerUrl: '/images/default-banner.jpg',
-        avatarUrl: '/images/default-profile-pic.png',
-      },
-    },
-    {
-      decodedHandle: '@henry_hikes',
-      name: 'Henry Hikes',
-      IsFollowing: false,
-      account: {
-        name: 'Henry Hikes',
-        handle: '@henry_hikes',
-        bio: 'Trail explorer | Hiking photos | Finding best routes and sunrise spots.',
-        location: {
-          text: 'Phoenix, AZ',
-          coordinates: [33.4484, -112.0740] as [number, number],
-        },
-        website: 'https://henryhikes.com',
-        joinDate: '2016-03-14',
-        following: '188',
-        followers: '4.7k',
-        Posts: '889',
-        isCompleted: true,
-        isVerified: false,
-        plan: 'Free',
-        bannerUrl: '/images/default-banner.jpg',
-        avatarUrl: '/images/default-profile-pic.png',
-      },
-    },
-    {
-      decodedHandle: '@isla_designs',
-      name: 'Isla Designs',
-      IsFollowing: true,
-      account: {
-        name: 'Isla Designs',
-        handle: '@isla_designs',
-        bio: 'Product design | UI patterns | Turning complex ideas into simple flows.',
-        location: {
-          text: 'Boston, MA',
-          coordinates: [42.3601, -71.0589] as [number, number],
-        },
-        website: 'https://isla.design',
-        joinDate: '2019-11-23',
-        following: '523',
-        followers: '6.2k',
-        Posts: '1,540',
-        isCompleted: true,
-        isVerified: true,
-        plan: 'Pro',
-        bannerUrl: '/images/default-banner.jpg',
-        avatarUrl: '/images/default-profile-pic.png',
-      },
-    },
+    }
   ]);
 
   // function for showing more suggestions...
@@ -575,10 +432,25 @@ export default function notifications() {
     }
   }
   // useeffect for auto-fethcing of notifications....
-    // useEffect(() => {
-    // if ((window.innerHeight - window.scrollY) <= autoHeightGap && hasMoreNotifications)   setPage( Page + 1 ) ;
-
-  // }, [window.scrollY]) ]
+  useEffect(() => {
+     const notificationSection = notificationSec.current ;
+     if (!notificationSection) return ;
+     
+     const handleScroll = () => {
+       const distanceFromBottom = notificationSection.scrollHeight - notificationSection.scrollTop - notificationSection.clientHeight ;
+       if (distanceFromBottom <= autoHeightGap && hasMoreNotifications) {
+        //  fetchNotifications();
+        //  setPage(Page + 1);
+       }
+      }
+      // calling scroll function...
+      handleScroll() ;
+     
+      notificationSection.addEventListener('scroll', handleScroll, { passive: true })
+      return () => {
+       notificationSection.removeEventListener('scroll', handleScroll)
+     }
+  }, [autoHeightGap,hasMoreNotifications,notificationList.length])
 
 
   // function for marking notifications read...
@@ -616,14 +488,15 @@ export default function notifications() {
 
   // useffect for handling isRead feild...
   useEffect(() => {
-    // getOtherExploreInfo()
+    // getOtherExploreInfo();
+    // fetchNotifications();
   }, [])
     
 
   return (
-    <div className='w-full h-full flex font-poppins rounded-lg dark:bg-black p-1'>
-      <div className='mainbox flex flex-col xl:flex-row-reverse w-full h-fit max-w-7xl mx-auto font-poppins shadow-lg dark:bg-black rounded-lg'>
-        <div className='right flex flex-col gap-5 p-6'>
+    <div className='w-full h-screen flex font-poppins rounded-lg dark:bg-black p-1'>
+      <div className='mainbox flex flex-col xl:flex-row-reverse w-full h-full max-w-7xl mx-auto font-poppins dark:bg-black rounded-md'>
+        <div className='right overflow-y-scroll flex flex-col gap-5 p-6'>
             {/* Who to Follow */}
             <div className='z-20 lg:block flex-1 h-fit'>
               <div className='space-y-4'>
@@ -654,7 +527,7 @@ export default function notifications() {
                     onClick={() => {
                       handleSuggesstionShow();
                     }}
-                    className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'
+                    className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'
                   >
                     {ShowLess ? 'Show less' : 'Show more'}
                   </button>
@@ -674,16 +547,14 @@ export default function notifications() {
               <div className='p-4'>
                 <Link
                   href={`/explore?q=${encodeURIComponent('whats-happening')}&utm_source=show-more`}
-                  className='cursor-pointer text-blue-500 hover:text-blue-600 text-sm font-medium'
+                  className='cursor-pointer text-yellow-500 hover:text-yellow-600 text-sm font-medium'
                 >
                   Show more
                 </Link>
               </div>
             </div>
                 <button
-                  onClick={() => {
-                    handleScrollToTop(window);
-                  }}
+                  onClick={() => { handleScrollToTop('notification') }}
                   className='fixed right-5 bottom-10 rounded-full p-1 hover:bg-yellow-100 dark:hover:bg-gray-950 cursor-pointer z-50'
                 >
                   <ArrowBigUpIcon width={40} height={40} stroke='5' className='fill-yellow-400' />
@@ -693,18 +564,18 @@ export default function notifications() {
           </div>
 
           {/* Notifications */}
-          <div className='order-2 lg:order-1 left flex flex-col gap-2 h-fit flex-1 bg-white dark:bg-black rounded-xl font-poppins'>
+          <div ref={notificationSec} id='notification' className='order-2 lg:order-1 left flex flex-col gap-2 h-full flex-1 overflow-y-scroll overflow-x-hidden bg-white dark:bg-black rounded-xl font-poppins'>
             <div className='flex flex-row items-center justify-between text-xl p-3 border-b border-gray-200 dark:border-gray-700 rounded-lg'>
+              <button
+                onClick={() => { router.back() }}
+                className='p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer'
+              >
+                <ArrowLeftCircle size={25} />
+              </button>
               <div className='flex items-center justify-center gap-2'>
                 <MdNotifications size={25} />
                 <span className='font-bold'>Notifications</span>
               </div>
-              <Link
-                href={`/${Account.decodedHandle}/settings/notifications`}
-                className='p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer'
-              >
-                <SettingsIcon />
-              </Link>
             </div>
 
             {Array.isArray(notificationList) && notificationList.length > 0 ? (
@@ -718,20 +589,8 @@ export default function notifications() {
                 ))}
                 {/* loading section on auto scroll trigger... */}
                 <div className='relative my-4'>
-                  {(Loading) && (
-                    <div
-                      className='rounded-xl flex flex-col gap-2 bg-white/80 dark:bg-black/40 px-1'
-                      aria-live='polite'
-                    >
-                      <div className='flex items-center justify-center gap-3'>
-                        <div className='relative h-6 w-6'>
-                          <div className='absolute inset-0 rounded-full border-3 border-gray-200 dark:border-gray-700 border-t-yellow-400 dark:border-t-yellow-300 animate-spin' />
-                        </div>
-                      </div>
-                      <div className='mt-3 space-y-2'>
-                        {[1, 2, 3, 4].map((i) => ( <div key={i}> <NotificationCardSkeleton isodd={( i%2 !== 0 ) ? true : false } /></div> ))}
-                      </div>
-                    </div>
+                  {Loading && (
+                  <Notificationloader cardnums={6} />
                   )}
 
                   {!hasMoreNotifications && !Loading && (

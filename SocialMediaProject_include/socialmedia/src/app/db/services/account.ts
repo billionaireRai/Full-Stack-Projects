@@ -88,17 +88,17 @@ export const exploreDetailsForAccountService = async () => {
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     // Fetch blocked account IDs
-    const blockedDocs = await Block.find({ blockedByAcc: activeAcc._id, isActive: true , source:'profile'});
-    const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
-    // generating the follow suggestions...
-    const followingDocs: InstanceType<typeof follows>[] = await follows.find({ followerId : activeAcc._id , isDeleted:false});
-    const followingAccountId : string[] = followingDocs.map((followObj) => followObj.followingId ) ;
+    // const blockedDocs = await Block.find({ blockedByAcc: activeAcc._id, isActive: true , source:'profile'});
+    // const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
+    // // generating the follow suggestions...
+    // const followingDocs: InstanceType<typeof follows>[] = await follows.find({ followerId : activeAcc._id , isDeleted:false});
+    // const followingAccountId : string[] = followingDocs.map((followObj) => followObj.followingId ) ;
     
-    // getting the mutual followers...
-    const mutualFollowingId = followingAccountId.map(async (accountId : string) => {
-        const thereFollowings : InstanceType<typeof follows>[] = await follows.find({ followerId:accountId , isDeleted:false }) ;
-        return thereFollowings.map((followobj) => followobj.followingId.toString()) ;
-    }) ;
+    // // getting the mutual followers...
+    // const mutualFollowingId = followingAccountId.map(async (accountId : string) => {
+    //     const thereFollowings : InstanceType<typeof follows>[] = await follows.find({ followerId:accountId , isDeleted:false }) ;
+    //     return thereFollowings.map((followobj) => followobj.followingId.toString()) ;
+    // }) ;
 
     async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
         const paticularAcc = await accounts.findById(accountId) ;
@@ -138,67 +138,72 @@ export const exploreDetailsForAccountService = async () => {
     }
 
     // Resolve and flatten mutual following IDs...
-    const resolvedMutualFollowing = await Promise.all(mutualFollowingId);
-    const flattenedMutualIds = resolvedMutualFollowing.flat();
+    // const resolvedMutualFollowing = await Promise.all(mutualFollowingId);
+    // const flattenedMutualIds = resolvedMutualFollowing.flat();
 
-    // getting the accounts of mutual followers...
-    const mutualFriendAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
-            return returnAccountDataInStructure(accId);
-        })
-    );
-    const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
+    // // getting the accounts of mutual followers...
+    // const mutualFriendAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
+    //         return returnAccountDataInStructure(accId);
+    //     })
+    // );
+    // const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
 
-    // getting more accounts for suggestions...
-    const ageRange = ['0-13','13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'] ;
-    const genderArray = ['male', 'female', 'none'] ;
-    const indexOfAgeRange = ageRange.findIndex(activeAcc.interests.ageRange); // getting the index in ageRange...
-    const indexOfGender = genderArray.findIndex(activeAcc.interests.gender); // same for gender...
-    const filteredTopics = activeAcc.interests.topicsLoved ; // engagement topics array...
+    // // getting more accounts for suggestions...
+    // const ageRange = ['0-13','13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'] ;
+    // const genderArray = ['male', 'female', 'none'] ;
+    // const indexOfAgeRange = ageRange.findIndex(activeAcc.interests.ageRange); // getting the index in ageRange...
+    // const indexOfGender = genderArray.findIndex(activeAcc.interests.gender); // same for gender...
+    // const filteredTopics = activeAcc.interests.topicsLoved ; // engagement topics array...
 
-    // opposite gender filter for increasing engagement...
-    const moreAccounts = await accounts.find({
-        $and:[
-            {'interests.gender' : genderArray[indexOfGender] === 'none' ? ' ' : !(genderArray[indexOfGender])},
-            { 'interests.ageRange' : (ageRange.length - indexOfAgeRange)  >= 2  ? (ageRange[indexOfAgeRange] || ageRange[indexOfAgeRange + 1] || ageRange[indexOfAgeRange + 2])  : (ageRange[ageRange.length - 1] || ageRange[ageRange.length - 2]) },
-            {'interests.topicsLoved' : { $in: filteredTopics } },
-            { _id: { $nin: blockedIds } },
-        ]
-    }) ;
+    // // opposite gender filter for increasing engagement...
+    // const moreAccounts = await accounts.find({
+    //     $and:[
+    //         {'interests.gender' : genderArray[indexOfGender] === 'none' ? ' ' : !(genderArray[indexOfGender])},
+    //         { 'interests.ageRange' : (ageRange.length - indexOfAgeRange)  >= 2  ? (ageRange[indexOfAgeRange] || ageRange[indexOfAgeRange + 1] || ageRange[indexOfAgeRange + 2])  : (ageRange[ageRange.length - 1] || ageRange[ageRange.length - 2]) },
+    //         {'interests.topicsLoved' : { $in: filteredTopics } },
+    //         { _id: { $nin: blockedIds } },
+    //     ]
+    // }) ;
 
-    // getting account whose content , user like & comment...
-    const myLikes  = await likes.find({ $and:[ { accountId:activeAcc._id },{ targetType:{ $in: ['Post','Comment'] } }]}) ;
-    const likedToAcc = await Promise.all(myLikes.map( async ( like ) => {
-        return returnAccountDataInStructure((like.targetAccount as mongoose.Types.ObjectId).toString());
-    }));
-    const filteredLikedToAcc = likedToAcc.filter(acc => acc.id && !blockedIds.includes(acc.id));
+    // // getting account whose content , user like & comment...
+    // const myLikes  = await likes.find({ $and:[ { accountId:activeAcc._id },{ targetType:{ $in: ['Post','Comment'] } }]}) ;
+    // const likedToAcc = await Promise.all(myLikes.map( async ( like ) => {
+    //     return returnAccountDataInStructure((like.targetAccount as mongoose.Types.ObjectId).toString());
+    // }));
+    // const filteredLikedToAcc = likedToAcc.filter(acc => acc.id && !blockedIds.includes(acc.id));
 
-    const postsContentUserCommented = await Post.find({ $and:[{ authorId:activeAcc._id },{ replyToPostId: { $exists: true, $ne: null } },{ isDeleted:false }]}) ;
-    const accountsWhosPost = await Promise.all(postsContentUserCommented.map( async (post) => {
-        const commentedOnPost = await Post.findById(post.replyToPostId) ;
-        return returnAccountDataInStructure(commentedOnPost.authorId) ;
-    })) ;
-    const filteredAccountsWhosPost = accountsWhosPost.filter(acc => acc.id && !blockedIds.includes(acc.id));
+    // const postsContentUserCommented = await Post.find({ $and:[{ authorId:activeAcc._id },{ replyToPostId: { $exists: true, $ne: null } },{ isDeleted:false }]}) ;
+    // const accountsWhosPost = await Promise.all(postsContentUserCommented.map( async (post) => {
+    //     const commentedOnPost = await Post.findById(post.replyToPostId) ;
+    //     return returnAccountDataInStructure(commentedOnPost.authorId) ;
+    // })) ;
+    // const filteredAccountsWhosPost = accountsWhosPost.filter(acc => acc.id && !blockedIds.includes(acc.id));
 
-    // removing the duplicacy from account array...
-    const uniqueAccArr = [...new Set([...filteredMutualFriendAccounts,...moreAccounts,...filteredLikedToAcc,...filteredAccountsWhosPost])];
-    // sorting the array based on subscription level...
-    const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
+    // // removing the duplicacy from account array...
+    // const uniqueAccArr = [...new Set([...filteredMutualFriendAccounts,...moreAccounts,...filteredLikedToAcc,...filteredAccountsWhosPost])];
+    // // sorting the array based on subscription level...
+    // const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
 
-    // sorting logic...
-    const suggesstionsArr = uniqueAccArr.sort((a, b) => {
-        const aPlan = (a.account?.plan || 'Free') as Plan;
-        const bPlan = (b.account?.plan || 'Free') as Plan;
-        const aLevel = planOrder[aPlan] ?? 0;
-        const bLevel = planOrder[bPlan] ?? 0;
+    // // sorting logic...
+    // const suggesstionsArr = uniqueAccArr.sort((a, b) => {
+    //     const aPlan = (a.account?.plan || 'Free') as Plan;
+    //     const bPlan = (b.account?.plan || 'Free') as Plan;
+    //     const aLevel = planOrder[aPlan] ?? 0;
+    //     const bLevel = planOrder[bPlan] ?? 0;
         
-        if (aLevel !== bLevel) return bLevel - aLevel;
+    //     if (aLevel !== bLevel) return bLevel - aLevel;
         
-        const aVerified = a.account?.isVerified ?? false;
-        const bVerified = b.account?.isVerified ?? false;
-        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+    //     const aVerified = a.account?.isVerified ?? false;
+    //     const bVerified = b.account?.isVerified ?? false;
+    //     if (aVerified !== bVerified) return aVerified ? -1 : 1;
         
-        return 0;
-    });
+    //     return 0;
+    // });
+
+    const initialSuggstions = await accounts.find({ $and:[{ _id: { $ne: activeAcc._id }},{'account.status': 'ACTIVE' }] }) ;
+    const suggesstionsArr = await Promise.all(initialSuggstions.map( async (account) => {
+      return returnAccountDataInStructure(account._id) ;
+    }))
 
     // calculating trending hashtags last 1 month...
     const totalHashtags: string[] = [];
@@ -206,9 +211,7 @@ export const exploreDetailsForAccountService = async () => {
     const postContainingHashtags = await Post.find({ hashtags: { $nin: [undefined, null, ''] }, isDeleted: false,
         createdAt: { $gte: thirtyDaysAgo }
     });
-    postContainingHashtags.forEach((post) => { 
-      totalHashtags.push(...post.hashtags);
-    });
+    postContainingHashtags.forEach((post) => { totalHashtags.push(...post.hashtags) });
 
     const finalTags = [...new Set(totalHashtags)];
 

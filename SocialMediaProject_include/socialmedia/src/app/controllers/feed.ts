@@ -1,4 +1,4 @@
-import { getFeedPostService } from "../db/services/feed";
+import { getFeedPostService, getFeedSuggestionsService } from "../db/services/feed";
 import asyncErrorHandler from "../middleware/errorMiddleware";
 import { NextRequest , NextResponse } from "next/server";
 
@@ -11,4 +11,8 @@ export const getAccountsFeedPostController = asyncErrorHandler(async (request:Ne
     }
 
     return await getFeedPostService({ Page , size });
+})
+
+export const getFeedAccountSuggestionsController = asyncErrorHandler(async (request:NextRequest) => {
+    return await getFeedSuggestionsService() ;
 })

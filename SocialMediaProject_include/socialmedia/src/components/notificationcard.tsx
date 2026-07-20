@@ -50,7 +50,7 @@ interface NotificationCardProps {
 
 export function NotificationCardSkeleton( { isodd } :skeletonprops ) {
   return (
-    <div className='flex relative flex-col md:flex-row md:items-center md:justify-between dark:shadow-gray-900 bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm p-4 md:p-5 mb-1 font-poppins'>
+    <div className='flex relative flex-col md:flex-row md:items-center md:justify-between dark:shadow-gray-900 bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm p-4 mb-1 font-poppins'>
       <div className='flex items-center space-x-3 md:space-x-4 flex-1'>
         <div className='h-12 w-12 md:w-15 md:h-15 rounded-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-pulse' />
         <div className='flex flex-col gap-2 min-w-0 flex-1'>

@@ -13,6 +13,7 @@ import UserCard, { userCardProp } from '@/components/usercard';
 import { CalendarClockIcon, ImagesIcon, Infinity, InfinityIcon, SearchIcon, SparklesIcon, UserPlus2Icon } from 'lucide-react';
 import CompLoader from '@/components/componentloader';
 import axiosInstance from '@/lib/interceptor';
+import Loader from '@/components/loader';
 
 interface featureDemoType {
   icon:React.JSX.Element ;
@@ -31,369 +32,8 @@ const [ShowLess, setShowLess] = useState<boolean>(false);
 const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
 const [showSearchPop, setshowSearchPop] = useState<boolean>(false);
 const [loadingPosts, setloadingPosts] = useState<boolean>(false);
-const [feedPosts, setfeedPosts] = useState<PostType[]>([
-  {
-    postid: "post_001",
-    content:
-      "Finally shipped our AI scheduling feature after weeks of testing. 🚀",
-    postedAt: "2026-07-15T08:30:00Z",
-    comments: 34,
-    reposts: 19,
-    likes: 482,
-    views: 5600,
-    mediaUrls: [
-      {
-        url: "https://picsum.photos/id/1015/1200/800",
-        media_type: "image",
-      },
-    ],
-    hashTags: ["AI", "Startup", "BuildInPublic"],
-    mentions: ["@team"],
-    userliked: true,
-    userBookmarked: true,
-    usereposted: false,
-    usercommented: false,
-    isVerified: true,
-    username: "Amritansh Rai",
-    handle: "@amritansh",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    cover: "https://picsum.photos/1200/400?1",
-    bio: "Founder • Developer • Fitness",
-    plan: "Pro",
-    followers: "14.2K",
-    following: "212",
-    isFollowing: false,
-    isHighlighted: true,
-    isPinned: true,
-  },
-
-  {
-    postid: "post_002",
-    content:
-      "Morning gym session before writing backend APIs. Discipline wins.",
-    postedAt: "2026-07-14T06:20:00Z",
-    comments: 16,
-    reposts: 4,
-    likes: 251,
-    views: 2100,
-    mediaUrls: [
-      {
-        url: "https://picsum.photos/id/1005/1200/800",
-        media_type: "image",
-      },
-    ],
-    hashTags: ["Fitness", "Coding"],
-    userliked: false,
-    userBookmarked: false,
-    usereposted: false,
-    usercommented: true,
-    username: "Amritansh Rai",
-    handle: "@amritansh",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    isVerified: true,
-  },
-
-  {
-    postid: "post_003",
-    content:
-      "Docker has completely changed how I deploy my applications.",
-    postedAt: "2026-07-13T14:40:00Z",
-    comments: 23,
-    reposts: 31,
-    likes: 680,
-    views: 7200,
-    hashTags: ["Docker", "DevOps"],
-    userliked: true,
-    isVerified: true,
-    username: "Dev Hub",
-    handle: "@devhub",
-    avatar: "https://i.pravatar.cc/150?img=2",
-  },
-
-  {
-    postid: "post_004",
-    content: "Weekend coffee and system design diagrams.",
-    postedAt: "2026-07-12T11:10:00Z",
-    comments: 7,
-    reposts: 1,
-    likes: 88,
-    views: 840,
-    mediaUrls: [
-      {
-        url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-        media_type: "video",
-      },
-    ],
-    username: "Sarah",
-    handle: "@sarahcodes",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    isVerified: false,
-  },
-
-  {
-    postid: "post_005",
-    content: "Building Briezl one feature at a time.",
-    postedAt: "2026-07-11T10:00:00Z",
-    comments: 45,
-    reposts: 27,
-    likes: 953,
-    views: 14000,
-    hashTags: ["Briezl", "Startup"],
-    username: "Amritansh Rai",
-    handle: "@amritansh",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    isVerified: true,
-    taggedLocation: [
-      {
-        text: "Delhi, India",
-        coordinates: [28.6139, 77.209],
-      },
-    ],
-  },
-
-  {
-    postid: "post_006",
-    content: "What feature should we build next?",
-    postedAt: "2026-07-10T18:15:00Z",
-    comments: 96,
-    reposts: 18,
-    likes: 743,
-    views: 10200,
-    poll: {
-      question: "Choose one",
-      options: [
-        { text: "Stories", votes: 312 },
-        { text: "Communities", votes: 224 },
-        { text: "Live Audio", votes: 110 },
-      ],
-      duration: 86400,
-    },
-    username: "Briezl",
-    handle: "@briezl",
-    avatar: "https://i.pravatar.cc/150?img=4",
-    isVerified: true,
-  },
-
-  {
-    postid: "post_007",
-    content: "Every bug teaches something new.",
-    postedAt: "2026-07-09T16:50:00Z",
-    comments: 9,
-    reposts: 3,
-    likes: 174,
-    views: 1200,
-    username: "CodeDaily",
-    handle: "@codedaily",
-    avatar: "https://i.pravatar.cc/150?img=5",
-    isVerified: false,
-  },
-
-  {
-    postid: "post_008",
-    content: "React Server Components are growing on me.",
-    postedAt: "2026-07-08T08:00:00Z",
-    comments: 30,
-    reposts: 14,
-    likes: 501,
-    views: 4900,
-    hashTags: ["React", "NextJS"],
-    username: "Frontend Guru",
-    handle: "@frontendguru",
-    avatar: "https://i.pravatar.cc/150?img=6",
-    isVerified: true,
-  },
-
-  {
-    postid: "post_009",
-    content: "Beautiful sunset after a productive sprint.",
-    postedAt: "2026-07-07T19:30:00Z",
-    comments: 11,
-    reposts: 2,
-    likes: 214,
-    views: 1800,
-    mediaUrls: [
-      {
-        url: "https://picsum.photos/id/1025/1200/800",
-        media_type: "image",
-      },
-    ],
-    username: "Emily",
-    handle: "@emily",
-    avatar: "https://i.pravatar.cc/150?img=7",
-    isVerified: false,
-  },
-
-  {
-    postid: "post_010",
-    content: "Microservices aren't always the answer.",
-    postedAt: "2026-07-06T13:40:00Z",
-    comments: 58,
-    reposts: 40,
-    likes: 1032,
-    views: 17000,
-    hashTags: ["Architecture"],
-    username: "System Design",
-    handle: "@sysdesign",
-    avatar: "https://i.pravatar.cc/150?img=8",
-    isVerified: true,
-  },
-
-  {
-    postid: "post_011",
-    content: "Reading Clean Architecture again.",
-    postedAt: "2026-07-05T09:20:00Z",
-    comments: 8,
-    reposts: 1,
-    likes: 92,
-    views: 650,
-    username: "John",
-    handle: "@john",
-    avatar: "https://i.pravatar.cc/150?img=9",
-    isVerified: false,
-  },
-
-  {
-    postid: "post_012",
-    content: "Kubernetes finally clicked today.",
-    postedAt: "2026-07-04T17:00:00Z",
-    comments: 17,
-    reposts: 7,
-    likes: 304,
-    views: 3100,
-    hashTags: ["Kubernetes"],
-    username: "Cloud Guy",
-    handle: "@cloudguy",
-    avatar: "https://i.pravatar.cc/150?img=10",
-    isVerified: true,
-  },
-
-  {
-    postid: "post_013",
-    content: "Taking a break and touching some grass 🌿",
-    postedAt: "2026-07-03T18:00:00Z",
-    comments: 5,
-    reposts: 0,
-    likes: 63,
-    views: 430,
-    username: "Alex",
-    handle: "@alex",
-    avatar: "https://i.pravatar.cc/150?img=11",
-    isVerified: false,
-  },
-
-  {
-    postid: "post_014",
-    content: "Who's attending the developer meetup this weekend?",
-    postedAt: "2026-07-02T12:15:00Z",
-    comments: 41,
-    reposts: 8,
-    likes: 411,
-    views: 4200,
-    taggedLocation: [
-      {
-        text: "Bengaluru",
-        coordinates: [12.9716, 77.5946],
-      },
-    ],
-    username: "Tech Events",
-    handle: "@techevents",
-    avatar: "https://i.pravatar.cc/150?img=12",
-    isVerified: true,
-  },
-
-  {
-    postid: "post_015",
-    content: "Small improvements every single day.",
-    postedAt: "2026-07-01T09:40:00Z",
-    comments: 12,
-    reposts: 2,
-    likes: 158,
-    views: 1300,
-    username: "Motivation",
-    handle: "@motivation",
-    avatar: "https://i.pravatar.cc/150?img=13",
-    isVerified: false,
-  },
-
-  {
-    postid: "post_016",
-    content: "Open source changed my career.",
-    postedAt: "2026-06-30T15:00:00Z",
-    comments: 36,
-    reposts: 23,
-    likes: 782,
-    views: 9500,
-    hashTags: ["OpenSource"],
-    username: "Git Master",
-    handle: "@gitmaster",
-    avatar: "https://i.pravatar.cc/150?img=14",
-    isVerified: true,
-  },
-
-  {
-    postid: "post_017",
-    content: "Anyone learning German here? 🇩🇪",
-    postedAt: "2026-06-29T08:00:00Z",
-    comments: 24,
-    reposts: 6,
-    likes: 270,
-    views: 2400,
-    username: "Language Learner",
-    handle: "@languages",
-    avatar: "https://i.pravatar.cc/150?img=15",
-    isVerified: false,
-  },
-
-  {
-    postid: "post_018",
-    content: "The best investment is still learning.",
-    postedAt: "2026-06-28T11:00:00Z",
-    comments: 15,
-    reposts: 5,
-    likes: 198,
-    views: 1600,
-    username: "Business Daily",
-    handle: "@bizdaily",
-    avatar: "https://i.pravatar.cc/150?img=16",
-    isVerified: true,
-  },
-
-  {
-    postid: "post_019",
-    content: "Finished reading another book on distributed systems.",
-    postedAt: "2026-06-27T13:30:00Z",
-    comments: 18,
-    reposts: 3,
-    likes: 249,
-    views: 2000,
-    username: "Backend Engineer",
-    handle: "@backend",
-    avatar: "https://i.pravatar.cc/150?img=17",
-    isVerified: false,
-  },
-
-  {
-    postid: "post_020",
-    content:
-      "Success isn't luck. It's consistency over thousands of days.",
-    postedAt: "2026-06-26T21:00:00Z",
-    comments: 61,
-    reposts: 49,
-    likes: 1420,
-    views: 25200,
-    hashTags: ["Success", "Discipline"],
-    mentions: ["@everyone"],
-    userliked: true,
-    userBookmarked: true,
-    usereposted: true,
-    usercommented: true,
-    username: "Visionary",
-    handle: "@visionary",
-    avatar: "https://i.pravatar.cc/150?img=18",
-    isVerified: true,
-    isHighlighted: true,
-  },
-]);
+const [loadingsuggestions, setloadingsuggestions] = useState<boolean>(false);
+const [feedPosts, setfeedPosts] = useState<PostType[]>([]) ;
 
 const [featureDemo, setfeatureDemo] = useState<featureDemoType[]>([
   {
@@ -410,96 +50,7 @@ const [featureDemo, setfeatureDemo] = useState<featureDemoType[]>([
   },
 
 ])
-const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([
-        {
-            decodedHandle: '@alexcoding',
-            name: 'Alex Johnson',
-            content: 'Frontend engineer • React • TypeScript • Building fast UIs ⚡',
-            account: {
-                name: 'Alex Johnson',
-                handle: '@alexcoding',
-                bio: 'Frontend engineer • React • TypeScript • Building fast UIs ⚡',
-                location: { text: 'Austin, TX', coordinates: [30.2672, -97.7431] },
-                website: 'https://alexcoding.dev',
-                joinDate: 'January 2020',
-                following: '1,204',
-                followers: '12,480',
-                Posts: '342',
-                isVerified: true,
-                isCompleted: true,
-                plan: 'Pro',
-                bannerUrl: '/images/default-banner.jpg',
-                avatarUrl: '/images/myProfile.jpg',
-            },
-            IsFollowing: false,
-        },
-        {
-            decodedHandle: '@devonmiles',
-            name: 'Devon Miles',
-            content: 'Data science + ML • Visualizing insights • Coffee & code ☕',
-            account: {
-                name: 'Devon Miles',
-                handle: '@devonmiles',
-                bio: 'Data science + ML • Visualizing insights • Coffee & code ☕',
-                location: { text: 'Toronto, ON', coordinates: [43.6532, -79.3832] },
-                website: 'https://devonmiles.ai',
-                joinDate: 'March 2019',
-                following: '842',
-                followers: '9,103',
-                Posts: '211',
-                isVerified: true,
-                isCompleted: false,
-                plan: 'Creator',
-                bannerUrl: '/images/default-banner.jpg',
-                avatarUrl: '/images/myProfile.jpg',
-            },
-            IsFollowing: true,
-        },
-        {
-            decodedHandle: '@sarahwrites',
-            name: 'Sarah Writes',
-            content: 'Tech writer • Systems thinking • Clear docs > clever code',
-            account: {
-                name: 'Sarah Writes',
-                handle: '@sarahwrites',
-                bio: 'Tech writer • Systems thinking • Clear docs > clever code',
-                location: { text: 'London, UK', coordinates: [51.5074, -0.1278] },
-                website: 'https://sarahwrites.io',
-                joinDate: 'June 2021',
-                following: '603',
-                followers: '4,980',
-                Posts: '128',
-                isVerified: false,
-                isCompleted: true,
-                plan: 'Free',
-                bannerUrl: '/images/default-banner.jpg',
-                avatarUrl: '/images/myProfile.jpg',
-            },
-            IsFollowing: false,
-        },
-        {
-            decodedHandle: '@mariajen',
-            name: 'Maria Jen',
-            content: 'Product designer • UX research • Accessibility first ♿',
-            account: {
-                name: 'Maria Jen',
-                handle: '@mariajen',
-                bio: 'Product designer • UX research • Accessibility first ♿',
-                location: { text: 'Seattle, WA', coordinates: [47.6062, -122.3321] },
-                website: 'https://mariajen.design',
-                joinDate: 'September 2018',
-                following: '1,019',
-                followers: '15,201',
-                Posts: '410',
-                isVerified: true,
-                isCompleted: false,
-                plan: 'Premium',
-                bannerUrl: '/images/default-banner.jpg',
-                avatarUrl: '/images/myProfile.jpg',
-            },
-            IsFollowing: false,
-        },
-    ]);
+const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
 
   // function for showing more suggestions...
   const handleSuggesstionShow = () => {
@@ -516,18 +67,33 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([
     }
   }
 
+  // function fetching suggestions...
+  async function getAccountSuggestions() {
+    setloadingsuggestions(true);
+    const suggApi = await axiosInstance.get('/api/feed');
+     if (suggApi.status === 200) {
+      setfollowSuggestions(suggApi.data.suggestions);
+      setloadingsuggestions(false);
+     } else {
+      setloadingsuggestions(false);
+     }
+  }
+
   // function to fetch feed posts...
    async function getFeedPosts() {
+    setloadingPosts(true);
      const feedApi = await axiosInstance.post(`/api/feed`,{ Page , size });
      if (feedApi.status === 200) {
-       setfeedPosts((prev) => [...prev,feedApi.data.post]) ;
+       setfeedPosts((prev) => [...prev, ...(feedApi.data.posts)]) ;
        sethasFeed(feedApi.data.hasNext) ;
+       setloadingPosts(false);
      }
    }
         
    useEffect(() => {
-    // getFeedPosts() ;
-    // setPage(Page + 1);
+    getAccountSuggestions();
+    getFeedPosts() ;
+    setPage(Page + 1);
    }, [])
   
   // fetching posts by pagination...
@@ -537,7 +103,6 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([
      
      const handleScroll = () => {
        const distanceFromBottom = feedsection.scrollHeight - feedsection.scrollTop - feedsection.clientHeight ;
-
        if (distanceFromBottom <= autoHeightGap && hasFeed) {
          getFeedPosts();
          setPage(Page + 1);
@@ -606,7 +171,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([
                             <UserPlus2Icon size={30} />
                             <h2 className='text-xl font-bold text-gray-900 dark:text-white'>Who to follow</h2>
                         </div>
-                        <div className='space-y-2'>
+                        <div className='flex flex-col gap-2 items-center justify-center'>
                          {followSuggestions.map((u,index) => 
                              (index+1) <= suggesstionNum && (
                                 <UserCard
@@ -618,6 +183,9 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([
                                     account={u.account}
                                 />
                             ))}
+                            {loadingsuggestions && (
+                              <Loader loadingtext={`loading suggestions`} />
+                            )}
                         </div>
                         <div className='p-4 border-t rounded-lg border-gray-200 dark:border-slate-700'>
                             <button 

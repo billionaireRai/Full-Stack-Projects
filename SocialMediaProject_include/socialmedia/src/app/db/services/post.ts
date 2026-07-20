@@ -1329,12 +1329,18 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
 
-    const cleanedHashtag =
-        typeof hashtag === 'string' && hashtag.trim() !== '' && hashtag !== 'undefined'
-            ? hashtag.trim()
-            : null ;
+    // Normalize hashtag input coming from query params...
+    const cleanedHashtag = typeof hashtag === 'string' ? hashtag.trim() : null ;
 
-    const hashQuerySection = cleanedHashtag ? { hashtags: { $in: [cleanedHashtag] }} : {}; // include hash in query only if exists...
+    let finalHashtag: string | null = null;
+    if (cleanedHashtag) {
+        const normalized = cleanedHashtag.replace(/^#/, '');
+        if (normalized !== '' && normalized !== 'undefined' && normalized !== 'null') {
+            finalHashtag = normalized;
+        }
+    }
+
+    const hashQuerySection = finalHashtag ? { hashtags: { $in: [finalHashtag] } } : {}; // include hash in query only if exists...
 
     // getting doc total count...
     const total = await Post.countDocuments({ $and:[ hashQuerySection ,{ isDeleted: false , postType:'original' , status:'published' }] });
@@ -1369,7 +1375,8 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
 
 
         // Get poll data if exists
-        const pollData = await Poll.findOne({ authorPost: post._id, isActive: true, expiry: { $gt: new Date() } });
+        // const pollData = await Poll.findOne({ authorPost: post._id, isActive: true, expiry: { $gt: new Date() } });
+        const pollData = await Poll.findOne({ authorPost: post._id });
         let poll: polltype | undefined;
         if (pollData) {
             poll = {

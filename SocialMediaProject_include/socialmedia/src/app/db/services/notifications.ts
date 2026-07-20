@@ -265,8 +265,7 @@ export const getNotificationsService = async ( username:string , page:number , p
     );
 
     return {
-        notifications: notificationData,
-        hasMore,
+        notifications: notificationData,hasMore
       }
 }
 

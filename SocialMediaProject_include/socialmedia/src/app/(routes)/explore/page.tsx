@@ -3,6 +3,8 @@
 import React, { useState , useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { AnimatePresence , motion } from 'framer-motion';
+import CompLoader from '@/components/componentloader';
 import { SettingsIcon , SearchIcon, X , Users, TrendingUp, BadgeQuestionMark, MessageCircleHeartIcon } from 'lucide-react';
 import Newscard from '@/components/newscard';
 import Trendcard from '@/components/trendcard';
@@ -14,6 +16,7 @@ import { userCardProp } from '@/components/usercard';
 import { useSearchParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
 import useActiveAccount from '@/app/states/useraccounts';
+import Loader from '@/components/loader';
 interface newsCardType {
   source: string;
   category: string;
@@ -22,6 +25,13 @@ interface newsCardType {
   timeAgo: string;
   location: string;
   href: string;
+}
+
+interface trendcarddata {
+  rank:number ; 
+  region:string ; 
+  tag:string ; 
+  posts: number ;
 }
 
 interface mediaType {
@@ -85,6 +95,9 @@ export default function explore() {
   const pageCategory : "feed" | "profile" | "direct" | "explore" = "explore" ;
 
   const [openSettings, setopenSettings] = useState(false);
+  const [loadingPosts, setloadingPosts] = useState<boolean>(false);
+  const [loadingsuggestions, setloadingsuggestions] = useState<boolean>(true);
+  const [loadingTrends, setloadingTrends] = useState<boolean>(false);
   const [LocationSetting, setLocationSetting] = useState(false);
   const [hpninPopUp, sethpninPopUp] = useState(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
@@ -93,86 +106,34 @@ export default function explore() {
   const leftSectionRef = useRef<HTMLDivElement | null>(null);
 
   const [suggestionAcc,setsuggestionAcc] =useState<userCardProp[]>([
-        {
-          decodedHandle: '@alice_dev',
-          name: 'Alice Developer',
-          IsFollowing: true,
-          account: {
-            name: 'Alice Developer',
-            handle: '@alice_dev',
-            bio: 'Full-stack developer | React enthusiast | Building the future one commit at a time.',
-            location: {
-              text: 'New York, NY',
-              coordinates: [40.7128, -74.0060]
-            },
-            website: 'https://alice-dev.com',
-            joinDate: '2020-05-15',
-            following: '234',
-            followers: '1.2k',
-            Posts: '456',
-            isCompleted: true,
-            isVerified: true,
-            plan:'Pro',
-            bannerUrl: '/images/default-banner.jpg',
-            avatarUrl: '/images/default-profile-pic.png'
-          }
+     {
+      decodedHandle: '@diana_startup',
+      name: 'Diana Entrepreneur',
+      IsFollowing: true,
+      account: {
+        name: 'Diana Entrepreneur',
+        handle: '@diana_startup',
+        bio: 'Entrepreneur | AI enthusiast | Founder of innovative tech solutions.',
+        location: {
+          text: 'Seattle, WA',
+          coordinates: [47.6062, -122.3321] as [number, number]
         },
-        {
-          decodedHandle: '@bob_designer',
-          name: 'Bob Designer',
-          IsFollowing: false,
-          account: {
-            name: 'Bob Designer',
-            handle: '@bob_designer',
-            bio: 'Creative designer | Minimalist | Coffee addict | Turning ideas into beautiful interfaces.',
-            location: {
-              text: 'Los Angeles, CA',
-              coordinates: [34.0522, -118.2437]
-            },
-            website: 'https://bob-designs.com',
-            joinDate: '2019-08-22',
-            following: '567',
-            followers: '3.4k',
-            Posts: '789',
-            isCompleted: true,
-            isVerified: true,
-            plan:'Pro',
-            bannerUrl: '/images/default-banner.jpg',
-            avatarUrl: '/images/default-profile-pic.png'
-          }
-        },
-        {
-          decodedHandle: '@charlie_writer',
-          name: 'Charlie Writer',
-          IsFollowing: false,
-          account: {
-            name: 'Charlie Writer',
-            handle: '@charlie_writer',
-            bio: 'Tech writer | Blogger | Sharing insights on the latest in technology and development.',
-            location: {
-              text: 'Austin, TX',
-              coordinates: [30.2672, -97.7431]
-            },
-            website: 'https://charlie-writes.com',
-            joinDate: '2018-11-10',
-            following: '123',
-            followers: '5.6k',
-            Posts: '1,234',
-            isCompleted: true,
-            isVerified: false,
-            plan:'Free',
-            bannerUrl: '/images/default-banner.jpg',
-            avatarUrl: '/images/default-profile-pic.png'
-          }
-        }
-      ]);
+        website: 'https://diana-startup.com',
+        joinDate: '2021-02-28',
+        following: '345',
+        followers: '890',
+        Posts: '234',
+        isCompleted:true,
+        isVerified: false,
+        plan:'Free',
+        bannerUrl: '/images/default-banner.jpg',
+        avatarUrl: '/images/default-profile-pic.png'
+      }
+    }
+  ]);
       
-      const [Trends,setTrends] = useState([
+      const [Trends,setTrends] = useState<trendcarddata[]>([
         { rank: 1, region: "India", tag: "#Baaghi4Trailer", posts: 3592 },
-        { rank: 2, region: "India", tag: "#CricketWorldCup", posts: 45823 },
-        { rank: 3, region: "USA", tag: "#TarrifExposition", posts: 3352 },
-        { rank: 4, region: "Europe", tag: "#AirbusTransfer", posts: 67776 },
-        { rank: 5, region: "India", tag: "#10DayMBA", posts: 80385 }
       ]);
 
       const [newsData, setnewsData] = useState<newsCardType[]>([
@@ -227,25 +188,36 @@ export default function explore() {
       
       // function fetching trendings , follow-suggestions , news...
       async function getOtherExploreInfo() {
+        setloadingTrends(true);
         const otherapi = await axiosInstance.post('/api/explore');
         if (otherapi.status === 200) {
-          setsuggestionAcc(otherapi.data.suggesstions);
-          setTrends(otherapi.data.trendingHashtags);
+          setsuggestionAcc(otherapi.data.suggestions);
+          // setTrends(otherapi.data.trendingHashtags);
+          setloadingsuggestions(false);
+          setloadingTrends(false);
         }
       }
 
       
       // function to get posts...
-      async function functionFetchPosts(hashtag?:string) {
-        const postapi = await axiosInstance.get(`/api/explore?hashtag=${hashtag}&size=${pagesize}&page=${Page}`);
-        if (postapi.status === 200) {
-          setexplorePosts((prev) => [...prev,postapi.data.explore]) ;
-          sethasExplore(postapi.data.hasNext) ;
+      async function functionFetchPosts(hashtag?: string) {
+        try {
+          setloadingPosts(true);
+          const postapi = await axiosInstance.get(`/api/explore?hashtag=${encodeURIComponent(hashtag ?? '')}&size=${pagesize}&page=${Page}`);
+
+          if (postapi.status === 200) {
+            setexplorePosts((prev) => [...prev,...postapi.data.explore]);
+            sethasExplore(postapi.data.hasNext);
+          }
+        } catch (err) {
+          console.error('Failed to fetch explore posts:', err);
+        } finally {
+          setloadingPosts(false);
         }
       }
       
       useEffect(() => {
-        // getOtherExploreInfo() ;
+        getOtherExploreInfo() ;
         if (hashtopic) {
           const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
             functionFetchPosts(decodedT); // getting explore posts 
@@ -265,14 +237,14 @@ export default function explore() {
         const distanceFromBottom = exploreSection.scrollHeight - exploreSection.scrollTop - exploreSection.clientHeight ;
   
         if (distanceFromBottom <= autoHeightGap && hasExplore) {
-           if (hashtopic) {
-            const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
-            functionFetchPosts(decodedT); // getting explore posts 
-            setPage(Page + 1);
-          } else {
-            functionFetchPosts() ;
-            setPage(Page + 1);
-          }
+          //  if (hashtopic) {
+          //   const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
+          //   functionFetchPosts(decodedT); // getting explore posts 
+          //   setPage(Page + 1);
+          // } else {
+          //   functionFetchPosts() ;
+          //   setPage(Page + 1);
+          // }
         }
        }
        // calling scroll function...
@@ -306,34 +278,35 @@ export default function explore() {
         <div
           className={`right w-fit overflow-y-auto no-scrollbar lg:w-80 xl:w-96 space-y-2 overscroll-contain sticky top-0`}
         >
-           {/* Today's News */}
-           {/* On hover of each redirect => '/explore?n=endcodeurlcomponent(newstitle)&utm_source=news-click*/}
            <div className='bg-white p-2 dark:bg-black rounded-xl shadow-lg'>
                <div className='flex flex-col items-center gap-1.5'>
                     {/* account suggestions according to my preference... */}
-                    {suggestionAcc && (
+                    {(suggestionAcc  && !loadingsuggestions) ? (
                     <div className='relative bg-white dark:bg-black rounded-xl shadow-lg'>
                         <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center dark:border-gray-700'>
                           <Users size={20} /><h2 className='text-xl font-bold text-gray-900 dark:text-white'>Who to follow !!</h2>
                         </div>
-                          <div className='p-4'>
-                          {suggestionAcc.map((user, index) =>
-                            (
+                          <div className='p-4 w-full'>
+                            {suggestionAcc.slice(0, suggesstionNum).map((user, index) => (
                               <div key={index} className='flex items-center justify-between mb-2'>
                                 <Usercard {...user} content={null} />
                               </div>
-                             )
-                           )}
+                            ))
+                          }
                           </div>
                         <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
                            <button 
                             onClick={() => { handleSuggesstionShow() }}
                             className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
-                             { 'Show more' }
+                             { ShowLess ? 'Show less'  :'Show more' }
                            </button>
                          </div>
                       </div>
+                    ) : (
+                       <Loader />
                     )}
+                    {/* Today's News */}
+                    {/* On hover of each redirect => '/explore?n=endcodeurlcomponent(newstitle)&utm_source=news-click*/}
                     <div className='p-4 rounded-lg border-b w-full border-gray-200 dark:border-slate-700 flex items-center justify-between'>
                       <h2 className='text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3'><span>Today's News</span><Activebeep /></h2>
                       <Image className='dark:invert' src='/images/newspaper-folded.png' height={25} width={25} alt='newspaper' />
@@ -346,11 +319,10 @@ export default function explore() {
                            <Link  href={`/explore?q=${encodeURIComponent('todays-news')}&utm_source=show-more`} className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
                                 Show more
                             </Link>
-                         </div>
-                    </div>
+                        </div>
+                      </div>
                 </div>
         </div>
-
         {/* Main explore post Area - Left Side */}
         <div
           className={`left flex flex-col gap-2 h-fit flex-1 bg-white dark:bg-black rounded-xl font-poppins max-h-screen no-scrollbar overscroll-contain overflow-y-auto`}
@@ -377,16 +349,17 @@ export default function explore() {
                 </div>
 
                 <ul className='flex flex-col gap-1'>
-                    {Trends?.map((trend, index) => (
-                      <Trendcard 
-                        key={index}
-                        rank={trend.rank} 
-                        region={trend.region} 
-                        tag={trend.tag} 
-                        posts={trend.posts} 
-                      />
-                    ))}
-
+                  {( Trends.length > 0 && !loadingTrends ) ? Trends?.map((trend, index) => (
+                    <Trendcard 
+                      key={index}
+                      rank={trend.rank} 
+                      region={trend.region} 
+                      tag={trend.tag} 
+                      posts={trend.posts} 
+                    />
+                  )) : (
+                    <Loader />
+                  )}
                 </ul>
             </div>
             <div className='p-4 space-y-2'>
@@ -430,6 +403,23 @@ export default function explore() {
                   />
                 ))}
                 </div>
+                 <AnimatePresence>
+                    {loadingPosts && (
+                      <motion.div
+                        className="flex flex-col items-center justify-center gap-4 mt-1"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <motion.div
+                          className="w-8 h-8 border-4 border-yellow-200 dark:border-yellow-300 border-t-yellow-500 dark:border-t-yellow-400 rounded-full animate-spin"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1 , repeat: Infinity , ease: "linear" }}
+                        />
+                        <CompLoader />
+                      </motion.div>
+                    )}
+                 </AnimatePresence>
             </div>
             {openSettings && (
               <ExploreSettings

@@ -44,7 +44,7 @@ interface mediaType {
   media_type: string;
 }
 export interface PostCardProps {
-  postId:string;
+  postId?:string;
   avatar?: string;
   cover?:string
   username?: string;

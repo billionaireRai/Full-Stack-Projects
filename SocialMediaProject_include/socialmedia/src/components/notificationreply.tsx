@@ -122,7 +122,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
 
   if (!notification) {
     return (
-      <div className="fixed overflow-y-scroll inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-xs">
+      <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
         <motion.div
           initial={{ opacity: 0, scale: 0.96, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -250,7 +250,8 @@ export default function Notificationreply({ closeModal, notification, icon, tail
                   href={tailoredURL}
                   className="block group focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70"
                 >
-                  <div className="w-50 h-50 relative">
+                  {post?.thumbnailUrl?.media_type.trim() && (
+                  <div className="w-auto h-50 relative">
                     {/* Image media */}
                     {post?.thumbnailUrl?.url?.trim() && post.thumbnailUrl.media_type === 'image' && (
                       <img
@@ -261,7 +262,6 @@ export default function Notificationreply({ closeModal, notification, icon, tail
                         className="w-full h-full object-cover rounded-2xl transition-transform duration-300 group-hover:scale-[1.04]"
                       />
                     )}
-
                     {/* Video media*/}
                     {post?.thumbnailUrl?.url?.trim() && post.thumbnailUrl.media_type === 'video' && (
                       <video
@@ -273,6 +273,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
                       />
                     )}
                   </div>
+                  )}
                 </Link>
               </div>
 

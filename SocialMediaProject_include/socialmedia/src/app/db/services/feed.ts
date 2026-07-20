@@ -6,6 +6,7 @@ import tagged from "../models/tagged";
 import follows from "../models/follows";
 import accounts from "../models/accounts";
 import viewStat from "../models/viewstat";
+import { userCardProp } from "@/components/usercard";
 import { fmt, getCommonElements, shuffleArray } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { connectWithMongoDB } from "../dbConnection";
@@ -110,7 +111,8 @@ export const getFeedPostService = async ({ Page, size }: { Page: number; size: n
     ]);
 
     // Get poll data if exists
-    const pollData = await Poll.findOne({ authorPost: post._id,isActive: true, expiry: { $gt: new Date() } });
+    // const pollData = await Poll.findOne({ authorPost: post._id, isActive: true , expiry: { $gt: new Date() } });
+    const pollData = await Poll.findOne({ authorPost: post._id });
     let poll: polltype | undefined;
     if (pollData) {
       poll = {
@@ -124,7 +126,7 @@ export const getFeedPostService = async ({ Page, size }: { Page: number; size: n
     }
 
     structuredPost.push({
-      postId: post._id.toString(),
+      postid: post._id.toString(),
       authorId: postOwner._id.toString(),
       avatar: postOwner.avatar?.url,
       cover: postOwner.banner?.url,
@@ -153,7 +155,7 @@ export const getFeedPostService = async ({ Page, size }: { Page: number; size: n
       mentions: post.mentions,
       isFollowing: !!isFollowing,
       taggedLocation: post.taggedLocation || [],
-      poll,
+      poll: poll ? poll : null
     });
   }
 
@@ -256,3 +258,149 @@ export const getFeedPostService = async ({ Page, size }: { Page: number; size: n
   return NextResponse.json({ message: "Fetched feed posts successfully !!", posts: shuffledFeedPosts , hasNext },{ status: 200 });
 };
 
+export const getFeedSuggestionsService = async () => {
+      await connectWithMongoDB() ; // connection to DB...
+  
+      const user = await getDecodedDataFromCookie("accessToken");
+      if (user instanceof Error) return NextResponse.json({ message:user.message },{ status:401, statusText: 'UNAUTHORIZED REQUEST...' });
+  
+      const myAccount = await accounts.findOne({ userId: user.id , 'account.status':'ACTIVE' , 'account.Active':true }) ; // viewer's account doc
+      if (!myAccount) return NextResponse.json({ message: 'Logged in account missing !!' }, { status: 404 });
+
+      // Fetch blocked account IDs
+      // const blockedDocs = await Block.find({ blockedByAcc: user.id , isActive: true });
+      // const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
+  
+      // generating the follow suggestions...
+      // const followingDocs: InstanceType<typeof follows>[] = await follows.find({ followerId : targetAcc._id , isDeleted:false});
+      // const followingAccountId : string[] = followingDocs.map((followObj) => followObj.followingId ) ;
+      
+      // getting the mutual followers...
+      // const mutualFollowingId = followingAccountId.map(async (accountId : string) => {
+      //     const thereFollowings : InstanceType<typeof follows>[] = await follows.find({ followerId:accountId , isDeleted:false }) ;
+      //     return thereFollowings.map((followobj) => followobj.followingId.toString()) ;
+      // }) ;
+  
+      async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
+          const paticularAcc = await accounts.findById(accountId) ;
+          // getting count of followers and followings...
+          const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
+          const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
+          const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
+          const isfollowing = await follows.exists({$and:[{ followerId:myAccount._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+  
+          return {
+              id: paticularAcc._id.toString(),
+              decodedHandle:`@${paticularAcc.username}`,
+              name:paticularAcc.name,
+              content:paticularAcc.bio,
+              account:{
+                  name:paticularAcc.name ,
+                  handle:`@${paticularAcc.username}` ,
+                  bio:paticularAcc.bio ,
+                  location:{
+                    text:paticularAcc.location.text,
+                    coordinates:paticularAcc.location.coordinates // lat,long
+                  },
+                  website:paticularAcc.website,
+                  joinDate:new Date(paticularAcc.createdAt).toDateString(),
+                  following:fmt(following.length),
+                  followers:fmt(followers.length),
+                  Posts:fmt(posts.length),
+                  isCompleted:paticularAcc.account.completed,
+                  isVerified:paticularAcc.isVerified.value,
+                  plan:paticularAcc.isVerified?.level || 'Free',
+                  bannerUrl:paticularAcc.banner.url,
+                  avatarUrl:paticularAcc.avatar.url
+              },
+              IsFollowing: isfollowing ? true : false
+          }
+  
+      }
+  
+      // Resolve and flatten mutual following IDs...
+      // const resolvedMutualFollowing = await Promise.all(mutualFollowingId);
+      // const flattenedMutualIds = resolvedMutualFollowing.flat();
+  
+      // getting the accounts of mutual followers...
+      // const mappedAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
+      //     return returnAccountDataInStructure(accId);
+      // }));
+      // const mutualFriendAccounts = mappedAccounts.filter(account => !account?.IsFollowing);
+      // const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id));
+  
+      // getting more accounts for suggestions...
+      // const ageRange = ['0-13','13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'] ;
+      // const genderArray = ['male', 'female', 'none'] ;
+  
+      // these feilds might be missing for newly created accounts...
+      // const myGender = myAccount?.interests?.gender ?? 'none';
+      // const myAgeRange = myAccount?.interests?.ageRange ?? '0-13';
+      // const filteredTopics = myAccount?.interests?.topicsLoved ?? [] ; // engagement topics array...
+  
+      // const indexOfAgeRange = ageRange.findIndex((r) => r === myAgeRange); // getting the index in ageRange...
+      // const indexOfGender = genderArray.findIndex((g) => g === myGender); // same for gender...
+  
+      // const safeIndexOfAgeRange = indexOfAgeRange === -1 ? 0 : indexOfAgeRange;
+      // const safeIndexOfGender = indexOfGender === -1 ? 2 : indexOfGender;
+  
+      // opposite gender filter for increasing engagement...
+      // const oppositeGender = genderArray[safeIndexOfGender] === 'none' ? ' ' : (genderArray[safeIndexOfGender] === 'male' ? 'female' : 'male');
+      // const targetAge = (ageRange.length - safeIndexOfAgeRange)  >= 2
+      //     ? (ageRange[safeIndexOfAgeRange] || ageRange[safeIndexOfAgeRange + 1] || ageRange[safeIndexOfAgeRange + 2])
+      //     : (ageRange[ageRange.length - 1] || ageRange[ageRange.length - 2]);
+  
+      // const moreAccounts = await accounts.find({
+      //     $and:[
+      //         {'interests.gender' : oppositeGender},
+      //         { 'interests.ageRange' : targetAge },
+      //         {'interests.topicsLoved' : { $in: filteredTopics } },
+      //         { _id: { $nin: blockedIds } },
+      //     ]
+      // }) ;
+  
+      // getting account whose content , user like & comment...
+      // likes.accountId should be the viewer's account (_id) not user.id (user doc _id)
+      const myLikes  = await likes.find({ $and:[ { accountId: myAccount._id },{ targetType:{ $in: ['Post','Comment'] } }]}) ;
+      // const MappedlikedToAcc = await Promise.all(myLikes.map( async ( like ) => {
+      //     return returnAccountDataInStructure((like.targetAccount as mongoose.Types.ObjectId).toString());
+      // }));
+  
+      // const filteredLikedToAcc = MappedlikedToAcc.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
+  
+      //  const postsContentUserCommented = await Post.find({ $and:[{ authorId: user.id },{ replyToPostId: { $exists: true, $ne: null } },{ isDeleted:false }]}) ;
+  
+      // const accountsWhosPost = await Promise.all(postsContentUserCommented.map( async (post) => {
+      //     const commentedOnPost = await Post.findById(post.replyToPostId) ;
+      //     return returnAccountDataInStructure(commentedOnPost.authorId) ;
+      // })) ;
+      // const filteredAccountsWhosPost = accountsWhosPost.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing);
+  
+      // // removing the duplicacy from account array...
+      // const uniqueAccArr = [...new Set([...filteredMutualFriendAccounts,...moreAccounts,...filteredLikedToAcc,...filteredAccountsWhosPost])];
+      // // sorting the array based on subscription level...
+      // const planOrder: Record<Plan, number> = { Free: 0, Pro: 1, Creator: 2, Enterprise: 3 };
+  
+      // // sorting logic...
+      // const sortedArr = uniqueAccArr.sort((a, b) => {
+      //     const aPlan = (a.account?.plan || 'Free') as Plan;
+      //     const bPlan = (b.account?.plan || 'Free') as Plan;
+      //     const aLevel = planOrder[aPlan] ?? 0;
+      //     const bLevel = planOrder[bPlan] ?? 0;
+          
+      //     if (aLevel !== bLevel) return bLevel - aLevel;
+          
+      //     const aVerified = a.account?.isVerified ?? false;
+      //     const bVerified = b.account?.isVerified ?? false;
+      //     if (aVerified !== bVerified) return aVerified ? -1 : 1;
+              
+      //     return 0;
+      // });
+  
+      const initialSuggstions = await accounts.find({ $and:[{ _id: { $ne: myAccount._id }},{'account.status': 'ACTIVE' }] }) ;
+      const sortedArr = await Promise.all(initialSuggstions.map( async (account) => {
+          return returnAccountDataInStructure(account._id) ;
+      }))
+
+      return NextResponse.json({ message:'Account suggestions fetched !!' , suggestions:sortedArr },{ status:200 })
+}
