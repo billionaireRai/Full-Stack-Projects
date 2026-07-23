@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
+import { EncryptedMessage, messageDecryptionTopLevel ,importRespectiveKey } from '@/lib/encryption'
 import useActiveAccount from '@/app/states/useraccounts'
 import { useTheme } from 'next-themes'
 // import useMessageSocket from '@/app/hooks/useMessageSocket'
@@ -22,6 +23,7 @@ import Audioplayer from './Audioplayer'
 import axiosInstance from '@/lib/interceptor'
 import Messagesearch from './messagesearch'
 import Clearchatpop from './clearchatpop'
+import Messagesloader from './messagesloader'
 
 interface Message {
   id: string
@@ -33,6 +35,27 @@ interface Message {
   isOwn: boolean
   avatar: string
   status?: 'sent' | 'delivered' | 'seen'
+}
+
+interface MessageMetaData {
+    id: string ;
+    fromId: string ;
+    toId: string ;
+    isSender: boolean ;
+    mediaUrls?: mediaType[] ;
+    mentions?: string[] ,
+    status?: 'sent' | 'delivered' | 'seen' ,
+    createdAt: string
+}
+
+interface messageReturnedType {
+  encrypted:EncryptedMessage ;
+  msgMetadata:MessageMetaData ;
+}
+
+interface messageinbetween {
+  msgtxt:string ;
+  metadata:MessageMetaData ;
 }
 
 interface attachmentOptionType {
@@ -56,12 +79,15 @@ interface MessageCardProps {
 export default function MessageCard({ chatCardDetails, openBlockPop, openReportPop, handleAddChat, updateCardDetail, openDeletePop , muteToggleAction , pinToggleAction }: MessageCardProps) {
   const { resolvedTheme } = useTheme() ;
   const { Account } = useActiveAccount();
+  const privatekey = localStorage.getItem('privatekey') ;
   const { messages, addMessages } = useActiveChatMessages() ;
   // const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
 
   const heightGap = 200;
   const [backPage, setbackPage] = useState<number>(1);
+  const [messageSize, setSize] = useState(15);
   const [hasMoreMessages, sethasMoreMessages] = useState<boolean>(true);
+  const [loadingMsgs, setloadingMsgs] = useState<boolean>(false);
   const msgsection = useRef<HTMLDivElement | null>(null)
 
   const imageRef = useRef<HTMLInputElement | null>(null)
@@ -135,6 +161,72 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     updateCardDetail(messages[messages.length - 1].text, messages[messages.length - 1].timestamp)
     
   }, [lastMessageKey])
+
+  // function for decrypting a page message...
+  async function convertPlainMsgs(encryptedMsgs: messageReturnedType[],privateKey:CryptoKey): 
+  Promise<messageinbetween[]> {
+    const decryptedMessages= [] ;
+    for (const msg of encryptedMsgs) {
+      const decryptedMsg = await messageDecryptionTopLevel(msg.encrypted, privateKey, msg.msgMetadata.isSender);
+      decryptedMessages.push({ msgtxt:decryptedMsg , metadata:msg.msgMetadata });
+    }
+    return decryptedMessages ;
+  }
+
+  function getMessageInStructure(msgs:messageinbetween[]): Message[] {
+    return msgs.map((msg, idx) => {
+      const time = new Date(msg.metadata.createdAt) ;
+      if (msg.metadata.isSender) {
+        return {
+          id: msg.metadata.id,
+          sendername: Account.name || 'You',
+          senderhandle: Account.decodedHandle || '@unknown',
+          text: msg.msgtxt,
+          timestamp: time.toLocaleString(),
+          isOwn: msg.metadata.isSender ,
+          avatar: Account.account?.avatarUrl || '',
+          status: msg.metadata.status,
+        }
+      } else {
+        return {
+          id: msg.metadata.id,
+          sendername: chatCardDetails?.name || 'Unknown',
+          senderhandle: chatCardDetails?.handle || '@unknown',
+          text: msg.msgtxt,
+          timestamp: time.toLocaleString(),
+          isOwn: msg.metadata.isSender,
+          avatar: chatCardDetails?.avatarUrl || '',
+        }
+      }
+    })
+  }
+  // function for fetching messages...
+  async function fetchMessagesForPage() {
+    if (!privatekey) return ;
+    setloadingMsgs(true);
+    try {
+      const messageApi = await axiosInstance.post('/api/chat/messages',{ page:backPage , size:messageSize , convid:chatCardDetails?.id });
+      const privKey = await importRespectiveKey(privatekey,'private') ;
+      if (messageApi.data.success && messageApi.status === 200) {
+        const plainMsgs = await convertPlainMsgs(messageApi.data.messages,privKey);
+        const structuredMessages = getMessageInStructure(plainMsgs);
+        addMessages(structuredMessages);
+        setloadingMsgs(false);
+      }
+    } catch (error) {
+      console.log("An Error Occured : ",error);
+      setloadingMsgs(false);
+    } finally {
+      setloadingMsgs(false);
+    }
+
+  }
+
+  useEffect(() => {
+    // fetchMessagesForPage();
+    // setbackPage(backPage + 1);
+  }, [backPage])
+  
   
   // for fetching older messages...
   useEffect(() => {
@@ -142,23 +234,21 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     if (!section) return ;
 
     const handleScroll = () => {
-      // scrolled near the bottom...
-      const distanceFromBottom = section.scrollHeight - section.scrollTop - section.clientHeight ;
-      setshowDownArrow(distanceFromBottom > 1) ;
-
+      // scrolled near the top...
       if (section.scrollTop <= heightGap && hasMoreMessages) {
-        // getting more old messages...
+        // fetchMessagesForPage()
+        // setbackPage(backPage + 1);
       }
     }
 
     // calling scroll function...
-    handleScroll()
+    handleScroll();
 
-    section.addEventListener('scroll', handleScroll, { passive: true })
+    section.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      section.removeEventListener('scroll', handleScroll)
+      section.removeEventListener('scroll', handleScroll);
     }
-  }, [heightGap,hasMoreMessages, messages.length])
+  }, [heightGap,hasMoreMessages,messages.length])
 
 
 
@@ -473,6 +563,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
       {/* Messages */}
       <AnimatePresence> 
       <div ref={msgsection} className={`overflow-y-auto relative overflow-x-hidden flex gap-2 flex-col p-2 h-full rounded-md ${chatCardDetails.blockedTo && 'blur-sm'}`}>
+        {loadingMsgs && ( <Messagesloader msgnums={4} />)}
           {messages.length > 0 && messages.map((message, idx) => (
             <motion.div
               layout

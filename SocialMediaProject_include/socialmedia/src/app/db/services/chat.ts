@@ -223,5 +223,73 @@ export const messageCreationService = async (data:messageCreationPayload) => {
 }
 
 export const messageFinalStatusUpdation = async (status:string,msgid:string) => {
+    await connectWithMongoDB() ; // connecting with mongodb...
     
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST..'});
+        
+    const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    // status updation...
+    await messages.findByIdAndUpdate(msgid,{ status }) ;
 }
+
+export const fetchMessagesService = async ({ page , size , convid }:{ page:number ; size:number , convid:string }) => {
+    await connectWithMongoDB() ; // connecting with mongodb...
+    
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST..'});
+        
+    const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    // Verify conversation exists and account is a participant
+    const Conversation = await conversation.findOne({ _id: convid, participants: { $in: [activeAcc._id] }, deletedBy: { $nin: [activeAcc._id] }});
+
+    if (!Conversation) return NextResponse.json({ message: 'Conversation not found' }, { status: 404 });
+
+    // Get the other participant's ID
+    const otherParticipantId = Conversation.participants.find((pid: string) => pid.toString() !== activeAcc._id.toString());
+
+    // Fetching paginated messages...
+    const totalMessages = await messages.countDocuments({ conversationId: convid,deletedFor: { $nin: [activeAcc._id] }});
+    const skip = (page - 1) * size ;
+
+    const fetchedMessages = await messages.find({ conversationId: convid , deletedFor: { $nin: [activeAcc._id] }})
+    .sort({ createdAt: -1 }) // newest first for pagination
+    .skip(skip)
+    .limit(size)
+    .lean();
+
+    // Reverse to chronological order for the client
+    const orderedMessages = fetchedMessages.reverse();
+
+    // Mapping to the encrypted structure expected by the client...
+    const messageList = orderedMessages.map((msg: any) => {
+        const isSender = msg.fromId.toString() === activeAcc._id.toString();
+        return {
+            encrypted: {
+                cipherText: msg.encryptedMsg,
+                iv: msg.iv,
+                senderEncryptedKey: msg.senderEncryptedKey,
+                receiverEncryptedKey: msg.receiverEncryptedKey,
+                algorithm: msg.algorithm || "AES-256-GCM",
+            },
+            msgMetadata:{
+                isSender,
+                id: msg._id.toString(),
+                fromId: msg.fromId.toString(),
+                toId: msg.toId.toString(),
+                mediaUrls: msg.mediaUrls || [],
+                mentions: msg.mentions || [],
+                status: msg.status || 'sent',
+                createdAt: msg.createdAt?.toISOString() || new Date().toISOString()
+            }
+    }})
+
+    const hasMore = (page * size) < totalMessages;
+
+    return NextResponse.json({ success: true, messages: messageList, hasMore }, { status: 200 });
+}
+

@@ -1,12 +1,14 @@
 'use client'
 
-import React, { useState , useEffect } from 'react'
+import React, { useState , useEffect , useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import PostCard from '@/components/postcard'
-import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontal, Bookmark, ArrowDownUp, Shuffle, ArrowDown, ArrowUp, Heart, MessageCircle, Repeat, Eye, Check, Users} from 'lucide-react'
+import Activebeep from '@/components/activebeep'
+import { featureDemoType } from '../feed/page'
+import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontal, Bookmark, ArrowDownUp, Shuffle, ArrowDown, ArrowUp, Heart, MessageCircle, Repeat, Eye, Check, Users , SparklesIcon , CalendarClockIcon , InfinityIcon } from 'lucide-react'
 import TrendingCard from '@/components/trendingcard'
 import UserCard from '@/components/usercard'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -65,6 +67,7 @@ interface PostType {
 export default function Bookmarkedpage(){
   const router = useRouter() ; // intializing the useRouter hook....
   const params = useParams();
+  const postsSection = useRef<HTMLDivElement | null>(null);
   const pageHandle = decodeURIComponent(String(params.username)) ;
   const [bookmarkOptionsOpen, setBookmarkOptionsOpen] = useState<boolean>(false);
   const [selectedSort, setSelectedSort] = useState<string>('newest');
@@ -174,6 +177,22 @@ export default function Bookmarkedpage(){
       hour12: true
     });
   };
+
+const [featureDemo, setfeatureDemo] = useState<featureDemoType[]>([
+  {
+    icon:<SparklesIcon size={25} />,
+    lable:'AI powered features for enhancement of you post content'
+  },
+  {
+    icon:<CalendarClockIcon size={25} />,
+    lable:'Schedule your post to get uploaded automatically in future'
+  },
+  {
+    icon:<InfinityIcon size={25} />,
+    lable:'Unlimited posting & commenting in any time bracket'
+  },
+
+])
 
 const [PostDetails, setPostDetails] = useState<PostType[]>([
 {
@@ -536,12 +555,48 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
   useEffect(() => {
   // getPostsAndSuggestions() ; // calling the fetching functions
   }, [])
+
+  // fetching posts by pagination...
+  useEffect(() => {
+     const section = postsSection.current ;
+     if (!section) return ;
+     
+     const handleScroll = () => {
+       const distanceFromBottom = section.scrollHeight - section.scrollTop - section.clientHeight ;
+       if (distanceFromBottom <= autoHeightGap && hasFeed) {
+         getFeedPosts();
+         setPage(Page + 1);
+       }
+      }
+      // calling scroll function...
+      handleScroll() ;
+       
+      feedsection.addEventListener('scroll', handleScroll, { passive: true })
+      return () => {
+       feedsection.removeEventListener('scroll', handleScroll)
+     }
+  }, [autoHeightGap,hasFeed,feedPosts.length])
   
+   // useeffect for more popup closing...
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+         if (bookmarkOptionsOpen && !(event.target as Element).closest('.option-pop')) {
+           setBookmarkOptionsOpen(false)
+         }
+      }
+        
+      if (bookmarkOptionsOpen) {
+        document.addEventListener('mousedown', handleClickOutside)
+      }
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }, [bookmarkOptionsOpen])
 
   return (
-    <div className='h-fit flex flex-row gap-4 font-poppins rounded-lg p-4 dark:bg-black'>
-      <div className='leftContainer flex flex-col flex-1 rounded-lg'>
-           <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-4 border-gray-300 dark:border-gray-800 bg-white/90 dark:bg-black/90 shadow-lg">
+    <div className='h-screen flex flex-row gap-4 font-poppins rounded-lg p-4 dark:bg-black'>
+      <div ref={postsSecction} className='leftContainer flex flex-col flex-1 overflow-y-scroll rounded-lg'>
+           <header className="sticky top-0 w-full z-10 backdrop-blur-sm border-b rounded-lg mb-4 border-gray-300 dark:border-gray-900 bg-white/90 dark:bg-black/90 shadow-lg">
              <div className="p-2">
                <div className="flex items-center relative gap-2">
                  <button
@@ -550,11 +605,11 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                    <Image src='/images/up-arrow.png' width={30} height={30} alt='back-arrow' className='-rotate-90 dark:invert' />
                  </button>
                  <div className="ml-4">
-                    <h1 className="text-xl font-bold">Saved Posts<span className='text-yellow-400 p-3 dark:text-blue-500'>{PostDetails.length}</span></h1>
-                  <Link href={`/${pageHandle}`} className="text-xs px-3 py-1 rounded-lg w-fit hover:bg-gray-100 transition-all duration-300 dark:hover:bg-gray-950 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">{pageHandle}</Link>
+                    <h1 className="text-xl font-bold">Saved Posts<span className='text-yellow-400 p-3 dark:text-yellow-500'>{PostDetails.length}</span></h1>
+                  <Link href={`/${pageHandle}`} className="text-xs px-3 py-1 rounded-lg w-fit hover:bg-yellow-100 transition-all duration-300 dark:hover:bg-gray-950 text-yellow-500 dark:text-yellow-400">{pageHandle}</Link>
                  </div>
                   <div className='absolute right-0 mx-3 flex items-center gap-2'>
-                      <p className="text-sm text-black hidden dark:text-gray-400 truncate sm:block sm:w-[170px] lg:w-fit">Posts you've saved for future</p>
+                      <p className="text-xs text-black hidden dark:text-gray-400 truncate sm:block sm:w-[170px] lg:w-fit">Posts you've saved for future</p>
                       <Bookmark width={20} height={20} className='fill-black stroke-black dark:fill-white dark:stroke-white'/>
                   </div>
                 </div>
@@ -564,7 +619,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                         <button 
                         onClick={() => { handleReversePostOrder() }}
                         type="button" className='cursor-pointer p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-gray-950'>
-                          <ArrowDownUp/>
+                          <ArrowDownUp size={16} />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>Reverse post order</TooltipContent>
@@ -574,7 +629,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                         <button 
                         onClick={() => { handleShufflePosts() }}
                         type="button" className='cursor-pointer p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-gray-950'>
-                          <Shuffle/>
+                          <Shuffle size={16} />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>Shuffle posts</TooltipContent>
@@ -587,22 +642,24 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             onClick={() => setBookmarkOptionsOpen(!bookmarkOptionsOpen)}
                             className='cursor-pointer p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-gray-950'
                           >
-                            <MoreHorizontal/>
+                            <MoreHorizontal size={16} />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>More options</TooltipContent>
                       </Tooltip>
                       {bookmarkOptionsOpen && (
                         <motion.div 
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }} 
-                        className="absolute right-0 mt-2 w-56 bg-white dark:bg-black rounded-lg shadow-lg dark:shadow-gray-800 border border-gray-200 dark:border-gray-700 z-50 p-2">
+                          initial={{ opacity: 0, scale: 0.9, y: 0 }}
+                          animate={{ opacity: 1, scale: 1, y: -8 }}
+                          exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                          transition={{ duration: 0.15, ease: 'easeOut' }}
+                          style={{ transformOrigin: 'top right', willChange: 'transform, opacity' }}
+                          className="option-pop absolute right-0 top-0 w-56 bg-white dark:bg-black rounded-lg shadow-lg dark:shadow-gray-800 border border-gray-200 dark:border-gray-900 z-50 p-1">
                           <button
                             onClick={() => { setSelectedSort('newest'); setBookmarkOptionsOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'newest' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
-                            <ArrowDown size={16}  />
+                            <ArrowDown size={20}  />
                             <span>Newest first</span>
                             {selectedSort === 'newest' && <Check size={16} className="ml-auto stroke-2" />}
                           </button>
@@ -610,7 +667,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             onClick={() => { setSelectedSort('oldest'); setBookmarkOptionsOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'oldest' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
-                            <ArrowUp size={16} />
+                            <ArrowUp size={20} />
                             <span>Oldest first</span>
                             {selectedSort === 'oldest' && <Check size={16} className="ml-auto" />}
                           </button>
@@ -618,7 +675,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             onClick={() => { setSelectedSort('likes'); setBookmarkOptionsOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'likes' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
-                            <Heart size={16} />
+                            <Heart size={20} />
                             <span>Most liked</span>
                             {selectedSort === 'likes' && <Check size={16} className="ml-auto" />}
                           </button>
@@ -626,7 +683,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             onClick={() => { setSelectedSort('comments'); setBookmarkOptionsOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'comments' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
-                            <MessageCircle size={16} />
+                            <MessageCircle size={20} />
                             <span>Most commented</span>
                             {selectedSort === 'comments' && <Check size={16} className="ml-auto" />}
                           </button>
@@ -634,7 +691,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             onClick={() => { setSelectedSort('reposts'); setBookmarkOptionsOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'reposts' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
-                            <Repeat size={16} />
+                            <Repeat size={20} />
                             <span>Most reposted</span>
                             {selectedSort === 'reposts' && <Check size={16} className="ml-auto" />}
                           </button>
@@ -642,7 +699,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             onClick={() => { setSelectedSort('views'); setBookmarkOptionsOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'views' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
-                            <Eye size={16} />
+                            <Eye size={20} />
                             <span>Most viewed</span>
                             {selectedSort === 'views' && <Check size={16} className="ml-auto" />}
                           </button>
@@ -687,83 +744,56 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
               ))}
             </div>
       </div>
-      <div className='rightContainer hidden lg:block w-96'>
+      <div className='rightContainer overflow-y-scroll hidden lg:block w-96'>
         <div className='space-y-4'>
-              {/* What's happening */}
-              <div className='bg-gray-50 p-2 dark:bg-black rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg transition-shadow duration-300'>
-                <div className='px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center'>
-                  <h2 className='text-xl font-bold text-gray-900 dark:text-white'>What's happening</h2>
-                  <svg className='h-5 w-5 text-gray-500 dark:text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
-                  </svg>
-                </div>
-                <div className='p-3 space-y-2'>
-                  <TrendingCard
-                    id={1}
-                    trendName="#TechInnovation"
-                    postCount="45.2K"
-                    category="Technology"
-                    iconType="trending"
-                    gradientFrom="from-blue-500"
-                    gradientTo="to-cyan-500"
-                  />
-                  <TrendingCard
-                    id={2}
-                    trendName="#ClimateAction"
-                    postCount="28.7K"
-                    category="Trending"
-                    iconType="flame"
-                    gradientFrom="from-orange-500"
-                    gradientTo="to-red-500"
-                  />
-                  <TrendingCard
-                    id={3}
-                    trendName="#Gaming"
-                    postCount="156K"
-                    category="Gaming"
-                    iconType="gamepad"
-                    gradientFrom="from-purple-500"
-                    gradientTo="to-pink-500"
-                  />
-                  <TrendingCard
-                    id={4}
-                    trendName="#Business"
-                    postCount="89.3K"
-                    category="Business"
-                    iconType="briefcase"
-                    gradientFrom="from-green-500"
-                    gradientTo="to-emerald-500"
-                  />
-                </div>
-                <div className='p-3 border-t flex items-center justify-between border-gray-200 dark:border-gray-700'>
-                  <Link href={`/explore?q=${encodeURIComponent('trend-nowdays')}&utm_source=show-more`} className='cursor-pointer text-blue-500 rounded-full hover:bg-blue-100 p-2 hover:text-blue-600 text-sm font-medium transition-colors'>
-                    Show more
-                  </Link>
-                </div>
+            {/* Who to Follow */}
+            <div className='relative bg-white dark:bg-black rounded-xl shadow-lg'>
+              <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center border-gray-200 dark:border-gray-900'>
+                <Users size={20} /><h2 className='text-xl font-bold text-gray-900 dark:text-white'>Suggestions</h2>
               </div>
-
-              {/* Who to Follow */}
-              <div className='relative bg-white dark:bg-black rounded-xl shadow-lg'>
-                <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center border-gray-200 dark:border-gray-700'>
-                  <Users size={20} /><h2 className='text-xl font-bold text-gray-900 dark:text-white'>Suggestions</h2>
-                </div>
-                <div className='p-4'>
-                  {whoToFollow.map((usercard,index) =>
-                    (index+1) <= suggesstionNum && (
-                    <div key={index + 1} className='flex items-center justify-between'>
-                     <UserCard content={null} decodedHandle={usercard.decodedHandle} name={usercard.name} IsFollowing={usercard.IsFollowing}
-                     account={usercard.account} />
-                    </div>)
-                  )}
-                </div>
-                <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
-                  <button 
-                    onClick={() => { handleSuggesstionShow() }}
-                    className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'>
-                    { ShowLess ? 'Show less' : 'Show more' }
-                  </button>
-                </div>
+              <div className='p-4'>
+                {whoToFollow.map((usercard,index) =>
+                  (index+1) <= suggesstionNum && (
+                  <div key={index + 1} className='flex items-center justify-between'>
+                   <UserCard content={null} decodedHandle={usercard.decodedHandle} name={usercard.name} IsFollowing={usercard.IsFollowing}
+                   account={usercard.account} />
+                  </div>)
+                )}
               </div>
+              <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-900'>
+                <button 
+                  onClick={() => { handleSuggesstionShow() }}
+                  className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
+                  { ShowLess ? 'Show less' : 'Show more' }
+                </button>
+              </div>
+            </div>
+        </div>
+        {/* card to subscribe... */}
+        <div className='bg-white dark:bg-black rounded-xl flex flex-col gap-2 border p-4 border-gray-200 dark:border-gray-900 shadow-sm'>
+            <div className='flex item-center justify-between gap-3'>
+              <div className='flex items-center justify-start gap-2'>
+                <span className='text-xl font-semibold'>Upgrade subscription</span>
+                <span className='flex items-center justify-center bg-yellow-100 dark:bg-gray-950 p-1 rounded-full'>
+                    <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-account'/>
+                </span>
+              </div>
+              <Activebeep />
+            </div>
+            <p className='text-xs text-gray-400'>
+                Upgrading your subscription plan allows you to unlock new features and if eligible , recieve a share of revenue...
+            </p>
+            <div className='borer border-black p-2 flex flex-col gap-2 rounded-lg'>
+               {featureDemo.length > 0 && featureDemo.map((feature,idx) => (
+                <div key={idx} className='border ring-3 ring-yellow-400/30 dark:ring-yellow-600/20 border-yellow-400 dark:border-yellow-600 flex items-center gap-2 p-2 justify-center rounded-lg'>
+                   <span>{feature.icon}</span>
+                   <span className='text-xs text-gray-500'>{feature.lable}</span>
+                 </div>
+               ))}
+             </div>
+             <Link href='/subscription?plan=Pro&term=Monthly&utm_source=feed-page' className='w-fit rounded-lg'>
+               <button className='cursor-pointer w-fit py-2 px-4 mt-1 font-semibold hover:shadow-md shadow-sm shadow-yellow-100 dark:shadow-yellow-900 dark:bg-yellow-500 bg-yellow-400 transition-shadow duration-300 rounded-lg'>Subscribe</button>
+            </Link>
         </div>
       </div>
     </div>

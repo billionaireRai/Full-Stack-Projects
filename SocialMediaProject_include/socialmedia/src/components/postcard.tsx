@@ -768,8 +768,8 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
                  <button
                  key={i}
                  ref={action.label === 'Share' ? shareRef : null}
-                 className="flex items-center group py-1.5 sm:py-1 sm:px-3 rounded-lg text-gray-500 dark:text-white hover:text-yellow-500    dark:hover:text-yellow-500 transition-all text-sm cursor-pointer" >
-                   <span onClick={() => { actionClick(action) }} className='p-2 rounded-full group-hover:bg-yellow-100    dark:group-hover:bg-gray-950'>{action.icon}</span>
+                 className="flex items-center group py-1.5 sm:py-1 sm:px-3 rounded-lg text-gray-500 dark:text-white hover:text-yellow-500 dark:hover:text-yellow-500 transition-all text-sm cursor-pointer" >
+                   <span onClick={() => { actionClick(action) }} className='p-2 rounded-full group-hover:bg-yellow-100    dark:group-hover:bg-yellow-950'>{action.icon}</span>
                    <span className={`hidden sm:inline ${(action.label === 'Like' && isLiked) || (action.label ==='Repost' && isReposted) ||    (action.label === 'Comment' && isCommented) || (action.label === 'Bookmark' && isBookmarked) ? 'text-yellow-500 dark:text-yellow-500' : ''}`}>{action.value}</span>
                  </button>
               </TooltipTrigger>
@@ -791,7 +791,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
                  animate={{ opacity: 1, scale: 1, y: 0 }}
                  exit={{ opacity: 0, scale: 0.85, y: 6 }}
                  transition={{ duration: 0.1 }}
-                 className="pop-container flex flex-col absolute m-1 top-full z-100 right-0 w-74 p-1 overflow-hidden rounded-xl border border-gray-200/70 dark:border-gray-800 bg-white/95 dark:bg-black/90 shadow-xl shadow-black/5 dark:shadow-gray-950/50 backdrop-blur">
+                 className="pop-container flex flex-col absolute z-100 -right-1 -top-1 w-74 p-1 overflow-hidden rounded-xl border border-gray-200/70 dark:border-gray-800 bg-white/95 dark:bg-black/90 shadow-xl shadow-black/5 dark:shadow-gray-950/50 backdrop-blur">
 
                 <div className="px-3 py-2 border-b border-gray-100/80 rounded-lg dark:border-gray-900/70">
                   <div className="flex items-center gap-2">

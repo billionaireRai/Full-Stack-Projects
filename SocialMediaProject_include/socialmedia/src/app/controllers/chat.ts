@@ -1,6 +1,6 @@
 import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "../middleware/errorMiddleware";
-import { clearChatHistoryService, getAttachmentsOfChatService, muteChatService, pinChatService } from "../db/services/chat";
+import { clearChatHistoryService, fetchMessagesService, getAttachmentsOfChatService, muteChatService, pinChatService } from "../db/services/chat";
 import { mediaType } from "@/components/mediapopmodal";
 import { userCardProp } from "../db/services/user";
 
@@ -54,4 +54,15 @@ export const clearChatHistoryController = asyncErrorHandler(async (request:NextR
 
     await clearChatHistoryService(conversationid); // calling service for mute...
     return NextResponse.json({ message:'Chat history cleared successfully' },{ status:200 });
+})
+
+export const fetchMessagesController = asyncErrorHandler( async (request:NextRequest) => {
+    const { page , size , convid } = await request.json() ; // extracting pagination variables...
+
+    if (!page || !size || !convid) {
+        console.log("Any neccesary credential missing !!") ;
+        return NextResponse.json({ message:'Credential missing' },{ status:400 });
+    }
+
+    return await fetchMessagesService({ page , size , convid }) ;
 })

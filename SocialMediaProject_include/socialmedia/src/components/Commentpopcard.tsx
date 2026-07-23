@@ -45,7 +45,6 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
   const [searchLocationPop, setsearchLocationPop] = useState<boolean>(false);
   const [mentions, setmentions] = useState<string[]>([]);
   const [AddLocation, setAddLocation] = useState<{ name: string; coordinates: number[] }[]>([]);
-  const [isFocused, setIsFocused] = useState<boolean>(false);
   const [isPosting, setIsPosting] = useState<boolean>(false);
   const { resolvedTheme } = useTheme() ;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -284,19 +283,13 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
                      <PollInPost poll={poll} />
                   </div>
                 )}
-               <div className={`relative flex flex-row items-center rounded-3xl border transition-all duration-300 ease-out ${
-                     isFocused
-                       ? 'border-yellow-500/80 dark:border-yellow-400/80 ring-2 ring-yellow-400/20 dark:ring-yellow-500/30 bg-white/95 dark:bg-gray-900 shadow-lg shadow-yellow-500/10 backdrop-blur-sm scale-[1.005]'
-                       : 'border-transparent bg-white/80 dark:bg-gray-950/80 shadow-sm backdrop-blur-sm hover:border-gray-200/50 dark:hover:border-zinc-700/50 hover:shadow-md'
-                   }`}>
+               <div className={`relative flex flex-row items-center`}>
                   <textarea
                     ref={textareaRef}
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
                     placeholder="Post your reply..."
-                    className="w-full text-gray-900 dark:text-gray-100 text-[13px] resize-none border-none outline-none placeholder-gray-500 dark:placeholder-gray-400 p-3 min-h-[120px] max-h-[150px] transition-colors duration-200 caret-yellow-500 dark:caret-yellow-400 focus:caret-yellow-500"
+                    className="w-full text-gray-900 transition-all duration-300 border border-yellow-500 dark:text-gray-300 rounded-3xl text-[13px] resize-none outline-none placeholder-gray-500 dark:placeholder-gray-400 p-3 min-h-[120px] max-h-[150px]  focus:ring-3 ring-yellow-500/30 dark:ring-yellow-500/20"
                     rows={3}
                     maxLength={maxChars}
                   />
@@ -523,7 +516,7 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
               className={`cursor-pointer flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 ${
                 replyText.trim() 
                   ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-500 shadow-sm hover:shadow-md shadow-yellow-400/25 hover:shadow-yellow-400/40' 
-                  : 'bg-gray-200 dark:bg-zinc-700 text-gray-400 dark:text-zinc-500 cursor-not-allowed'
+                  : 'bg-gray-200 dark:bg-zinc-700 text-gray-400 dark:text-zinc-500 disabled:cursor-not-allowed'
               }`}
             >
               {isPosting ? (

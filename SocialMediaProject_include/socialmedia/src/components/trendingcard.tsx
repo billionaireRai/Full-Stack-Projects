@@ -42,7 +42,7 @@ export default function TrendingCard({
           {iconMap[iconType]}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{category}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{category}</p>
           <p className="font-bold text-gray-900 dark:text-white">{trendName.substring(1)}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">{postCount} posts</p>
         </div>
@@ -50,8 +50,8 @@ export default function TrendingCard({
           onClick={(e) => { e.preventDefault() ; e.stopPropagation() ; setshowOption(!showOption) }} 
           className="relative"
         >
-          <MoreHorizontal className="hover:border p-1 border-gray-400 rounded-full cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition-colors" />
-          {showOption && (
+          {/* <MoreHorizontal className="hover:border p-1 border-gray-400 rounded-full cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition-colors" /> */}
+          {/* {showOption && (
             <div className="absolute flex flex-col animate-in slide-in-from-top-2 duration-200 gap-1.5 right-7 top-0 mt-2 w-[300px] bg-white dark:bg-black dark:shadow-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 z-50 p-2">
               <button
                 className="w-full text-left px-4 py-2 cursor-pointer rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100   dark:hover:bg-gray-950 rounded-t-lg"
@@ -113,7 +113,7 @@ export default function TrendingCard({
             </div>
               </button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </Link>

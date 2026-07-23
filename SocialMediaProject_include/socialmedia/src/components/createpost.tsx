@@ -308,7 +308,7 @@ export default function CreatePost() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  className="absolute -right-30 -top-5 sm:left-0 sm:top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden"
+                  className="absolute -right-30 -top-5 sm:left-0  z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden"
                 >
                   <Aifeaturespost/>
                 </motion.div>
@@ -325,7 +325,7 @@ export default function CreatePost() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  className="absolute -right-30 -top-5 sm:left-0 sm:top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden"
+                  className="absolute -right-30 -top-5 sm:left-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden"
                 >
                   <DraftConfirmPop onConfirm={() => { setstatus('draft') ; handlePostSubmission() }} />
                 </motion.div>
@@ -346,7 +346,7 @@ export default function CreatePost() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="absolute -right-30 -top-5 sm:left-0 sm:top-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden schedule-post"
+                    className="absolute -right-30 -top-5 sm:left-0 z-[100] w-[340px] rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-black overflow-hidden schedule-post"
                   >
                     <Schedulepop
                       onSchedule={(Date, Time) => { setscheduleTime({ Date, Time }) }}

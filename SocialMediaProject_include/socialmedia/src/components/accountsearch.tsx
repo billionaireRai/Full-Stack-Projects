@@ -119,20 +119,6 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
           <Loader loadingtext={`Searching for ${searchValue.trim() ? searchValue : 'followings'}`}/>
         )}
       </AnimatePresence>
-      {!searchValue.trim() && searchedAccounts.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col h-full w-full items-center justify-center py-8 text-gray-500 dark:text-gray-400"
-        >
-          <div className="bg-yellow-100 dark:bg-gray-950 rounded-full p-4 mb-4">
-            <SearchIcon className="w-12 h-12 text-yellow-400 dark:text-yellow-500" />
-          </div>
-          <h2 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Search for Accounts</h2>
-          <p className="text-center text-sm max-w-xs">Type a <b>name</b> or <b>@handle</b> to tagg several accounts on the platform.</p>
-        </motion.div>
-      )}
     </div>
   );
 }

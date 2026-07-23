@@ -38,7 +38,7 @@ export default function FavouriteAddPop({ closePopUp, handle ,postid ,itemType =
     <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       {/* Modal */}
       <div className="relative flex items-center justify-center h-full">
-        <div className="bg-white dark:bg-black rounded-lg p-6 max-w-md mx-4 shadow-xl border border-gray-300 dark:border-gray-700">
+        <div className="bg-white dark:bg-black rounded-lg p-4 max-w-md mx-4 shadow-xl border border-gray-300 dark:border-gray-700">
           {/* Title */}
           <div className='flex items-center gap-2.5 mb-3'>
             <MdFavorite size={25}/>
@@ -46,8 +46,8 @@ export default function FavouriteAddPop({ closePopUp, handle ,postid ,itemType =
           </div>
 
           {/* Description */}
-          <p className="text-gray-700 dark:text-gray-300 text-sm mb-6">
-            Are you sure you want to add this {itemType} to your favourites? Your favourites act as preference signals, guiding recommendations and prioritizing content you’re more likely to enjoy across the platform.
+          <p className="text-gray-700 dark:text-gray-300 text-left text-xs mb-6">
+            Are you sure you want to add this {itemType} to your favourites ? Your favourites act as preference signals, guiding recommendations and prioritizing content you might be interested in.
           </p>
 
           {/* Buttons */}

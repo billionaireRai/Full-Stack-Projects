@@ -119,7 +119,7 @@ export default function SideNavbar() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
-                            className="cursor-pointer rounded-full bg-white dark:bg-black p-2 transform hover:scale-110 transition-transform ring-1 ring-gray-200 dark:ring-gray-800"
+                            className="cursor-pointer rounded-full bg-white dark:bg-black p-2 transform hover:scale-110 transition-transform ring-3 border border-yellow-500 ring-yellow-500/20 dark:ring-yellow-800/20"
                             aria-label="Toggle theme"
                           >
                             <div
@@ -128,9 +128,9 @@ export default function SideNavbar() {
                               }`}
                             >
                               {isDark ? (
-                                <Sun size={20} className="text-gray-900" />
+                                <Sun size={20} className="text-gray-900 dark:text-white" />
                               ) : (
-                                <Moon size={20} className="text-gray-900" />
+                                <Moon size={20} className="text-gray-900 dark:text-white" />
                               )}
                             </div>
                           </button>

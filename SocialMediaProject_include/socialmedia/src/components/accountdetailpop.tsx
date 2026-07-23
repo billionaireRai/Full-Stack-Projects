@@ -58,9 +58,9 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
   if (!visible) return null ;
 
   // Fixed width for consistent centering
-  const popupWidth = 340;
+  const popupWidth = 320 ;
   // Calculate centered position - subtract half of popup width
-  const centeredLeft = position.left - (popupWidth / 2);
+  const centeredLeft = position.left - (popupWidth / 2) ;
 
 return (
     <motion.div
@@ -68,7 +68,7 @@ return (
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.18 }}
-      className="fixed z-100 w-[340px] p-1 rounded-2xl border border-gray-200 dark:shadow-gray-700 dark:border-gray-800 bg-white dark:bg-black shadow-md overflow-hidden"
+      className="fixed z-100 w-[320px] p-1 rounded-2xl border border-gray-200 dark:shadow-gray-700 dark:border-gray-800 bg-white dark:bg-black shadow-md overflow-hidden"
       style={{ top: position.top, left: centeredLeft }}
       onMouseEnter={onOpen}
       onMouseLeave={onClose}
@@ -96,7 +96,7 @@ return (
             onClick={(e) => { e.stopPropagation(); handleFollowToggleLogic(); }}
             className={`text-sm font-semibold px-4 py-2
                ${IsFollowing
-               ? 'bg-white border border-gray-300 dark:border-gray-600 dark:bg-gray-950 dark:text-yellow-500 hover:bg-yellow-100        dark:hover:bg-gray-950 hover:text-yellow-400 dark:hover:text-yellow-600 cursor-pointer'
+               ? 'bg-white border border-gray-300 dark:border-gray-600 dark:bg-gray-950 dark:text-yellow-500 hover:bg-yellow-100 dark:hover:bg-gray-950 hover:text-yellow-400 dark:hover:text-yellow-600 cursor-pointer'
                : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-950 dark:hover:bg-gray-200 cursor-pointer'
                } rounded-full`}
           >
@@ -106,12 +106,12 @@ return (
 
         {/* User Info */}
         <div className="mt-2 flex flex-row gap-2.5 items-center">
-          <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base truncate">
+          <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">
             {user.name}
           </h3>
           <span><Image src='/images/yellow-tick.png' width={20} height={20} alt='blue-tick' /></span>
           <span className='text-gray-700'>.</span>
-          <p className="text-gray-500 dark:text-gray-400 text-sm truncate">{user.handle}</p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs truncate">{user.handle}</p>
         </div>
 
         {/* Bio */}
@@ -124,18 +124,18 @@ return (
         {/* Stats */}
         <div className="flex items-center gap-4 mt-3">
           <Link href={`/${user.handle}/followings`} className="flex items-center group gap-2">
-            <span className="font-bold text-gray-900 dark:text-gray-100">
+            <span className="font-bold text-gray-900 text-sm dark:text-gray-100">
               {user.following}
             </span>
-            <span className="text-gray-500 group-hover:underline dark:text-gray-400 text-sm">
+            <span className="text-gray-500 group-hover:underline dark:text-gray-400 text-xs">
               Following
             </span>
           </Link>
           <Link href={`/${user.handle}/followers`} className="flex items-center group gap-2">
-            <span className="font-bold text-gray-900 dark:text-gray-100">
+            <span className="font-bold text-gray-900 text-sm dark:text-gray-100">
               {user.followers}
             </span>
-            <span className="text-gray-500 group-hover:underline dark:text-gray-400 text-sm">
+            <span className="text-gray-500 group-hover:underline dark:text-gray-400 text-xs">
               Followers
             </span>
           </Link>

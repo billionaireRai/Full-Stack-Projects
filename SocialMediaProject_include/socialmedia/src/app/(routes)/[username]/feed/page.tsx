@@ -15,7 +15,7 @@ import CompLoader from '@/components/componentloader';
 import axiosInstance from '@/lib/interceptor';
 import Loader from '@/components/loader';
 
-interface featureDemoType {
+export interface featureDemoType {
   icon:React.JSX.Element ;
   lable:string
 }
@@ -140,7 +140,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
                 {/* Right Sidebar */}
                 <div className='right w-full overflow-y-scroll lg:w-80 xl:w-96 hidden xl:block space-y-2 m-2'>
                     {/* card to subscribe... */}
-                    <div className='bg-white dark:bg-black rounded-xl flex flex-col gap-2 border p-4 border-gray-200 dark:border-slate-700 shadow-sm'>
+                    <div className='bg-white dark:bg-black rounded-xl flex flex-col gap-2 border p-4 border-gray-200 dark:border-gray-900 shadow-sm'>
                         <div className='flex item-center justify-between gap-3'>
                           <div className='flex items-center justify-start gap-2'>
                             <span className='text-xl font-semibold'>Upgrade subscription</span>
@@ -155,7 +155,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
                         </p>
                         <div className='borer border-black p-2 flex flex-col gap-2 rounded-lg'>
                           {featureDemo.length > 0 && featureDemo.map((feature,idx) => (
-                            <div key={idx} className='border ring-3 ring-yellow-400/30 dark:ring-yellow-600/50 border-yellow-400 dark:border-yellow-600 flex items-center gap-2 p-2 justify-center rounded-lg'>
+                            <div key={idx} className='border ring-3 ring-yellow-400/30 dark:ring-yellow-600/20 border-yellow-400 dark:border-yellow-600 flex items-center gap-2 p-2 justify-center rounded-lg'>
                               <span>{feature.icon}</span>
                               <span className='text-xs text-gray-500'>{feature.lable}</span>
                             </div>

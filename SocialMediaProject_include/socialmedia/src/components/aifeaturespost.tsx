@@ -5,17 +5,17 @@ export default function Aifeaturespost() {
   const postAIfeatures =  [
     { 
          title: 'AI recommended mention',
-         desc: 'Get smart mention suggestions based on your text.',
+         desc: 'Get smart mention suggestions based on your post caption.',
          icon: <AtSign size={18} className="text-yellow-500" />
      },
      {
        title: 'Rewrite post caption',
-       desc: 'Make your post friendly, professional, or punchy.',
+       desc: 'Make your post friendly, professional, or punchy as per requirement',
        icon: <Text size={18} className="text-yellow-500" />
      },
      {
        title: 'Hashtag & keywords',
-       desc: 'Auto-suggest relevant hashtags and keywords.',
+       desc: 'Auto-suggest relevant hashtags and keywords for better distribution',
        icon: <Globe size={18} className="text-yellow-500" />
      }
   ]
@@ -26,7 +26,7 @@ export default function Aifeaturespost() {
       <div className="flex flex-col items-start gap-1">
         <h3 className="text-sm font-bold text-gray-900 dark:text-white">AI based features</h3>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Boost your posts with helpful AI suggestions.
+          Boost your posts with helpful AI enhancements.
         </p>
       </div>
      </div>
