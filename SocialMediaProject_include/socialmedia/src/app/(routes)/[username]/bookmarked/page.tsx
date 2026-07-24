@@ -4,15 +4,18 @@ import React, { useState , useEffect , useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion , AnimatePresence } from 'framer-motion'
 import PostCard from '@/components/postcard'
 import Activebeep from '@/components/activebeep'
 import { featureDemoType } from '../feed/page'
-import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontal, Bookmark, ArrowDownUp, Shuffle, ArrowDown, ArrowUp, Heart, MessageCircle, Repeat, Eye, Check, Users , SparklesIcon , CalendarClockIcon , InfinityIcon } from 'lucide-react'
+import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontal, Bookmark, ArrowDownUp, Shuffle, ArrowDown, ArrowUp, Heart, MessageCircle, Repeat, Eye, Check, Users , SparklesIcon , CalendarClockIcon , InfinityIcon, ArrowBigUpIcon } from 'lucide-react'
 import TrendingCard from '@/components/trendingcard'
 import UserCard from '@/components/usercard'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import axiosInstance from '@/lib/interceptor'
+import CompLoader from '@/components/componentloader'
+import { handleScrollToTop } from '@/lib/windowtopscroll'
+import Loader from '@/components/loader'
 
 interface mediaType {
   url: string;
@@ -67,10 +70,16 @@ interface PostType {
 export default function Bookmarkedpage(){
   const router = useRouter() ; // intializing the useRouter hook....
   const params = useParams();
+  const Size:number = 15 ;
+  const autoHeightGap:number = 400 ;
   const postsSection = useRef<HTMLDivElement | null>(null);
   const pageHandle = decodeURIComponent(String(params.username)) ;
+  const [Page, setPage] = useState<number>(1);
+  const [hasPosts, sethasPosts] = useState<boolean>(true);
   const [bookmarkOptionsOpen, setBookmarkOptionsOpen] = useState<boolean>(false);
   const [selectedSort, setSelectedSort] = useState<string>('newest');
+  const [loadingSugg, setloadingSugg] = useState<boolean>(false);
+  const [loadingPosts, setloadingPosts] = useState<boolean>(false);
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [suggesstionNum, setsuggesstionNum] = useState<number>(4);
 
@@ -250,6 +259,9 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       bio: 'Nature photographer & travel enthusiast',
       isCompleted:true,
       isVerified: false,
+      isFollowing:true,
+      isPinned:false,
+      isHighlighted:false,
       plan:'Free',
       followers: '12.5k',
       following: '892'
@@ -368,6 +380,9 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       bio: 'Yoga instructor | Wellness advocate',
       isCompleted:true,
       isVerified: true,
+      isFollowing:true,
+      isPinned:true,
+      isHighlighted:false,
       plan:'Pro',
       followers: '22.1k',
       following: '567'
@@ -540,21 +555,46 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
   }, [selectedSort,bookmarkOptionsOpen])
 
   // function for api triggering...
-  async function getPostsAndSuggestions() {
+  async function getBookmarkPosts() {
+    setloadingPosts(true);
     try {
-      const apires = await axiosInstance.get('/api/bookmark');
-      if (apires.status === 200) {
-        setPostDetails(apires.data.posts);
-        setWhoToFollow(apires.data.suggestions);
+      const bookmarkApi = await axiosInstance.post('/api/bookmark',{ Page , Size });
+      if (bookmarkApi.data.success || bookmarkApi.status === 200) {
+        setPostDetails(bookmarkApi.data.posts);
+        sethasPosts(bookmarkApi.data.hasMore);
+        setloadingPosts(false);
       }
     } catch (error) { 
       console.log("An Error Occured :",error);
+      setloadingPosts(false);
+    } finally {
+      setloadingPosts(false);
     }
   }
 
+  // function to get suggestions...
+  async function getAccountSuggestions() {
+    setloadingSugg(true);
+    try {
+      const suggApi = await axiosInstance.get('/api/bookmark');
+      if (suggApi.data.success || suggApi.status === 200) {
+        setWhoToFollow(suggApi.data.suggestions);
+        setloadingSugg(false);
+      }
+    } catch (error) {
+      console.log('An Error Occured :',error);
+      setloadingSugg(false);
+    } finally {
+      setloadingSugg(false);
+    }
+
+  }
+
   useEffect(() => {
-  // getPostsAndSuggestions() ; // calling the fetching functions
+  // getBookmarkPosts() ; // calling the fetching functions
+  // getAccountSuggestions();
   }, [])
+
 
   // fetching posts by pagination...
   useEffect(() => {
@@ -563,19 +603,19 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
      
      const handleScroll = () => {
        const distanceFromBottom = section.scrollHeight - section.scrollTop - section.clientHeight ;
-       if (distanceFromBottom <= autoHeightGap && hasFeed) {
-         getFeedPosts();
-         setPage(Page + 1);
+       if (distanceFromBottom <= autoHeightGap && hasPosts) {
+        //  getBookmarkPosts();
+        //  setPage(Page + 1);
        }
       }
       // calling scroll function...
       handleScroll() ;
        
-      feedsection.addEventListener('scroll', handleScroll, { passive: true })
+      section.addEventListener('scroll', handleScroll, { passive: true })
       return () => {
-       feedsection.removeEventListener('scroll', handleScroll)
+      section.removeEventListener('scroll', handleScroll)
      }
-  }, [autoHeightGap,hasFeed,feedPosts.length])
+  }, [autoHeightGap,hasPosts,PostDetails.length])
   
    // useeffect for more popup closing...
     useEffect(() => {
@@ -595,7 +635,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
 
   return (
     <div className='h-screen flex flex-row gap-4 font-poppins rounded-lg p-4 dark:bg-black'>
-      <div ref={postsSecction} className='leftContainer flex flex-col flex-1 overflow-y-scroll rounded-lg'>
+      <div ref={postsSection} id='leftcon' className='leftContainer flex flex-col flex-1 overflow-y-scroll rounded-lg'>
            <header className="sticky top-0 w-full z-10 backdrop-blur-sm border-b rounded-lg mb-4 border-gray-300 dark:border-gray-900 bg-white/90 dark:bg-black/90 shadow-lg">
              <div className="p-2">
                <div className="flex items-center relative gap-2">
@@ -614,6 +654,11 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                   </div>
                 </div>
                   <div className='flex items-center justify-end gap-1'>
+                     <button 
+                      onClick={() => { handleScrollToTop('leftcon') }}
+                      type="button" className='cursor-pointer p-2 rounded-full text-yellow-500 hover:bg-yellow-100 dark:hover:bg-gray-950'>
+                       <ArrowBigUpIcon size={25} />
+                     </button>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button 
@@ -743,10 +788,28 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                 />
               ))}
             </div>
+              <AnimatePresence>
+                {loadingPosts && (
+                  <motion.div
+                    className="flex flex-col items-center justify-center gap-4 mt-5"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <motion.div
+                      className="w-8 h-8 border-4 border-yellow-200 dark:border-yellow-300 border-t-yellow-500 dark:border-t-yellow-400 rounded-full animate-spin"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1 , repeat: Infinity , ease: "linear" }}
+                    />
+                    <CompLoader />
+                  </motion.div>
+                )}
+              </AnimatePresence>
       </div>
       <div className='rightContainer overflow-y-scroll hidden lg:block w-96'>
         <div className='space-y-4'>
             {/* Who to Follow */}
+            {!loadingSugg && ( 
             <div className='relative bg-white dark:bg-black rounded-xl shadow-lg'>
               <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center border-gray-200 dark:border-gray-900'>
                 <Users size={20} /><h2 className='text-xl font-bold text-gray-900 dark:text-white'>Suggestions</h2>
@@ -768,6 +831,10 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                 </button>
               </div>
             </div>
+            )}
+            {loadingSugg && (
+              <Loader />
+            )}
         </div>
         {/* card to subscribe... */}
         <div className='bg-white dark:bg-black rounded-xl flex flex-col gap-2 border p-4 border-gray-200 dark:border-gray-900 shadow-sm'>

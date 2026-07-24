@@ -22,7 +22,7 @@ import tagged from "../models/tagged";
 import Poll from "../models/polls";
 import axios from "axios";
 
-type Plan = "Free" | "Pro" | "Creator" | "Enterprise";
+type Plan = "Free" | "Pro" | "Creator" | "Premium";
 
 type profileEditMediaType = 'avatarUrl' | 'bannerUrl' ;
 
@@ -858,10 +858,14 @@ export const profileUpdateService = async (data: accountType) => {
 };
 
 export const profileDeletionService = async (handle:string) => {
+
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST.' });
+    
     await connectWithMongoDB() ; // connecting with mongodb...
 
     // Find the account by handle...
-    const account = await accounts.findOne({ username: handle, 'account.status': 'ACTIVE' , 'account.Active':true});
+    const account = await accounts.findOne({ userId:user.id , username: handle, 'account.status': 'ACTIVE' , 'account.Active':true});
     if (!account) return NextResponse.json({ message: 'Account Not found...' }, { status: 500 })
 
     // Setting account to deletion pending with scheduled deletion date 15 days 
@@ -888,5 +892,145 @@ export const blockingAccountService = async (handle:string , isBlock:boolean) =>
     await newBlockedDoc.save() ; // saving the doc...
     await follows.findOneAndUpdate({ $or:[{ followerId:myAccount._id , followingId:targetAccount._id },{ followerId:targetAccount._id , followingId:myAccount._id }]},{ isDeleted:true })
 
+}
 
+export const getBookmarkSuggestionsService = async () => {
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST.' });
+
+    await connectWithMongoDB() ;
+
+    const activeAcc = await accounts.findOne({ userId: user.id, 'account.Active': true, 'account.status': 'ACTIVE' });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    const bookmarks = await tagged.find({ $and: [{ accountId: activeAcc._id }, { taggedAs: 'bookmarked' }] });
+    const bookmarkPostIds = bookmarks.map(mark => mark.entityId);
+
+    //  getting account suggestions from bookmarked posts...
+    const suggestedAccountsPromises = bookmarkPostIds.map(async ( postid:string ) => {
+        const requiredPost = await Post.findById(postid);
+        const account = await accounts.findOne({ username: requiredPost?.handle, 'account.status': 'ACTIVE' });
+        if (!account) return null;
+        const posts = await Post.find({ authorId: account._id, isDeleted: false });
+        const isFoll = await follows.exists({ followerId: activeAcc._id, followingId: account._id, isDeleted: false });
+        return {
+            id:account._id.toString(),
+            decodedHandle:`@${account.username}`,
+            name: account.name,
+            content:account.bio,
+            IsFollowing: isFoll ? true : false ,
+            account: {
+                name: account.name,
+                handle: `@${account.username}`,
+                bio: account.bio || '',
+                location: {
+                    text: account.location?.text || '',
+                    coordinates: account.location?.coordinates || [0, 0]
+                },
+                website: account.website || '',
+                joinDate: account.createdAt ? new Date(account.createdAt).toDateString() : '',
+                following: fmt(account.followings) || '0',
+                followers: fmt(account.followers) || '0',
+                Posts: fmt(posts.length),
+                isCompleted: account.account?.completed || false,
+                isVerified: account.isVerified?.value || false,
+                plan: account.isVerified?.level || 'Free',
+                bannerUrl: account.banner?.url || '/images/default-banner.jpg',
+                avatarUrl: account.avatar?.url || '/images/default-profile-pic.png'
+            }
+        };
+    });
+
+    // Fetch blocked account IDs
+    const blockedDocs = await Block.find({ blockedByAcc: activeAcc._id, isActive: true });
+    const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
+    
+    const suggestedFromMarked = await Promise.all(suggestedAccountsPromises);
+    const filteredSuggestedFromMarked = suggestedFromMarked.filter(Boolean); // filtering the nulll values...
+
+    // getting suggestions from relations...
+
+    // generating the follow suggestions...
+    const followingDocs = await follows.find({ followerId: activeAcc._id, isDeleted: false });
+    const followingAccountId: string[] = followingDocs.map((followObj) => followObj.followingId.toString());
+
+    // getting the mutual followers...
+    const mutualFollowingIdPromises = followingAccountId.map(async (accountId: string) => {
+        const thereFollowings = await follows.find({ followerId: accountId, isDeleted: false });
+        return thereFollowings.map((followobj) => followobj.followingId.toString());
+    });
+
+    // Resolve and flatten mutual following IDs...
+    const resolvedMutualFollowing = await Promise.all(mutualFollowingIdPromises);
+    const flattenedMutualIds = resolvedMutualFollowing.flat();
+
+      async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
+        const paticularAcc = await accounts.findById(accountId) ;
+        // getting count of followers and followings...
+        const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
+        const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
+        const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
+        const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+
+        return {
+            id: paticularAcc._id.toString(),
+            decodedHandle:`@${paticularAcc.username}`,
+            name:paticularAcc.name,
+            content:paticularAcc.bio,
+            account:{
+                name:paticularAcc.name ,
+                handle:`@${paticularAcc.username}` ,
+                bio:paticularAcc.bio ,
+                location:{
+                  text:paticularAcc.location.text,
+                  coordinates:paticularAcc.location.coordinates // lat,long
+                },
+                website:paticularAcc.website,
+                joinDate:new Date(paticularAcc.createdAt).toDateString(),
+                following:fmt(following.length),
+                followers:fmt(followers.length),
+                Posts:fmt(posts.length),
+                isCompleted:paticularAcc.account.completed,
+                isVerified:paticularAcc.isVerified.value,
+                plan:paticularAcc.isVerified?.level || 'Free',
+                bannerUrl:paticularAcc.banner.url,
+                avatarUrl:paticularAcc.avatar.url
+            },
+            IsFollowing: isfollowing ? true : false
+        }
+
+    }
+
+    // getting the accounts of mutual followers...
+    const mutualFriendAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
+        return returnAccountDataInStructure(accId);
+    }));
+    const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing );
+
+    // Combine and deduplicate suggestions
+    const allSuggestions = [new Set([...filteredSuggestedFromMarked, ...filteredMutualFriendAccounts])];
+
+    // sorting the array based on subscription level...
+    const planOrder: Record<Plan, number> = { "Free": 0, "Pro": 1, "Creator": 2, "Premium": 3 };
+
+    const accountsWithSubs = Array.from(allSuggestions).map((acc: any) => {
+        const account = accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
+        const plan: Plan = (acc.account.plan as Plan) || 'Free';
+        return { acc, plan, isVerified: acc.account?.isVerified || false };
+    });
+
+    // sorting logic...
+    accountsWithSubs.sort((a, b) => {
+        const aLevel = planOrder[a.plan]; 
+        const bLevel = planOrder[b.plan];
+        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
+        if (a.isVerified !== b.isVerified) return a.isVerified ? -1 : 1; // verified first...
+
+        return 0 ;
+    });
+
+    // final sorted array...
+    const finalAcc = accountsWithSubs.map(item => item.acc);
+
+    return NextResponse.json({ success:true , suggestions:finalAcc },{ status:200 });
 }

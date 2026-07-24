@@ -14,20 +14,16 @@ interface HighlightPostPopProps {
   action?: string;
 }
 
-export default function HighlightPostPop({
-  visible,
-  onClose,
-  postId,
-  updateState,
-  action
-}: HighlightPostPopProps) {
+export default function HighlightPostPop({ visible , onClose , postId , updateState , action }: HighlightPostPopProps) {
   if (!visible) return null;
+  const stateChangeTo = ( action === 'Highlight' ) ? true : false ;
   const router = useRouter() ;
+
    // useeffect for hightlight change...
    const handleHighlightToggle = async () => {
     const loadingtoast = toast.loading('highlighting your post...');
       try {
-        const highLightApi = await axiosInstance.patch(`/api/post/control?`,{ postId:postId });
+        const highLightApi = await axiosInstance.post(`/api/post/highlight`,{ postId:postId , changeTo:stateChangeTo  });
         if (highLightApi.status === 200) {
            toast.dismiss(loadingtoast)
            updateState?.() ;
@@ -65,21 +61,24 @@ export default function HighlightPostPop({
         <div className="text-left">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Star className="w-8 h-8 text-yellow-500" />
-            <span>Highlight Post</span>
+            <span>{action} Post</span>
           </h2>
-          <p className="text-gray-600 text-sm dark:text-gray-300 mb-6">
-            Highlighting this post will feature it prominently in highlight section of your profile . This action helps showcase important or favorite content, drawing attention to posts you want to emphasize.
+          <p className="text-gray-600 text-xs text-left dark:text-gray-300 mb-6">
+            {action === 'Unhighlight'
+              ? `Unhighlighting this post will remove it from the highlight section of your profile. This action helps keep your highlights curated and up-to-date.`
+              : `Highlighting this post will feature it prominently in the highlight section of your profile. This action helps showcase important or favorite content, drawing attention to posts you want to emphasize.`
+            }
           </p>
           <div className="flex gap-3 items-start justify-center">
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2 cursor-pointer"
+              className="p-2 flex-1 text-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={() => { handleHighlightToggle() }}
-              className="px-6 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors flex items-center gap-2 cursor-pointer"
+              className="p-2 flex-1 text-center bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors cursor-pointer"
             >
               {action}
             </button>

@@ -1,7 +1,7 @@
 import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "@/app/middleware/errorMiddleware";
 import { userFollowService , userReportService , newAccountCreationService , fetchingAccountsService , switchAccountService } from "../db/services/follow";
-import { accountFetchingService ,profileSpecificDataService , profileUpdateService , profileDeletionService, blockingAccountService } from "@/app/db/services/user";
+import { accountFetchingService ,profileSpecificDataService , profileUpdateService , profileDeletionService, blockingAccountService, getBookmarkSuggestionsService } from "@/app/db/services/user";
 import { gettingAccountService } from "../db/services/account";
 import axios from "axios";
 
@@ -183,4 +183,9 @@ export const getSearchedLocation = asyncErrorHandler(async (request:NextRequest)
     }));
 
     return NextResponse.json({ message: 'Locations fetched successfully', searchedLocation: searchedLocation }, { status: 200 });
+})
+
+
+export const getBookmarkSuggestionsController = asyncErrorHandler(async (request:NextRequest) => {
+    return await getBookmarkSuggestionsService() ;
 })

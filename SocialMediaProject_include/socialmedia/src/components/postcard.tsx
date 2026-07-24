@@ -868,7 +868,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
 
       { CommentCardPop && ( <Commentpopcard Hashtags={hashTags} Mentions={mentions} Verified={isVerified} updateState={() => { handleCommentStateUpdate() }} poll={poll} postId={postId} avatar={avatar} name={username} handle={handle}  timestamp={timestamp} content={content} media={displayMedia} handleClose={() => { setCommentCardPop(false) }}/> )}
 
-      { viewPop && (<ViewClickPop closePopUp={() => { setviewPop(false) }}/> )}
+      { viewPop && (<ViewClickPop count={views} closePopUp={() => { setviewPop(false) }}/> )}
 
       { ShareDropDown && (
         <motion.div

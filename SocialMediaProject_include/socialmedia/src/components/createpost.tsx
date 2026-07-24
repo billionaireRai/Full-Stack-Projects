@@ -80,6 +80,7 @@ export default function CreatePost() {
   const { poll: PollInfo, isCreateOpen: showPollModal, setIsCreateOpen: setShowPollModal, isDisplayOpen: showDisplayModal, setIsDisplayOpen: setShowDisplayModal, resetPoll } = usePoll();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const maxPostLength : number = Account.account?.isVerified ? 500 : 100 ; // conditional length...
+  const showAiControls : boolean = Account.account?.plan === 'Premium' ? true : false ;
 
 
   // Auto-resize textarea
@@ -297,6 +298,7 @@ export default function CreatePost() {
                 </span>
               </Link>
             </div>
+            {showAiControls && (
             <div className="flex items-end rounded-full p-1"> 
              <div className="relative">
               <button type="button" onClick={() => { setisAIPop(!isAIPop) }} className="hover:bg-yellow-100 dark:hover:bg-gray-950 transition-transform duration-300 p-1 rounded-full">
@@ -356,6 +358,7 @@ export default function CreatePost() {
                 )}
               </div>
             </div>
+          )}
           </div>
           <button
             onClick={() => { setCreatePop(false) ; resetForm() }}

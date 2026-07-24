@@ -83,8 +83,8 @@ export default function SideNavbar() {
         <aside
           className={`fixed top-0 left-0 h-screen z-40 font-poppins transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          w-72 bg-white/80 dark:bg-black/80 backdrop-blur-md
-          border-r border-gray-200/70 dark:border-gray-800/70
+          w-72 bg-white/80 dark:bg-black backdrop-blur-md
+          border-none outline-none
           rounded-none`}
         >
           <div className="flex flex-col h-full p-3">

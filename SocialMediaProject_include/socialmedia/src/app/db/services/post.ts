@@ -804,7 +804,7 @@ export const postSendingViaDM = async (data:{ link:string , selectedAccounts:acc
         return NextResponse.json({ message:'Post shared via DM...' },{ status:200 });
 }
 
-export const getBookmarkAndSuggestionService = async () => {
+export const getBookmarkPostsService = async ({ Page , Size }:{ Page:number ; Size:number }) => {
     await connectWithMongoDB(); // connecting with database...
 
     // extracting cookies data...
@@ -855,8 +855,14 @@ export const getBookmarkAndSuggestionService = async () => {
         };
     }
 
+    const bookmarksCount = await tagged.countDocuments({ $and: [{ accountId: activeAcc._id }, { taggedAs: 'bookmarked' }] })
+    const skip = (Page - 1) * Size ;
+    const hasMore = (skip + Size ) < bookmarksCount ;
     // getting the bookmarked posts
-    const bookmarks = await tagged.find({ $and: [{ accountId: activeAcc._id }, { taggedAs: 'bookmarked' }] });
+    const bookmarks = await tagged.find({ $and: [{ accountId: activeAcc._id }, { taggedAs: 'bookmarked' }] })
+    .limit(Size)
+    .skip(skip)
+    .lean()
 
     const posts = await Promise.all(bookmarks.map(async (bookmark: any) => {
         const postMarked = await Post.findById(bookmark.entityId);
@@ -933,95 +939,7 @@ export const getBookmarkAndSuggestionService = async () => {
 
     // Filter out null values...
     const filteredPosts = posts.filter(Boolean);
-
-    // getting account suggestions from bookmarked posts...
-    const suggestedAccountsPromises = filteredPosts.map(async (post: any) => {
-        const account = await accounts.findOne({ username: post?.handle, 'account.status': 'ACTIVE' });
-        if (!account) return null;
-        const posts = await Post.find({ authorId: account._id, isDeleted: false });
-        const isFoll = await follows.exists({ followerId: activeAcc._id, followingId: account._id, isDeleted: false });
-        return {
-            id:account._id.toString(),
-            decodedHandle:`@${account.username}`,
-            name: account.name,
-            content:account.bio,
-            IsFollowing: isFoll ? true : false ,
-            account: {
-                name: account.name,
-                handle: `@${account.username}`,
-                bio: account.bio || '',
-                location: {
-                    text: account.location?.text || '',
-                    coordinates: account.location?.coordinates || [0, 0]
-                },
-                website: account.website || '',
-                joinDate: account.createdAt ? new Date(account.createdAt).toDateString() : '',
-                following: fmt(account.followings) || '0',
-                followers: fmt(account.followers) || '0',
-                Posts: fmt(posts.length),
-                isCompleted: account.account?.completed || false,
-                isVerified: account.isVerified?.value || false,
-                plan: account.isVerified?.level || 'Free',
-                bannerUrl: account.banner?.url || '/images/default-banner.jpg',
-                avatarUrl: account.avatar?.url || '/images/default-profile-pic.png'
-            }
-        };
-    });
-
-    // Fetch blocked account IDs
-    const blockedDocs = await Block.find({ blockedByAcc: activeAcc._id, isActive: true });
-    const blockedIds = blockedDocs.map(doc => doc.blockedAcc.toString());
-    
-    const suggestedFromMarked = await Promise.all(suggestedAccountsPromises);
-    const filteredSuggestedFromMarked = suggestedFromMarked.filter(Boolean); // filtering the nulll values...
-
-    // getting suggestions from relations...
-
-    // generating the follow suggestions...
-    const followingDocs = await follows.find({ followerId: activeAcc._id, isDeleted: false });
-    const followingAccountId: string[] = followingDocs.map((followObj) => followObj.followingId.toString());
-
-    // getting the mutual followers...
-    const mutualFollowingIdPromises = followingAccountId.map(async (accountId: string) => {
-        const thereFollowings = await follows.find({ followerId: accountId, isDeleted: false });
-        return thereFollowings.map((followobj) => followobj.followingId.toString());
-    });
-
-    // Resolve and flatten mutual following IDs...
-    const resolvedMutualFollowing = await Promise.all(mutualFollowingIdPromises);
-    const flattenedMutualIds = resolvedMutualFollowing.flat();
-
-    // getting the accounts of mutual followers...
-    const mutualFriendAccounts = await Promise.all(flattenedMutualIds.map(async (accId: string) => {
-        return returnAccountDataInStructure(accId);
-    }));
-    const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing );
-
-    // Combine and deduplicate suggestions
-    const allSuggestions = [new Set([...filteredSuggestedFromMarked, ...filteredMutualFriendAccounts])];
-
-// sorting the array based on subscription level...
-    const planOrder: Record<Plan, number> = { "Free": 0, "Pro": 1, "Creator": 2, "Premium": 3 };
-
-    const accountsWithSubs = Array.from(allSuggestions).map((acc: any) => {
-        const account = accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
-        const plan: Plan = (acc.account.plan as Plan) || 'Free';
-        return { acc, plan, isVerified: acc.account?.isVerified || false };
-    });
-
-    // sorting logic...
-    accountsWithSubs.sort((a, b) => {
-        const aLevel = planOrder[a.plan]; 
-        const bLevel = planOrder[b.plan];
-        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
-        if (a.isVerified !== b.isVerified) return a.isVerified ? -1 : 1; // verified first...
-
-        return 0 ;
-    });
-
-    // final sorted array...
-    const finalAcc = accountsWithSubs.map(item => item.acc);
-    return NextResponse.json({ success: true, posts: filteredPosts, suggestions: finalAcc }, { status: 200 });
+    return NextResponse.json({ success: true, posts: filteredPosts , hasMore }, { status: 200 });
 }
 
 export const getPostPageEssentialService = async ({ postId, username }: { postId: string, username: string }) => {

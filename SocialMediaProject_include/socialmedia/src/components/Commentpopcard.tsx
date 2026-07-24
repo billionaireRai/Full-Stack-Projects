@@ -287,6 +287,7 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
                   <textarea
                     ref={textareaRef}
                     value={replyText}
+                    autoFocus
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Post your reply..."
                     className="w-full text-gray-900 transition-all duration-300 border border-yellow-500 dark:text-gray-300 rounded-3xl text-[13px] resize-none outline-none placeholder-gray-500 dark:placeholder-gray-400 p-3 min-h-[120px] max-h-[150px]  focus:ring-3 ring-yellow-500/30 dark:ring-yellow-500/20"

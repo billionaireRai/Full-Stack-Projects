@@ -1,6 +1,6 @@
 import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "../middleware/errorMiddleware";
-import { postDeletionService, postUpdationService, togglePostHighlightService, togglePostPinService, togglePostFavouriteService, postNotInterestedService, postRepostService, postLikedService, postBookmarkingService, postSendingViaDM, getBookmarkAndSuggestionService, getPostPageEssentialService , getAccountsBookmarkedAPostService} from "../db/services/post";
+import { postDeletionService, postUpdationService, togglePostHighlightService, togglePostPinService, togglePostFavouriteService, postNotInterestedService, postRepostService, postLikedService, postBookmarkingService, postSendingViaDM, getBookmarkPostsService, getPostPageEssentialService , getAccountsBookmarkedAPostService} from "../db/services/post";
 import { getVerifiedUrlForQRService } from "../db/services/qr";
 
 export const deleteMyPostController =  asyncErrorHandler(async (request:NextRequest) => {
@@ -176,9 +176,15 @@ export const postSendViaDMController = asyncErrorHandler(async (request:NextRequ
     return NextResponse.json({ message:'Post sent via DM !!'},{ status:200 });
 })
 
-export const getBookmarkPostAndSuggestionsController = asyncErrorHandler( async (request:NextRequest) => {
+export const getBookmarkPostController = asyncErrorHandler( async (request:NextRequest) => {
+    const { Page , Size } = await request.json() ; // extracting page & size feild...
 
-    // await getBookmarkAndSuggesstionService() ; // calling the function...
+    if (!Page || !Size) {
+        console.log("Important parameter missing !!");
+        return NextResponse.json({ message:'Important parameter missing !!' },{ status:200 });
+    }
+
+    // await getBookmarkPostsService({ Page , Size }) ; // calling the function...
     return NextResponse.json({ message:'fetched successfully !!'},{ status:200 });
 })
 

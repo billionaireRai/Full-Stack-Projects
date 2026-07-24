@@ -33,6 +33,8 @@ import Mediapopmodal from '@/components/mediapopmodal';
 import { usernameRegex } from '@/app/controllers/regex';
 import { checkForPrivateKeyIDB, generateKeyPairAndStoreBoth, isKeyObjType } from '@/lib/pairedkeys';
 import { MdAttachEmail } from 'react-icons/md';
+import useUserInfo from '@/app/states/userinfo';
+import AISummary from '@/components/aisummary';
 
 interface mediaType {
   url: string;
@@ -163,6 +165,7 @@ interface tabsTypes {
 export default function UserProfilePage() {
   const isTab = (id: string) => activeTab.id === id ;
 
+  const { User } = useUserInfo() ;
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
   const router = useRouter() ;
   const searchParams = useSearchParams() ; // for making access to searchparams...
@@ -184,6 +187,7 @@ export default function UserProfilePage() {
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
   const [planIntent, setplanIntent] = useState<string>('Pro');
   const [showDeleteAccPop,setshowDeleteAccPop] = useState<boolean>(false);
+  const [ShowSummarize, setShowSummarize] = useState<boolean>(false)
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
   const [Loading, setLoading] = useState(false);
   const [OpenReportPop, setOpenReportPop] = useState<boolean>(false)
@@ -191,6 +195,7 @@ export default function UserProfilePage() {
   const [SharePop, setSharePop] = useState<boolean>(false)
   const [IsBlocked, setIsBlocked] = useState<boolean>(false);
   const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
+  const showUpgradePop : boolean = Account.account?.plan !== 'Premium' ? true : false ;
   
   const pageCategory : "feed" | "profile" | "direct" | "explore" = "profile" ;
   // random user data
@@ -648,7 +653,7 @@ export default function UserProfilePage() {
         }
       }
     };
-    fetchAccountData();
+    // fetchAccountData();
   }, [Account.account, username])
   
   useEffect(() => {
@@ -677,7 +682,7 @@ export default function UserProfilePage() {
     }
 
     // running only when username exists...
-    if (username) functionToGetData();
+    // if (username) functionToGetData();
   }, [username])
   
   // toggleing follow logic...
@@ -775,6 +780,26 @@ export default function UserProfilePage() {
     setDetails(media);
   }
 
+  // funtion to handle summarize pop...
+  function handleSummarizePop() : void {
+    // if (showUpgradePop) {
+      // setplanIntent('Premium');
+      // setisPop(true);
+    // } else {
+      // main logic comes here...
+      setShowSummarize(true);
+
+    // }
+  }
+
+  // funtion to copy email..
+  function handleUserEmailCopy() {
+     navigator.clipboard.writeText(User.email).then(() => {
+      console.log('User email copied');
+      toast.success(`User email ${User.email} copied...`);
+     })
+  }
+
   // useffect for handling 'utm_source' & 'accid' search param...
   useEffect(() => {
     const handlingSocketAndKeyLogic = async (accountid:string) => {
@@ -798,10 +823,10 @@ export default function UserProfilePage() {
   return (
 
     <>
-      <div className={`h-fit flex flex-col font-poppins rounded-md p-2 dark:bg-black`}>
+      <div className={`h-screen flex flex-col font-poppins rounded-md p-2 dark:bg-black`}>
         <div className='flex gap-2'>
           {/* Main Content - Profile */}
-          <div className='flex-2 overflow-y-auto'>
+          <div className='flex-2 h-screen overflow-y-auto'>
           <div className={`flex-2 bg-white dark:bg-black text-gray-900 overflow-x-hidden dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
               {/* Header */}
               <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
@@ -816,18 +841,14 @@ export default function UserProfilePage() {
                       <h1 className="text-xl font-semibold">{AccountInfo.handle}</h1>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{posts.length} Posts</p>
                     </div>
-                      {IsBlocked ? (
+                      {IsBlocked && (
                         <div className={`flex items-center justify-center flex-row flex-1 ml-5 p-2 gap-1 rounded-md ${IsBlocked ? 'bg-red-50 dark:bg-red-950' : 'bg-white/80 dark:bg-black/80'}`}>
                             <BanIcon size={35} className="text-red-600 dark:text-red-400" />
                             <p className="text-sm text-red-600 dark:text-red-400">
                               You have blocked this user. You won't be able to interact with there POSTS, no suggestions in TAGGING and your FEED...
                             </p>
                         </div>
-                      ):(
-                        <div>
-                        </div>
-                      )
-                      }
+                      )}
                   </div>
                 </div>
               </header>
@@ -899,7 +920,7 @@ export default function UserProfilePage() {
                                   </div>
                                 </li>
                                 <li
-                                   onClick={() => {  }}
+                                   onClick={() => { handleUserEmailCopy() }}
                                    className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                                  >
                                    <MdAttachEmail className="h-4 w-4" />
@@ -922,7 +943,7 @@ export default function UserProfilePage() {
                                   </div>
                                 </li>
                                 <li
-                                 onClick={() => {  }}
+                                 onClick={() => { handleSummarizePop() }}
                                  className={`w-full flex items-center justify-between px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                                 >
                                   <div className='flex items-center justify-center gap-3'>
@@ -931,22 +952,6 @@ export default function UserProfilePage() {
                                   </div>
                                     <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                                 </li>                                
-                                <li
-                                onClick={() => { toast.success('Manage Notifications feature coming soon!') }}
-                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                  <div className='flex items-center justify-center gap-3'>
-                                    <Bell size={15}/>
-                                    <span>Manage Notifications</span>
-                                  </div>
-                                </li>
-                                <li
-                                onClick={() => { toast.success('Account Settings feature coming soon!') }}
-                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                  <div className='flex items-center justify-center gap-3'>
-                                    <Settings size={15}/>
-                                    <span>Account Settings</span>
-                                  </div>
-                                </li>
                                 <li
                                 onClick={() => { setshowDeleteAccPop(true)  }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm   hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
@@ -975,14 +980,14 @@ export default function UserProfilePage() {
                                   </div>
                               </li>
                               <li
-                                onClick={() => {  }}
+                                onClick={() => { handleUserEmailCopy()  }}
                                 className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                               >
                                <MdAttachEmail className="h-4 w-4" />
                                Copy account email
                              </li>
                               <li
-                                onClick={() => {  }}
+                                onClick={() => { handleSummarizePop()  }}
                                 className={`flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors`}
                               >
                                 <div className='flex items-center justify-center gap-3'>
@@ -1016,7 +1021,7 @@ export default function UserProfilePage() {
                                   </div>
                                </Link>
                                <li
-                               onClick={() => { toast.success('Add to List feature coming soon!') }}
+                               onClick={() => {  }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                 <div className='flex items-center justify-center gap-3'>
                                   <Star size={15}/>
@@ -1025,7 +1030,7 @@ export default function UserProfilePage() {
                                  <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                                </li>
                                <li
-                               onClick={() => { toast.success('Mute Account feature coming soon!') }}
+                               onClick={() => {  }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                 <div className='flex items-center justify-center gap-3'>
                                   <VolumeX size={15}/>
@@ -1549,7 +1554,7 @@ export default function UserProfilePage() {
           </div>
 
           {/* some other widgets... */}
-          <div className={`hidden z-20 lg:block flex-1 h-fit ${IsBlocked ? 'blur-md pointer-events-none cursor-not-allowed' : ''}`}>
+          <div className={`hidden z-20 lg:block flex-1 h-screen overflow-y-scroll ${IsBlocked ? 'blur-md pointer-events-none cursor-not-allowed' : ''}`}>
             <div className='space-y-4'>
               {/* Who to Follow */}
                 {/* account suggestions according to this USER profile respective...*/}
@@ -1614,6 +1619,10 @@ export default function UserProfilePage() {
         )}
         {isMediaPop && mediaDetail && (
           <Mediapopmodal closepop={() => { setMediaPop(false) }} media={mediaDetail} />
+        )}
+        {/* testing phase.. */}
+        {ShowSummarize && (
+          <AISummary type='profile' onClose={() => setShowSummarize(false)} meta={{ name:AccountInfo.name , bio:AccountInfo.bio , handle:AccountInfo.handle , content:AccountInfo.bio }} />
         )}
       </>
   </>

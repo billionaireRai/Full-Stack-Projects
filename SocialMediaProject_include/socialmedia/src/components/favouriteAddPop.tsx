@@ -14,12 +14,12 @@ interface FavouriteAddPopProp {
 }
 
 export default function FavouriteAddPop({ closePopUp, handle ,postid ,itemType = 'item' }: FavouriteAddPopProp) {
-    const router = useRouter() ; // initializing router hook...
+  const router = useRouter() ; // initializing router hook...
   const handleAddToFavourite = async () => {
     const loadingtoast = toast.loading('Adding to favourite...');
      try {
-     const highLightApi = await axiosInstance.post(`/api/post/control`,{ postId:postid });
-     if (highLightApi.status === 200) {
+     const favouriteApi = await axiosInstance.post(`/api/post/control`,{ postId:postid });
+     if (favouriteApi.status === 200) {
         toast.dismiss(loadingtoast)
         toast.success(`Added to favourite !!`)
         closePopUp?.();
