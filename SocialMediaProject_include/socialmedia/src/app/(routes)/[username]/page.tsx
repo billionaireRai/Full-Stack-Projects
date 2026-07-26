@@ -934,14 +934,14 @@ export default function UserProfilePage() {
                                     <span>Generate QR code</span>
                                   </div>
                                 </li>
-                                <li
-                                onClick={() => { toast.success('View Analytics feature coming soon!') }}
-                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                <Link
+                                  href={`${Account.decodedHandle}/account-analytics`}
+                                  className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                   <div className='flex items-center justify-center gap-3'>
                                     <BarChart3 size={15}/>
                                     <span>View Analytics</span>
                                   </div>
-                                </li>
+                                </Link>
                                 <li
                                  onClick={() => { handleSummarizePop() }}
                                  className={`w-full flex items-center justify-between px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
@@ -952,6 +952,14 @@ export default function UserProfilePage() {
                                   </div>
                                     <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                                 </li>                                
+                                <Link
+                                  href={`/${Account.decodedHandle}/settings/account`}
+                                  className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
+                                  <div className='flex items-center justify-center gap-3'>
+                                    <Settings size={15}/>
+                                    <span>Account Settings</span>
+                                  </div>
+                                </Link>
                                 <li
                                 onClick={() => { setshowDeleteAccPop(true)  }}
                                 className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm   hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors text-red-500'>
@@ -1622,7 +1630,7 @@ export default function UserProfilePage() {
         )}
         {/* testing phase.. */}
         {ShowSummarize && (
-          <AISummary type='profile' onClose={() => setShowSummarize(false)} meta={{ name:AccountInfo.name , bio:AccountInfo.bio , handle:AccountInfo.handle , content:AccountInfo.bio }} />
+          <AISummary type='account' onClose={() => setShowSummarize(false)} meta={{ name:AccountInfo.name , bio:AccountInfo.bio , handle:AccountInfo.handle , content:AccountInfo.bio }} />
         )}
       </>
   </>

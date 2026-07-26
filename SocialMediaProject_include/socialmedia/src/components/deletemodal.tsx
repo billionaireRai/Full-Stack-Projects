@@ -12,9 +12,9 @@ export default function DeleteModal({closePopUp, onDelete , itemType = 'item'}: 
     <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
       {/* Modal */}
       <div className="relative flex items-center justify-center h-full">
-        <div className="bg-white dark:bg-black rounded-lg p-6 max-w-sm mx-4 shadow-xl border border-gray-300 dark:border-gray-900">
+        <div className="bg-white dark:bg-black rounded-lg p-4 max-w-sm mx-4 shadow-xl border border-gray-300 dark:border-gray-900">
           {/* Title */}
-          <h2 className="text-black flex flex-row items-center gap-1.5 dark:text-white text-xl font-bold mb-4">
+          <h2 className="text-black flex flex-row items-center gap-1.5 dark:text-white text-xl font-bold mb-2">
             <Delete color="#dc2626" size={22} />
             <span>Confirm Deletion</span>
           </h2>

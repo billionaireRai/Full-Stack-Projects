@@ -1,12 +1,17 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, SparklesIcon, Copy, Check, RefreshCw, Share2, Download, ThumbsUp, ThumbsDown, FileText, Hash, AtSign, BarChart3, TrendingUp, Users, MessageCircle, Heart, Eye, Repeat2, Bookmark, Calendar, MapPin, Link2, Quote, Lightbulb, Target, Zap, AlertCircle, Shield, Globe, Clock, UserCheck, Activity, PieChart, Video, Image , File, ExternalLink, Send, Star, Flag, HelpCircle, Info, Smile, Frown, Meh, Bot, Brain, Layers, Compass, Filter, SlidersHorizontal, EyeOff, Lock, Unlock, Gift, Crown, Award, BadgeCheck, Newspaper, BookOpen, PenLine, List, Settings, ArrowUpDown, ArrowRight, ArrowLeft, ChevronDown, ChevronUp, Maximize2, Minimize2 } from 'lucide-react'
+import { X, SparklesIcon, Copy, Check, RefreshCw, BrainCircuit, Target, TrendingUp, BarChart3, Users, MessageCircle, Heart, Eye, Repeat2, Bookmark, Hash, AtSign, Lightbulb, FileText, Calendar, MapPin, Quote, BadgeCheck, Activity, PieChart, Globe, UserCheck, CopyIcon, Redo, Share2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Loader from './loader'
 
 // typescript types...
 export interface PostSummaryMeta {
+  name:string
+  handle:string
   content: string
   hashtags?: string[]
   mentions?: string[]
@@ -42,547 +47,188 @@ export interface ProfileSummaryMeta {
 }
 
 interface AISummaryProps {
-  type: 'post' | 'profile'
+  type: 'post' | 'account'
   meta: PostSummaryMeta | ProfileSummaryMeta
   onClose: () => void
 }
 
-function getSentimentIcon(sentiment?: string) {
-  switch (sentiment) {
-    case 'positive':
-      return <Smile className="w-5 h-5 text-green-500" />
-    case 'negative':
-      return <Frown className="w-5 h-5 text-red-500" />
-    default:
-      return <Meh className="w-5 h-5 text-yellow-500" />
-  }
-}
 
-function getSentimentLabel(sentiment?: string) {
-  switch (sentiment) {
-    case 'positive':
-      return 'Positive'
-    case 'negative':
-      return 'Negative'
-    default:
-      return 'Neutral'
-  }
-}
-
-function getSentimentColor(sentiment?: string) {
-  switch (sentiment) {
-    case 'positive':
-      return 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
-    case 'negative':
-      return 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
-    default:
-      return 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300'
-  }
-}
-
-
-function StatBadge({ icon , label , value }: { icon: React.ReactNode ; label: string ; value?: string | number }) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 hover:border-yellow-200 dark:hover:border-yellow-800 transition-all duration-200">
-      <span className="text-yellow-500 shrink-0">{icon}</span>
-      <div className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-semibold">
-          {label}
-        </span>
-        <span className="text-sm font-bold text-gray-900 dark:text-white">
-          {value ?? '—'}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function InsightCard({ icon , title , description , action }: {
-  icon: React.ReactNode
-  title: string
-  description: string
-  action?: { label: string; onClick: () => void }
-}) {
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-black p-4 hover:shadow-md hover:border-yellow-200 dark:hover:border-yellow-900 transition-all duration-300">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-yellow-400/5 to-transparent rounded-bl-full pointer-events-none" />
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5 w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-500/10 flex items-center justify-center shrink-0 text-yellow-600 dark:text-yellow-400 group-hover:scale-110 transition-transform duration-300">
-          {icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-            {title}
-          </h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-            {description}
-          </p>
-          {action && (
-            <button
-              onClick={action.onClick}
-              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors cursor-pointer"
-            >
-              {action.label}
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-
-function TagPill({ label, icon }: { label: string; icon?: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-500/20 transition-colors cursor-default">
-      {icon && <span className="shrink-0">{icon}</span>}
-      {label}
-    </span>
-  )
-}
 
 export default function AISummary({ type , meta , onClose }: AISummaryProps) {
-  const [copied, setCopied] = useState(false)
-  const [expanded, setExpanded] = useState(false)
-  const [showFullAnalysis, setShowFullAnalysis] = useState(false)
-  const modalRef = useRef<HTMLDivElement>(null)
+  const isPost = type === 'post' ;
+  const specificType = isPost ? 'Post' : 'Account' ;
+  const [LoadingOutput, setLoadingOutput] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
+  const [aiExplanation, setAiExplanation] = useState<string>(''); // state holding AI explanation...
 
-  // Close on Escape key...
+  const metaRef = useRef<HTMLDivElement>(null);
+
+  // Narrow the type for safe access...
+  const profileMeta = !isPost ? (meta as ProfileSummaryMeta) : null;
+  const postMeta = isPost ? (meta as PostSummaryMeta) : null;
+
+  // Generate AI explanation from meta data on mount
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+
+  }, []);
+
+  const handleCopy = async () => {
+    if (metaRef.current) {
+      try {
+        await navigator.clipboard.writeText(metaRef.current.innerText);
+        setCopied(true);
+        toast.success('Summary copied to clipboard');
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        toast.error('Failed to copy summary');
+      }
     }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
-
-
-  const handleCopy = () => {
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-    
-    toast.success('Summary copied to clipboard')
-  }
-
+  };
 
   const handleRegenerate = () => {
-    
-    toast.success('Regenerating summary...')
-  }
+    setLoadingOutput(true);
+    toast.success('Regenerating summary...');
+    setTimeout(() => {
+      setLoadingOutput(false);
+      toast.success('Summary regenerated!');
+    }, 2000);
+  };
 
-  // ── Post Summary Content ──────────────────────────────────────────
-  const renderPostSummary = () => {
-    const p = meta as PostSummaryMeta
-    const wordCount = p.content?.split(/\s+/).filter(Boolean).length ?? 0
-    const charCount = p.content?.length ?? 0
-    const estimatedReadTime = Math.max(1, Math.ceil(wordCount / 200))
+  const handleShare = async () => {
+    const text = metaRef.current?.innerText || aiExplanation;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `AI ${specificType} Analysis for ${meta.handle}`,
+          text: text,
+        });
+        toast.success('Shared successfully!');
+      } catch {
+        toast.error('Failed to share');
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast.success('Analysis copied to clipboard — you can share it now!');
+      } catch {
+        toast.error('Failed to copy for sharing');
+      }
+    }
+  };
 
-    return (
-      <div className="space-y-5">
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <StatBadge icon={<Eye className="w-4 h-4" />} label="Views" value={p.views?.toLocaleString()} />
-          <StatBadge icon={<Heart className="w-4 h-4" />} label="Likes" value={p.likes?.toLocaleString()} />
-          <StatBadge icon={<Repeat2 className="w-4 h-4" />} label="Reposts" value={p.reposts?.toLocaleString()} />
-          <StatBadge icon={<MessageCircle className="w-4 h-4" />} label="Comments" value={p.comments?.toLocaleString()} />
-          <StatBadge icon={<Bookmark className="w-4 h-4" />} label="Bookmarks" value={p.bookmarks?.toLocaleString()} />
-          <StatBadge icon={<Calendar className="w-4 h-4" />} label="Posted" value={p.postedAt} />
-        </div>
+  // Format numbers
+  const formatNum = (num?: number): string => {
+    if (num === undefined) return '\u2014';
+    if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
+    if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K';
+    return num.toString();
+  };
 
-        {/* Sentiment & Category */}
-        <div className="flex flex-wrap gap-2">
-          {p.sentiment && (
-            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${getSentimentColor(p.sentiment)}`}>
-              {getSentimentIcon(p.sentiment)}
-              <span>{getSentimentLabel(p.sentiment)} Sentiment</span>
-            </div>
-          )}
-          {p.category && (
-            <TagPill label={p.category} icon={<Target className="w-3 h-3" />} />
-          )}
-          {p.keywords?.slice(0, 3).map((kw) => (
-            <TagPill key={kw} label={kw} />
-          ))}
-        </div>
+  const sentimentColor = (sentiment?: string) => {
+    switch (sentiment) {
+      case 'positive': return 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400';
+      case 'negative': return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
+      default: return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400';
+    }
+  };
 
-        {/* Content Summary */}
-        <div className="rounded-xl bg-gradient-to-br from-yellow-50/50 to-amber-50/50 dark:from-yellow-950/10 dark:to-amber-950/10 border border-yellow-100 dark:border-yellow-900/50 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <FileText className="w-4 h-4 text-yellow-500" />
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Content Analysis</h4>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-            {p.content?.length > 200 && !expanded
-              ? p.content.slice(0, 200) + '...'
-              : p.content}
-          </p>
-          {p.content?.length > 200 && (
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors cursor-pointer"
-            >
-              {expanded ? (
-                <>Show less <ChevronUp className="w-3 h-3" /></>
-              ) : (
-                <>Read more <ChevronDown className="w-3 h-3" /></>
-              )}
-            </button>
-          )}
-          <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-gray-400 dark:text-gray-500">
-            <span>{wordCount} words</span>
-            <span>·</span>
-            <span>{charCount} characters</span>
-            <span>·</span>
-            <span>{estimatedReadTime} min read</span>
-          </div>
-        </div>
-
-        {/* Hashtags & Mentions */}
-        <div className="space-y-3">
-          {p.hashtags && p.hashtags.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Hash className="w-4 h-4 text-yellow-500" />
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Hashtags ({p.hashtags.length})
-                </h4>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {p.hashtags.map((tag) => (
-                  <TagPill key={tag} label={`#${tag}`} icon={<Hash className="w-3 h-3" />} />
-                ))}
-              </div>
-            </div>
-          )}
-          {p.mentions && p.mentions.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <AtSign className="w-4 h-4 text-yellow-500" />
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Mentions ({p.mentions.length})
-                </h4>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {p.mentions.map((mention) => (
-                  <TagPill key={mention} label={`@${mention}`} icon={<AtSign className="w-3 h-3" />} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Location */}
-        {p.taggedLocation && p.taggedLocation.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
-            <MapPin className="w-4 h-4 text-yellow-500 shrink-0" />
-            <span className="text-sm text-gray-600 dark:text-gray-300">
-              Tagged at: {p.taggedLocation.map((l) => l.text).join(', ')}
-            </span>
-          </div>
-        )}
-
-        {/* Poll Summary */}
-        {p.poll && (
-          <div className="rounded-xl bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-950/10 dark:to-pink-950/10 border border-purple-100 dark:border-purple-900/50 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <BarChart3 className="w-4 h-4 text-purple-500" />
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Poll Insights</h4>
-            </div>
-            <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-              {p.poll.question}
-            </p>
-            <div className="space-y-1.5">
-              {p.poll.options.map((opt) => (
-                <div key={opt.text} className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600 dark:text-gray-400">{opt.text}</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">{opt.votes} votes</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* AI Insights */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-yellow-500" />
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">AI Insights</h4>
-          </div>
-          <div className="grid gap-3">
-            <InsightCard
-              icon={<TrendingUp className="w-5 h-5" />}
-              title="Engagement Potential"
-              description="This post has strong engagement signals. The content style resonates well with the audience based on current interaction metrics."
-            />
-            <InsightCard
-              icon={<Target className="w-5 h-5" />}
-              title="Suggested Improvements"
-              description="Adding more visual media could increase reach by up to 40%. Consider including a call-to-action to boost comments."
-            />
-            <InsightCard
-              icon={<Zap className="w-5 h-5" />}
-              title="Best Posting Time"
-              description="Posts with similar content perform best during evening hours (6-9 PM). Consider scheduling future posts accordingly."
-            />
-          </div>
-        </div>
-
-        {/* Media Summary */}
-        {p.mediaCount !== undefined && (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-              {p.mediaCount > 0 ? (
-                <>
-                  <Image className="w-4 h-4 text-yellow-500" />
-                  <span>{p.mediaCount} media item{p.mediaCount > 1 ? 's' : ''} attached</span>
-                </>
-              ) : (
-                <>
-                  <File className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-400">No media attached</span>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  // ── Profile Summary Content ────────────────────────────────────────
-  const renderProfileSummary = () => {
-    const p = meta as ProfileSummaryMeta
-    const followerNum = parseInt(String(p.followers ?? '0').replace(/[^0-9]/g, '')) || 0
-    const followingNum = parseInt(String(p.following ?? '0').replace(/[^0-9]/g, '')) || 0
-    const postsNum = parseInt(String(p.posts ?? '0').replace(/[^0-9]/g, '')) || 0
-    const followerToFollowingRatio = followingNum > 0 ? (followerNum / followingNum).toFixed(1) : '—'
-
-    return (
-      <div className="space-y-5">
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <StatBadge icon={<Users className="w-4 h-4" />} label="Followers" value={p.followers} />
-          <StatBadge icon={<UserCheck className="w-4 h-4" />} label="Following" value={p.following} />
-          <StatBadge icon={<FileText className="w-4 h-4" />} label="Posts" value={p.posts} />
-          <StatBadge icon={<Activity className="w-4 h-4" />} label="F/FO Ratio" value={followerToFollowingRatio} />
-          <StatBadge icon={<Calendar className="w-4 h-4" />} label="Joined" value={p.joinDate} />
-          <StatBadge icon={<Globe className="w-4 h-4" />} label="Location" value={p.location || '—'} />
-        </div>
-
-        {/* Verification & Plan */}
-        <div className="flex flex-wrap gap-2">
-          {p.isVerified && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-sm">
-              <BadgeCheck className="w-3.5 h-3.5" />
-              <span>Verified {p.plan}</span>
-            </div>
-          )}
-          {p.plan && !p.isVerified && (
-            <TagPill label={`${p.plan} Plan`} icon={<Crown className="w-3 h-3" />} />
-          )}
-          <TagPill label={`${postsNum} total posts`} icon={<FileText className="w-3 h-3" />} />
-        </div>
-
-        {/* Bio Analysis */}
-        <div className="rounded-xl bg-gradient-to-br from-yellow-50/50 to-amber-50/50 dark:from-yellow-950/10 dark:to-amber-950/10 border border-yellow-100 dark:border-yellow-900/50 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Quote className="w-4 h-4 text-yellow-500" />
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Bio Analysis</h4>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic">
-            &ldquo;{p.bio}&rdquo;
-          </p>
-          <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-gray-400 dark:text-gray-500">
-            <span>{p.bio?.split(/\s+/).filter(Boolean).length ?? 0} words</span>
-            <span>·</span>
-            <span>Bio completeness: {((p.bio?.length ?? 0) / 160 * 100).toFixed(0)}%</span>
-          </div>
-        </div>
-
-        {/* Interests & Content Categories */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {p.interests && p.interests.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Star className="w-4 h-4 text-yellow-500" />
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Interests</h4>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {p.interests.map((interest) => (
-                  <TagPill key={interest} label={interest} />
-                ))}
-              </div>
-            </div>
-          )}
-          {p.contentCategories && p.contentCategories.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Layers className="w-4 h-4 text-yellow-500" />
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Content Style</h4>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {p.contentCategories.map((cat) => (
-                  <TagPill key={cat} label={cat} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* AI Insights */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Brain className="w-4 h-4 text-yellow-500" />
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">AI Profile Insights</h4>
-          </div>
-          <div className="grid gap-3">
-            <InsightCard
-              icon={<TrendingUp className="w-5 h-5" />}
-              title="Audience Growth"
-              description={`Follower-to-following ratio of ${followerToFollowingRatio} indicates ${followerNum > followingNum ? 'strong organic reach and content authority in your niche.' : 'room for growth in content distribution strategy.'}`}
-            />
-            <InsightCard
-              icon={<Compass className="w-5 h-5" />}
-              title="Content Strategy"
-              description={p.contentCategories?.length
-                ? `Your content spans ${p.contentCategories.length} categories. Diversifying within these topics could attract 2x more engagement.`
-                : 'Establishing consistent content categories can help build a stronger personal brand.'}
-            />
-            <InsightCard
-              icon={<Target className="w-5 h-5" />}
-              title="Recommendation"
-              description={p.avgEngagement
-                ? `Your average engagement rate of ${p.avgEngagement} is solid. Focus on community interaction to push it higher.`
-                : 'Engage more with your audience through polls, Q&A sessions, and consistent posting to boost interaction.'}
-              action={{ label: 'View detailed analytics', onClick: () => toast.success('Analytics feature coming soon!') }}
-            />
-          </div>
-        </div>
-
-        {/* Website & Social */}
-        {p.website && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
-            <Link2 className="w-4 h-4 text-yellow-500 shrink-0" />
-            <a
-              href={p.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate"
-            >
-              {p.website}
-            </a>
-            <ExternalLink className="w-3 h-3 text-gray-400 shrink-0 ml-auto" />
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  // ─── Render ────────────────────────────────────────────────────────
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 overflow-y-auto p-2 sm:p-4"
-        onClick={(e: React.MouseEvent) => {
-          if (e.target === e.currentTarget) onClose()
-        }}
-      >
-        <motion.div
-          ref={modalRef}
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="relative w-full max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-neutral-900 shadow-2xl shadow-black/10 dark:shadow-black/40 border border-gray-100 dark:border-gray-800"
+    <>
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">
+        <div
+          className='w-full relative max-w-xl h-full max-h-[85vh] bg-white dark:bg-neutral-950 rounded-2xl shadow-2xl border border-yellow-100 dark:border-yellow-900/30 overflow-hidden'
         >
-          {/* ── Header ─────────────────────────────── */}
-          <div className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800 rounded-t-2xl px-5 py-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg shadow-yellow-500/20 shrink-0">
-                  <Bot className="w-5 h-5 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white truncate flex items-center gap-2">
-                    AI Summary
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800">
-                      <Zap className="w-2.5 h-2.5" />
-                      {type === 'post' ? 'Post' : 'Profile'}
-                    </span>
-                  </h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {type === 'post'
-                      ? 'AI-generated insights and analysis for this post'
-                      : 'AI-powered profile overview and recommendations'}
-                  </p>
+          {/* Header */}
+          <div className='flex items-center justify-between gap-3 px-5 py-4 border-b rounded-lg border-yellow-100 dark:border-yellow-900/20 bg-gradient-to-r from-yellow-50/80 to-amber-50/50 dark:from-yellow-950/10 dark:to-amber-950/5'>
+            <div className='flex items-center justify-start gap-3'>
+              <div>
+                <SparklesIcon size={25} />
+              </div>
+              <div className='flex flex-col'>
+                <span className='text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2'>
+                  AI {specificType} Analysis
+                  <div className="flex items-center justify-center w-5 h-5 bg-yellow-100 dark:bg-yellow-950 rounded-full shadow-sm">
+                    <Image src='/images/yellow-tick.png' width={15} height={15} alt="verified" className="object-cover" />
+                  </div>
+                </span>
+                <div className='flex items-start justify-center max-w-sm'>
+                  <span className='text-xs text-gray-500 dark:text-gray-400'>
+                    Comprehensive AI-powered analysis with detailed insights and breakdown of
+                  </span>
+                  <Link href={`/${meta.handle}`} className="text-[11px] text-yellow-600 dark:text-yellow-400 cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors duration-200 font-semibold py-0.5 px-2 rounded-full inline-flex items-center gap-1">
+                    {meta.handle}
+                  </Link>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 cursor-pointer shrink-0"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
-
-            {/* Action pills */}
-            <div className="flex flex-wrap items-center gap-1.5 mt-3">
-              <button
-                onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all cursor-pointer"
-              >
-                {copied ? (
-                  <Check className="w-3.5 h-3.5 text-green-500" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
-                )}
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-              <button
-                onClick={handleRegenerate}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Regenerate
-              </button>
-              <button
-                onClick={() => setShowFullAnalysis(!showFullAnalysis)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  showFullAnalysis
-                    ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                {showFullAnalysis ? 'Basic' : 'Full'}
-              </button>
-            </div>
+            <button onClick={onClose} className='cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full p-1.5 transition-all duration-200' >
+              <X size={16} />
+            </button>
           </div>
 
-          {/* body */}
-          <div className="px-5 py-5">
-            {type === 'post' ? renderPostSummary() : renderProfileSummary()}
+          {/* Main Body */}
+          <div className="overflow-y-auto h-3/4">
+            {LoadingOutput ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader loadingtext={`AI is analyzing this ${specificType.toLowerCase()}...`} />
+              </div>
+            ) : (
+              <div className='flex flex-col gap-2 p-3 h-full rounded-lg'>
+                <div className='flex items-center justify-start gap-1.5 flex-wrap'>
+                  <button onClick={handleCopy} className='flex items-center text-xs text-gray-600 dark:text-gray-400 justify-center gap-1 border-none outline-none hover:bg-gray-100 dark:hover:bg-gray-950 rounded-full p-2 cursor-pointer transition-colors duration-200' type="button">
+                    {copied ? <Check size={15} className="text-green-500" /> : <CopyIcon size={15} />}
+                    <span>{copied ? 'Copied' : 'Copy'}</span>
+                  </button>
+                  <button onClick={handleRegenerate} className='flex items-center text-xs text-gray-600 dark:text-gray-400 justify-center gap-1 border-none outline-none hover:bg-gray-100 dark:hover:bg-gray-950 rounded-full p-2 cursor-pointer transition-colors duration-200' type="button">
+                    <RefreshCw size={15} />
+                    <span>Regenerate</span>
+                  </button>
+                  <button onClick={handleShare} className='flex items-center text-xs text-gray-600 dark:text-gray-400 justify-center gap-1 border-none outline-none hover:bg-gray-100 dark:hover:bg-gray-950 rounded-full p-2 cursor-pointer transition-colors duration-200' type="button">
+                    <Share2 size={15} />
+                    <span>Share</span>
+                  </button>
+                </div>
+                <div ref={metaRef} className='border border-gray-200 dark:border-gray-800 h-full rounded-lg overflow-y-auto bg-gradient-to-b from-yellow-50/30 to-white dark:from-yellow-950/5 dark:to-neutral-950 p-4'>
+                  {aiExplanation ? (
+                    <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-line font-mono">
+                      
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-600">
+                      <div className="flex flex-col items-center gap-2">
+                        <SparklesIcon size={24} className="text-yellow-400" />
+                        <span className="text-sm">AI analysis will appear here</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-
           {/* footer */}
-          <div className="sticky bottom-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-t border-gray-100 dark:border-gray-800 rounded-b-2xl px-5 py-4">
-              {/* Powered by */}
-              <div className="flex items-center justify-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
-                <img src="https://latestlogo.com/wp-content/uploads/2024/01/openai-icon.png" className="w-5 h-5" alt='open-ai' />
-                <div className='flex flex-col items-center gap-1'>
-                  <span>Powered by OpenAI</span>
-                  <span className="font-semibold text-gray-500 dark:text-gray-400">chatGPT</span>
+          <div className='flex sticky bottom-0 items-center justify-between px-5 py-3 rounded-lg
+           border-t border-yellow-100/80 dark:border-yellow-900/20 bg-yellow-50 dark:bg-zinc-950'>
+            <div className='flex items-center gap-3'>
+                <div>
+                  <Image
+                    src='https://res.cloudinary.com/dvgcc6gts/image/upload/v1785046887/icons8-chatgpt-48_uhveaf.png'
+                    width={20}
+                    height={20}
+                    alt='ChatGPT'
+                    className='object-contain'
+                  />
                 </div>
+              <div className='flex flex-col leading-tight'>
+                <span className='text-[8px] uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500 font-medium'>Powered by OpenAI</span>
+                <span className='text-xs font-semibold text-gray-800 dark:text-gray-200'>ChatGPT</span>
               </div>
+            </div>
+            <div className='hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-100/50 dark:bg-yellow-900/10 border border-yellow-200/50 dark:border-yellow-800/20'>
+              <SparklesIcon size={12} className='text-yellow-600 dark:text-yellow-400' />
+              <span className='text-[10px] font-medium text-yellow-700 dark:text-yellow-300'>AI-Powered Insights</span>
+            </div>
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  )
-}
-
+      </div>
+     </div>
+   </>
+)}
