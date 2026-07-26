@@ -5,10 +5,8 @@ import { useTheme } from "next-themes";
 import PollInPost from "./pollinpost";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { userCardProp } from "./usercard";
 import AccountSearch from "./accountsearch";
 import usePoll, { pollInfoType } from "@/app/states/poll";
-import { useRouter } from "next/navigation";
 import AccountPoll from "./accountpoll";
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import { motion } from "framer-motion";
@@ -45,7 +43,6 @@ export default function EditPostPop({
   const maxPostLength = 100;
   const [post, setPost] = useState(initialContent);
   const [DisablePostButton, setDisablePostButton] = useState<boolean>(false);
-  const router = useRouter();
   const { poll , resetPoll } = usePoll() ;
   const { Account } = useActiveAccount();
   const { resolvedTheme } = useTheme();

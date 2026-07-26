@@ -5,9 +5,10 @@ import { mediaType } from './mediapopmodal'
 import Usercard, { userCardProp } from './usercard'
 import Audioplayer from './Audioplayer'
 import Videoplayer from './videoplayer'
-import Mediacontrols from './mediacontrols'
+// import Mediacontrols from './mediacontrols'
 import axiosInstance from '@/lib/interceptor'
 import toast from 'react-hot-toast'
+import Error from 'next/error'
 
 interface attachmentOptionType {
   icon: React.ReactNode
@@ -209,13 +210,13 @@ export default function Attachmentpop({ closePop, menuOptions , handleMediaClick
         setmentions(attachmentres.data.mentions);
       }
     } catch (error) {
-      console.log("An Error occured...");
+      console.log("An Error occured :",Error);
       toast.error("Error occured in getting attachments !!");
     }
   }
   // useeffect triggered on page load...
   useEffect(() => {
-    // getAllAttachments() ;
+    getAllAttachments() ;
   }, [])
 
   return (

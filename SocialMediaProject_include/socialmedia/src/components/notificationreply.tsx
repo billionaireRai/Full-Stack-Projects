@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getNotificationActionText } from './notificationcard';
 import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { useTheme } from 'next-themes';
-import { X, MessageSquareText, Reply, Send } from 'lucide-react';
+import { X, Reply, Send } from 'lucide-react';
 import axiosInstance from '@/lib/interceptor';
 import { NotificationType, Post } from './notificationcard';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -84,7 +84,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
         closeModal?.();
       }
     } catch (error) {
-      console.log("An error occured in replying !!");
+      console.log("An error occured in replying :",error);
       toast.error('Failed to send reply !!');
     } finally {
       setisReplying(false);
@@ -113,7 +113,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [replyText]);
+  }, [replyText,handleCommentOnNotification]);
 
   // setting the clicked emoji in replytext...
   const onEmojiClick = (emojiData: EmojiClickData) => {

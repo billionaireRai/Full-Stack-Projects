@@ -14,12 +14,10 @@ import {
   AlertTriangle,
   CheckCircle,
   Settings,
-  Upload,
   CheckCircleIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-// import { signOut } from 'next-auth/react';
 import LogoutModal from '@/components/logoutmodal';
 import toast from 'react-hot-toast';
 import DeactivateModal from '@/components/deactivatemodal';
@@ -67,9 +65,6 @@ export default function AccountSettings() {
     coverImage: 'https://www.bing.com/th/id/OIP.1BFjs0_bYPi5Wwl2uFoLEgAAAA?w=435&h=211&c=8&rs=1&qlt=90&o=6&cb=ucfimg1&dpr=1.3&pid=3.1&rm=2&ucfimg=1'
   });
   
-  const [coverImagePreview, setCoverImagePreview] = useState<string>(formData.coverImage);
-  const [avatarPreview, setAvatarPreview] = useState<string>(formData.avatar);
-
 
   // function for handling profile update..
   const handleProfileUpdate = () => {
@@ -98,7 +93,6 @@ export default function AccountSettings() {
   // handle logout
   const handleLogout = () : void => {
     toast.loading('logging out in proccess , wait !!');
-    signOut({ redirect:true , callbackUrl:'/auth/log-in' });
   };
 
   // function handling deactivation logic...
@@ -311,48 +305,6 @@ export default function AccountSettings() {
                 className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
               />
             </div>
-          </div>
-          <div className="mt-6">
-            <label className="block text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Avatar
-            </label>
-            {avatarPreview && (
-              <div className="my-4 p-2 flex flex-row items-center justify-between rounded-lg">
-                <img
-                  src={formData.avatar}
-                  alt="Avatar Preview"
-                  className="w-30 h-30 object-cover rounded-full border"
-                />
-                <button className='py-2 px-3 flex flex-row gap-1 border items-center justify-center rounded-lg bg-black dark:bg-gray-950 text-white shadow-sm hover:shadow-md cursor-pointer'><Upload/><span>Change Avatar</span></button>
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => { handleImageManipulation(e,'avatar')}}
-              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-            />
-          </div>
-          <div className="mt-6">
-            <label className="block text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Cover Image
-            </label>
-            {coverImagePreview && (
-              <div className="my-4 p-2 flex flex-row items-center gap-2 rounded-lg">
-                <img
-                  src={formData.coverImage}
-                  alt="Cover Preview"
-                  className="w-4/5 h-32 object-cover rounded-md border"
-                />
-                <button className='py-2 px-3 flex flex-row items-center justify-center gap-1 border rounded-lg bg-black dark:bg-gray-950 text-white shadow-sm hover:shadow-md cursor-pointer'><Upload />Change Cover Image</button>
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => { handleImageManipulation(e,'coverImage')}}
-              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-            />
           </div>
           <div className="mt-6 flex justify-end">
             <Button 
@@ -605,7 +557,7 @@ export default function AccountSettings() {
       </div>
       {showLogoutModal && 
       <>
-      <LogoutModal closePopUp={() => { setshowLogoutModal(false) }} onLogout={() => { handleLogout() }}/> 
+      <LogoutModal closePopUp={() => { setshowLogoutModal(false) }} handle={formData.username}/> 
       </>
       }
       {showDeactivateModal && 

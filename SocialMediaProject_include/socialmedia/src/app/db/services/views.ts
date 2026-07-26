@@ -8,7 +8,6 @@ import viewStat from "../models/viewstat";
 import Post from "../models/posts";
 import follows from "../models/follows";
 import { fmt } from "@/lib/utils";
-import { userCardProp } from "./user";
 
 export const trackingPostViewService = async ( postid: string, fromPage: string, ipHash?: string, userAgentHash?: string ) => {
   await connectWithMongoDB();
@@ -63,7 +62,7 @@ export const trackingPostViewService = async ( postid: string, fromPage: string,
 
 };
 
-export const getAllViewsOfPostService = async ({ postid , page , pagesize } : { postid: string , page: number , pagesize: number }) => {
+export const getAllViewsOfPostService = async ({ postid , page , size } : { postid: string , page: number , size: number }) => {
   await connectWithMongoDB() ;
 
   // getting credentials from cookies...
@@ -87,14 +86,14 @@ export const getAllViewsOfPostService = async ({ postid , page , pagesize } : { 
   const total = totalResult[0]?.total || 0; // total distinct views...
 
   // Pagination
-  const skip = (page - 1) * pagesize;
-  const hasNext = skip + pagesize < total;
+  const skip = (page - 1) * size;
+  const hasNext = skip + size < total;
 
   if (total === 0)  return NextResponse.json({ message: 'likes not found !!', navdata: [] , hasNext}, { status: 200 });
 
 
   // Get paginated distinct viewerIds
-  const viewerDocs = await Views.find({ postId: new mongoose.Types.ObjectId(postid), isQualified: true }).skip(skip).limit(pagesize).select('viewerId').lean();
+  const viewerDocs = await Views.find({ postId: new mongoose.Types.ObjectId(postid), isQualified: true }).skip(skip).limit(size).select('viewerId').lean();
   const viewerIds = viewerDocs.map(doc => doc.viewerId);
 
   // Batch fetch accounts and compute counts - single queries per type

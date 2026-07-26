@@ -7,12 +7,10 @@ import Videoplayer from "./videoplayer";
 import toast from "react-hot-toast";
 import { scrollToBottom } from "@/lib/windowtopscroll";
 import Link from "next/link";
-import { userCardProp } from "./usercard";
 import usePoll from "@/app/states/poll";
 import AccountSearch from "./accountsearch";
 import DraftConfirmPop from "./draftconfirm";
 import Aifeaturespost from "./aifeaturespost";
-import { useRouter } from "next/navigation";
 import AccountPoll from "./accountpoll";
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,16 +20,12 @@ import {
   UserPlusIcon, 
   Globe, 
   X, 
-  Image as ImageIcon, 
-  Video, 
   Smile, 
-  AtSign, 
   MapPin,
   Loader2,
   ChevronDown,
   MessagesSquareIcon,
   SparklesIcon,
-  Text,
   CalendarClock
 } from 'lucide-react';
 import { TooltipContent, TooltipTrigger, Tooltip } from "./ui/tooltip";
@@ -47,9 +41,7 @@ type poststatustype = "draft" | "scheduled" | "published" ;
 export default function CreatePost() {
   const [post, setPost] = useState('');
   const [DisablePostButton, setDisablePostButton] = useState<boolean>(true);
-  const [isFocused, setIsFocused] = useState<boolean>(false);
   const [isPosting, setIsPosting] = useState<boolean>(false);
-  const router = useRouter();
   const { Account } = useActiveAccount();
   const { poll } = usePoll();
   const { resolvedTheme } = useTheme();
@@ -77,7 +69,7 @@ export default function CreatePost() {
   const [hashtags, sethashtags] = useState<string[]>([]);
   const [AddLocation, setAddLocation] = useState<{ name: string; coordinates: number[] }[]>([]);
   const [openReplyOptions, setOpenReplyOptions] = useState(false);
-  const { poll: PollInfo, isCreateOpen: showPollModal, setIsCreateOpen: setShowPollModal, isDisplayOpen: showDisplayModal, setIsDisplayOpen: setShowDisplayModal, resetPoll } = usePoll();
+  const { poll: PollInfo, isCreateOpen: showPollModal, setIsCreateOpen: setShowPollModal, isDisplayOpen: showDisplayModal, resetPoll } = usePoll();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const maxPostLength : number = Account.account?.isVerified ? 500 : 100 ; // conditional length...
   const showAiControls : boolean = Account.account?.plan === 'Premium' ? true : false ;
@@ -131,20 +123,7 @@ export default function CreatePost() {
     };
   }, [openOptions, openReplyOptions, showEmojiPicker, showTagSomeone, showPollModal, showLocationSearchModal,isAIPop,draftPop,showSchedule]);
 
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setCreatePop(false);
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && post.trim() && !DisablePostButton) {
-        handlePostSubmission();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [post, DisablePostButton]);
-
+  
   const handlePostSubmission = async () => {
     if (!post.trim()) return;
 
@@ -182,12 +161,26 @@ export default function CreatePost() {
     }
   };
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setCreatePop(false);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && post.trim() && !DisablePostButton) {
+        handlePostSubmission();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [post, DisablePostButton,handlePostSubmission,setCreatePop]);
+
   useEffect(() => {
     setDisablePostButton(!post.trim());
     if(post.length > maxPostLength) {
       setPost(post.substring(0,maxPostLength));
     }
-  }, [post]);
+  }, [post,maxPostLength]);
 
   const onEmojiClick = (emojiData: EmojiClickData) => {
     setPost((prev) => prev + emojiData.emoji);
@@ -376,8 +369,6 @@ export default function CreatePost() {
                 ref={textareaRef}
                 value={post}
                 onChange={(e) => setPost(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
                 placeholder="what's happening guys ??"
                 rows={1}
                 className="w-full resize-none border-none outline-none text-sm text-gray-900 dark:text-white bg-transparent placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 min-h-[100px] max-h-[300px]"

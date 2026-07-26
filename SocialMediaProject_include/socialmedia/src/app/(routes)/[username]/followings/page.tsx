@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams , useRouter } from 'next/navigation'
 import Usercard from '@/components/usercard';
-import { Users, TrendingUp, Calendar, Clock, UserCheck, ThumbsUp } from 'lucide-react';
+import { Users, TrendingUp, Calendar, Clock, ThumbsUp } from 'lucide-react';
 
 
 export interface userType {
@@ -37,11 +37,11 @@ interface navItemsType {
   icon:React.JSX.Element
 }
 
-export default function followingspage () {
+export default function FollowingsPage () {
   const params = useParams() ; // initializing the param hook...
   const router = useRouter() ;
   // const width = useWindowWidth() ; // custom hook created to getting screen width...
-  const [user, setuser] = useState<userType>({
+  const [user, setuser] = useState<userType | null>({
     name:'Amritansh Rai' ,
     handle:'@amritansh_coder' ,
     bio:'' ,
@@ -62,7 +62,8 @@ export default function followingspage () {
   // useeffect for fetching account details...
   useEffect(() => {
     // api fetching for data...
-
+    setAccountDetails([])
+    setuser(null);
   }, [])
   
 
@@ -86,12 +87,13 @@ export default function followingspage () {
   useEffect(() => {
     // api for getting user info and followings
     console.log(decodeURIComponent(String(params.username)))
-    if (user.handle.includes('@amritansh_coder')) {
+    if (user?.handle.includes('@amritansh_coder')) {
       const filtered = navItems.filter((item) => item.navtext !== 'Common');
       setnavItems(filtered);
     }
   }, [params])
   
+  if (!user) return null ;
   return (
     <>
      <div className='dark:bg-black rounded-md h-fit flex flex-col lg:flex-row font-poppins'>

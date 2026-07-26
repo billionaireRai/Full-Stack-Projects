@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { Clock } from "lucide-react";
-import { useTheme } from "next-themes";
 import { fmt } from "@/lib/utils";
 import { formatDuration } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -17,7 +16,6 @@ interface PollInPostProps {
 }
 
 export default function PollInPost({ poll }: PollInPostProps) {
-  const { resolvedTheme } = useTheme();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [votes, setVotes] = useState<number[]>(

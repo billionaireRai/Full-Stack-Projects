@@ -2,12 +2,11 @@ import { connectWithMongoDB } from "../dbConnection";
 import { NextResponse } from "next/server";
 import { userCardProp } from "./user";
 import follows from "../models/follows";
-import mongoose from "mongoose";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import Post from "../models/posts";
-import subscriptions from "../models/subscriptions";
+// import subscriptions from "../models/subscriptions";
 import Block from "../models/blocked";
-import likes from "../models/likes";
+// import likes from "../models/likes";
 import { fmt } from "@/lib/utils";
 import accounts from "../models/accounts";
 

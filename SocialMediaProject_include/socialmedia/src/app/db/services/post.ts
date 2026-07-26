@@ -2,7 +2,6 @@ import { connectWithMongoDB } from "../dbConnection";
 import { NextResponse } from "next/server";
 import { uploadMediaOnCloudinary } from "@/app/controllers/cloudinary";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
-import { urlRegex } from '@/app/controllers/regex';
 import mongoose from "mongoose";
 import accounts from "../models/accounts";
 import Post from "../models/posts";
@@ -19,7 +18,6 @@ import Message from "../models/messages";
 import Block from "../models/blocked";
 import subscriptions from "../models/subscriptions";
 import { userCardProp } from "./user";
-import { PostCardProps } from "@/components/postcard";
 import { generateCategoryAndKeywords } from "@/lib/aifeatures";
 
 type Plan = "Free" | "Pro" | "Creator" | "Premium";
@@ -1159,7 +1157,7 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
     return NextResponse.json({ success: true, mainPost: postdata , releventAcc:postAuthor, suggestions : suggestions }, { status: 200 });
 }
 
-export const getAccountsBookmarkedAPostService = async ({ postid , page , pagesize } : { postid: string , page: number , pagesize: number }) => {
+export const getAccountsBookmarkedAPostService = async ({ postid , page , size } : { postid: string , page: number , size: number }) => {
     await connectWithMongoDB() ; // establishing connection to DB...
 
     // extracting cookies data...
@@ -1181,8 +1179,8 @@ export const getAccountsBookmarkedAPostService = async ({ postid , page , pagesi
         const total = totalResult[0]?.total || 0; // total distinct views...
         
         // skip configuration and fetching bookmarks...
-        const toSkip = ( page - 1 ) * pagesize ;
-        const hasNext = toSkip + pagesize < total;
+        const toSkip = ( page - 1 ) * size ;
+        const hasNext = toSkip + size < total;
 
         if (total === 0)  return NextResponse.json({ message: 'likes not found !!', navdata: [] , hasNext }, { status: 200 }) ;
         
@@ -1227,7 +1225,7 @@ export const getAccountsBookmarkedAPostService = async ({ postid , page , pagesi
         };
     }
 
-    const taggedObjs =  await tagged.find({ $and :[{ entityId:postid },{ taggedAs:'bookmarked' }] }).skip(toSkip).limit(pagesize) ;
+    const taggedObjs =  await tagged.find({ $and :[{ entityId:postid },{ taggedAs:'bookmarked' }] }).skip(toSkip).limit(size) ;
     const accns = await Promise.all(taggedObjs.map((obj) => { 
         return returnAccountDataInStructure(obj.accountId) ;
      }))

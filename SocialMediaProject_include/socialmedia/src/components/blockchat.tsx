@@ -1,4 +1,4 @@
-import React,{ useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import axiosInstance from '@/lib/interceptor';
 import toast from 'react-hot-toast';

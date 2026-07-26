@@ -9,7 +9,7 @@ import follows from "../models/follows";
 import likes from "../models/likes";
 import Post from "../models/posts";
 
-export const getAllTheLikesOfPostService = async ({ postid , page , pagesize } : { postid: string , page: number , pagesize: number }) => { 
+export const getAllTheLikesOfPostService = async ({ postid , page , size } : { postid: string , page: number , size: number }) => { 
     await connectWithMongoDB() ; // connecting to database...
 
     // getting credentials from cookies...
@@ -32,14 +32,14 @@ export const getAllTheLikesOfPostService = async ({ postid , page , pagesize } :
     const total = totalResult[0]?.total || 0; // total distinct views...
     
     // Pagination related values...
-    const skip = (page - 1) * pagesize ; 
-    const hasNext = skip + pagesize < total ;
+    const skip = (page - 1) * size ; 
+    const hasNext = skip + size < total ;
     
     if (total === 0)  return NextResponse.json({ message: 'likes not found !!', navdata: [] , hasNext }, { status: 200 }) ;
     
 
     // getting the structured data...
-    const likeObjs = await likes.find({ $and:[{ targetEntity:postid },{ targetType:'Post' }] }).skip(skip).limit(pagesize) ;
+    const likeObjs = await likes.find({ $and:[{ targetEntity:postid },{ targetType:'Post' }] }).skip(skip).limit(size) ;
     const likesByAccIds = likeObjs.map( like => like.accountId ) ;
 
     async function returnAccountDataInStructure(accountId: string): Promise<userCardProp> {

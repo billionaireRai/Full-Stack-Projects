@@ -17,19 +17,19 @@ export default function Clearchatpop ({ chat , close }: clearChatPopType) {
   const { clearMessages } = useActiveChatMessages() ;
 
   const handleClearChatHistory = async () => {
-    // const loadingtoast = toast.loading(`Clearing chat with ${chat?.handle}...`);
-    // try {
-    //    const clearchatapi = await axiosInstance.delete(`/api/chat/attachments?conversationid=${chat.id}`); 
-    //   if (clearchatapi.status === 200) {
-    //     toast.dismiss(loadingtoast);
+    const loadingtoast = toast.loading(`Clearing chat with ${chat?.handle}...`);
+    try {
+       const clearchatapi = await axiosInstance.delete(`/api/chat/attachments?conversationid=${chat.id}`); 
+      if (clearchatapi.status === 200) {
+        toast.dismiss(loadingtoast);
         clearMessages(); // clearing messages from global state...
         toast.success(`Chat history with ${chat.handle} cleared successfully !!`);
         close();
-    //   }
-    // } catch (error) {
-    //     console.log("An erroo occured in clearing chat !!");
-    //     toast.error("An error occured in clearing chat !!");
-    // }
+      }
+    } catch (error) {
+        console.log("An erroo occured in clearing chat !!");
+        toast.error("An error occured in clearing chat !!");
+    }
   }
  return (
     <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">

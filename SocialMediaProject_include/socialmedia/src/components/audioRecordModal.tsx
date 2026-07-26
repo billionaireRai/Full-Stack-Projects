@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import toast from 'react-hot-toast';
 import Audioplayer from './Audioplayer';
-import { MdPreview } from 'react-icons/md';
 
 interface audioProp {
   closePopUp: () => void;
@@ -26,7 +25,7 @@ export default function AudioRecordModal({ closePopUp, addAudioInAttachments }: 
   const recorderState = useMemo(() => {
     if (!mediaRecorderRef.current) return 'inactive' ;
     return mediaRecorderRef.current.state;
-  }, [isRecording]);
+  }, []);
 
   
   // function audio recording logic...

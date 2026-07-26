@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { urlRegex, usernameRegex } from "@/app/controllers/regex";
+import { usernameRegex } from "@/app/controllers/regex";
 
 const mediaUrlSchema = new mongoose.Schema({
   url: {

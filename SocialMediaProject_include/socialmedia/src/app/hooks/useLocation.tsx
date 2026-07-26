@@ -82,7 +82,7 @@ export function useLocation(autoFetch: boolean = true) {
           setState({
             location: null,
             loading: false,
-            error: "Failed to resolve location name",
+            error:JSON.stringify(err),
           });
         }
       },

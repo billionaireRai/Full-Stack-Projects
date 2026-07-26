@@ -3,21 +3,17 @@
 import React,{ useState , useEffect }from 'react'
 import ChatAccountcard from '@/components/chataccountcard'
 import ReportPop from '@/components/reportPop'
-import Link from 'next/link'
-import Image from 'next/image';
-import AudioRecordModal from '@/components/audioRecordModal';
 import BlockChatPop from '@/components/blockchat';
 import MessageCard from '@/components/messagecard';
-import Sharecontactonchat from '@/components/sharecontactonchat';
 import AddAccinchatlist from '@/components/adduserinchatlist';
 import { userCardProp } from '@/components/usercard';
-import { SearchIcon, PlusCircleIcon,SendIcon ,User, BellOff,Folder, Eraser, UserX, Flag, Trash, Smile, Paperclip, Mic, Image as image, Video, File, Music, Square, Play, X, PhoneIcon, BarChart3, Images, MessageCirclePlus, BanIcon , Link2Icon, BellDot, MessageCircleDashed } from 'lucide-react'
+import { SearchIcon, PlusCircleIcon, MessageCircleDashed } from 'lucide-react'
 import toast from 'react-hot-toast';
 import { infoForChatCard } from '@/components/chataccountcard'
 import axiosInstance from '@/lib/interceptor';
 import DeleteModal from '@/components/deletemodal'
 
-export default function Messages() {
+export default function MessagesPage() {
   const [ChatSearch, setChatSearch] = useState('') ; // input for searching a paticular chat...
   const [CurrentOpenChat, setCurrentOpenChat] = useState<infoForChatCard>();
   const [chatSlideOpen, setchatSlideOpen] = useState<boolean>(false) ;
@@ -254,12 +250,7 @@ export default function Messages() {
       publicKeyReciever:'utbgnhskrnohwe',
     }
   ])
-  const attachFileoptions = [
-    { icon: <Images className="w-3 h-3 text-blue-500" />, label: "Photos" },
-    { icon: <Video className="w-3 h-3 text-purple-500" />, label: "Videos" },
-    { icon: <Music className="w-3 h-3 text-pink-500" />, label: "Audio" },
-    { icon: <PhoneIcon className="w-3 h-3 text-red-500" />, label: "Contact" },
-  ]
+
   const [filteredCards, setFilteredCards] = useState(conversations); // for handling the searched result array...
   
   // for adding new chat in UI...
@@ -343,7 +334,7 @@ export default function Messages() {
     
   // useffect for page load actions..
   useEffect(() => {
-    // getConversations();
+    getConversations();
   }, [])
 
 

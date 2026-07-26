@@ -41,19 +41,19 @@ export default function LogIn() {
 
   if (loginRes.status === 200) {
     const userInfo = { email:loginRes.data.userCred.email , userId:loginRes.data.userCred.userId } // making separate objet for userInfo...
-    // const output = await checkForPrivateKeyIDB(loginRes.data.userCred.accountId); // for fetching private key in local storage...
+    const output = await checkForPrivateKeyIDB(loginRes.data.userCred.accountId); // for fetching private key in local storage...
       toast.dismiss(initialToast);
       toast.success('login successfull !!');
       setisAuth(true);
       setAccount(loginRes.data.userCred.activeAccount)
       setUserInfo(userInfo);
       router.push(`/${loginRes.data.handle}`);
-      // if (isKeyObjType(output)) { 
-      //   localStorage.setItem('privatekey', output.value);
-      //   setpublickey(loginRes.data.userCred.key);
-      // }
-      // else generateKeyPairAndStoreBoth(loginRes.data.userCred.accountId);
-      // useWebSocket(loginRes.data.userCred.accountId,'login'); // generating websocket connection client => server...
+      if (isKeyObjType(output)) { 
+        localStorage.setItem('privatekey', output.value);
+        setpublickey(loginRes.data.userCred.key);
+      }
+      else generateKeyPairAndStoreBoth(loginRes.data.userCred.accountId);
+      useWebSocket(loginRes.data.userCred.accountId,'login'); // generating websocket connection client => server...
       return 'success';
   }
     toast.dismiss(initialToast);
@@ -83,7 +83,7 @@ export default function LogIn() {
 
         {/* Social Login */}
         <div className="flex flex-row w-full px-6 gap-4 items-center justify-center mt-4">
-          <a
+          <Link
             href="/api/auth/register/google?intent=login"
             className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-400 transition-all duration-300 hover:shadow-md bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
           >
@@ -95,9 +95,9 @@ export default function LogIn() {
               alt="google-icon"
             />
             <span className="dark:font-bold">Google</span>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/api/auth/register/facebook?intent=login"
             className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-400 transition-all duration-300 hover:shadow-md bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
           >
@@ -109,7 +109,7 @@ export default function LogIn() {
               alt="facebook-icon"
             />
             <span className="dark:font-bold">Facebook</span>
-          </a>
+          </Link>
         </div>
 
         {/* Divider */}

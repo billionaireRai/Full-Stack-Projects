@@ -1,6 +1,6 @@
 import asyncErrorHandler from "../middleware/errorMiddleware";
 import { NextRequest , NextResponse } from "next/server";
-import { getConversationsService , createNewConversationService, chatCardOpenService, chatBlockingService } from "../db/services/conversations";
+import { getConversationsService , createNewConversationService, chatCardOpenService, chatBlockingService ,conversationDeletionService } from "../db/services/conversations";
 
 export const getConversationsController = asyncErrorHandler( async (req:NextRequest) => {
     const conversations = await getConversationsService();
@@ -27,7 +27,7 @@ export const chatCardOpenController = asyncErrorHandler(async (request:NextReque
        return NextResponse.json({ message:'Card information missing !!' },{ status:404 });
     }
 
-    // await chatCardOpenService(cardInfo); 
+    await chatCardOpenService(cardInfo); 
     return NextResponse.json({ message:'Chat open logics completed successful..' },{ status:200 });
 })
 
@@ -39,7 +39,7 @@ export const blockConversationController = asyncErrorHandler(async (request:Next
         return NextResponse.json({ message:"Conversation id Or Username missing..." },{ status:200 });
     }
 
-    // await chatBlockingService(username,conversationid,changeTo);
+    await chatBlockingService(username,conversationid,changeTo);
     return NextResponse.json({ message:`Conversation ${changeTo ? 'blocked' : 'unblocked' }  successfully !!`});
 })
 
@@ -52,6 +52,6 @@ export const conversationDeletionController = asyncErrorHandler( async (request:
         return NextResponse.json({ message:'conversation id unavailable...' },{ status:404 });
     }
 
-    // await conversationDeletionService(conversationid);
+    await conversationDeletionService(conversationid);
     return NextResponse.json({ message:'Conversation deleted successfully !!' },{ status:200 });
 })

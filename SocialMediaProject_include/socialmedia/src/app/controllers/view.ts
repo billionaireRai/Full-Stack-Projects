@@ -1,5 +1,4 @@
 import { NextRequest , NextResponse } from "next/server";
-import crypto from "crypto";
 import asyncErrorHandler from "../middleware/errorMiddleware";
 import { getAllViewsOfPostService, trackingPostViewService } from "../db/services/views";
 
@@ -19,7 +18,7 @@ export const viewCreationController = asyncErrorHandler( async (request:NextRequ
     // Extract User-Agent from request headers
     const userAgent = request.headers.get("user-agent") || "unknown";
     
-   //  await trackingPostViewService(postid,fromPage,idAddress,userAgent) ;
+    await trackingPostViewService(postid,fromPage,ipAddress,userAgent) ;
     return NextResponse.json({ message:'View created successfully !!' },{ status:200 });
 })
 
@@ -35,6 +34,6 @@ export const getAllViewsOfPostController = asyncErrorHandler( async (request:Nex
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
     } 
 
-    // await getAllViewsOfPostService({ postid , page , size }) ;
+    await getAllViewsOfPostService({ postid , page , size }) ;
     return NextResponse.json({ message:'View fetched successfully !!' },{ status:200 });
 })

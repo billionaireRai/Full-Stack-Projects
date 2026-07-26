@@ -50,7 +50,7 @@ export default function Qrcodepop ({ path , owner , timestamp , doneScanning , c
   };
 
   useEffect(() => {
-   // apiForUrlVerification();
+   apiForUrlVerification();
   }, [])
 
     return (

@@ -3,14 +3,13 @@ import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import { NextResponse } from "next/server";
 import accounts from "../models/accounts";
 import Post from "../models/posts";
-import mongoose from "mongoose";
 import { fmt } from "@/lib/utils";
 import likes from "../models/likes";
 import viewStat from "../models/viewstat";
 import tagged from "../models/tagged";
 import follows from "../models/follows";
 
-export const getCommentsOfAPostService = async ({ postid , page , pagesize } : { postid: string , page: number , pagesize: number }) => { 
+export const getCommentsOfAPostService = async ({ postid , page , size } : { postid: string , page: number , size: number }) => { 
     await connectWithMongoDB() ; // establishing connection to DB...
 
     const user = await getDecodedDataFromCookie("accessToken");
@@ -33,8 +32,8 @@ export const getCommentsOfAPostService = async ({ postid , page , pagesize } : {
     const total = totalResult[0]?.total || 0; // total distinct views...
 
     // Pagination
-    const skip = (page - 1) * pagesize;
-    const hasNext = total > skip + pagesize;
+    const skip = (page - 1) * size;
+    const hasNext = total > skip + size;
 
     if (total === 0) return NextResponse.json({ message: 'comments not found !!', comments: [], hasNext }, { status: 200 });
 
@@ -42,7 +41,7 @@ export const getCommentsOfAPostService = async ({ postid , page , pagesize } : {
     const commentPost = await Post.find({ replyToPostId: postid, postType: 'comment', isDeleted: false })
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(pagesize)
+        .limit(size)
         .lean();
 
     const comments = await Promise.all(commentPost.map(async (comment) => {
@@ -110,7 +109,7 @@ export const getCommentsOfAPostService = async ({ postid , page , pagesize } : {
 }
 
 
-export const getRepliesOnPostCommentService = async ({ postid , page , pagesize } : { postid: string , page: number , pagesize: number }) => { 
+export const getRepliesOnPostCommentService = async ({ postid , page , size } : { postid: string , page: number ,size: number }) => { 
     // getting the cookies data...
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
@@ -136,8 +135,8 @@ export const getRepliesOnPostCommentService = async ({ postid , page , pagesize 
     const total = replies[0]?.total || 0; // total distinct replies....
 
     // Pagination variables...
-    const skip = (page - 1) * pagesize;
-    const hasNext = total > skip + pagesize;
+    const skip = (page - 1) * size;
+    const hasNext = total > skip + size;
 
     if (total === 0) return NextResponse.json({ message: 'replies not found !!', replies: [], hasNext }, { status: 200 });
     
@@ -145,7 +144,7 @@ export const getRepliesOnPostCommentService = async ({ postid , page , pagesize 
     const repliesOnComment = await Post.find({ replyToPostId: { $in:commentIds }, postType: 'comment', isDeleted: false })
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(pagesize)
+        .limit(size)
         .lean();
 
     const repliedData = await Promise.all(repliesOnComment.map(async (reply) => { 

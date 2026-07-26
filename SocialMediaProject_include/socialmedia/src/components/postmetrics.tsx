@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Eye, Heart, MessageCircle, Repeat, Bookmark, TrendingUp, Users, MapPin, Smartphone, Monitor, Clock, BarChart3, PieChart, Activity, LaptopIcon } from 'lucide-react'
-import { useParams } from 'next/navigation'
+import { Eye, Heart, MessageCircle, Repeat, Bookmark, TrendingUp, Users, MapPin, Smartphone, Monitor, Clock, BarChart3, Activity, LaptopIcon } from 'lucide-react'
 import axiosInstance from '@/lib/interceptor'
 import { fmt } from '@/lib/utils'
 
@@ -32,9 +31,8 @@ interface timeObj {
 
 export default function PostMetricsPage({ postId }:{ postId:string }) {
   // containing all time options...
-  const [timeArray, settimeArray] = useState<timeObj[]>(
-    [{value:"7d",label:'7 days'},{value:"30d",label:'30 days'},{value:"90d",label:'90 days'},{value:"1y",label:'1 year'},{value:"2y",label:'2 years'}]
-  )
+  const timeArray:timeObj[] = [{value:"7d",label:'7 days'},{value:"30d",label:'30 days'},{value:"90d",label:'90 days'},{value:"1y",label:'1 year'},{value:"2y",label:'2 years'}] ;
+  
   const [TimeRange, setTimeRange] = useState<timeObj>({value:'7d',label:'7 days'}); // selected time interval for analytics...
 
   const [metrics, setMetrics] = useState<PostMetrics>({
@@ -101,7 +99,7 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
       if (metricApi.status == 200) setMetrics(metricApi.data.metric) ;
     }
 
-    // fetchMetrics() ;
+    fetchMetrics() ;
   }, [postId,TimeRange,timeArray])
 
 

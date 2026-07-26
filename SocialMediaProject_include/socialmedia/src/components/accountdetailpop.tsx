@@ -49,7 +49,8 @@ export default function AccountDetailPop({ user,visible,onOpen,onClose,position 
             toast.error('Failed with action...');
           }
       } catch (error) {
-        toast.error('Failed with action...');
+        toast.error('Failed with action');
+        console.log(error);
       } finally {
         setLoading(false);
       }

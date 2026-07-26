@@ -1,7 +1,7 @@
 'use client'
 
 import { fmt } from "@/lib/utils";
-import { MoreHorizontalIcon, ThumbsDown, AlertTriangle, ShieldAlert, EyeOff, Copy, MessageCirclePlusIcon } from "lucide-react";
+import { MessageCirclePlusIcon } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 
@@ -13,19 +13,19 @@ export interface trendcardprop {
 }
 
 export default function TrendCard({ rank, region, tag, posts } : trendcardprop ) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Toggle dropdown visibility
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+  // const toggleDropdown = () => {
+  //   setIsDropdownOpen(!isDropdownOpen);
+  // };
 
   // Close dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if ( dropdownRef.current && !dropdownRef.current.contains(event.target as Node) ) {
-        setIsDropdownOpen(false);
+        // setIsDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);

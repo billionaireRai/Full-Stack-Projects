@@ -14,11 +14,10 @@ import { usePathname } from 'next/navigation'
 import LogoutModal from './logoutmodal';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
-import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, PlusCircleIcon, MoreVerticalIcon, SparklesIcon, List, BadgeQuestionMark, PlusCircle, OptionIcon, CalendarClock } from 'lucide-react'
+import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, MoreVerticalIcon, List, BadgeQuestionMark, PlusCircle, OptionIcon, CalendarClock } from 'lucide-react'
 import useMessageCount from '@/app/states/unreadmessages';
 import { MdDrafts, MdGroups } from 'react-icons/md';
-import axios from 'axios';
-import toast from 'react-hot-toast';
+
 
 export default function SideNavbar() {
   const { setCreatePop } = useCreatePost()

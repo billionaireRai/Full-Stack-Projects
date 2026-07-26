@@ -27,6 +27,7 @@ export default function NotInterestedPop({ closePopUp, postId, username , update
       }
     } catch (error) {
       toast.dismiss(loadingToast);
+      console.log("error occured :",error);
       toast.error('Failed to hide post !!');
     }
   }

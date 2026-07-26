@@ -17,6 +17,7 @@ export const handleLogoutAccountLogic = async (accountHandle:string) => {
       }
     } catch (error) {
         toast.dismiss(loadingToast);
+        console.log("Error occured :",error);
         toast.error('An error occured...');
     }
 }

@@ -36,7 +36,7 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
     }
   }
   useEffect(() => {
-    // apiForAllFollowings();
+    apiForAllFollowings();
   }, [handle])
    
   // useeffect for handling

@@ -126,20 +126,20 @@ const Table = ({ headers, rows }: any) => (
   </table>
 );
 
-const AnalyticsReport = (props: any) => {
+const AnalyticsReport = (props:Props) => {
   const {
     overview,
     watchTime,
     viewersSeries,
     deviceBreakdown,
     genderBreakdown,
-    recentUploads,
+    // recentUploads,
     topCountries,
     topPosts,
-    growthSeries,
-    interactionTypes,
-    contentPerformance,
-  } = props;
+    // growthSeries,
+    // interactionTypes,
+    // contentPerformance,
+  } = props ;
 
   return (
     <div className="bg-white text-gray-800">

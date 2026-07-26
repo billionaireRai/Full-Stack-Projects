@@ -250,7 +250,7 @@ export const fetchMessagesService = async ({ page , size , convid }:{ page:numbe
     if (!Conversation) return NextResponse.json({ message: 'Conversation not found' }, { status: 404 });
 
     // Get the other participant's ID
-    const otherParticipantId = Conversation.participants.find((pid: string) => pid.toString() !== activeAcc._id.toString());
+    // const otherParticipantId = Conversation.participants.find((pid: string) => pid.toString() !== activeAcc._id.toString());
 
     // Fetching paginated messages...
     const totalMessages = await messages.countDocuments({ conversationId: convid,deletedFor: { $nin: [activeAcc._id] }});

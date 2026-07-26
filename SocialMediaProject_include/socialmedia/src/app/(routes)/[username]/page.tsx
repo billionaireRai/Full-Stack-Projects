@@ -3,7 +3,6 @@
 import React, { useState , useEffect, useRef } from 'react';
 import ReportPop from '@/components/reportPop';
 import RequireSubscription from "@/components/requireSubscription"
-import usePublicKey from '@/app/states/accountpublickey';
 import BlockUser from '@/components/blockUser';
 import useUpgradePop from "@/app/states/upgradePop";
 import Link from 'next/link';
@@ -19,7 +18,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
-import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Bell, Shield, Settings, Download, MessageCircle, VolumeX, ExternalLink, QrCodeIcon, Heart, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon, VideoOffIcon, File, SparklesIcon} from 'lucide-react';
+import { MoreHorizontalIcon, MapPin, Link as LinkIcon, Calendar , Edit2Icon , Share2Icon , CopyIcon , BanIcon, Flag, FileText , Users, ArrowBigUpIcon , Delete, BarChart3, Settings, MessageCircle, VolumeX, QrCodeIcon, Star, Image as ImageIcon, MessageCircleMore, ImagesIcon, ThumbsUp, HighlighterIcon, VideoOffIcon, File, SparklesIcon} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import axiosInstance from '@/lib/interceptor';
@@ -27,7 +26,6 @@ import { AxiosResponse } from 'axios';
 import DeleteModal from '@/components/deletemodal';
 import SharePopup from '@/components/sharePopUp';
 import Qrcodepop from '@/components/qrcodepop';
-import { BsPostcardFill } from 'react-icons/bs';
 import useMediaPop from '@/app/states/mediapop';
 import Mediapopmodal from '@/components/mediapopmodal';
 import { usernameRegex } from '@/app/controllers/regex';
@@ -176,13 +174,11 @@ export default function UserProfilePage() {
 
   const { isPop , setisPop } = useUpgradePop() ;
   const { isMediaPop , mediaDetail , setDetails, setMediaPop } = useMediaPop() ;
-  const { username } = useParams() ; // taking the username from URL...
-  const { setpublickey } = usePublicKey() ;
+  const { username } = useParams() ; // taking the username from URL..
   const fetchedHandlesRef = useRef<Set<string>>(new Set()); // ref to track fetched handles
   const isSelf = Account.decodedHandle === decodeURIComponent(String(username)) ? true : false ;
   const [isFollowing, setisFollowing] = useState<boolean>(false);
   const [ShowQRPop, setShowQRPop] = useState(false);
-  const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
   const [planIntent, setplanIntent] = useState<string>('Pro');
@@ -191,7 +187,7 @@ export default function UserProfilePage() {
   const [OpenProfileEditor, setOpenProfileEditor] = useState<boolean>(false) ;
   const [Loading, setLoading] = useState(false);
   const [OpenReportPop, setOpenReportPop] = useState<boolean>(false)
-  const [showBlockPop, setshowBlockPop] = useState<Boolean>(false)
+  const [showBlockPop, setshowBlockPop] = useState<boolean>(false)
   const [SharePop, setSharePop] = useState<boolean>(false)
   const [IsBlocked, setIsBlocked] = useState<boolean>(false);
   const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
@@ -199,7 +195,7 @@ export default function UserProfilePage() {
   
   const pageCategory : "feed" | "profile" | "direct" | "explore" = "profile" ;
   // random user data
-  let user : accountType = {
+  const user : accountType = {
     name: "John Doe",
     handle: "@johndoe",
     bio: "Digital creator • Photography enthusiast • Coffee lover • Building amazing things one line of code at a time",
@@ -653,7 +649,7 @@ export default function UserProfilePage() {
         }
       }
     };
-    // fetchAccountData();
+    fetchAccountData();
   }, [Account.account, username])
   
   useEffect(() => {
@@ -682,7 +678,7 @@ export default function UserProfilePage() {
     }
 
     // running only when username exists...
-    // if (username) functionToGetData();
+    if (username) functionToGetData();
   }, [username])
   
   // toggleing follow logic...
@@ -782,14 +778,13 @@ export default function UserProfilePage() {
 
   // funtion to handle summarize pop...
   function handleSummarizePop() : void {
-    // if (showUpgradePop) {
-      // setplanIntent('Premium');
-      // setisPop(true);
-    // } else {
+    if (showUpgradePop) {
+      setplanIntent('Premium');
+      setisPop(true);
+    } else {
       // main logic comes here...
       setShowSummarize(true);
-
-    // }
+    }
   }
 
   // funtion to copy email..
@@ -817,7 +812,7 @@ export default function UserProfilePage() {
         useWebSocket(accountid,intent) // updating presence state web-socket id...
       }    
     }
-    // if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
+    if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
   }, [utmsource,accid,intent,key])
 
   return (

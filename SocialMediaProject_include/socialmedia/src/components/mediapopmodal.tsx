@@ -10,10 +10,10 @@ export interface mediaType {
   media_type: string;
 }
 
-interface mediasizetype {
-  height: number;
-  width: number;
-}
+// interface mediasizetype {
+//   height: number;
+//   width: number;
+// }
 
 interface modalProps {
   closepop: () => void;

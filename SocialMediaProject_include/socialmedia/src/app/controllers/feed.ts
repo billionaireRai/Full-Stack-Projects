@@ -13,6 +13,6 @@ export const getAccountsFeedPostController = asyncErrorHandler(async (request:Ne
     return await getFeedPostService({ Page , size });
 })
 
-export const getFeedAccountSuggestionsController = asyncErrorHandler(async (request:NextRequest) => {
+export const getFeedAccountSuggestionsController = asyncErrorHandler(async () => {
     return await getFeedSuggestionsService() ;
 })

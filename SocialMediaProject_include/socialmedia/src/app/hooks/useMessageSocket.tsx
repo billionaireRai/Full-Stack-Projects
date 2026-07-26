@@ -119,7 +119,7 @@ export default function useMessageSocket(chat?: infoForChatCard) {
       socketRef.current = null;
       setConnectionStatus("disconnected");
     };
-  }, [chat, publickey, privateKey]);
+  }, [chat, publickey, privateKey,addMessages,messages.length,play,updateMessageStatus]);
 
   const sendMessage = useCallback( async (payload: SendMessageInput) => {
       if (!chat) throw new Error("Chat is not selected");
@@ -141,7 +141,7 @@ export default function useMessageSocket(chat?: infoForChatCard) {
         mentions: payload.mentions,
       });
     },
-    [chat, publickey, privateKey, chat?.publicKeyReciever]
+    [chat, publickey, privateKey]
   );
 
   return { sendMessage , connectionStatus } ;

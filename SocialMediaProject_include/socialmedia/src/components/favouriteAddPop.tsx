@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
 import axiosInstance from '@/lib/interceptor'
 import toast from 'react-hot-toast'
 import { MdFavorite } from 'react-icons/md'
@@ -14,11 +13,10 @@ interface FavouriteAddPopProp {
 }
 
 export default function FavouriteAddPop({ closePopUp, handle ,postid ,itemType = 'item' }: FavouriteAddPopProp) {
-  const router = useRouter() ; // initializing router hook...
   const handleAddToFavourite = async () => {
     const loadingtoast = toast.loading('Adding to favourite...');
      try {
-     const favouriteApi = await axiosInstance.post(`/api/post/control`,{ postId:postid });
+     const favouriteApi = await axiosInstance.post(`/api/post/control`,{ postId:postid , handle });
      if (favouriteApi.status === 200) {
         toast.dismiss(loadingtoast)
         toast.success(`Added to favourite !!`)

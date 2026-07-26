@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AnimatePresence , motion } from 'framer-motion';
 import CompLoader from '@/components/componentloader';
-import { SettingsIcon , SearchIcon, X , Users, TrendingUp, BadgeQuestionMark, MessageCircleHeartIcon } from 'lucide-react';
+import { SettingsIcon , SearchIcon , Users, TrendingUp, MessageCircleHeartIcon } from 'lucide-react';
 import Newscard from '@/components/newscard';
 import Trendcard from '@/components/trendcard';
 import PostCard from '@/components/postcard';
@@ -84,7 +84,7 @@ export interface PostType {
 }
 
 
-export default function explore() {
+export default function Explore() {
   const searchparam = useSearchParams() ; // initializing search param hook...
   const pagesize:number = 20 ;
   const autoHeightGap:number = 400 ;
@@ -99,7 +99,7 @@ export default function explore() {
   const [loadingsuggestions, setloadingsuggestions] = useState<boolean>(true);
   const [loadingTrends, setloadingTrends] = useState<boolean>(false);
   const [LocationSetting, setLocationSetting] = useState(false);
-  const [hpninPopUp, sethpninPopUp] = useState(0);
+  // const [hpninPopUp, sethpninPopUp] = useState(0);
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
 
@@ -136,7 +136,7 @@ export default function explore() {
         { rank: 1, region: "India", tag: "#Baaghi4Trailer", posts: 3592 },
       ]);
 
-      const [newsData, setnewsData] = useState<newsCardType[]>([
+      const newsData :newsCardType[] = [
         {
           source: "CNN",
           category: `${(Account.account?.location.text) ?? 'World'}-News`,
@@ -182,7 +182,7 @@ export default function explore() {
           location: "Business",
           href: `/news?n=${encodeURIComponent('Updates-About-Crypto-Market-And-Exchanges')}&cat=business&utm_source=news-click`
         }
-      ]);
+      ];
 
       const [explorePosts, setexplorePosts] = useState<PostType[]>([])
       
@@ -192,7 +192,7 @@ export default function explore() {
         const otherapi = await axiosInstance.post('/api/explore');
         if (otherapi.status === 200) {
           setsuggestionAcc(otherapi.data.suggestions);
-          // setTrends(otherapi.data.trendingHashtags);
+          setTrends(otherapi.data.trendingHashtags);
           setloadingsuggestions(false);
           setloadingTrends(false);
         }
@@ -237,14 +237,14 @@ export default function explore() {
         const distanceFromBottom = exploreSection.scrollHeight - exploreSection.scrollTop - exploreSection.clientHeight ;
   
         if (distanceFromBottom <= autoHeightGap && hasExplore) {
-          //  if (hashtopic) {
-          //   const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
-          //   functionFetchPosts(decodedT); // getting explore posts 
-          //   setPage(Page + 1);
-          // } else {
-          //   functionFetchPosts() ;
-          //   setPage(Page + 1);
-          // }
+           if (hashtopic) {
+            const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
+            functionFetchPosts(decodedT); // getting explore posts 
+            setPage(Page + 1);
+          } else {
+            functionFetchPosts() ;
+            setPage(Page + 1);
+          }
         }
        }
        // calling scroll function...

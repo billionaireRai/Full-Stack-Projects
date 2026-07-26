@@ -62,7 +62,7 @@ export default function LocationSearch({ visible, onClose, onSelect, placeholder
     return () => {
       clearTimeout(delayDebounce);
     }
-  }, [searchQuery])
+  }, [searchQuery,sampleLocations])
   
 
   if (!visible) return null;

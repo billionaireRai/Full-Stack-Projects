@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, SparklesIcon, Copy, Check, RefreshCw, BrainCircuit, Target, TrendingUp, BarChart3, Users, MessageCircle, Heart, Eye, Repeat2, Bookmark, Hash, AtSign, Lightbulb, FileText, Calendar, MapPin, Quote, BadgeCheck, Activity, PieChart, Globe, UserCheck, CopyIcon, Redo, Share2 } from 'lucide-react'
+import { X, SparklesIcon, Check, RefreshCw, CopyIcon, Share2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Loader from './loader'
 
@@ -64,12 +63,12 @@ export default function AISummary({ type , meta , onClose }: AISummaryProps) {
   const metaRef = useRef<HTMLDivElement>(null);
 
   // Narrow the type for safe access...
-  const profileMeta = !isPost ? (meta as ProfileSummaryMeta) : null;
-  const postMeta = isPost ? (meta as PostSummaryMeta) : null;
+  // const profileMeta = !isPost ? (meta as ProfileSummaryMeta) : null;
+  // const postMeta = isPost ? (meta as PostSummaryMeta) : null;
 
   // Generate AI explanation from meta data on mount
   useEffect(() => {
-
+    setAiExplanation('')
   }, []);
 
   const handleCopy = async () => {

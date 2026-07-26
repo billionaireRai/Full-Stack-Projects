@@ -8,7 +8,7 @@ import useActiveAccount from '@/app/states/useraccounts';
 import { motion, AnimatePresence } from 'framer-motion';
 import PollInPost from './pollinpost';
 import { useTheme } from 'next-themes';
-import { X, Smile, ImageIcon, Send, MessageCircle, MapPin } from 'lucide-react';
+import { X, Send, MessageCircle, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import Link from 'next/link';
@@ -106,7 +106,7 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
   // useffect for handling execceding allowed character length...
   useEffect(() => {
     if (replyText.length > maxChars) setReplyText(replyText) ;
-  }, [replyText])
+  }, [replyText,maxChars])
 
   // function handling emoji selection logic...
   const onEmojiClick = (emojiData:EmojiClickData) => {
@@ -130,7 +130,7 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [replyText]);
+  }, [replyText,handlePostReply]);
 
   // Calculate character count percentage
   const charPercentage = (replyText.length / maxChars) * 100;
@@ -163,7 +163,6 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center overflow-y-scroll justify-center z-50 p-4" 
-      onClick={handleClose}
     >
       <motion.div 
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -171,7 +170,6 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="bg-white dark:bg-black w-full max-w-lg rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 max-h-fit flex flex-col" 
-        onClick={(e:MouseEvent) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-black rounded-2xl">

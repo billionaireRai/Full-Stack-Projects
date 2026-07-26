@@ -14,6 +14,6 @@ export const getAllLikesOfPostController = asyncErrorHandler(async (request:Next
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
     } 
 
-    // await getAllTheLikesOfPostService({ postid , page , size });
+    await getAllTheLikesOfPostService({ postid , page , size });
     return NextResponse.json({ message:'Post likes fetched !!' },{ status:200 });
 })

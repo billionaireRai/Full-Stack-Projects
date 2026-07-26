@@ -56,13 +56,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <Toaster position="top-center" reverseOrder={false} />
         { isCreatePop && <CreatePost /> }
         { isPopOpen && <SwitchAccountPopUp /> }
-        {/* { isAuth && !isCompleted && <AccCompletionPop onClose={() => { setisCompleted(true) }} onContinue={() => { router.push(`/@${Account.decodedHandle}`) }}/> } */}
+        { isAuth && !isCompleted && <AccCompletionPop onClose={() => { setisCompleted(true) }} onContinue={() => { router.push(`/@${Account.decodedHandle}`) }}/> }
         {/* interest popup modal... */}
-        {/* { isAuth && showInterest && (
+        { isAuth && showInterest && (
             <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>
                  <Interest getStarted={() => { setshowInterest(false) ; setStart(true) }} onClose={() => setshowInterest(false)} />
             </div>
-         )} */}
+         )}
         {/* main selection popup... */}
         {Start && (
              <div className='fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200'>

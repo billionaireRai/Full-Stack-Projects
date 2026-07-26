@@ -11,6 +11,6 @@ export const getAllTheFollowingsController = asyncErrorHandler( async (request:N
         return NextResponse.json({ message:'Handle missing !!'},{ status:400 }) ;
     }
 
-    // getAllTheFollowingService(handle) ;
+    getAllTheFollowingService(handle) ;
     return NextResponse.json({ message:'followings fetched...' },{ status:200 });
 })

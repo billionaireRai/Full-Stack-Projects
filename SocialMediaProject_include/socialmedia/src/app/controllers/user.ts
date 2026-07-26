@@ -58,7 +58,7 @@ export const triggerFollowToggleController = asyncErrorHandler( async (request:N
         return NextResponse.json({message:'credentials missing !!'},{ status:404 }) ;
     }
     
-    // await userFollowService(accounthandle,follow) ; // calling DB service...
+    await userFollowService(accounthandle,follow) ; // calling DB service...
     return NextResponse.json({message:'action performed successfully...' },{ status:200 });
 })
 
@@ -82,7 +82,7 @@ export const userProfileDeletioncontroller = asyncErrorHandler( async (request:N
         return NextResponse.json({message:'Account handle unavailable...'},{ status:404 });
     }
 
-    // await profileDeletionService(profilehandle) ; // DB service...
+    await profileDeletionService(profilehandle) ; // DB service...
     return NextResponse.json({message:'Account deleted successfully !!'},{ status:200 });
 
 })
@@ -95,7 +95,7 @@ export const BlockPaticularAccountController = asyncErrorHandler( async (request
         return NextResponse.json({message:'Account handle unavailable...'},{ status:404 });
     }
 
-    // await blockingAccountService(handle,isBlock) ; // triggering the service function...
+    await blockingAccountService(handle,isBlock) ; // triggering the service function...
     return NextResponse.json({message:'account successfully blocked...'},{ status:200 });
 
 })
@@ -109,7 +109,7 @@ export const accountRepostSubmittionController = asyncErrorHandler( async (reque
     }
 
     console.log(reportInfo);
-    // await userReportService(reportInfo); // calling the database function...
+    await userReportService(reportInfo); // calling the database function...
     return NextResponse.json({ message:'Report submittion successfull...' },{ status:200 });
 })
 
@@ -186,6 +186,6 @@ export const getSearchedLocation = asyncErrorHandler(async (request:NextRequest)
 })
 
 
-export const getBookmarkSuggestionsController = asyncErrorHandler(async (request:NextRequest) => {
+export const getBookmarkSuggestionsController = asyncErrorHandler(async () => {
     return await getBookmarkSuggestionsService() ;
 })

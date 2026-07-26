@@ -86,14 +86,13 @@ export default function Messagesearch({ close , scrollInMsgSection }: MessageSea
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [close, matched.length])
+  }, [close, matched.length,activeMessageIdx,scrollInMsgSection,matched])
 
 
   return (
     <div 
     role="dialog" 
     aria-modal="true" 
-    onClick={close} 
     className="fixed w-full h-full inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-300" >
       {/* panel */}
       <motion.div
@@ -101,7 +100,6 @@ export default function Messagesearch({ close , scrollInMsgSection }: MessageSea
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 10 }}
         transition={{ duration: 0.18 }}
-        onClick={(e:Event) => e.stopPropagation()}
         className="flex flex-col w-full h-full max-w-2xl max-h-4/5 p-2 rounded-2xl bg-white dark:bg-black shadow-2xl"
       >
         <div className="p-2 sm:p-3 border-b border-gray-200/40 rounded-xl dark:border-gray-800/60">

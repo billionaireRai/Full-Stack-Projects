@@ -115,6 +115,7 @@ export default function Shareviadm({ closemodal, link }: shareViaDmProp) {
       }
     } catch (error) {
       toast.dismiss(loading);
+      console.log("error :",error);
       toast.error('An error occured !!')
     }
    }

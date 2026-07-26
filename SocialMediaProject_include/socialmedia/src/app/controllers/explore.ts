@@ -19,6 +19,6 @@ export const getExplorePostsOfAccountController = asyncErrorHandler( async (requ
     return await getExplorePostsService({ hashtag , page , size });
 })
 
-export const getOtherExploreDetailsController = asyncErrorHandler( async (request:NextRequest) => {
+export const getOtherExploreDetailsController = asyncErrorHandler( async () => {
     return await exploreDetailsForAccountService();
 })

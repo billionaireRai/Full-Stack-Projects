@@ -8,11 +8,11 @@ import { getDevicePublicIP } from "@/lib/pairedkeys";
 import pubkeys from "../models/pubkeys";
 import { loginDataType, registrationDataType } from "@/app/controllers/auth";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
-import cloudinary from "@/lib/cloudinary";
+// import cloudinary from "@/lib/cloudinary";
 import follows from "../models/follows";
 import Post from "../models/posts";
-import subscriptions from "../models/subscriptions";
-import mongoose from "mongoose";
+// import subscriptions from "../models/subscriptions";
+// import mongoose from "mongoose";
 import Block from "../models/blocked";
 import { fmt } from "@/lib/utils";
 import likes from "../models/likes";
@@ -160,8 +160,8 @@ export async function logginUserService(data:loginDataType) : Promise<any> {
     }
 
     // getting public key if exists for this device...
-    // const deviceip = await getDevicePublicIP() ;
-    // const publickey = await pubkeys.findOne({ accountId:account._id , deviceIP:deviceip , status:'active' });
+    const deviceip = await getDevicePublicIP() ;
+    const publickey = await pubkeys.findOne({ accountId:account._id , deviceIP:deviceip , status:'active' });
      
     const posts = await Post.find({ authorId : userdoc._id , isDeleted:false }); // taking out all the posts...
     // getting count of followers and followings... 
@@ -1014,7 +1014,7 @@ export const getBookmarkSuggestionsService = async () => {
     const planOrder: Record<Plan, number> = { "Free": 0, "Pro": 1, "Creator": 2, "Premium": 3 };
 
     const accountsWithSubs = Array.from(allSuggestions).map((acc: any) => {
-        const account = accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
+        // const account = accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
         const plan: Plan = (acc.account.plan as Plan) || 'Free';
         return { acc, plan, isVerified: acc.account?.isVerified || false };
     });

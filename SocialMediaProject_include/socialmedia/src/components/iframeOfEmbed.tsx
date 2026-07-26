@@ -12,9 +12,7 @@ import {
   MessageCircle,
   Heart,
   Repeat,
-  Eye,
-  Bookmark,
-  Share2
+  Eye
 } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import toast from 'react-hot-toast';
@@ -24,17 +22,17 @@ interface mediaType {
   media_type: string;
 }
 
-interface locationTaggedType {
-  text: string;
-  coordinates: number[];
-}
+// interface locationTaggedType {
+//   text: string;
+//   coordinates: number[];
+// }
 
-interface pollInfoType {
-  question: string;
-  options: { text: string; votes: number }[];
-  duration: number;
-  expiry: Date;
-}
+// interface pollInfoType {
+//   question: string;
+//   options: { text: string; votes: number }[];
+//   duration: number;
+//   expiry: Date;
+// }
 
 interface IframeOfEmbedProps {
   isOpen: boolean;
@@ -79,13 +77,12 @@ export default function IframeOfEmbed({
   const [copied, setCopied] = useState(false);
   const [copiedIframe, setCopiedIframe] = useState(false);
   
-  // Size and display controls
-  const [iframeWidth, setIframeWidth] = useState(600);
-  const [iframeHeight, setIframeHeight] = useState(400);
-  const [alignment, setAlignment] = useState<'left' | 'center' | 'full'>('center');
-  const [isResponsive, setIsResponsive] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  // Size and display states
+  const iframeWidth = 600 ;
+  const iframeHeight = 400 ;
+  const isResponsive = false ;
+  // const [isLoading, setIsLoading] = useState(true);
+  // const [hasError, setHasError] = useState(false);
 
   // Default values
   const displayMedia = media || [];
@@ -120,22 +117,22 @@ export default function IframeOfEmbed({
   const iframeCode = generateIframeCode();
 
   // Handle iframe load
-  const handleIframeLoad = () => {
-    setIsLoading(false);
-    setHasError(false);
-  };
+  // const handleIframeLoad = () => {
+  //   setIsLoading(false);
+  //   setHasError(false);
+  // };
 
-  // Handle iframe error
-  const handleIframeError = () => {
-    setIsLoading(false);
-    setHasError(true);
-  };
+  // // Handle iframe error
+  // const handleIframeError = () => {
+  //   setIsLoading(false);
+  //   setHasError(true);
+  // };
 
-  // Reset loading state when endpoint changes
-  const handleRetry = () => {
-    setIsLoading(true);
-    setHasError(false);
-  };
+  // // Reset loading state when endpoint changes
+  // const handleRetry = () => {
+  //   setIsLoading(true);
+  //   setHasError(false);
+  // };
 
   // Generate share URL
   const shareUrl = `http://localhost:3000/${handle}/post/${postId}`;
@@ -192,6 +189,7 @@ export default function IframeOfEmbed({
       setTimeout(() => setCopiedIframe(false), 2000);
     } catch (err) {
       toast.error('Failed to copy iframe code');
+      console.log(err);
     }
   };
 

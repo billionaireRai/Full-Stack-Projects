@@ -9,7 +9,6 @@ import accounts from "@/app/db/models/accounts";
 import follows from "@/app/db/models/follows";
 import reports from "../models/reports";
 import Post from "../models/posts";
-import users from "../models/users";
 import { newAccType } from "@/app/controllers/user";
 import { generateReportEmailHTML } from "@/components/report";
 import { sendFollowNotification } from "./notifications";

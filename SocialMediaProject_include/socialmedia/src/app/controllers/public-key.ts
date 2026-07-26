@@ -10,6 +10,6 @@ export const storePublickeyInDBController = asyncErrorHandler(async (request:Nex
         return NextResponse.json({ message:'Check incoming credentials !!' },{ status:404 });
     }
 
-    // await storePublicKeyInDBService(publicKey,accid,deviceip);
+    await storePublicKeyInDBService(publicKey,accid,deviceip);
     return NextResponse.json({ message:'Public key successfully stored !!' },{ status:200 });
 })

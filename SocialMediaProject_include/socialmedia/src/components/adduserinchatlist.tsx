@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import UserCard, { userCardProp } from './usercard'
 import { SearchIcon, X, UserPlus, LucideMessageCircleWarning, MessageCircleMoreIcon } from 'lucide-react'
 
@@ -269,6 +269,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
     } catch (error) {
       toast.error("An error occured !!");
+      console.log(error);
     }
   }
 
@@ -291,7 +292,7 @@ export default function AddAccinchatlist({ closePop, onAddChat }: addUserInListP
     }
 
     const delayDebounce = setTimeout(() => {
-      // getTheSearchedAccount(searchQuery) ;
+      getTheSearchedAccount(searchQuery) ;
     }, 300 );
 
     // cleanup previous timer on second update...

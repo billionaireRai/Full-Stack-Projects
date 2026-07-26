@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { EncryptedMessage, messageDecryptionTopLevel ,importRespectiveKey } from '@/lib/encryption'
 import useActiveAccount from '@/app/states/useraccounts'
 import { useTheme } from 'next-themes'
-// import useMessageSocket from '@/app/hooks/useMessageSocket'
+import useMessageSocket from '@/app/hooks/useMessageSocket'
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react'
 import { AtSign, CheckCircle, Eraser, Flag, Folder, Images, Lock, LockOpenIcon, Mic, MicOff, Music, Paperclip, PinIcon, PinOff, SearchIcon, SendIcon, Smile, Trash, Video, Bell, BellOff, X, Ban, User, MessageCirclePlus, CameraIcon, LockKeyholeIcon, MessageCircleMore, MessageCircleOff, LucideArrowBigDown } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -81,11 +81,11 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   const { Account } = useActiveAccount();
   const privatekey = localStorage.getItem('privatekey') ;
   const { messages, addMessages } = useActiveChatMessages() ;
-  // const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
+  const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
 
-  const heightGap = 200;
+  const heightGap = 200 ;
+  const messageSize = 15 ;
   const [backPage, setbackPage] = useState<number>(1);
-  const [messageSize, setSize] = useState(15);
   const [hasMoreMessages, sethasMoreMessages] = useState<boolean>(true);
   const [loadingMsgs, setloadingMsgs] = useState<boolean>(false);
   const msgsection = useRef<HTMLDivElement | null>(null)
@@ -211,6 +211,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
         const plainMsgs = await convertPlainMsgs(messageApi.data.messages,privKey);
         const structuredMessages = getMessageInStructure(plainMsgs);
         addMessages(structuredMessages);
+        sethasMoreMessages(messageApi.data.hasMore);
         setloadingMsgs(false);
       }
     } catch (error) {
@@ -223,8 +224,8 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   }
 
   useEffect(() => {
-    // fetchMessagesForPage();
-    // setbackPage(backPage + 1);
+    fetchMessagesForPage();
+    setbackPage(backPage + 1);
   }, [backPage])
   
   
@@ -236,8 +237,8 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     const handleScroll = () => {
       // scrolled near the top...
       if (section.scrollTop <= heightGap && hasMoreMessages) {
-        // fetchMessagesForPage()
-        // setbackPage(backPage + 1);
+        fetchMessagesForPage()
+        setbackPage(backPage + 1);
       }
     }
 
@@ -272,7 +273,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   }
 
   const handleSendMessage = async (_msg: string) => {
-    // if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
+    if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
 
     const trimmedmsg = _msg.trim() ;
     // instant message push UI
@@ -290,7 +291,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     setmessageText('')
 
     try {
-      // await sendMessage({ message: trimmedmsg , mentions:mentions , mediaFiles:MediaFiles });
+      await sendMessage({ message: trimmedmsg , mentions:mentions , mediaFiles:MediaFiles });
       // clearing local states after sending message...
       setmentions([])
       setMediaFiles([])

@@ -1,8 +1,8 @@
 
-import axios from "axios";
 import axiosInstance from "./interceptor";
 import usePublicKey from "@/app/states/accountpublickey";
 import toast from "react-hot-toast";
+import { importRespectiveKey } from "./encryption";
 
 export interface keyObjType {
   accId:string ;
@@ -121,10 +121,11 @@ export const generateKeyPairAndStoreBoth = async (accountid:string) => {
   const publicPem = derToPem(spkiDer, "PUBLIC_KEY");
   const privatePem = derToPem(pkcs8Der, "PRIVATE_KEY");
 
-  // await sendingPubkeyToBackend(publicPem,accountid);
-  // const storeobj:keyObjType = await handleIndexedDBStorage(privatePem,accountid);
-  // localStorage.setItem('privatekey',storeobj.value);
-  // setpublickey(publicPem);
+  await sendingPubkeyToBackend(publicPem,accountid);
+  const storeobj:keyObjType = await handleIndexedDBStorage(privatePem,accountid);
+  localStorage.setItem('privatekey',storeobj.value);
+  const pulick = await importRespectiveKey(publicPem,'public');
+  setpublickey(pulick);
   
 };
 

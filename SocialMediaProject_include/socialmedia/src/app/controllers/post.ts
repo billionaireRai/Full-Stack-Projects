@@ -1,6 +1,6 @@
 import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "../middleware/errorMiddleware";
-import { postDeletionService, postUpdationService, togglePostHighlightService, togglePostPinService, togglePostFavouriteService, postNotInterestedService, postRepostService, postLikedService, postBookmarkingService, postSendingViaDM, getBookmarkPostsService, getPostPageEssentialService , getAccountsBookmarkedAPostService} from "../db/services/post";
+import { postDeletionService, postUpdationService, togglePostHighlightService, togglePostPinService, togglePostFavouriteService, postNotInterestedService, postRepostService, postLikedService, postBookmarkingService, postSendingViaDM, getBookmarkPostsService, getPostPageEssentialService , getAccountsBookmarkedAPostService,commentingOnAPostService ,getPostByIdService} from "../db/services/post";
 import { getVerifiedUrlForQRService } from "../db/services/qr";
 
 export const deleteMyPostController =  asyncErrorHandler(async (request:NextRequest) => {
@@ -20,7 +20,7 @@ export const deleteMyPostController =  asyncErrorHandler(async (request:NextRequ
         return NextResponse.json({ message:'Cant delete someone else post...'},{ status:403 });
     }
    
-   // await postDeletionService({ postId:String(postid) , postOwner:String(postowner) , deleteRequestBy:String(deleterequestby)  });
+   await postDeletionService({ postId:String(postid) , postOwner:String(postowner) , deleteRequestBy:String(deleterequestby)  });
    return NextResponse.json({ message:'Post deleted successfully !!'},{ status:200 });
 })
 
@@ -31,7 +31,7 @@ export const updatePaticularPostController = asyncErrorHandler(async (request:Ne
         data[key] = value;
     }
     
-    // await postUpdationService(data) ; // calling thhe service...
+    await postUpdationService(data) ; // calling thhe service...
 
     return NextResponse.json({ message:'Post updated successfully !!'},{ status:200 });
 })
@@ -53,7 +53,7 @@ export const togglePinnedPostController = asyncErrorHandler( async (request:Next
         return NextResponse.json({ message:'Cant delete someone else post...'},{ status:403 });
     }
     
-    // await togglePostPinService({currentState,postid,postowner,requestby}); // calling the toggle service...
+    await togglePostPinService({currentState,postid,postowner,requestby}); // calling the toggle service...
     return NextResponse.json({ message:'Post pinned toggled successfully !!'},{ status:200 });
 })
 
@@ -65,7 +65,7 @@ export const toggleHighlightPostController = asyncErrorHandler( async (request:N
         return NextResponse.json({ message:'postid unavailable please check...'},{ status:400 });
     }
 
-    // await togglePostHighlightService(postId) ; // calling post highlight service...
+    await togglePostHighlightService(postId) ; // calling post highlight service...
     return NextResponse.json({ message:'Post pinned toggled successfully !!'},{ status:200 });
 })
 
@@ -77,7 +77,7 @@ export const addToFavouriteController = asyncErrorHandler( async (request:NextRe
         return NextResponse.json({ message:'postid unavailable please check...'},{ status:400 });
     }
 
-    // await togglePostFavouriteService(postId) ; // calling the toggle favourite service...
+    await togglePostFavouriteService(postId) ; // calling the toggle favourite service...
     return NextResponse.json({ message:'Post added to fav !!'},{ status:200 });
 })
 
@@ -95,7 +95,7 @@ export const commentOnPostController = asyncErrorHandler( async (request:NextReq
         return NextResponse.json({ message:'Check your neccessary credentials !!' },{ status:404 });
     }
 
-    // await commentingOnAPostService({ postId , replyText , mentions , AddLocation });
+    await commentingOnAPostService({ postId , replyText , mentions , AddLocation });
     return NextResponse.json({ message:'Commented successfully !!'},{ status:200 });
 })
 
@@ -108,7 +108,7 @@ export const getPostForEmbedPageController = asyncErrorHandler( async (request:N
         return NextResponse.json({ message:'postid unavailable please check...'},{ status:400 });
     }
 
-    // await getPostByIdService(postId) ; // calling post highlight service...
+    await getPostByIdService(postId) ; // calling post highlight service...
     return NextResponse.json({ message:'Post data fetched !!'},{ status:200 });
 })
 
@@ -120,7 +120,7 @@ export const postNotInterestedController = asyncErrorHandler(async (request:Next
         return NextResponse.json({ message:'Please check postId' },{ status:404 });
     }
     
-    // await postNotInterestedService(postId) ;
+    await postNotInterestedService(postId) ;
     return NextResponse.json({ message:'Post data fetched !!'},{ status:200 });
 }) 
 
@@ -136,7 +136,7 @@ export const postRepostController = asyncErrorHandler(async (request:NextRequest
         return NextResponse.json({ message:'Check the request object !!' },{ status:404 });
     }
 
-    // await postRepostService({ postid , repostState }) ;
+    await postRepostService({ postid , repostState }) ;
     return NextResponse.json({ message:'Post successfully reposted !!'},{ status:200 });
 })
 
@@ -148,7 +148,7 @@ export const postLikeController = asyncErrorHandler(async (request:NextRequest) 
         return NextResponse.json({ message:'Check the request object !!' },{ status:404 });
     }
 
-    // await postLikedService({ postId , isLiked }); 
+    await postLikedService({ postId , isLiked }); 
     return NextResponse.json({ message:'Post liked successfully !!'},{ status:200 });
 })
 
@@ -160,7 +160,7 @@ export const postBookmarkController = asyncErrorHandler( async (request:NextRequ
       return NextResponse.json({ message:'Check the request object !!' },{ status:404 });
     }
 
-    // await postBookmarkingService({ postId , isBookmarked });
+    await postBookmarkingService({ postId , isBookmarked });
     return NextResponse.json({ message:'Post bookmarked successfully !!'},{ status:200 });
 })
 
@@ -172,7 +172,7 @@ export const postSendViaDMController = asyncErrorHandler(async (request:NextRequ
         return NextResponse.json({ message:'Missing neccessary credentials...' },{ status:404 });
     }
 
-    // await postSendingViaDM({ link , selectedAccounts }) ; // calling DM sending logic...
+    await postSendingViaDM({ link , selectedAccounts }) ; // calling DM sending logic...
     return NextResponse.json({ message:'Post sent via DM !!'},{ status:200 });
 })
 
@@ -184,7 +184,7 @@ export const getBookmarkPostController = asyncErrorHandler( async (request:NextR
         return NextResponse.json({ message:'Important parameter missing !!' },{ status:200 });
     }
 
-    // await getBookmarkPostsService({ Page , Size }) ; // calling the function...
+    await getBookmarkPostsService({ Page , Size }) ; // calling the function...
     return NextResponse.json({ message:'fetched successfully !!'},{ status:200 });
 })
 
@@ -196,7 +196,7 @@ export const postPageEssentialController = asyncErrorHandler( async (request:Nex
         return NextResponse.json({ message:'Recheck the credentials...' },{ status:400 });
     }
 
-    // await getPostPageEssentialService({ postId , username }) ;
+    await getPostPageEssentialService({ postId , username }) ;
     return NextResponse.json({ message:'Essentials fetched successfully !!'},{ status:200 });
 })
 
@@ -212,7 +212,7 @@ export const getAccountsBookmarkedAPostController = asyncErrorHandler( async (re
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
     }
 
-    // await getAccountsBookmarkedAPostService({ postid , page , size });
+    await getAccountsBookmarkedAPostService({ postid , page , size });
     return NextResponse.json({ message:'Essentials fetched successfully !!'},{ status:200 });
 })
 
@@ -225,6 +225,6 @@ export const getVerifiedUrlForQRController = asyncErrorHandler( async (request:N
         return NextResponse.json({ message:'Ensure credentials coming...' },{ status:400 });
     }
 
-    // await getVerifiedUrlForQRService({ category , handle , id , url });
+    await getVerifiedUrlForQRService({ category , handle , id , path });
     return NextResponse.json({ message:'Verified url sent !!' },{ status:200 });
 })

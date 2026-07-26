@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef , ReactElement } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MoreVerticalIcon,Trash2,Edit3,Pin,Star,List,BarChart3,Code,TrendingUp,FileText,Share2,Mail,Link as LinkIcon,X,SendHorizontalIcon,Eye,EyeOff,VolumeX,Slash,Flag,Frown,UserPlus,ListPlus,Ban,Code2,Megaphone,PodcastIcon,DollarSign,QrCodeIcon,MessagesSquare,RefreshCw,ThumbsUp,BookmarkPlus,ExternalLink,ArrowBigDownDash,BookOpen, SparklesIcon } from 'lucide-react';
+import { MoreVerticalIcon,Trash2,Edit3,Pin,Star,List,BarChart3,TrendingUp,Share2,Mail,Link as LinkIcon,Eye,EyeOff,Flag,Frown,UserPlus,ListPlus,Ban,Code2,PodcastIcon,DollarSign,QrCodeIcon,MessagesSquare,RefreshCw,ThumbsUp,BookmarkPlus,ExternalLink,ArrowBigDownDash,BookOpen, SparklesIcon } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/lib/interceptor';
@@ -33,7 +33,7 @@ import NotInterestedPop from './NotInterestedPop';
 import SharePopup from './sharePopUp';
 import useMediaPop from '@/app/states/mediapop';
 import Videoplayer from './videoplayer';
-import { MdAttachEmail, MdImportExport } from 'react-icons/md';
+import { MdImportExport } from 'react-icons/md';
 
 interface locationTaggedType {
   text: string,
@@ -875,7 +875,6 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
-          onClick={(e:MouseEvent) => { e.stopPropagation() }}
           className="fixed w-fit z-50 p-2 bg-white dark:bg-black shadow-lg dark:shadow-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl share-dropdown"
           style={{ top: `${sharePosition.top}px`, left: `${sharePosition.left}px` }}
         >

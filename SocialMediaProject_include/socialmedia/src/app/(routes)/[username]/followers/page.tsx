@@ -3,10 +3,9 @@
 import React,{useState , useEffect} from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
-// import { useWindowWidth } from '@/app/hooks/useWindowWidth';
 import { useParams , useRouter } from 'next/navigation'
 import Usercard from '@/components/usercard';
-import { Users, TrendingUp, Calendar, Clock, UserCheck, ThumbsUp } from 'lucide-react';
+import { Users, TrendingUp, Calendar, Clock, ThumbsUp } from 'lucide-react';
 
 
 export interface userType {
@@ -38,11 +37,11 @@ interface navItemsType {
   icon:React.JSX.Element
 }
 
-export default function followingspage () {
+export default function FollowersPage () {
   const params = useParams() ; // initializing the param hook...
   const router = useRouter() ;
   // const width = useWindowWidth() ; // custom hook created to getting screen width...
-  const [user, setuser] = useState<userType>({
+  const [user, setuser] = useState<userType | null>({
     name:'Amritansh Rai' ,
     handle:'@amritansh_coder' ,
     bio:'' ,
@@ -63,7 +62,8 @@ export default function followingspage () {
   // useeffect for fetching account details...
   useEffect(() => {
     // api fetching for data...
-
+    setuser(null);
+    setAccountDetails([])
   }, [])
   
 
@@ -87,12 +87,13 @@ export default function followingspage () {
   useEffect(() => {
     // api for getting user info and followings
     console.log(decodeURIComponent(String(params.username)))
-    if (user.handle.includes('@amritansh_coder')) {
+    if (user?.handle.includes('@amritansh_coder')) {
       const filtered = navItems.filter((item) => item.navtext !== 'Common');
       setnavItems(filtered);
     }
   }, [params])
   
+  if (!user) return null ;
   return (
     <>
      <div className='dark:bg-black rounded-md h-fit flex flex-col lg:flex-row font-poppins'>
@@ -112,12 +113,7 @@ export default function followingspage () {
             </Link>
           </div>
           <div className='text-xs text-gray-700 dark:text-gray-300 leading-relaxed flex-1'>
-            {/* {width > 1000
-            ?
-              "Accounts that follow you. They stay updated with your posts, and you'll be notified of their actions."
-            :
-              "Your followers."
-            } */}
+              Your followers !!{AccountDetails.length}
           </div>
         </div>
         <div className="navigation-section m-2">

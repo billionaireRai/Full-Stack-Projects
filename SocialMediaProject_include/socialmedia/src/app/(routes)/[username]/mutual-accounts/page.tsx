@@ -4,21 +4,20 @@ import React,{ useState , useEffect } from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { handleScrollToTop } from '@/lib/windowtopscroll'
-import { ArrowBigUpIcon , CommandIcon, MessagesSquare, MoreVertical, ThumbsUp, Users } from 'lucide-react';
+import { ArrowBigUpIcon , CommandIcon, MoreVertical, ThumbsUp, Users } from 'lucide-react';
 import { useRouter , useParams } from 'next/navigation';
 import Usercard, { userCardProp } from '@/components/usercard'
-import { RepliedPostsType } from '../page';
 import useActiveAccount from '@/app/states/useraccounts';
 import { PostCardProps } from '@/components/postcard';
 import PostCard from '@/components/postcard';
 import axiosInstance from '@/lib/interceptor';
 
 // Helper function to format numbers
-const fmt = (num: number): string => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-  return num.toString();
-};
+// const fmt = (num: number): string => {
+//   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+//   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+//   return num.toString();
+// };
 
 // Type for postAuthorInfo nested object
 interface PostAuthorInfoType {
@@ -77,7 +76,7 @@ interface MutualCommentType {
   userbookmarked: boolean;
 }
 
-export default function mutualaccounts () {
+export default function MutualAccounts () {
     const router = useRouter() ;
     const { username } = useParams() ;
     const { Account } = useActiveAccount() ;
@@ -638,7 +637,7 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
   }
 
   useEffect(() => {
-    // getMutualData() ;
+    getMutualData() ;
   }, [username,Account.decodedHandle])
 
   // function to get mutual interested post...
@@ -656,14 +655,14 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
 
   useEffect(() => {
     if (((window.innerHeight - window.scrollY) <= autoHeightGap ) && HasMore) {
-      // setPage(Page + 1);
-       // getMutualInterestPost(); // getting explore posts...
+      setPage(Page + 1);
+      getMutualInterestPost(); // getting explore posts...
      }
   }, [window.scrollY]) ;
   
 
   return (
-  <div className='min-h-screen overflow-y-scroll flex flex-col gap-2 md:flex-row font-poppins rounded-md p-2 dark:bg-black'>
+  <div id='accounts' className='min-h-screen overflow-y-scroll flex flex-col gap-2 md:flex-row font-poppins rounded-md p-2 dark:bg-black'>
       {/* main section of content... */}
       <div className='flex-1 flex-col gap-4 items-center rounded-md'>
         <div className="flex items-center justify-between p-2 gap-1 border-b border-gray-300 backdrop:blur-md rounded-md">
@@ -681,9 +680,9 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
          </div>
         </div>
         {/* will add some controller buttons... */}
-        {/* <div className='border border-gray-300 flex flec-row gap-1.5 p-1 rounded-full cursor-pointer'>
+        <div className='border border-gray-300 flex flec-row gap-1.5 p-1 rounded-full cursor-pointer'>
           <MoreVertical size={15} />
-        </div> */}
+        </div>
         </div>
         <div className='p-1 flex flex-col gap-2 rounded-md'>
           <div className='p-4'>
@@ -776,7 +775,7 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
                { ShowLess ? 'Show less' : 'Show more' }
           </button>
          </div>
-        <button onClick={() => { handleScrollToTop(window) }} className='fixed right-5 bottom-10 rounded-full p-1 hover:bg-yellow-100 dark:hover:bg-gray-950 cursor-pointer z-50'>
+        <button onClick={() => { handleScrollToTop('accounts') }} className='fixed right-5 bottom-10 rounded-full p-1 hover:bg-yellow-100 dark:hover:bg-gray-950 cursor-pointer z-50'>
              <ArrowBigUpIcon width={40} height={40} stroke='5' className='fill-yellow-400'/>
         </button>
     </div>

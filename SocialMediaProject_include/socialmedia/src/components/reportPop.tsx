@@ -25,10 +25,10 @@ interface reportModalProps {
   convid?:string
 }
 
-export default function reportPop({ closeReportModal , username, convid , postId }:reportModalProps) {
+export default function ReportPop({ closeReportModal , username, convid , postId }:reportModalProps) {
   const reportForm = useForm<formDataType>() ; // intializing useForm hook...
 
-  const [Options, setOptions] = useState<optionsType[]>([
+  const Options : optionsType[] = [
     {label:'Harassment',value:'harassment', priority: 'medium'},
     {label:'Spam',value:'spam', priority: 'low'},
     {label:'Misinformation',value:'misinformation', priority: 'low'},
@@ -41,7 +41,7 @@ export default function reportPop({ closeReportModal , username, convid , postId
     {label:'Illegal Goods',value:'illegal_goods', priority: 'high'},
     {label:'Policy Violation',value:'policy_violation', priority: 'medium'},
     {label:'Child Safety',value:'child_safety', priority: 'critical'}
-  ])
+  ];
   const [selectedOne, setselectedOne] = useState<optionsType>({label:'Harassment',value:'harassment', priority: 'medium'})
 
   // report handler function...

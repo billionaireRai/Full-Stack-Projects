@@ -5,19 +5,16 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useParams } from 'next/navigation'
-import { FilterIcon, Target, Heart, Clock, Archive, Users, Check, Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontal as MoreHorizontalIcon, User, Eye, MessageSquare, Bookmark, ChevronDown, ArrowDownUp , Shuffle ,Share2, UserPlusIcon, UserCheck, CommandIcon, Reply } from 'lucide-react'
-import { FiSearch } from "react-icons/fi";
+import { FilterIcon, Target, Heart, Clock, Archive, Users, Check, TrendingUp, Eye, MessageSquare, Bookmark, ChevronDown, ArrowDownUp , Shuffle , UserCheck, CommandIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 import PostCard from '@/components/postcard'
 import Commentpopcard from '@/components/Commentpopcard'
 import TrendingCard from '@/components/trendingcard'
 import Usercard from '@/components/usercard'
 import PostMetricsPage from '@/components/postmetrics'
-import { PostCardProps } from '@/components/postcard'
-import { accountInfoType, userCardProp } from '@/components/usercard'
+import { userCardProp } from '@/components/usercard'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import axiosInstance from '@/lib/interceptor'
-import { getPostByIdService } from '@/app/db/services/post'
 import toast from 'react-hot-toast'
 
 
@@ -134,7 +131,7 @@ interface RepliedPostsType {
   userbookmarked: boolean;
 }
 
-export default function paticularPost() {
+export default function PostPage() {
   const router = useRouter() ;
   const pagesize = useRef(15) ; // on every loadmore...
   // states for pagination functionality...
@@ -574,7 +571,7 @@ const [Comments, setComments] = useState<PostType[]>([
       }
     }
 
-    // await fetchPostData() 
+    fetchPostData() ;
    }, [postId, username])
 
    // standard function for getting Nav specific data...
@@ -621,27 +618,27 @@ const [Comments, setComments] = useState<PostType[]>([
 
    // getting the bookmarks...
    useEffect(() => {
-    // fetchingNavSpecificData(setbookmarkUsers,sethasbookmark,String(postId),'/api/post/bookmarks',bookmarkpage);
+    fetchingNavSpecificData(setbookmarkAccs,sethasbookmark,String(postId),'/api/post/bookmarks',bookmarkpage);
    }, [bookmarkpage,pagesize])
 
    // getting the views...
    useEffect(() => {
-  //  fetchingNavSpecificData(setviewedUsers,sethasviews,String(postId),'/api/post/views',viewspage);
+   fetchingNavSpecificData(setviewedAccs,sethasviews,String(postId),'/api/post/views',viewspage);
    }, [viewspage,pagesize])
 
    // getting all the likes
    useEffect(() => {
-  //  fetchingNavSpecificData(setlikedUsers,sethaslikes,String(postId),'/api/post/likes',likespage);
+   fetchingNavSpecificData(setlikedAccs,sethaslikes,String(postId),'/api/post/likes',likespage);
    }, [likespage,pagesize])
  
    // getting all the comments...
    useEffect(() => {
-    // getAllCommentsOfPost() ;
+    getAllCommentsOfPost() ;
    }, [commentpage,pagesize])
 
    // getting all the replies..
    useEffect(() => {
-    // getRepliesOnComments() ;
+    getRepliesOnComments() ;
    }, [repliespage,pagesize])
    
    

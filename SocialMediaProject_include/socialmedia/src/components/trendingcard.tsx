@@ -2,7 +2,7 @@
 
 import React,{ useState } from 'react'
 import Link from 'next/link'
-import { MoreHorizontal, Flame, TrendingUp, Gamepad2, Briefcase, X, Ban, AlertTriangle, EyeOff, Copy } from 'lucide-react'
+import { Flame, TrendingUp, Gamepad2, Briefcase } from 'lucide-react'
 
 interface TrendingCardProps {
   id: number
@@ -22,7 +22,6 @@ const iconMap = {
 }
 
 export default function TrendingCard({
-  id,
   trendName,
   postCount,
   category,

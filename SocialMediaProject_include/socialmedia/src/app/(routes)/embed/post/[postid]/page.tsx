@@ -8,10 +8,10 @@ import axiosInstance from '@/lib/interceptor';
 import { Inbox, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 
 
-interface MediaType {
-  url: string;
-  media_type: string;
-}
+// interface MediaType {
+//   url: string;
+//   media_type: string;
+// }
 
 // function returning default data...
 const getDefaultPostData = (postId: string): PostCardProps => ({

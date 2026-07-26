@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, User, ExternalLink, Clock, Newspaper, AlertCircle, ArrowDown } from 'lucide-react'
+import { Calendar, User, ExternalLink, Newspaper, AlertCircle, ArrowDown } from 'lucide-react'
 import toast from 'react-hot-toast'
 import axiosInstance from '@/lib/interceptor'
 

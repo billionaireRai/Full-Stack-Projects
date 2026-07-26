@@ -7,12 +7,13 @@ import follows from "../models/follows";
 import accounts from "../models/accounts";
 import viewStat from "../models/viewstat";
 import { userCardProp } from "@/components/usercard";
-import { fmt, getCommonElements, shuffleArray } from "@/lib/utils";
+import { fmt, shuffleArray } from "@/lib/utils";
+// import { getCommonElements } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { connectWithMongoDB } from "../dbConnection";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
-import messages from "../models/messages";
-import boosts from "../models/boosts";
+// import messages from "../models/messages";
+// import boosts from "../models/boosts";
 
 export interface pollOptionType {
   text: string;

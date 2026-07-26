@@ -6,7 +6,7 @@ interface viewProp {
   closePopUp: () => void ;
 }
 
-export default function viewClickPop({ closePopUp , count }: viewProp) {
+export default function ViewClickPop({ closePopUp , count }: viewProp) {
 
     useEffect(() => {
       const onKeyDown = (e: KeyboardEvent) => {

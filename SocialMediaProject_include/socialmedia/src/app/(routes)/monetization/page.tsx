@@ -8,9 +8,7 @@ import Image from "next/image";
 import {
   ArrowRight,
   DollarSign,
-  Users,
   BarChart,
-  Zap,
 } from "lucide-react";
 
 export default function MonetizationPage() {

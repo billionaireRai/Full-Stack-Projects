@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Usercard, { userCardProp } from '@/components/usercard';
 import { useRouter } from 'next/navigation';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
-import { Users, ArrowBigUpIcon, SettingsIcon , BellOff, ArrowLeftCircle } from 'lucide-react';
+import { Users, ArrowBigUpIcon, BellOff, ArrowLeftCircle } from 'lucide-react';
 import Activebeep from '@/components/activebeep';
 import useActiveAccount from '@/app/states/useraccounts';
 import Trendcard from '@/components/trendcard';
@@ -16,17 +16,17 @@ import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Notificationloader from '@/components/notificationloader';
 
-export default function notifications() {
+export default function Notifications() {
   const params = useParams() ;
   const pagesize = 15 ;
   const autoHeightGap:number = 200 ;
-  const { Account } = useActiveAccount() ;
+  // const { Account } = useActiveAccount() ;
   const router = useRouter() ;
   const notificationSec = useRef<HTMLDivElement | null>(null);
   const [Page, setPage] = useState<number>(1);
   const [hasMoreNotifications, sethasMoreNotifications] = useState<boolean>(true);
   const [Loading, setLoading] = useState<boolean>(false);
-  const [LoadingSuggestions, setLoadingSuggestions] = useState<boolean>(false);
+  // const [LoadingSuggestions, setLoadingSuggestions] = useState<boolean>(false);
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
   const [notificationList, setNotificationList] = useState<Notification[]>([
@@ -439,8 +439,8 @@ export default function notifications() {
      const handleScroll = () => {
        const distanceFromBottom = notificationSection.scrollHeight - notificationSection.scrollTop - notificationSection.clientHeight ;
        if (distanceFromBottom <= autoHeightGap && hasMoreNotifications) {
-        //  fetchNotifications();
-        //  setPage(Page + 1);
+         fetchNotifications();
+         setPage(Page + 1);
        }
       }
       // calling scroll function...
@@ -469,12 +469,12 @@ export default function notifications() {
   }
 
   useEffect(() => {
-    // MarkNotificationsRead() ;
+    MarkNotificationsRead() ;
   }, [notificationList])
   
   // when the Page state changes fetch notifications and marking read...
   useEffect(() => {
-    // fetchNotifications() ;
+    fetchNotifications() ;
   }, [Page])
 
   // function for getting trends...
@@ -488,8 +488,8 @@ export default function notifications() {
 
   // useffect for handling isRead feild...
   useEffect(() => {
-    // getOtherExploreInfo();
-    // fetchNotifications();
+    getOtherExploreInfo();
+    fetchNotifications();
   }, [])
     
 

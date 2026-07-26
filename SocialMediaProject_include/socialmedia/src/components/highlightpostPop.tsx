@@ -4,7 +4,7 @@ import React from 'react';
 import axiosInstance from '@/lib/interceptor';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { X, Star, Check } from 'lucide-react';
+import { X, Star } from 'lucide-react';
 
 interface HighlightPostPopProps {
   visible: boolean;
@@ -15,9 +15,9 @@ interface HighlightPostPopProps {
 }
 
 export default function HighlightPostPop({ visible , onClose , postId , updateState , action }: HighlightPostPopProps) {
-  if (!visible) return null;
-  const stateChangeTo = ( action === 'Highlight' ) ? true : false ;
   const router = useRouter() ;
+  const stateChangeTo = ( action === 'Highlight' ) ? true : false ;
+  if (!visible) return null;
 
    // useeffect for hightlight change...
    const handleHighlightToggle = async () => {

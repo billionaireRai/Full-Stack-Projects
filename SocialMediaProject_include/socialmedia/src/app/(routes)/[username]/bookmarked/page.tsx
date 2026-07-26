@@ -8,8 +8,7 @@ import { motion , AnimatePresence } from 'framer-motion'
 import PostCard from '@/components/postcard'
 import Activebeep from '@/components/activebeep'
 import { featureDemoType } from '../feed/page'
-import { Flame, TrendingUp, Gamepad2, Briefcase, MoreHorizontal, Bookmark, ArrowDownUp, Shuffle, ArrowDown, ArrowUp, Heart, MessageCircle, Repeat, Eye, Check, Users , SparklesIcon , CalendarClockIcon , InfinityIcon, ArrowBigUpIcon } from 'lucide-react'
-import TrendingCard from '@/components/trendingcard'
+import { MoreHorizontal, Bookmark, ArrowDownUp, Shuffle, ArrowDown, ArrowUp, Heart, MessageCircle, Repeat, Eye, Check, Users , SparklesIcon , CalendarClockIcon , InfinityIcon, ArrowBigUpIcon } from 'lucide-react'
 import UserCard from '@/components/usercard'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import axiosInstance from '@/lib/interceptor'
@@ -187,7 +186,7 @@ export default function Bookmarkedpage(){
     });
   };
 
-const [featureDemo, setfeatureDemo] = useState<featureDemoType[]>([
+const featureDemo : featureDemoType[] = [
   {
     icon:<SparklesIcon size={25} />,
     lable:'AI powered features for enhancement of you post content'
@@ -200,8 +199,7 @@ const [featureDemo, setfeatureDemo] = useState<featureDemoType[]>([
     icon:<InfinityIcon size={25} />,
     lable:'Unlimited posting & commenting in any time bracket'
   },
-
-])
+];
 
 const [PostDetails, setPostDetails] = useState<PostType[]>([
 {
@@ -591,8 +589,8 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
   }
 
   useEffect(() => {
-  // getBookmarkPosts() ; // calling the fetching functions
-  // getAccountSuggestions();
+  getBookmarkPosts() ; // calling the fetching functions
+  getAccountSuggestions();
   }, [])
 
 
@@ -604,8 +602,8 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
      const handleScroll = () => {
        const distanceFromBottom = section.scrollHeight - section.scrollTop - section.clientHeight ;
        if (distanceFromBottom <= autoHeightGap && hasPosts) {
-        //  getBookmarkPosts();
-        //  setPage(Page + 1);
+         getBookmarkPosts();
+         setPage(Page + 1);
        }
       }
       // calling scroll function...

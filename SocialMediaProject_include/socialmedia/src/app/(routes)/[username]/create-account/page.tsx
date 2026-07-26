@@ -1,24 +1,24 @@
 'use client'
 
-import React,{ JSX, useState } from "react";
+import React,{ JSX } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from "react-hook-form";
 import { usernameRegex } from "@/app/controllers/regex";
-import { User, AtSign, Lock, Globe, Palette, Briefcase } from "lucide-react"; // lightweight icons
+import { User, AtSign  } from "lucide-react"; // lightweight icons
 import axiosInstance from "@/lib/interceptor";
 import toast from "react-hot-toast";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { generateKeyPairAndStoreBoth } from "@/lib/pairedkeys";
 import useWebSocket from "@/app/hooks/useWebSocket";
 
-interface Option {
-  value:string,
-  label:string,
-  icon:JSX.Element
-}
+// interface Option {
+//   value:string,
+//   label:string,
+//   icon:JSX.Element
+// }
 
 // applying ZOD validation on form feilds...
 const newAccCreation = z.object({
@@ -26,7 +26,7 @@ const newAccCreation = z.object({
   Username:z.string().toLowerCase().min(8).nonempty("Essential for first account creation").regex(new RegExp(usernameRegex)),
 })
 
-export default function createNewAccount() {
+export default function CreateNewAccount() {
   const params = useParams() ; // getting the params...
   const router = useRouter() ;
   const searchParam = useSearchParams() ;
@@ -44,8 +44,8 @@ export default function createNewAccount() {
         toast.dismiss(loadingToast);
         toast.success('Account created successfully !!');
         router.push(`/${decodeURIComponent(String(params.username))}?switch-account-pop=true`) ;
-        // generateKeyPairAndStoreBoth(apires.data.newAccId); // for public-private key generation...
-        // useWebSocket(apires.data.newAccId,'register'); // registering web-socket id...
+        generateKeyPairAndStoreBoth(apires.data.newAccId); // for public-private key generation...
+        useWebSocket(apires.data.newAccId,'register'); // registering web-socket id...
       } else {
         toast.dismiss(loadingToast);
         toast.error('Account creation failed !!');

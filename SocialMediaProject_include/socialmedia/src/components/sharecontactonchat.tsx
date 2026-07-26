@@ -1,7 +1,5 @@
-import React, { useState , useMemo , useEffect, useRef } from 'react'
-import { X, Check, Search, Share2Icon } from 'lucide-react'
+
 import useActiveAccount from '@/app/states/useraccounts'
-import toast from 'react-hot-toast'
 import AccountSearch from './accountsearch'
 
 interface User {
@@ -16,7 +14,7 @@ interface shareContactProp {
     addInMention:(username:string) => void
 }
 
-export default function sharecontactonchat ({ closeShareContact ,addInMention } : shareContactProp) {
+export default function ShareContactOnChat ({ closeShareContact ,addInMention } : shareContactProp) {
   const { Account } = useActiveAccount() ; // intializing active account state...
 
   return (

@@ -13,7 +13,7 @@ export const getPostSpecificAnalyticsController = asyncErrorHandler(async (reque
         return NextResponse.json({ message:"Post id OR interval missing , please check..."},{ status:400 });
     }
 
-    // await getPostAnalyticsService( postid , desiredInterval ) ;
+    await getPostAnalyticsService( postid , desiredInterval ) ;
     return NextResponse.json({ message:"Post analytics successfully fethced !!"},{ status:200 });
 })
 
@@ -25,6 +25,6 @@ export const getProfileDashboardAnalyticsController = asyncErrorHandler(async (r
         return NextResponse.json({ message:"Variable missing , please check..." },{ status:404 });
     }
 
-    // const data = await getProfileDashboardAnalyticsService(handle,pastTime,year) ;
+    const data = await getProfileDashboardAnalyticsService(handle,pastTime,year) ;
     return NextResponse.json({ message:"Controller successfully triggered..." , analytics:data },{ status:200 });
 })

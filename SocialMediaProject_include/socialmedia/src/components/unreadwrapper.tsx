@@ -1,7 +1,7 @@
 "use client";
 
 // import useMessageSocket from "@/app/hooks/useMessageSocket";
-import useMessageCount from "@/app/states/unreadmessages";
+// import useMessageCount from "@/app/states/unreadmessages";
 
 async function updateNotificationCount() {
   // const { setValue } = useMessageCount() ;
@@ -9,7 +9,7 @@ async function updateNotificationCount() {
 }
 
 export default function UnreadMeesageWrapper() {
-  updateNotificationCount()
+  // updateNotificationCount()
   // useMessageSocket() ;
   return null;
 }

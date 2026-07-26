@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { Plus, Minus } from "lucide-react";
-import { useTheme } from "next-themes";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import usePoll from "@/app/states/poll";
@@ -22,11 +21,9 @@ interface Option {
 
 
 export default function CreatePoll({ plan , questionLen } : { plan:string , questionLen:number }) {
-  const { resolvedTheme } = useTheme();
   const { setPoll, setIsCreateOpen, setIsDisplayOpen } = usePoll();
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<{ text: string; votes: number }[]>([{ text: "", votes: 0 }, { text: "", votes: 0 }]);
-  const [duration, setDuration] = useState(86400); // Default 1 day in seconds
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const durationOptions: Option[] = [

@@ -14,7 +14,7 @@ export const getPostCommentsController = asyncErrorHandler( async (request:NextR
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
     } 
 
-    // await getCommentsOfAPostService({ postid , page , size }) ;
+    await getCommentsOfAPostService({ postid , page , size }) ;
     return NextResponse.json({ message:'Comments fetched successfully !!' },{ status:200 });
 }) 
 
@@ -30,6 +30,6 @@ export const getRepliesOnCommentsOfPostController = asyncErrorHandler( async (re
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
     } 
 
-    // await getRepliesOnPostCommentService({ postid , page , size }) ;
+    await getRepliesOnPostCommentService({ postid , page , size }) ;
     return NextResponse.json({ message:'Replies fetched successfully !!' },{ status:200 });
 })

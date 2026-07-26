@@ -79,12 +79,12 @@ export const registerUserController = asyncErrorHandler(async (request:NextReque
 
     setCookiesForAuth() // calling function to set
     // sending a welcome EMAIL...
-    // const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    // await sendEmailFunction({
-    //    to: data?.email,
-    //    subject: "Welcome to (Briezl) you social media platform",
-    //    html: generateWelcomeEmailHTML({ name: Name, email: Email, handle: `@${Username}`, baseUrl:baseUrl }),
-    // });
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    await sendEmailFunction({
+       to: data?.email,
+       subject: "Welcome to (Briezl) you social media platform",
+       html: generateWelcomeEmailHTML({ name: Name, email: Email, handle: `@${Username}`, baseUrl:baseUrl }),
+    });
 
     // filtering data to send.
     const Data : returnDataType = {
@@ -117,11 +117,11 @@ export const logginUserController = asyncErrorHandler( async (request:NextReques
     Cookies.set('refreshToken', serviceRes.refreshToken);
 
     // sending a email alert of login...
-    // await sendEmailFunction({
-    //    to: serviceRes?.email,
-    //    subject: "Successfull login to you account",
-    //    html:loginemail({ email:email , handle:serviceRes.accountInfo.decodedHandle , name:serviceRes.accountInfo.name })
-    // });
+    await sendEmailFunction({
+       to: serviceRes?.email,
+       subject: "Successfull login to you account",
+       html:loginemail({ email:email , handle:serviceRes.accountInfo.decodedHandle , name:serviceRes.accountInfo.name })
+    });
 
     const info : returnDataType = {
         email:email,
@@ -294,12 +294,12 @@ export const o_authGoogleCallbackController = asyncErrorHandler(async (request:N
     Cookies.set('refreshToken', userData.refreshToken);
 
     // Send welcome email
-    // const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    // await sendEmailFunction({
-    //     to: userData.email,
-    //     subject: "Welcome to (Briezl) you social media platform",
-    //     html: generateWelcomeEmailHTML({ name: name, email: email, handle: `@${userData.accountInfo.decodedHandle}`, baseUrl: baseUrl }),
-    // });
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    await sendEmailFunction({
+        to: userData.email,
+        subject: "Welcome to (Briezl) you social media platform",
+        html: generateWelcomeEmailHTML({ name: name, email: email, handle: `@${userData.accountInfo.decodedHandle}`, baseUrl: baseUrl }),
+    });
 
     
     var publickeySen = '' ;
@@ -391,12 +391,12 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
     Cookies.set('refreshToken', userinfo.refreshToken);
 
     // Send welcome email
-    // const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    // await sendEmailFunction({
-    //     to: userinfo.email,
-    //     subject: "Welcome to (Briezl) you social media platform",
-    //     html: generateWelcomeEmailHTML({ name: name, email: email, handle: `@${userinfo.accountInfo.decodedHandle}`, baseUrl: baseUrl }),
-    // });
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    await sendEmailFunction({
+        to: userinfo.email,
+        subject: "Welcome to (Briezl) you social media platform",
+        html: generateWelcomeEmailHTML({ name: name, email: email, handle: `@${userinfo.accountInfo.decodedHandle}`, baseUrl: baseUrl }),
+    });
 
     var publickeySen = '' ;
     if (STATE?.intent === 'login') {   

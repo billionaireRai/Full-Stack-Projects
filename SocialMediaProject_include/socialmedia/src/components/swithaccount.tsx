@@ -8,7 +8,7 @@ import useSwitchAccount from '@/app/states/swithaccount'
 import useUserInfo from '@/app/states/userinfo';
 import axiosInstance from '@/lib/interceptor';
 import toast from 'react-hot-toast';
-import { useRouter , useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function SwitchAccountPopUp () {
   const router = useRouter() ;
@@ -145,7 +145,7 @@ export default function SwitchAccountPopUp () {
   // useffect for getting user accounts...
   useEffect(() => {
     functionToGetAccounts();
-  }, [Account?.decodedHandle]);
+  }, [Account?.decodedHandle,functionToGetAccounts]);
   
   
   // function handling switching account...

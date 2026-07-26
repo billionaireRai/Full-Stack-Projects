@@ -1,12 +1,12 @@
 
-import { AtSignIcon, BellIcon, HeartIcon, MessageCircleIcon, MoreHorizontalIcon, Redo2Icon, Trash2Icon, UserPlusIcon, ReplyIcon, RefreshCw, ThumbsUp, MessagesSquare, ViewIcon, StarsIcon, Heart, BellDot, BellMinusIcon } from 'lucide-react';
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import { AtSignIcon, BellIcon, HeartIcon, MessageCircleIcon, MoreHorizontalIcon, Trash2Icon, UserPlusIcon, RefreshCw, ThumbsUp, MessagesSquare, ViewIcon, StarsIcon, Heart, BellDot, BellMinusIcon } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AxiosResponse } from 'axios';
 import Spinner from './spinner';
 import axiosInstance from '@/lib/interceptor';
 import Notificationreply from './notificationreply';
 import AccountDetailPop from './accountdetailpop';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import DeleteModal from './deletemodal';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
@@ -364,6 +364,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
       </div>
       {/* Is liked icon */}
       {isLiked && (
+        <AnimatePresence>
         <motion.div
           className="rounded-full p-1 absolute right-0 top-0"
           initial={{ scale: 0.2, rotate: -20, opacity: 0 }}
@@ -376,10 +377,12 @@ export default function NotificationCard({ notification , onRemove }: Notificati
         >
             <Heart strokeWidth={2} color="#f0b100" fill='#f0b100' size={20} />
         </motion.div>
+        </AnimatePresence>
       )}
 
       {/* new notification icon */}
       {!notification.isread && (
+        <AnimatePresence>
         <motion.div
           className="rounded-full p-1 absolute left-0 top-0"
           initial={{ scale: 0.2, rotate: -20, opacity: 0 }}
@@ -392,13 +395,16 @@ export default function NotificationCard({ notification , onRemove }: Notificati
         >
             <BellIcon strokeWidth={2} color="#f0b100" fill='#f0b100' size={20} />
         </motion.div>
+        </AnimatePresence>
       )}
 
 
       {isCommented && (
+        <AnimatePresence>
         <motion.div>
 
         </motion.div>
+        </AnimatePresence>
       )}
     </div>
     { replyModal && (

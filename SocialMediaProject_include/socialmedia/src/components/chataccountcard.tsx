@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
 import React ,{ useState , useEffect , useRef } from 'react'
 import axiosInstance from '@/lib/interceptor';
@@ -32,11 +31,10 @@ interface chatAccCardProp {
 
 export default function ChatAccountcard({ cardInfo , currentChat , countUpdate ,openChat ,currentOpenChat }:chatAccCardProp) {
   // ensure the card takes full width of the chatList container
-  // (absolute/fit children can otherwise cause it to visually look narrower)
-
+  if (!cardInfo) return null ;
+  
   const chatCardRef = useRef<HTMLDivElement | null>(null);
   const [isTargetChat, setisTargetChat] = useState(false) ;
-  if (!cardInfo) return null ;
 
   // useffect for handling the target chat check...
   useEffect(() => {
@@ -45,18 +43,18 @@ export default function ChatAccountcard({ cardInfo , currentChat , countUpdate ,
 
   // for backend operation...
   async function handleClick() {
-    // try {
-      // const chatclickapi = await axiosInstance.put('/api/account/conversations',{ cardInfo });
-      // if (chatclickapi.status === 200) {
+    try {
+      const chatclickapi = await axiosInstance.put('/api/account/conversations',{ cardInfo });
+      if (chatclickapi.status === 200) {
         openChat(true)
         currentChat(cardInfo)
         chatCardRef.current?.scrollIntoView({ behavior:'smooth',block:'center' });
         countUpdate()
-      // }
-    // } catch (error) {
-    //   console.log("An error occured !!");
-    //   toast.error("Error in clicking chat card !!");
-    // }
+      }
+    } catch (error) {
+      console.log("An error occured !!");
+      toast.error("Error in clicking chat card !!");
+    }
   }
   return (
    <div className='rounded-xl'>

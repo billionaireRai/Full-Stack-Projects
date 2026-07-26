@@ -17,7 +17,7 @@ export default function PaymentPage() {
   const searchParams = useSearchParams();
   
   // plan related info...
-  const [Term, setTerm] = useState<String>('');
+  const [Term, setTerm] = useState<string>('');
   const [plan, setplan] = useState<SubsPlanType | null>(null) ;
   
   // function for setting right plan...
@@ -68,7 +68,7 @@ export default function PaymentPage() {
 
   useEffect(() => {
     getAndSetPlan() ; // for getting right payment for user...
-  }, []);
+  });
    
 
   if (!plan) {

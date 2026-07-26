@@ -15,7 +15,6 @@ import {
   Cell,
   BarChart,
   Bar,
-  Legend,
   RadialBarChart,
   RadialBar,
   CartesianGrid,
@@ -157,12 +156,7 @@ export default function UserAnalytics() {
   const [Year, setYear] = useState<number>(date.getFullYear()) ;
   const joinedDate = new Date('01-05-2020') ;  // will pass argument as 'Account.account?.joinDate'
   const router = useRouter() ; // initializing router hook...
-  const [watchTime, setwatchTime] = useState<watchTimeType>({
-    hour:'1',
-    min:'36',
-    sec:'10',
-    rate:'+4.4%'
-  })
+
   const [viewersSeries, setviewersSeries] = useState<VisitorSeriesItem[]>([
     { name: "Jan", viewers: 22000 },
     { name: "Feb", viewers: 25000 },
@@ -288,9 +282,8 @@ export default function UserAnalytics() {
     { name: "Raws", value:10 },
     { name: "Autos", value:2 }
   ]);
-  const [timeArray, settimeArray] = useState(
-    [{value:"7d",label:'7 days', priority:"1"},{value:"30d",label:'30 days', priority:"2"},{value:"90d",label:'90 days', priority:"3"},{value:"1y",label:'1 year', priority:"4"},{value:"2y",label:'2 years', priority:"5"}]
-  )
+  const timeArray = [{value:"7d",label:'7 days', priority:"1"},{value:"30d",label:'30 days', priority:"2"},{value:"90d",label:'90 days', priority:"3"},{value:"1y",label:'1 year', priority:"4"},{value:"2y",label:'2 years', priority:"5"}]
+  
 
   const { theme } = useTheme();
   const tickColor = theme === 'dark' ? '#D1D5DB' : '#6B7280';
@@ -359,17 +352,17 @@ export default function UserAnalytics() {
     }
 
   // useffect for loading data from backend logic...
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     setLoading(true);
-  //     try {
-  //       await functionToGetAnalytics();
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-  //   // fetchData();
-  // }, [timeRange,Year]);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        await functionToGetAnalytics();
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [timeRange,Year]);
 
   // logic for advance analytics...
   const kpis = useMemo(() => {
@@ -406,7 +399,7 @@ export default function UserAnalytics() {
         a.remove();
         window.URL.revokeObjectURL(url);
       }
-    } catch (error) {
+    } catch (err) {
       toast.dismiss(toastLoading);
       toast.error('Failed to generate report');
     }
@@ -972,16 +965,6 @@ export default function UserAnalytics() {
                     </div>
                     <div className={`text-sm font-semibold ${ parseFloat((overview.views.rate).substring(0,overview.views.rate.length -2)) > 0 ? 'text-green-400' : 'text-red-400' } text-green-400 flex items-center gap-1`}>
                       {UpDownArrow(overview.views.rate)}<span>{overview.views.rate}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Avg Watch Time</div>
-                      <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{`${watchTime.hour}:${watchTime.min}:${watchTime.sec}`}</div>
-                    </div>
-                    <div className={`text-sm font-semibold ${ parseFloat((watchTime.rate).substring(0,watchTime.rate.length -2)) > 0 ? 'text-green-400' : 'text-red-400' } flex items-center gap-1`}>
-                      {UpDownArrow(watchTime.rate)}<span>{watchTime.rate}</span>
                     </div>
                   </div>
                  </div>

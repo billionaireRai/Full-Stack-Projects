@@ -20,7 +20,7 @@ export interface featureDemoType {
   lable:string
 }
 
-export default function feed() {
+export default function Feed() {
   const { Account } = useActiveAccount() ;
 const pageCategory : "feed" | "profile" | "direct" | "explore" = "feed" ;
 const size:number = 20 ;
@@ -35,7 +35,7 @@ const [loadingPosts, setloadingPosts] = useState<boolean>(false);
 const [loadingsuggestions, setloadingsuggestions] = useState<boolean>(false);
 const [feedPosts, setfeedPosts] = useState<PostType[]>([]) ;
 
-const [featureDemo, setfeatureDemo] = useState<featureDemoType[]>([
+const featureDemo:featureDemoType[] = [
   {
     icon:<SparklesIcon size={25} />,
     lable:'AI powered features for enhancement of you post content'
@@ -47,9 +47,8 @@ const [featureDemo, setfeatureDemo] = useState<featureDemoType[]>([
   {
     icon:<InfinityIcon size={25} />,
     lable:'Unlimited posting & commenting in any time bracket'
-  },
-
-])
+  }
+]
 const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
 
   // function for showing more suggestions...
@@ -94,7 +93,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
     getAccountSuggestions();
     getFeedPosts() ;
     setPage(Page + 1);
-   }, [])
+   })
   
   // fetching posts by pagination...
   useEffect(() => {
@@ -259,7 +258,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
                         <motion.div
                           className="w-8 h-8 border-4 border-yellow-200 dark:border-yellow-300 border-t-yellow-500 dark:border-t-yellow-400 rounded-full animate-spin"
                           animate={{ rotate: 360 }}
-                          transition={{ duration: 1 , repeat: Infinity , ease: "linear" }}
+                          transition={{ duration: 1 , ease: "linear" }}
                         />
                         <CompLoader />
                       </motion.div>
@@ -271,7 +270,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
                <AnimatePresence>
                 <motion.div
                   initial={{ opacity: 0 , y: 10 }}
-                  animate={{ opacity: 1 , duration:1000  , y: 0}}
+                  animate={{ opacity: 1 , animationDuration:1000  , y: 0}}
                   exit={{ opacity: 0 , y: -10 }}
                   className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-start z-50 animate-in fade-in-0 zoom-in-95 duration-200">
                     <AccountSearch placeholder='Search any account...' handle={String(Account.decodedHandle)} onSelect={() => { setshowSearchPop(false) }} />

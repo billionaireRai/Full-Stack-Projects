@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({children, params}: {children: React.ReactNode; params: Promise<{}>}) {
+export default function RootLayout({children }: {children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning={true} >
       <body
@@ -40,12 +40,12 @@ export default function RootLayout({children, params}: {children: React.ReactNod
         <div className="flex h-screen">
           <ThemeProvider>
             <Providers>
-              {/* <UnAuthorize> */}
+              <UnAuthorize>
               <Sidenavbar />
                 <div id="main-scrollable" className="w-full lg:ml-72 lg:flex-1 overflow-auto h-full">
                   {children}
                 </div>
-              {/* </UnAuthorize> */}
+              </UnAuthorize>
             </Providers>
           </ThemeProvider>
         </div>

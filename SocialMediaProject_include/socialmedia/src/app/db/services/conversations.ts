@@ -135,7 +135,7 @@ export const chatBlockingService = async (handle:string,convid:string,updateTo:b
    if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
     
    // fetching the conversation...
-   const conv = await conversation.findOne({ _id:convid , participants:{ $in:[activeAcc._id] ,deletedBy:{ $nin:[activeAcc._id] } } });
+//    const conv = await conversation.findOne({ _id:convid , participants:{ $in:[activeAcc._id] ,deletedBy:{ $nin:[activeAcc._id] } } });
 
    // target account...
    const targetAcc = await accounts.findOne({ username:handle.trim() , 'account.status':'ACTIVE' });

@@ -60,7 +60,7 @@ const defaultAccount : accountInfoType = {
   avatarUrl: "/images/myProfile.jpg"
 }
 
-export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,IsFollowing=false,content='CS Grad ‘25 | MERN • GenAI • SD • Web3 • DSA | Code Coffee Commits, Deadlifts & Deployments' , heading, account = defaultAccount }:userCardProp) {
+export default function UserCard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,IsFollowing=false,content='CS Grad \u201825 | MERN \u2022 GenAI \u2022 SD \u2022 Web3 \u2022 DSA | Code Coffee Commits, Deadlifts & Deployments' , heading, account = defaultAccount }:userCardProp) {
   const [isFollowing, setisFollowing] = useState<boolean>(IsFollowing);
   const [showAccountPopup, setShowAccountPopup] = useState<boolean>(false);
   const [Loading, setLoading] = useState(false) ; // for UI simulation...
@@ -97,6 +97,7 @@ export default function usercard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
         }
     } catch (error) {
       toast.error('Failed with action...');
+      console.log('Error :',error);
     } finally {
       setLoading(false);
     }
