@@ -1,11 +1,9 @@
 'use client'
 
-import React from 'react'
-
 export default function notfound () {
   return (
     <div>
-      
+      Hellow not found !!
     </div>
   )
 }
