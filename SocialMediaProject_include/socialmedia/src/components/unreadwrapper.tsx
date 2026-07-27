@@ -9,7 +9,7 @@ async function updateNotificationCount() {
 }
 
 export default function UnreadMeesageWrapper() {
-  // updateNotificationCount()
+  updateNotificationCount()
   // useMessageSocket() ;
   return null;
 }

@@ -2,7 +2,7 @@ import asyncErrorHandler from "../middleware/errorMiddleware";
 import { NextRequest , NextResponse } from "next/server";
 import { getConversationsService , createNewConversationService, chatCardOpenService, chatBlockingService ,conversationDeletionService } from "../db/services/conversations";
 
-export const getConversationsController = asyncErrorHandler( async (req:NextRequest) => {
+export const getConversationsController = asyncErrorHandler( async () => {
     const conversations = await getConversationsService();
     return NextResponse.json({ message:'Conversations fetched successfully !!' , conversations },{ status:200 })
 })

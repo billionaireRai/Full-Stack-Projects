@@ -2,13 +2,6 @@
 import useActiveAccount from '@/app/states/useraccounts'
 import AccountSearch from './accountsearch'
 
-interface User {
-  id: string
-  name: string
-  username: string
-  avatarInitials: string
-}
-
 interface shareContactProp {
     closeShareContact:() => void
     addInMention:(username:string) => void

@@ -1,5 +1,5 @@
 "use client";
-import React,{ useState , useEffect } from 'react';
+import React,{ useState , useEffect, useCallback } from 'react';
 import Usercard, { userCardProp } from './usercard';
 import { SearchIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,7 +21,7 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
   const [searchedAccounts,setsearchedAccounts] = useState<userCardProp[]>(sampleAcc);
 
   // useffect for getting all the followings...
-  async function apiForAllFollowings() {
+  const apiForAllFollowings = useCallback( async () => {
     setloadingSearch(true);
     try {
       const followingapi = await axiosInstance.get(`/api/follows?handle=${handle}`) ;
@@ -34,10 +34,11 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
       console.log('An Error occured :',error);
       setloadingSearch(false);
     }
-  }
+  },[handle])
+
   useEffect(() => {
     apiForAllFollowings();
-  }, [handle])
+  }, [handle,apiForAllFollowings])
    
   // useeffect for handling
   useEffect(() => {

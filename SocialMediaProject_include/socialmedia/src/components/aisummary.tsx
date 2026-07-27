@@ -116,20 +116,20 @@ export default function AISummary({ type , meta , onClose }: AISummaryProps) {
   };
 
   // Format numbers
-  const formatNum = (num?: number): string => {
-    if (num === undefined) return '\u2014';
-    if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
-    if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K';
-    return num.toString();
-  };
+  // const formatNum = (num?: number): string => {
+  //   if (num === undefined) return '\u2014';
+  //   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
+  //   if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K';
+  //   return num.toString();
+  // };
 
-  const sentimentColor = (sentiment?: string) => {
-    switch (sentiment) {
-      case 'positive': return 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400';
-      case 'negative': return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
-      default: return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400';
-    }
-  };
+  // const sentimentColor = (sentiment?: string) => {
+  //   switch (sentiment) {
+  //     case 'positive': return 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400';
+  //     case 'negative': return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
+  //     default: return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400';
+  //   }
+  // };
 
   return (
     <>

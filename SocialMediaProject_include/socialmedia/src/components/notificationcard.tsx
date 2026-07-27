@@ -153,6 +153,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
             }
         } catch (error) {
           toast.error('Failed with action...');
+          console.log("An error occured :",error);
         } finally {
           setLoading(false);
         }
@@ -168,7 +169,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
         toast.success("notification deleted successfully !!") ;
       }
     } catch (error) {
-       console.log("An error occured in deletion !!")
+       console.log("An error occured in deletion :",error);
        toast.dismiss(loading);
        toast.error("An error occured !!")
     }
@@ -184,7 +185,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
         setisLiked(targetState);
       }
     } catch (error) {
-      console.log("Failed with like action !!!")
+      console.log("Failed with like action :",error);
     }
   }
 
@@ -193,6 +194,8 @@ export default function NotificationCard({ notification , onRemove }: Notificati
       const handleClickOutside = (event: MouseEvent) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
           setopenDD(false);
+
+          setisCommented(false);
         }
       };
       document.addEventListener('mousedown', handleClickOutside);
@@ -234,6 +237,7 @@ export default function NotificationCard({ notification , onRemove }: Notificati
           <Link href={`/${actor.decodedHandle}`} ref={avatarRef} onMouseEnter={handleAvatarHover} onMouseLeave={handleAvatarLeave} >
             <img
               src={actor.account?.avatarUrl}
+              alt='actor-avatar'
               className="w-12 h-12 md:w-15 md:h-15 rounded-full object-cover flex-shrink-0"
             />
           </Link>

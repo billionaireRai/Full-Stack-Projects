@@ -137,7 +137,7 @@ interface tabsTypes {
 }
 
   // function to make mentions a link in bio...
-  export const makeMentionsAsLink = (Bio: string) => {
+  const makeMentionsAsLink = (Bio: string) => {
    if (!Bio?.trim()) return null ;
 
     const parts = Bio.split(/(@[a-zA-Z0-9_]{8,20})/g);
@@ -650,7 +650,7 @@ export default function UserProfilePage() {
       }
     };
     fetchAccountData();
-  }, [Account.account, username])
+  }, [Account.account, username,setAccount])
   
   useEffect(() => {
     if (!username) return;
@@ -694,6 +694,7 @@ export default function UserProfilePage() {
           toast.error('Failed with action...');
         }
     } catch (error) {
+      console.log("An error occured :",error);
       toast.error('Failed with action...');
     } finally {
       setLoading(false);
@@ -749,8 +750,8 @@ export default function UserProfilePage() {
         setshowDeleteAccPop(false);
 
       }
-
     } catch (error) {
+      console.log("An error occured :",error);
       toast.error('Error in profile deletion !!')
     }
   }

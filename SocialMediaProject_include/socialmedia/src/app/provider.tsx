@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect , useState } from "react"
+import React, { Suspense, useEffect , useState } from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from 'react-hot-toast'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -16,22 +16,16 @@ import AccCompletionPop from "@/components/acccompletionpop"
 import NotificationToaster from "@/components/NotificationToaster"
 import UnreadMeesageWrapper from "@/components/unreadwrapper"
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+function ProvidersInner({ children }: { children: React.ReactNode }) {
   const router = useRouter() ;
   const { Account } = useActiveAccount() ;
   const { isCreatePop } = useCreatePost();
   const { isAuth } = useAuthenticationState();
   const { isPopOpen, setisPopOpen } = useSwitchAccount();
-  const [isCompleted, setisCompleted] = useState<boolean | undefined>(Account.account?.isCompleted); // will get this state from current account feild...
+  const [isCompleted, setisCompleted] = useState<boolean | undefined>(Account.account?.isCompleted);
   const [showInterest, setshowInterest] = useState<boolean>(false) ;
   const [Start, setStart] = useState<boolean>(false)
   const searchParams = useSearchParams()
-
-  // function for checking account completion...
-  const checkAccountCompletion = () : boolean => { 
-    // will check the completion state of account with 'active' true from Accounts array...
-    return true ;
-   } 
 
   useEffect(() => {
     if (searchParams) {
@@ -48,6 +42,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       clearTimeout(timer) ;
     }
   }, [])
+
   return (
     <TooltipProvider>
         {children}
@@ -70,5 +65,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
              </div>
          )}
     </TooltipProvider>
+  )
+}
+
+export default function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <ProvidersInner>{children}</ProvidersInner>
+    </Suspense>
   )
 }

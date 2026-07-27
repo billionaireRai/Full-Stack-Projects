@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState , useEffect , useRef } from 'react'
+import React, { useState , useEffect , useRef, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
@@ -550,10 +550,10 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
     }
   
     
-  }, [selectedSort,bookmarkOptionsOpen])
+  }, [selectedSort,bookmarkOptionsOpen,PostDetails])
 
   // function for api triggering...
-  async function getBookmarkPosts() {
+  const getBookmarkPosts = useCallback(async() => {
     setloadingPosts(true);
     try {
       const bookmarkApi = await axiosInstance.post('/api/bookmark',{ Page , Size });
@@ -568,7 +568,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
     } finally {
       setloadingPosts(false);
     }
-  }
+  },[Page])
 
   // function to get suggestions...
   async function getAccountSuggestions() {
@@ -591,7 +591,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
   useEffect(() => {
   getBookmarkPosts() ; // calling the fetching functions
   getAccountSuggestions();
-  }, [])
+  }, [getBookmarkPosts])
 
 
   // fetching posts by pagination...
@@ -613,7 +613,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
       return () => {
       section.removeEventListener('scroll', handleScroll)
      }
-  }, [autoHeightGap,hasPosts,PostDetails.length])
+  }, [autoHeightGap,hasPosts,PostDetails.length,getBookmarkPosts,Page])
   
    // useeffect for more popup closing...
     useEffect(() => {

@@ -62,6 +62,7 @@ export default function ReportPop({ closeReportModal , username, convid , postId
       }
     } catch (error) {
       toast.dismiss(loadingToast);
+      console.log("An error occured :",error);
       toast.error('Error occured in submittion !!');
     }
   }

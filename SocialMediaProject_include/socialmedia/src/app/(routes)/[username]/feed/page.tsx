@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState , useEffect , useRef } from 'react';
+import React, { useState , useEffect , useRef, useCallback } from 'react';
 import PostCard from '@/components/postcard';
 import Activebeep from '@/components/activebeep';
 import AccountSearch from '@/components/accountsearch';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { PostType } from '../../explore/page';
 import UserCard, { userCardProp } from '@/components/usercard';
-import { CalendarClockIcon, ImagesIcon, Infinity, InfinityIcon, SearchIcon, SparklesIcon, UserPlus2Icon } from 'lucide-react';
+import { CalendarClockIcon, ImagesIcon, InfinityIcon, SearchIcon, SparklesIcon, UserPlus2Icon } from 'lucide-react';
 import CompLoader from '@/components/componentloader';
 import axiosInstance from '@/lib/interceptor';
 import Loader from '@/components/loader';
@@ -79,7 +79,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
   }
 
   // function to fetch feed posts...
-   async function getFeedPosts() {
+   const getFeedPosts = useCallback( async () => {
     setloadingPosts(true);
      const feedApi = await axiosInstance.post(`/api/feed`,{ Page , size });
      if (feedApi.status === 200) {
@@ -87,13 +87,13 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
        sethasFeed(feedApi.data.hasNext) ;
        setloadingPosts(false);
      }
-   }
+   },[Page])
         
    useEffect(() => {
     getAccountSuggestions();
     getFeedPosts() ;
     setPage(Page + 1);
-   })
+   },[Page,getFeedPosts])
   
   // fetching posts by pagination...
   useEffect(() => {
@@ -114,7 +114,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
       return () => {
        feedsection.removeEventListener('scroll', handleScroll)
      }
-  }, [autoHeightGap,hasFeed,feedPosts.length])
+  }, [autoHeightGap,hasFeed,feedPosts.length,Page,getFeedPosts])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

@@ -80,6 +80,7 @@ export default function CreatePoll({ plan , questionLen } : { plan:string , ques
       setSelectedDurationOption(durationOptions[4]); // Reset to default
     } catch (error) {
       toast.error("Failed to create poll");
+      console.log("An error occured :",error)
     } finally {
       setIsSubmitting(false);
     }

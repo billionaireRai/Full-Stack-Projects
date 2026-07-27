@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState , useEffect, useRef } from 'react'
+import React, { useState , useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -149,9 +149,8 @@ export default function PostPage() {
   const [decodedHandle, setdecodedHandle] = useState<string | null>(null) ;
   const [openFilter, setopenFilter] = useState<boolean>(false) ;
   const [currentFilter, setcurrentFilter] = useState<string>('Relevency');
-  const [PostInfo, setPostInfo] = useState<PostType | null>(null);
+  // const [PostInfo, setPostInfo] = useState<PostType | null>(null);
   const [CommentCardProp, setCommentCardProp] = useState<boolean>(false) ;
-  const [hpninPopUp, sethpninPopUp] = useState<number>(0);
   const [activeNav, setactiveNav] = useState<navOptionsType>({ label:'metric',value:'Metric'}) ;
   const [ShowLess, setShowLess] = useState<boolean>(false);
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
@@ -163,14 +162,14 @@ export default function PostPage() {
     { icon: Users, label: 'Following', value: 'Following' }
   ]
 
-  const [NavOptions, setNavOptions] = useState<navOptionsType[]>([
+  const NavOptions:navOptionsType[] = useMemo(() => [
     { label: 'metric', value: 'Metric' },
     { label: 'bookmark', value: 'Bookmark' },
     { label: 'comments', value: 'Comments' },
     { label:'replies' , value:'Replies'},
     { label: 'views', value: 'Views' },
     { label: 'likes', value: 'Likes' }
-  ])
+  ], []);
 
   // for storing the post details...
   const [POST, setPOST] = useState<PostType | null>({
@@ -553,7 +552,7 @@ const [Comments, setComments] = useState<PostType[]>([
       const targetNav = NavOptions.find((option) =>  option.value === searchparam.get('section') )
       targetNav && setactiveNav(targetNav) ;
     }
-  }, [])
+  }, [NavOptions,searchparam,username])
 
   const handleChangeFilterState = (category:string) : void => { 
     if (category !== currentFilter) setcurrentFilter(category) ;
@@ -589,7 +588,7 @@ const [Comments, setComments] = useState<PostType[]>([
    }
 
    // function getting comments and likes...
-   async function getAllCommentsOfPost() {
+  const getAllCommentsOfPost = useCallback( async () => {
     try {
       const apiResponse = await axiosInstance.get(`/api/post/comment?postid=${postId}&page=${commentpage}&size=${pagesize.current}`);
       if (apiResponse.status === 200)  {
@@ -600,10 +599,10 @@ const [Comments, setComments] = useState<PostType[]>([
       console.log(error);
       toast.error('An error occured...')
     }
-   }
+   },[postId,commentpage])
 
   // function getting replies on comment...
-   async function getRepliesOnComments() {
+  const getRepliesOnComments = useCallback(async () => {
     try {
       const apiResponse = await axiosInstance.get(`/api/post/replies?postid=${postId}&page=${commentpage}&size=${pagesize.current}`);
       if (apiResponse.status === 200)  {
@@ -614,32 +613,32 @@ const [Comments, setComments] = useState<PostType[]>([
       console.log(error);
       toast.error('An error occured...')
     }
-   }
+   },[postId,commentpage])
 
    // getting the bookmarks...
    useEffect(() => {
     fetchingNavSpecificData(setbookmarkAccs,sethasbookmark,String(postId),'/api/post/bookmarks',bookmarkpage);
-   }, [bookmarkpage,pagesize])
+   }, [bookmarkpage,pagesize,postId])
 
    // getting the views...
    useEffect(() => {
    fetchingNavSpecificData(setviewedAccs,sethasviews,String(postId),'/api/post/views',viewspage);
-   }, [viewspage,pagesize])
+   }, [viewspage,pagesize,postId])
 
    // getting all the likes
    useEffect(() => {
    fetchingNavSpecificData(setlikedAccs,sethaslikes,String(postId),'/api/post/likes',likespage);
-   }, [likespage,pagesize])
+   }, [likespage,pagesize,postId])
  
    // getting all the comments...
    useEffect(() => {
     getAllCommentsOfPost() ;
-   }, [commentpage,pagesize])
+   }, [commentpage,pagesize,getAllCommentsOfPost])
 
    // getting all the replies..
    useEffect(() => {
     getRepliesOnComments() ;
-   }, [repliespage,pagesize])
+   }, [repliespage,pagesize,getRepliesOnComments])
    
    
 // function handling reversing post order...
@@ -940,6 +939,7 @@ const [Comments, setComments] = useState<PostType[]>([
                           <div className="flex space-x-3">
                             <img
                               src={post.avatar}
+                              alt='owner-profile-avatar'
                               className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                             />
                             <div className="flex-1 min-w-0">

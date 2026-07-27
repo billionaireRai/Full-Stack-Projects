@@ -90,11 +90,11 @@ export default function IframeOfEmbed({
   const displayMentions = mentions || [];
 
   // Size presets
-  const sizePresets = [
-    { label: 'Small', width: 400, height: 300 },
-    { label: 'Medium', width: 600, height: 400 },
-    { label: 'Large', width: 800, height: 500 },
-  ];
+  // const sizePresets = [
+  //   { label: 'Small', width: 400, height: 300 },
+  //   { label: 'Medium', width: 600, height: 400 },
+  //   { label: 'Large', width: 800, height: 500 },
+  // ];
 
   // Generate iframe code based on settings
   const generateIframeCode = () => {
@@ -176,6 +176,7 @@ export default function IframeOfEmbed({
       toast.success('Link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
+      console.log("An error occured :",err);
       toast.error('Failed to copy link');
     }
   };

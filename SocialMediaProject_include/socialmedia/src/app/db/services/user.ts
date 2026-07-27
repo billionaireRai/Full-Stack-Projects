@@ -4,8 +4,8 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 // import { functionToTriggerSchedule } from "@/app/cronjob/accDeletionSchedule";
 import { connectWithMongoDB } from "@/app/db/dbConnection";
-import { getDevicePublicIP } from "@/lib/pairedkeys";
-import pubkeys from "../models/pubkeys";
+// import { getDevicePublicIP } from "@/lib/pairedkeys";
+// import pubkeys from "../models/pubkeys";
 import { loginDataType, registrationDataType } from "@/app/controllers/auth";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 // import cloudinary from "@/lib/cloudinary";
@@ -16,7 +16,7 @@ import Post from "../models/posts";
 import Block from "../models/blocked";
 import { fmt } from "@/lib/utils";
 import likes from "../models/likes";
-import Views from "../models/views";
+// import Views from "../models/views";
 import viewStat from "../models/viewstat";
 import tagged from "../models/tagged";
 import Poll from "../models/polls";
@@ -160,8 +160,8 @@ export async function logginUserService(data:loginDataType) : Promise<any> {
     }
 
     // getting public key if exists for this device...
-    const deviceip = await getDevicePublicIP() ;
-    const publickey = await pubkeys.findOne({ accountId:account._id , deviceIP:deviceip , status:'active' });
+    // const deviceip = await getDevicePublicIP() ;
+    // const publickey = await pubkeys.findOne({ accountId:account._id , deviceIP:deviceip , status:'active' });
      
     const posts = await Post.find({ authorId : userdoc._id , isDeleted:false }); // taking out all the posts...
     // getting count of followers and followings... 
@@ -591,7 +591,7 @@ export const profileSpecificDataService = async (handle:string) => {
         const accountInfo = await accounts.findById(authorPost.authorId) ;
         const followersOfAuthor = await follows.find({ followingId : accountInfo._id , isDeleted:false })
         const followingOfAuthor = await follows.find({ followerId : accountInfo._id , isDeleted:false })
-        const postsOfAuthor = await Post.find({ authorId: accountInfo._id , isDeleted:false })
+        // const postsOfAuthor = await Post.find({ authorId: accountInfo._id , isDeleted:false })
 
         const commentsPost = await Post.find({ $and:[{ replyToPostId:repliedpost._id },{ postType:'comment' },{ isDeleted:false }] });
         const repostsPost = await Post.find({ $and:[{ postType:'repost' },{ repostId:repliedpost._id },{ isDeleted:false }] });
@@ -806,10 +806,11 @@ export const profileUpdateService = async (data: accountType) => {
                 console.log('Geocoding empty - using fallback [0,0]');
             }
         } catch (geocodeError) {
+            console.log('An error occured :',geocodeError)
             console.log('Using fallback coordinates [0,0]');
         }
 
-        const Account = await accounts.findOne({ $and:[{ userId:user.id },{ 'account.Active':true }]}) ; 
+        // const Account = await accounts.findOne({ $and:[{ userId:user.id },{ 'account.Active':true }]}) ; 
 
          // uploading media on cloud...
         // if (Account.avatar?.public_id) {

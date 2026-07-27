@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import useCreatePost from '@/app/states/createpost';
 import { useTheme } from "next-themes";
@@ -121,10 +121,22 @@ export default function CreatePost() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [openOptions, openReplyOptions, showEmojiPicker, showTagSomeone, showPollModal, showLocationSearchModal,isAIPop,draftPop,showSchedule]);
+  }, [openOptions, openReplyOptions, showEmojiPicker, showTagSomeone, showPollModal, showLocationSearchModal,isAIPop,draftPop,showSchedule,setShowPollModal]);
 
+  const resetForm = useCallback(() => {
+    setPost('');
+    setImageArr([]);
+    setImageFiles([]);
+    setVideoArr([]);
+    setVideoFiles([]);
+    setMentionedTo([]);
+    setGifArr([]);
+    setGifFiles([]);
+    setAddLocation([]);
+    resetPoll();
+  },[resetPoll]);
   
-  const handlePostSubmission = async () => {
+  const handlePostSubmission = useCallback(async () => {
     if (!post.trim()) return;
 
     const scheduledAt = new Date(`${scheduleTime?.Date}T${scheduleTime?.Time}`);
@@ -159,7 +171,7 @@ export default function CreatePost() {
     } finally {
       setIsPosting(false);
     }
-  };
+  },[AddLocation,MentionedTo,gifFiles,imageFiles,resetForm,poll,post,scheduleTime,setCreatePop,status,videoFiles,whoCanReply]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -184,19 +196,6 @@ export default function CreatePost() {
 
   const onEmojiClick = (emojiData: EmojiClickData) => {
     setPost((prev) => prev + emojiData.emoji);
-  };
-  
-  const resetForm = () => {
-    setPost('');
-    setImageArr([]);
-    setImageFiles([]);
-    setVideoArr([]);
-    setVideoFiles([]);
-    setMentionedTo([]);
-    setGifArr([]);
-    setGifFiles([]);
-    setAddLocation([]);
-    resetPoll();
   };
 
 

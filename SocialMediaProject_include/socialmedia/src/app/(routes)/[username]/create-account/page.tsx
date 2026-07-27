@@ -1,6 +1,6 @@
 'use client'
 
-import React,{ JSX } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import z from 'zod';
@@ -52,6 +52,7 @@ export default function CreateNewAccount() {
       }
     } catch (error) {
        toast.dismiss(loadingToast);
+       console.log("An error occured :",error);
        toast.error('An Error occured');
     }
   }

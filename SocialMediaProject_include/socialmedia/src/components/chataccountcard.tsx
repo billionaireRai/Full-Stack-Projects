@@ -52,7 +52,7 @@ export default function ChatAccountcard({ cardInfo , currentChat , countUpdate ,
         countUpdate()
       }
     } catch (error) {
-      console.log("An error occured !!");
+      console.log("An error occured :",error);
       toast.error("Error in clicking chat card !!");
     }
   }

@@ -1,5 +1,5 @@
 'use client';
-import { useState , useEffect } from 'react';
+import { useState , useEffect, useMemo } from 'react';
 import { SearchIcon, MapPinIcon, X, LocateFixed } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axiosInstance from '@/lib/interceptor';
@@ -23,7 +23,8 @@ export default function LocationSearch({ visible, onClose, onSelect, placeholder
   const [searchQuery, setSearchQuery] = useState(''); // state handling search query..
 
   // Sample location data
-  const sampleLocations = [
+  const sampleLocations = useMemo(() => 
+  [
     { id: '1', text: 'New York', region: 'NY', country: 'United States', coordinates: [40.7128, -74.0060] }, // lat,long
     { id: '2', text: 'Los Angeles', region: 'CA', country: 'United States', coordinates: [34.0522, -118.2437] },
     { id: '3', text: 'London', region: 'England', country: 'United Kingdom', coordinates: [51.5074, -0.1278] },
@@ -34,7 +35,8 @@ export default function LocationSearch({ visible, onClose, onSelect, placeholder
     { id: '8', text: 'Toronto', region: 'ON', country: 'Canada', coordinates: [43.6532, -79.3832] },
     { id: '9', text: 'Mumbai', region: 'Maharashtra', country: 'India', coordinates: [19.0760, 72.8777] },
     { id: '10', text: 'São Paulo', region: 'SP', country: 'Brazil', coordinates: [-23.5505, -46.6333] },
-  ];
+  ],[]);
+  
   const [SearchedLocation, setSearchedLocation] = useState<Location[]>(sampleLocations) ;
 
   // Filter locations based on search query (UI only, no actual search logic)

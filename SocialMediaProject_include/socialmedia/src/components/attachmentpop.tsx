@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeftCircleIcon, ArrowRightCircleIcon, BookOpen, ImageOff, Music, X } from 'lucide-react'
 import { mediaType } from './mediapopmodal'
@@ -8,7 +8,6 @@ import Videoplayer from './videoplayer'
 // import Mediacontrols from './mediacontrols'
 import axiosInstance from '@/lib/interceptor'
 import toast from 'react-hot-toast'
-import Error from 'next/error'
 
 interface attachmentOptionType {
   icon: React.ReactNode
@@ -202,7 +201,7 @@ export default function Attachmentpop({ closePop, menuOptions , handleMediaClick
   }, [activeMenuIndex, activeLabel, Attachements])
 
   // function for fetching details...
-  async function getAllAttachments() {
+  const getAllAttachments = useCallback( async () => {
     try {
       const attachmentres = await axiosInstance.get(`/api/chat/attachments?targetAccHandle=${targetHandle}`);
       if (attachmentres.status === 200) {
@@ -210,14 +209,14 @@ export default function Attachmentpop({ closePop, menuOptions , handleMediaClick
         setmentions(attachmentres.data.mentions);
       }
     } catch (error) {
-      console.log("An Error occured :",Error);
+      console.log("An Error occured :",error);
       toast.error("Error occured in getting attachments !!");
     }
-  }
+  },[targetHandle])
   // useeffect triggered on page load...
   useEffect(() => {
     getAllAttachments() ;
-  }, [])
+  }, [getAllAttachments])
 
   return (
     <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-40 animate-in fade-in-0 zoom-in-95 duration-200">
@@ -346,7 +345,7 @@ export default function Attachmentpop({ closePop, menuOptions , handleMediaClick
                             className={`overflow-hidden rounded-3xl bg-white dark:bg-gray-300 shadow-xl
                               ${isActive ? 'border ring-3 ring-yellow-500/30 border-yellow-500' : 'border border-yellow-200'}`}
                           >
-                            {m.media_type === 'image' && <img src={m.url} className="w-md h-[400px] md:h-[450px] object-cover" />}
+                            {m.media_type === 'image' && <img src={m.url} alt='media-image' className="w-md h-[400px] md:h-[450px] object-cover" />}
 
                             {m.media_type === 'video' && (
                               <div className='w-md h-[400px] md:h-[450px]'>

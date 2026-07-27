@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -33,7 +33,7 @@ import RequireSubscription from "@/components/requireSubscription";
 import useUpgradePop from "@/app/states/upgradePop";
 import { useTheme } from "next-themes";
 import { MdAnalytics, MdImportExport, MdSpaceDashboard } from "react-icons/md";
-import { User, Loader2, Bookmark, UserRoundPlus, UserRoundMinus, ArrowBigLeft, ArrowBigRight, View, MessagesSquare, RefreshCw, ThumbsUp, Eye, Monitor, Users, Heart, Smile, BarChart3, TrendingUp, Upload } from "lucide-react";
+import { User, Loader2, Bookmark, UserRoundPlus, UserRoundMinus, ArrowBigLeft, ArrowBigRight, View, MessagesSquare, RefreshCw, ThumbsUp, Eye, Monitor, Users, Heart, Smile, BarChart3, Upload } from "lucide-react";
 import axiosInstance from "@/lib/interceptor";
 import toast from "react-hot-toast";
 
@@ -96,12 +96,12 @@ interface InteractionTypeItem {
   value: number;
 }
 
-interface watchTimeType {
-  hour:string ;
-  min:string ;
-  sec:string ;
-  rate:string ;
-}
+// interface watchTimeType {
+//   hour:string ;
+//   min:string ;
+//   sec:string ;
+//   rate:string ;
+// }
 
 // Custom Tooltip for Recharts with dark mode support
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -334,7 +334,7 @@ export default function UserAnalytics() {
   };
 
   // function to get analytics data...
-  async function functionToGetAnalytics() {
+  const functionToGetAnalytics = useCallback(async() => {
      const analyticsApi = await axiosInstance.post('/api/dashboard',{ handle:Account.decodedHandle , pastTime:timeRange.value , year:Year });
      if (analyticsApi.status === 200) {
       setOverview(analyticsApi.data.analytics.overview);
@@ -349,7 +349,7 @@ export default function UserAnalytics() {
       setContentPerformance(analyticsApi.data.analytics.contentperformance);
       
      }
-    }
+    },[Account.decodedHandle,timeRange,Year])
 
   // useffect for loading data from backend logic...
   useEffect(() => {
@@ -362,7 +362,7 @@ export default function UserAnalytics() {
       }
     }
     fetchData();
-  }, [timeRange,Year]);
+  }, [timeRange,Year,functionToGetAnalytics]);
 
   // logic for advance analytics...
   const kpis = useMemo(() => {
@@ -401,6 +401,7 @@ export default function UserAnalytics() {
       }
     } catch (err) {
       toast.dismiss(toastLoading);
+      console.log("An error occured :",err);
       toast.error('Failed to generate report');
     }
   }

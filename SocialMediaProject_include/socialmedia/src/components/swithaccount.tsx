@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from 'react'
+import React, { useState , useEffect, useCallback } from 'react'
 import { CheckCircleIcon, PlusCircleIcon, User2, X } from 'lucide-react'
 import { userCardProp } from './usercard';
 import Usercard from './usercard';
@@ -130,7 +130,7 @@ export default function SwitchAccountPopUp () {
   const [currentAccount, setcurrentAccount] = useState<userCardProp>(Account); // intially contains the running account....
 
   // getting all the accounts owner by user...
-  async function functionToGetAccounts() {
+  const functionToGetAccounts = useCallback(async () => {
     try {
       const accountapi = await axiosInstance.get(`/api/profile/username?currentHandle=${String(Account.decodedHandle).substring(1)}`);
       if (accountapi.status === 200) {
@@ -140,7 +140,7 @@ export default function SwitchAccountPopUp () {
     } catch (error) {
       return error;
     }
-  }
+  },[Account.decodedHandle])
 
   // useffect for getting user accounts...
   useEffect(() => {

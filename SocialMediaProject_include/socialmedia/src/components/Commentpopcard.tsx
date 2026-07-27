@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState , useEffect, useRef } from 'react';
+import React, { useState , useEffect, useRef, useCallback } from 'react';
 import { ReactElement } from 'react';
 import Image from 'next/image';
 import EmojiPicker ,{ EmojiClickData, Theme } from 'emoji-picker-react';
@@ -80,7 +80,7 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
   
     return combinedArray;
   }
-  const handlePostReply = async () => {
+  const handlePostReply = useCallback(async () => {
     try { 
       if (replyText.trim()) {
       setIsPosting(true);
@@ -98,10 +98,11 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
       }
      }
     } catch (error) {
-      toast.error('An error occured in commenting !!');
       setIsPosting(false)
+      toast.error('An error occured in commenting !!');
+      console.log("An error occured :",error);
     }
-  };
+  },[AddLocation,handleClose,mentions,postId,replyText,updateState]);
 
   // useffect for handling execceding allowed character length...
   useEffect(() => {

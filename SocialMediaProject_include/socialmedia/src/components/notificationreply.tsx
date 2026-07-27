@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getNotificationActionText } from './notificationcard';
 import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
@@ -70,7 +70,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
   }, [notification]);
 
   // function to handle comment on notification...
-  async function handleCommentOnNotification() {
+  const handleCommentOnNotification = useCallback(async () => {
     try {
       if (!replyText.trim()) {
         toast.error('Reply text cant be empty !!');
@@ -89,7 +89,7 @@ export default function Notificationreply({ closeModal, notification, icon, tail
     } finally {
       setisReplying(false);
     }
-  }
+  },[closeModal,notification.id,replyText])
 
   // for slicing text till max char...
   useEffect(() => {

@@ -3,6 +3,7 @@ import jsonwebtoken, { Secret } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { emailRegex } from "@/app/controllers/regex";
 import { Document } from "mongoose";
+import type { StringValue } from "ms";
 export interface IUser extends Document {
   email: string;
   password: string;
@@ -25,8 +26,8 @@ export interface IUser extends Document {
 const ACCESS_TOKEN_SECRET = process.env.SECRET_FOR_ACCESS_TOKEN as Secret;
 const REFRESH_TOKEN_SECRET = process.env.SECRET_FOR_REFRESH_TOKEN as Secret;
 
-const ACCESS_TOKEN_EXPIRY = process.env.EXPIRY_FOR_ACCESS_TOKEN as string;
-const REFRESH_TOKEN_EXPIRY = process.env.EXPIRY_FOR_REFRESH_TOKEN as string;
+const ACCESS_TOKEN_EXPIRY = process.env.EXPIRY_FOR_ACCESS_TOKEN as unknown as StringValue;
+const REFRESH_TOKEN_EXPIRY = process.env.EXPIRY_FOR_REFRESH_TOKEN as unknown as StringValue;
 
 
 const userSchema = new mongoose.Schema<IUser>(

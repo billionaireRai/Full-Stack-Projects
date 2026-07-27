@@ -91,7 +91,7 @@ export default function FollowersPage () {
       const filtered = navItems.filter((item) => item.navtext !== 'Common');
       setnavItems(filtered);
     }
-  }, [params])
+  }, [params,navItems,user?.handle])
   
   if (!user) return null ;
   return (

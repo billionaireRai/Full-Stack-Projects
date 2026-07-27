@@ -27,7 +27,7 @@ export default function Clearchatpop ({ chat , close }: clearChatPopType) {
         close();
       }
     } catch (error) {
-        console.log("An erroo occured in clearing chat !!");
+        console.log("An erroo occured in clearing chat :",error);
         toast.error("An error occured in clearing chat !!");
     }
   }

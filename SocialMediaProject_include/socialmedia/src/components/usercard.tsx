@@ -4,7 +4,7 @@ import Image from 'next/image';
 import React, { useState, useRef } from 'react'
 import { createPortal } from 'react-dom';
 import AccountDetailPop from './accountdetailpop';
-import { makeMentionsAsLink } from '@/app/(routes)/[username]/page';
+import { usernameRegex } from '@/app/controllers/regex';
 import axiosInstance from '@/lib/interceptor';
 import { AxiosResponse } from 'axios';
 import Spinner from '@/components/spinner';
@@ -59,6 +59,30 @@ const defaultAccount : accountInfoType = {
   bannerUrl: "https://img.freepik.com/premium-photo/wide-banner-with-many-random-square-hexagons-charcoal-dark-black-color_105589-1820.jpg",
   avatarUrl: "/images/myProfile.jpg"
 }
+
+  // function to make mentions a link in bio...
+  const makeMentionsAsLink = (Bio: string) => {
+   if (!Bio?.trim()) return null ;
+
+    const parts = Bio.split(/(@[a-zA-Z0-9_]{8,20})/g);
+
+    return parts.map((part, idx) => {
+      if (part.startsWith("@") && usernameRegex.test(part.slice(1))) {
+
+       return (
+        <Link
+          key={idx}
+          href={`/${part}`}
+          className="text-yellow-500 hover:text-shadow-xs text-shadow-yellow-400"
+        >
+          {part}
+        </Link>
+       );
+      }
+      
+      return <React.Fragment key={idx}>{part}</React.Fragment>;
+    });
+};
 
 export default function UserCard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,IsFollowing=false,content='CS Grad \u201825 | MERN \u2022 GenAI \u2022 SD \u2022 Web3 \u2022 DSA | Code Coffee Commits, Deadlifts & Deployments' , heading, account = defaultAccount }:userCardProp) {
   const [isFollowing, setisFollowing] = useState<boolean>(IsFollowing);

@@ -4,7 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { makeMentionsAsLink } from '@/app/(routes)/[username]/page'
+import { usernameRegex } from '@/app/controllers/regex'
 import { Eye } from 'lucide-react'
 import axiosInstance from '@/lib/interceptor'
 import { AxiosResponse } from 'axios'
@@ -31,6 +31,30 @@ interface AccountDetailPopProps {
   position?: { top: number; left: number }
   isFollowing:boolean
 }
+
+  // function to make mentions a link in bio...
+  const makeMentionsAsLink = (Bio: string) => {
+   if (!Bio?.trim()) return null ;
+
+    const parts = Bio.split(/(@[a-zA-Z0-9_]{8,20})/g);
+
+    return parts.map((part, idx) => {
+      if (part.startsWith("@") && usernameRegex.test(part.slice(1))) {
+
+       return (
+        <Link
+          key={idx}
+          href={`/${part}`}
+          className="text-yellow-500 hover:text-shadow-xs text-shadow-yellow-400"
+        >
+          {part}
+        </Link>
+       );
+      }
+      
+      return <React.Fragment key={idx}>{part}</React.Fragment>;
+    });
+};
 
 export default function AccountDetailPop({ user,visible,onOpen,onClose,position = { top: 0, left: 0 } , isFollowing }: AccountDetailPopProps) {
   const [Loading, setLoading] = useState<boolean>(false);

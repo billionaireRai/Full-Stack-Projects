@@ -10,7 +10,7 @@ import Block from "../models/blocked";
 import { fmt } from "@/lib/utils";
 import accounts from "../models/accounts";
 
-type Plan = "Free" | "Pro" | "Creator" | "Premium";
+// type Plan = "Free" | "Pro" | "Creator" | "Premium";
 
 export const gettingAccountService = async (text:string) => {
     await connectWithMongoDB() ; // connecting to db...

@@ -1,5 +1,5 @@
 import { Copy, Download, QrCode, X } from 'lucide-react';
-import { useState , useEffect, useRef } from 'react';
+import { useState , useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
 import React from 'react'
@@ -22,7 +22,7 @@ export default function Qrcodepop ({ path , owner , timestamp , doneScanning , c
   const qrRef = useRef<HTMLDivElement>(null);
 
   // function for QR url verification...
-  async function apiForUrlVerification() {
+  const apiForUrlVerification = useCallback( async() => {
     setLoadingQR(true);
     const verifyApi = await axiosInstance.post('/api/qr/verify',{ category:Category , handle:owner , id:postid , path  });
     if (verifyApi.status === 200) {
@@ -32,7 +32,7 @@ export default function Qrcodepop ({ path , owner , timestamp , doneScanning , c
       setLoadingQR(false);
       toast.error("Wrong post url found...");
     }
-  }
+  },[Category,owner,postid,path])
 
   // function for downloading QR...
   const handleQRdownload = async () => {
@@ -51,7 +51,7 @@ export default function Qrcodepop ({ path , owner , timestamp , doneScanning , c
 
   useEffect(() => {
    apiForUrlVerification();
-  }, [])
+  }, [apiForUrlVerification])
 
     return (
       <div className="fixed inset-0 bg-black/10 backdrop-blur-xs flex items-center justify-center z-50 animate-in fade-in-0 zoom-in-95 duration-200">

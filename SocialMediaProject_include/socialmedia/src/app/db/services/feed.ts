@@ -26,39 +26,39 @@ export interface polltype {
 }
 
 // different plan levels...
-type Plan = "Free" | "Pro" | "Creator" | "Premium";
+// type Plan = "Free" | "Pro" | "Creator" | "Premium";
 
 // categories type allowed...
-type rankingCategories = "engagement" | "freshness" | "relationship" | "interest" | "reputation" | "boosted" ;
+// type rankingCategories = "engagement" | "freshness" | "relationship" | "interest" | "reputation" | "boosted" ;
 
 // score multiplier for each...
-const categoryScoreMultiplier: Record<rankingCategories, number> = {
-  engagement: 0.3, freshness: 0.2, relationship: 0.15, interest: 0.1, reputation: 0.05, boosted: 0.1,
-};
+// const categoryScoreMultiplier: Record<rankingCategories, number> = {
+//   engagement: 0.3, freshness: 0.2, relationship: 0.15, interest: 0.1, reputation: 0.05, boosted: 0.1,
+// };
 
-const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
-const clamp0to100 = (n: number) => Math.max(0, Math.min(100, n));
+// const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+// const clamp0to100 = (n: number) => Math.max(0, Math.min(100, n));
 
 // stander log normalization...
-const normLog100 = (metric: number, scale: number) => {
-  if (!Number.isFinite(metric) || metric <= 0) return 0 ;
-  return clamp0to100((Math.log(1 + metric) / Math.log(1 + scale)) * 100);
-};
+// const normLog100 = (metric: number, scale: number) => {
+//   if (!Number.isFinite(metric) || metric <= 0) return 0 ;
+//   return clamp0to100((Math.log(1 + metric) / Math.log(1 + scale)) * 100);
+// };
 
 // Exponential decay function...
-const normRecency100 = (ageMs: number, halfLifeHours: number) => {
-  if (!Number.isFinite(ageMs) || ageMs <= 0) return 100;
-  const ageHours = ageMs / (1000 * 60 * 60);
-  if (!Number.isFinite(ageHours)) return 0;
+// const normRecency100 = (ageMs: number, halfLifeHours: number) => {
+//   if (!Number.isFinite(ageMs) || ageMs <= 0) return 100;
+//   const ageHours = ageMs / (1000 * 60 * 60);
+//   if (!Number.isFinite(ageHours)) return 0;
 
-  const decay = Math.pow(0.5, ageHours / Math.max(0.0001, halfLifeHours));
-  return clamp0to100(decay * 100);
-};
+//   const decay = Math.pow(0.5, ageHours / Math.max(0.0001, halfLifeHours));
+//   return clamp0to100(decay * 100);
+// };
 
-const safeRatio100 = (num: number, den: number) => {
-  if (!Number.isFinite(num) || !Number.isFinite(den) || den <= 0) return 0;
-  return clamp0to100(clamp01(num / den) * 100);
-};
+// const safeRatio100 = (num: number, den: number) => {
+//   if (!Number.isFinite(num) || !Number.isFinite(den) || den <= 0) return 0;
+//   return clamp0to100(clamp01(num / den) * 100);
+// };
 
 export const getFeedPostService = async ({ Page, size }: { Page: number; size: number }) => {
   await connectWithMongoDB();
@@ -80,8 +80,8 @@ export const getFeedPostService = async ({ Page, size }: { Page: number; size: n
     .skip(skip)
     .limit(size);
 
-  const followingDocs = await follows.find({ follower: activeAcc._id, isDeleted: false });
-  const followingIds = followingDocs.flatMap((f) => f.followingId);
+  // const followingDocs = await follows.find({ follower: activeAcc._id, isDeleted: false });
+  // const followingIds = followingDocs.flatMap((f) => f.followingId);
 
   const structuredPost: any[] = []; // array of total posts...
 
@@ -362,7 +362,7 @@ export const getFeedSuggestionsService = async () => {
   
       // getting account whose content , user like & comment...
       // likes.accountId should be the viewer's account (_id) not user.id (user doc _id)
-      const myLikes  = await likes.find({ $and:[ { accountId: myAccount._id },{ targetType:{ $in: ['Post','Comment'] } }]}) ;
+    // const myLikes  = await likes.find({ $and:[ { accountId: myAccount._id },{ targetType:{ $in: ['Post','Comment'] } }]}) ;
       // const MappedlikedToAcc = await Promise.all(myLikes.map( async ( like ) => {
       //     return returnAccountDataInStructure((like.targetAccount as mongoose.Types.ObjectId).toString());
       // }));

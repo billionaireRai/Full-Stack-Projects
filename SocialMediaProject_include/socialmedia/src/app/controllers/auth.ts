@@ -134,7 +134,7 @@ export const logginUserController = asyncErrorHandler( async (request:NextReques
 
 
 // refrehing token controller...
-export const refreshTokenController = asyncErrorHandler(async (request: NextRequest) => {
+export const refreshTokenController = asyncErrorHandler(async () => {
     const Cookies = await cookies(); // intializing the cookies...
     const refreshTokenValue = Cookies.get('refreshToken')?.value;
 

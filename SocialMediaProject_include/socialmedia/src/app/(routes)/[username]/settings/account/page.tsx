@@ -76,25 +76,6 @@ export default function AccountSettings() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // handling image manipulation...
-  const handleImageManipulation = (e: React.ChangeEvent<HTMLInputElement>,imageFor:string) : void => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      if (imageFor.includes('coverImage')) {
-        handleInputChange('coverImage', file.name);
-      } else {
-        handleInputChange('avatar', file.name);
-      }
-    }
-  };
-
-  // handle logout
-  const handleLogout = () : void => {
-    toast.loading('logging out in proccess , wait !!');
-  };
-
   // function handling deactivation logic...
   const handleAccountDeactivation = () : void => { 
     setshowDeactivateModal(false)

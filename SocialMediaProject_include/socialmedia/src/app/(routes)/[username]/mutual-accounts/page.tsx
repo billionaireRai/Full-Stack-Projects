@@ -1,6 +1,6 @@
 'use client'
 
-import React,{ useState , useEffect } from 'react'
+import React,{ useState , useEffect, useCallback } from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { handleScrollToTop } from '@/lib/windowtopscroll'
@@ -20,61 +20,61 @@ import axiosInstance from '@/lib/interceptor';
 // };
 
 // Type for postAuthorInfo nested object
-interface PostAuthorInfoType {
-  postId: string;
-  username: string;
-  handle: string;
-  cover: string;
-  bio: string;
-  isVerified: boolean;
-  plan: string;
-  followers: string;
-  following: string;
-  timestamp: string;
-  avatar: string;
-  content: string;
-  media: { url: string; media_type: string }[];
-  mentions: string[];
-  hashTags: string[];
-  taggedLocation: { text: string; coordinates: [number, number] }[];
-  poll?: {
-    question: string;
-    options: { text: string; votes: number }[];
-    duration: number;
-  };
-  likes: string;
-  reposts: string;
-  replies: string;
-  shares: string;
-  views: string;
-  userliked: boolean;
-  usereposted: boolean;
-  usercommented: boolean;
-  userbookmarked: boolean;
-  isPinned: boolean;
-  isHighlighted: boolean;
-  isFollowing: boolean;
-}
+// interface PostAuthorInfoType {
+//   postId: string;
+//   username: string;
+//   handle: string;
+//   cover: string;
+//   bio: string;
+//   isVerified: boolean;
+//   plan: string;
+//   followers: string;
+//   following: string;
+//   timestamp: string;
+//   avatar: string;
+//   content: string;
+//   media: { url: string; media_type: string }[];
+//   mentions: string[];
+//   hashTags: string[];
+//   taggedLocation: { text: string; coordinates: [number, number] }[];
+//   poll?: {
+//     question: string;
+//     options: { text: string; votes: number }[];
+//     duration: number;
+//   };
+//   likes: string;
+//   reposts: string;
+//   replies: string;
+//   shares: string;
+//   views: string;
+//   userliked: boolean;
+//   usereposted: boolean;
+//   usercommented: boolean;
+//   userbookmarked: boolean;
+//   isPinned: boolean;
+//   isHighlighted: boolean;
+//   isFollowing: boolean;
+// }
 
 // Type for mutual comment data
-interface MutualCommentType {
-  id: string;
-  postId: string;
-  postAuthorInfo: PostAuthorInfoType;
-  commentedText: string;
-  mediaUrls: { url: string; media_type: string }[];
-  mentions: string[];
-  hashTags: string[];
-  repliedAt: string;
-  comments: string;
-  reposts: string;
-  likes: string;
-  views: string;
-  userliked: boolean;
-  usereposted: boolean;
-  usercommented: boolean;
-  userbookmarked: boolean;
-}
+// interface MutualCommentType {
+//   id: string;
+//   postId: string;
+//   postAuthorInfo: PostAuthorInfoType;
+//   commentedText: string;
+//   mediaUrls: { url: string; media_type: string }[];
+//   mentions: string[];
+//   hashTags: string[];
+//   repliedAt: string;
+//   comments: string;
+//   reposts: string;
+//   likes: string;
+//   views: string;
+//   userliked: boolean;
+//   usereposted: boolean;
+//   usercommented: boolean;
+//   userbookmarked: boolean;
+// }
 
 export default function MutualAccounts () {
     const router = useRouter() ;
@@ -623,7 +623,7 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
   }
   
   // function for fetching data....
-  async function getMutualData() {
+  const getMutualData = useCallback( async() => {
     try {
       const mutualApi = await axiosInstance.post('/api/account/mutual',{ targetHandle:username , fromHandle:Account.decodedHandle });
       if (mutualApi.status === 200) {
@@ -634,14 +634,14 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
     } catch (error) {
       console.log(error);
     }
-  }
+  },[Account.decodedHandle,username])
 
   useEffect(() => {
     getMutualData() ;
-  }, [username,Account.decodedHandle])
+  }, [username,Account.decodedHandle,getMutualData])
 
   // function to get mutual interested post...
-  async function getMutualInterestPost() {
+  const getMutualInterestPost = useCallback( async() => {
     try {
       const interestApi = await axiosInstance.get(`/api/account/mutual?targetHandle=${username}&fromHandle=${Account.decodedHandle}&page=${Page}&size=${pagesize}`);
       if (interestApi.status === 200) {
@@ -651,14 +651,14 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
     } catch (error) {
       console.log(error);
     }
-  }
+  },[Account.decodedHandle,Page,username])
 
   useEffect(() => {
     if (((window.innerHeight - window.scrollY) <= autoHeightGap ) && HasMore) {
       setPage(Page + 1);
       getMutualInterestPost(); // getting explore posts...
      }
-  }, [window.scrollY]) ;
+  }, [HasMore,getMutualInterestPost,Page]) ;
   
 
   return (

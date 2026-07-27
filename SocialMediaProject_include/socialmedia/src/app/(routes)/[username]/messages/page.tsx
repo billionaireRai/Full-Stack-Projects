@@ -1,6 +1,6 @@
 'use client'
 
-import React,{ useState , useEffect }from 'react'
+import React,{ useState , useEffect, useCallback }from 'react'
 import ChatAccountcard from '@/components/chataccountcard'
 import ReportPop from '@/components/reportPop'
 import BlockChatPop from '@/components/blockchat';
@@ -301,23 +301,25 @@ export default function MessagesPage() {
 
   // function for calculating total unread message...
   function calculateTotalUnread(arrOfCardInfo : infoForChatCard[]) : void{
-    let total = arrOfCardInfo.reduce((acc, obj) => acc + obj.unreadCount , 0);
+    console.log(arrOfCardInfo.length)
+   //  let total = arrOfCardInfo.reduce((acc, obj) => acc + obj.unreadCount , 0);
     // setUnreadMessage(total) ; // updating the total unread messages...
   }
 
-  const handleSearch = (searchedText: string) => {
+  const handleSearch = useCallback((searchedText: string) => {
     const filtered = conversations.filter((chatCard) =>
       chatCard.name.toLowerCase().includes(searchedText.toLowerCase()) ||  // high chance that account search without case sensitivity...
       chatCard.handle.toLowerCase().includes(searchedText.toLowerCase())
     );
     setFilteredCards(filtered);
-  };
+  },[conversations]);
+  
   // useffect hook for handling the search change...
   useEffect(() => {
     if (ChatSearch.trim())  handleSearch(ChatSearch); // run the funtion if something is searched...
 
     else  setFilteredCards(conversations); // show all if search is empty...
-  }, [ChatSearch,conversations]);
+  }, [ChatSearch,conversations,handleSearch]);
 
   // function fethcing all conversations...
   async function getConversations() {
@@ -387,24 +389,23 @@ export default function MessagesPage() {
         toast.dismiss(loadingT);
       }
     } catch (error) {
-      toast.error("An error occured in deletion !!");
       toast.dismiss(loadingT);
+      toast.error("An error occured in deletion !!");
+      console.log("An error occured :",error);
     }
   }
 
   // function for mute toggeling in UI...
   function muteSwitching() {
     if (CurrentOpenChat) {
-      const currentMuteState = CurrentOpenChat?.isMuted ;
-      setCurrentOpenChat((chat) => { chat ? setCurrentOpenChat({ ...chat , isMuted:!currentMuteState }) : chat });
+      setCurrentOpenChat((chat) => chat ? { ...chat, isMuted: !chat.isMuted } : chat);
     }
   }
 
   // function for pin UI toggleing
   function pinSwitchingOnChat() {
     if (CurrentOpenChat) {
-      const currentPinState = CurrentOpenChat?.pinned ;
-      setCurrentOpenChat((chat) => { chat ? setCurrentOpenChat({ ...chat , pinned:!currentPinState }) : chat });
+      setCurrentOpenChat((chat) => chat ? { ...chat, pinned: !chat.pinned } : chat);
     }
   }
 

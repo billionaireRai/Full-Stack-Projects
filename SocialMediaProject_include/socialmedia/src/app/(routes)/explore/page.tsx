@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState , useEffect, useRef } from 'react';
+import React, { useState , useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { AnimatePresence , motion } from 'framer-motion';
@@ -200,7 +200,7 @@ export default function Explore() {
 
       
       // function to get posts...
-      async function functionFetchPosts(hashtag?: string) {
+     const functionFetchPosts = useCallback( async (hashtag?: string) => {
         try {
           setloadingPosts(true);
           const postapi = await axiosInstance.get(`/api/explore?hashtag=${encodeURIComponent(hashtag ?? '')}&size=${pagesize}&page=${Page}`);
@@ -214,7 +214,7 @@ export default function Explore() {
         } finally {
           setloadingPosts(false);
         }
-      }
+      },[Page])
       
       useEffect(() => {
         getOtherExploreInfo() ;
@@ -226,7 +226,7 @@ export default function Explore() {
             functionFetchPosts() ;
             setPage(Page + 1);
         }
-      }, [])
+      }, [hashtopic,functionFetchPosts,Page])
 
     // fetching posts by pagination...
     useEffect(() => {
@@ -254,7 +254,7 @@ export default function Explore() {
        return () => {
         exploreSection.removeEventListener('scroll', handleScroll)
       }
-   }, [autoHeightGap,hasExplore,explorePosts.length])
+   }, [autoHeightGap,hasExplore,explorePosts.length,Page,hashtopic,functionFetchPosts])
       
   // function for showing more suggestions...
   const handleSuggesstionShow = () => {

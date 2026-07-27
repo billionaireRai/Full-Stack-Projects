@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useEffect , useRef } from 'react';
+import React, { useState, useEffect , useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Usercard, { userCardProp } from '@/components/usercard';
 import { useRouter } from 'next/navigation';
 import { handleScrollToTop } from '@/lib/windowtopscroll';
 import { Users, ArrowBigUpIcon, BellOff, ArrowLeftCircle } from 'lucide-react';
 import Activebeep from '@/components/activebeep';
-import useActiveAccount from '@/app/states/useraccounts';
+// import useActiveAccount from '@/app/states/useraccounts';
 import Trendcard from '@/components/trendcard';
 import NotificationCard, { Notification } from '@/components/notificationcard';
 import { MdNotifications } from 'react-icons/md';
@@ -416,7 +416,7 @@ export default function Notifications() {
   };
 
   // function to handle notification fetching logic...
-  async function fetchNotifications() {
+  const fetchNotifications = useCallback( async() => {
     try {
       setLoading(true);
       const notificationsApi = await axiosInstance.get(`/api/account/notifications?handle=${params?.username}&page=${Page}&pagesize=${pagesize}`);
@@ -427,10 +427,11 @@ export default function Notifications() {
         setLoading(false);
       }
     } catch (error) {
-      console.log("An error occured in fetching notifications...");
+      console.log("An error occured in fetching notifications :",error);
       setLoading(false);
     }
-  }
+  },[Page,params?.username])
+
   // useeffect for auto-fethcing of notifications....
   useEffect(() => {
      const notificationSection = notificationSec.current ;
@@ -450,11 +451,11 @@ export default function Notifications() {
       return () => {
        notificationSection.removeEventListener('scroll', handleScroll)
      }
-  }, [autoHeightGap,hasMoreNotifications,notificationList.length])
+  }, [autoHeightGap,hasMoreNotifications,notificationList.length,fetchNotifications,Page])
 
 
   // function for marking notifications read...
-  async function MarkNotificationsRead() {
+  const MarkNotificationsRead = useCallback( async() => {
     try {
       const readUpdateApi = await axiosInstance.patch('/api/account/notifications',{ page:Page , size:pagesize });
       if (readUpdateApi.status === 200) {
@@ -464,33 +465,33 @@ export default function Notifications() {
         toast.success("New notifications read !!");
       }
     } catch (error) {
-      console.log("An error occured in updating isRead state of notification...");
+      console.log("An error occured in updating isRead state of notification :",error);
     }
-  }
+  },[Page,notificationList])
 
   useEffect(() => {
     MarkNotificationsRead() ;
-  }, [notificationList])
+  }, [notificationList,MarkNotificationsRead])
   
   // when the Page state changes fetch notifications and marking read...
   useEffect(() => {
     fetchNotifications() ;
-  }, [Page])
+  }, [Page,fetchNotifications])
 
   // function for getting trends...
-  async function getOtherExploreInfo() {
+  const getOtherExploreInfo = useCallback( async() => {
     const otherapi = await axiosInstance.post('/api/explore');
     if (otherapi.status === 200) {
       setFollowSuggesstions(otherapi.data.suggesstions);
       setTrends(otherapi.data.trendingHashtags);
     }
-  }
+  },[])
 
   // useffect for handling isRead feild...
   useEffect(() => {
     getOtherExploreInfo();
     fetchNotifications();
-  }, [])
+  }, [fetchNotifications,getOtherExploreInfo])
     
 
   return (

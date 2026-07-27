@@ -23,14 +23,14 @@ export interface userType {
   avatar:string
 }
 
-interface userCardProp {
-  decodedHandle?:string | null ;
-  name?:string | null;
-  content?:string | null ;
-  heading?:React.ReactElement;
-  user?: userType;
-  IsFollowing?:boolean;
-}
+// interface userCardProp {
+//   decodedHandle?:string | null ;
+//   name?:string | null;
+//   content?:string | null ;
+//   heading?:React.ReactElement;
+//   user?: userType;
+//   IsFollowing?:boolean;
+// }
 
 interface navItemsType {
   navtext:string,
@@ -57,12 +57,12 @@ export default function FollowingsPage () {
   })
 
   // array for account card details...
-  const [AccountDetails, setAccountDetails] = useState<userCardProp[]>([]); // will update its value...
+  // const [AccountDetails, setAccountDetails] = useState<userCardProp[]>([]); // will update its value...
 
   // useeffect for fetching account details...
   useEffect(() => {
     // api fetching for data...
-    setAccountDetails([])
+    // setAccountDetails([])
     setuser(null);
   }, [])
   
@@ -91,7 +91,7 @@ export default function FollowingsPage () {
       const filtered = navItems.filter((item) => item.navtext !== 'Common');
       setnavItems(filtered);
     }
-  }, [params])
+  }, [params,navItems,user?.handle])
   
   if (!user) return null ;
   return (
@@ -140,7 +140,7 @@ export default function FollowingsPage () {
       {/* {user && AccountDetails.map((account,index) => (
           <Usercard key={index} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} content={account.content} heading={account.heading} user={user.} />
         )) */}
-        
+
       {/* } */}
       <Usercard IsFollowing={true}/>
       <Usercard IsFollowing={true}/>

@@ -20,7 +20,7 @@ import subscriptions from "../models/subscriptions";
 import { userCardProp } from "./user";
 import { generateCategoryAndKeywords } from "@/lib/aifeatures";
 
-type Plan = "Free" | "Pro" | "Creator" | "Premium";
+// type Plan = "Free" | "Pro" | "Creator" | "Premium";
 
 interface uploadedObj {
      success: boolean;
@@ -70,12 +70,12 @@ export const createANewPostService = async ( data:any ) => {
     // const currentDate = new Date();
     // const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     // const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-    const totalPostsThisMonth = await Post.countDocuments({
-        authorId: activeAcc._id,
-        postType:'original',
-        isDeleted: false,
-        // createdAt: { $gte: monthStart, $lt: monthEnd }
-    });
+    // const totalPostsThisMonth = await Post.countDocuments({
+    //     authorId: activeAcc._id,
+    //     postType:'original',
+    //     isDeleted: false,
+    //     createdAt: { $gte: monthStart, $lt: monthEnd }
+    // });
 
     // posts limited to 20 for unverified accounts...
     // if (!activeAcc.isVerified.value && ( totalPostsThisMonth >= 20 || (String(postText).length > 100))) {
@@ -154,7 +154,7 @@ export const createANewPostService = async ( data:any ) => {
 }
 
 export const postDeletionService = async (credentials:postDeletionType) => {
-    const { postId , postOwner , deleteRequestBy } = credentials ; // parsing credentials in service...
+    const { postId , deleteRequestBy } = credentials ; // parsing credentials in service...
     await connectWithMongoDB() ; // connecting to database...
 
     // getting credentials from cookies...
@@ -812,46 +812,6 @@ export const getBookmarkPostsService = async ({ Page , Size }:{ Page:number ; Si
     const activeAcc = await accounts.findOne({ userId: user.id, 'account.Active': true, 'account.status': 'ACTIVE' });
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
-
-    // Helper function to return account data in structure
-    async function returnAccountDataInStructure(accountId: string): Promise<userCardProp> {
-        const particularAcc = await accounts.findById(accountId);
-        if (!particularAcc) return {} as userCardProp ;
-        
-        // getting count of followers and followings...
-        const postCategory = ['original','repost'];
-        const followers = await follows.find({ followingId: particularAcc._id, isDeleted: false });
-        const following = await follows.find({ followerId: particularAcc._id, isDeleted: false });
-        const posts = await Post.find({ authorId:particularAcc._id , postType: { $in:postCategory } ,isDeleted:false }) ;
-        const isFollowing = await follows.exists({ followerId: activeAcc._id, followingId: particularAcc._id, isDeleted: false });
-
-        return {
-            id: particularAcc._id.toString(),
-            decodedHandle:`@${particularAcc.username}`,
-            name: particularAcc.name,
-            content: particularAcc.bio,
-            account: {
-                name: particularAcc.name,
-                handle:`@${particularAcc.username}`,
-                bio: particularAcc.bio || '',
-                location: {
-                    text: particularAcc.location?.text || '',
-                    coordinates: particularAcc.location?.coordinates || [0, 0]
-                },
-                website: particularAcc.website || '',
-                joinDate: particularAcc.createdAt ? new Date(particularAcc.createdAt).toDateString() : '',
-                following: fmt(following.length),
-                followers: fmt(followers.length),
-                Posts: fmt(posts.length),
-                isCompleted: particularAcc.account?.completed || false,
-                isVerified: particularAcc.isVerified?.value || false,
-                plan: particularAcc.isVerified?.level || 'Free',
-                bannerUrl: particularAcc.banner?.url || '/images/default-banner.jpg',
-                avatarUrl: particularAcc.avatar?.url || '/images/default-profile-pic.png'
-            },
-            IsFollowing: isFollowing ? true : false
-        };
-    }
 
     const bookmarksCount = await tagged.countDocuments({ $and: [{ accountId: activeAcc._id }, { taggedAs: 'bookmarked' }] })
     const skip = (Page - 1) * Size ;

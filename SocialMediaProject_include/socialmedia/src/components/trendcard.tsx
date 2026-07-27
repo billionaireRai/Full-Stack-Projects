@@ -13,7 +13,7 @@ export interface trendcardprop {
 }
 
 export default function TrendCard({ rank, region, tag, posts } : trendcardprop ) {
-  // const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Toggle dropdown visibility
@@ -25,7 +25,7 @@ export default function TrendCard({ rank, region, tag, posts } : trendcardprop )
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if ( dropdownRef.current && !dropdownRef.current.contains(event.target as Node) ) {
-        // setIsDropdownOpen(false);
+        setIsDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -69,59 +69,60 @@ export default function TrendCard({ rank, region, tag, posts } : trendcardprop )
             <MoreHorizontalIcon className="h-5 w-5" />
           </button> */}
 
-          {/* {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-74 p-2 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-10 overflow-hidden">
-               <button
-                 className="flex items-center w-full cursor-pointer rounded-xl text-left px-5 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-slate-800 dark:hover:to-slate-700 transition-all hover:scale-[1.02]"
-                 onClick={() => setIsDropdownOpen(false)}
-               >
-                 <ThumbsDown className="mr-2 h-4 w-4" />
-                 The associated content is not relevant
-               </button>
-               <button
-                 className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
-                 onClick={() => setIsDropdownOpen(false)}
-               >
-                 <AlertTriangle className="mr-2 h-4 w-4" />
-                 This trend is spam
-               </button>
-               <button
-                 className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
-                 onClick={() => setIsDropdownOpen(false)}
-               >
-                 <ShieldAlert className="mr-2 h-4 w-4" />
-                 This trend is abusive or harmful
-               </button>
-               <button
-                 className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
-                 onClick={() => setIsDropdownOpen(false)}
-               >
-                 <EyeOff className="mr-2 h-4 w-4" />
-                 Not interested in this
-               </button>
-               <button
-                 className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
-                 onClick={() => setIsDropdownOpen(false)}
-               >
-                 <Copy className="mr-2 h-4 w-4" />
-                 This trend is a duplicate
-               </button>
-               <button
-                 className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
-                 onClick={() => setIsDropdownOpen(false)}
-               >
-                 <AlertTriangle className="mr-2 h-4 w-4" />
-                 This trend is harmful or spammy
-               </button>
-               <button
-                 className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
-                 onClick={() => setIsDropdownOpen(false)}
-               >
-                 <EyeOff className="mr-2 h-4 w-4" />
-                 Don't want to see this ad
-               </button>
-             </div>
-          )} */}
+          {isDropdownOpen && (
+            <></>
+            // <div className="absolute right-0 mt-2 w-74 p-2 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-10 overflow-hidden">
+            //    <button
+            //      className="flex items-center w-full cursor-pointer rounded-xl text-left px-5 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-slate-800 dark:hover:to-slate-700 transition-all hover:scale-[1.02]"
+            //      onClick={() => setIsDropdownOpen(false)}
+            //    >
+            //      <ThumbsDown className="mr-2 h-4 w-4" />
+            //      The associated content is not relevant
+            //    </button>
+            //    <button
+            //      className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+            //      onClick={() => setIsDropdownOpen(false)}
+            //    >
+            //      <AlertTriangle className="mr-2 h-4 w-4" />
+            //      This trend is spam
+            //    </button>
+            //    <button
+            //      className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+            //      onClick={() => setIsDropdownOpen(false)}
+            //    >
+            //      <ShieldAlert className="mr-2 h-4 w-4" />
+            //      This trend is abusive or harmful
+            //    </button>
+            //    <button
+            //      className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+            //      onClick={() => setIsDropdownOpen(false)}
+            //    >
+            //      <EyeOff className="mr-2 h-4 w-4" />
+            //      Not interested in this
+            //    </button>
+            //    <button
+            //      className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+            //      onClick={() => setIsDropdownOpen(false)}
+            //    >
+            //      <Copy className="mr-2 h-4 w-4" />
+            //      This trend is a duplicate
+            //    </button>
+            //    <button
+            //      className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+            //      onClick={() => setIsDropdownOpen(false)}
+            //    >
+            //      <AlertTriangle className="mr-2 h-4 w-4" />
+            //      This trend is harmful or spammy
+            //    </button>
+            //    <button
+            //      className="flex items-center w-full cursor-pointer rounded-lg text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950"
+            //      onClick={() => setIsDropdownOpen(false)}
+            //    >
+            //      <EyeOff className="mr-2 h-4 w-4" />
+            //      Don't want to see this ad
+            //    </button>
+            //  </div>
+          )}
         </div>
       </div>
     </Link>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -150,6 +150,9 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     const msgElement = msgsection.current ;
     if (!msgElement) return ;
 
+    setsendingMessage(false);
+    setshowDownArrow(false);
+
     msgElement?.scrollTo({ top:msgElement.scrollHeight , left: 0,behavior: "smooth" });
   }
 
@@ -160,7 +163,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     handleMsgBottomScroll();
     updateCardDetail(messages[messages.length - 1].text, messages[messages.length - 1].timestamp)
     
-  }, [lastMessageKey])
+  }, [lastMessageKey,updateCardDetail,messages])
 
   // function for decrypting a page message...
   async function convertPlainMsgs(encryptedMsgs: messageReturnedType[],privateKey:CryptoKey): 
@@ -173,8 +176,8 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     return decryptedMessages ;
   }
 
-  function getMessageInStructure(msgs:messageinbetween[]): Message[] {
-    return msgs.map((msg, idx) => {
+  const getMessageInStructure = useCallback((msgs:messageinbetween[]): Message[] => {
+    return msgs.map((msg) => {
       const time = new Date(msg.metadata.createdAt) ;
       if (msg.metadata.isSender) {
         return {
@@ -199,9 +202,10 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
         }
       }
     })
-  }
+  },[Account.account?.avatarUrl,Account.decodedHandle,Account.name,chatCardDetails?.avatarUrl,chatCardDetails?.handle,chatCardDetails?.name])
+
   // function for fetching messages...
-  async function fetchMessagesForPage() {
+  const fetchMessagesForPage = useCallback( async() => {
     if (!privatekey) return ;
     setloadingMsgs(true);
     try {
@@ -220,13 +224,12 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     } finally {
       setloadingMsgs(false);
     }
-
-  }
+  },[chatCardDetails?.id,backPage,addMessages,getMessageInStructure,privatekey])
 
   useEffect(() => {
     fetchMessagesForPage();
     setbackPage(backPage + 1);
-  }, [backPage])
+  }, [backPage,fetchMessagesForPage])
   
   
   // for fetching older messages...
@@ -249,7 +252,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     return () => {
       section.removeEventListener('scroll', handleScroll);
     }
-  }, [heightGap,hasMoreMessages,messages.length])
+  }, [heightGap,hasMoreMessages,messages.length,fetchMessagesForPage,backPage])
 
 
 

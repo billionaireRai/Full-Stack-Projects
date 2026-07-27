@@ -116,7 +116,7 @@ export default function PostCard({
   isHighlighted = false,
   isFollowing=false,
   readOnly=false,
-  fromPage='feed'
+  // fromPage='feed'
 }: PostCardProps) {
   const displayMedia = media || [];
 
@@ -202,7 +202,6 @@ export default function PostCard({
       { icon: <BookmarkPlus className={`w-5 h-5 group-active:animate-ping ${isBookmarked ? 'fill-yellow-500 text-yellow-500 dark:fill-yellow-500 dark:text-yellow-500' : ''} `} />, label: "Bookmark" },
       { icon: <ExternalLink className={'w-5 h-5'} />, label: "Share", }
   ]
-  const generalImage = '/images/broken-laptop.jpg';
 
   // Function to parse content and make hashtags and mentions clickable...
 function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactElement[] {
@@ -219,6 +218,8 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
       </Link>
     )
   });
+  setplanIntent('Pro');
+  console.log(IsFollowing);
   // looping through mentions array...
   mentions.forEach((eachMention) => {
     combinedArray.push(
@@ -247,6 +248,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
         toast.success('Repost toggled successfully !!');
       }
     } catch (error) {
+      console.log("An error occured :",error);
       toast.error('Error in repost action !!')
     }
   }
@@ -395,6 +397,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
             toast.error('Failed with action...');
           }
       } catch (error) {
+        console.log("An error occured :",error);
         toast.error('Failed with action...');
     }
   }
