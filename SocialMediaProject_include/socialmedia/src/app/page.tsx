@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image";
 import Link from "next/link";
 import { Sun , Moon } from 'lucide-react';
@@ -11,14 +11,9 @@ import { useTheme } from 'next-themes'
 export default function HomePage() {
   const { theme, setTheme } = useTheme() ; // getting the current theme state and updation function...
   const isDark = ( theme === 'dark' ) ;
-  const [mounted, setMounted] = useState(false);
   const [Location, setLocation] = useState([0,0]);
   const [text, settext] = useState('Earth')
   const { location } = useLocation();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (location) {
@@ -31,7 +26,6 @@ export default function HomePage() {
     <>
       <div className="border-none lg:-ml-72 fixed top-0 p-0 dark:bg-black border-black w-screen h-screen flex flex-col overflow-y-auto">
         {/* themetoggler section */}
-        {mounted && (
           <div className="themetoggler border-none flex items-center justify-end">
             <div
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
@@ -52,7 +46,6 @@ export default function HomePage() {
               <div className="absolute inset-0 rounded-full bg-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300 border border-gray-300 dark:border-gray-600"></div>
             </div>
           </div>
-        )}
         <div className="mainBox font-poppins flex flex-col gap-4 items-center border-none h-full rounded-lg border-black">
           <div>
             <Image src='/images/letter-B.png' className="rounded-full dark:invert" width={120} height={120} alt="letter-B" />
