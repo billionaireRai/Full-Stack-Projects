@@ -30,7 +30,10 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: true,
   },
-  output: "standalone" // for minimizing docker image size...
+  output: "standalone", // for minimizing docker image size...
+  turbopack: {
+    root: process.cwd(),
+  },
 };
 
 export default nextConfig;

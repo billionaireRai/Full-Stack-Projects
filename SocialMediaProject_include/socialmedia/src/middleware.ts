@@ -1,2 +1,3 @@
 // middleware.ts (ROOT)
-export { default } from '@/app/middleware/authMiddleware';
+import authMiddleware from '@/app/middleware/authMiddleware';
+export default authMiddleware;
