@@ -10,7 +10,7 @@ const PUBLIC_ROUTES = [
 
 export const config = {
   matcher: [
-    "/((?!api|_next|favicon.ico|robots.txt|sitemap.xml).*)",
+    "/((?!api|_next|.*\\..*).*)",
   ],
 };
 
