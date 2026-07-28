@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
-    unoptimized: true,
+    unoptimized: false,
   },
 
   async headers() {

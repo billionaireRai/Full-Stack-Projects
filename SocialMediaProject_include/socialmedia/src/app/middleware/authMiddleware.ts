@@ -4,9 +4,10 @@ const PUBLIC_ROUTES = ["/","/auth/log-in","/auth/sign-up","/auth/forgot-password
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/|_next/static|_next/image|favicon.ico).*)",
   ],
 };
+
 
 export default function authMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
