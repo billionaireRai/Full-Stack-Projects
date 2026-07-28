@@ -50,13 +50,13 @@ export default function HomePage() {
           <div>
             <Image src='/images/letter-B.png' className="rounded-full dark:invert" width={120} height={120} alt="letter-B" />
           </div>
-          <span className="text-[30px] sm:text-[50px] font-extrabold cursor-pointer">What's happening Now !!!</span>
+          <span className="text-[30px] sm:text-[50px] font-extrabold text-center cursor-pointer">What's happening Now !!!</span>
           <p className="text-center text-xs w-full sm:max-w-2xl sm:text-sm">
             Join Briezl today and connect with leaders, founders & creative people around the world in a fun, easy, and secure way.Unfiltered & true opinions are appreciated on our social media platform. Only serious people make it till here , lets get started !!
           </p>
           <div className="flex flex-col sm:flex-row w-full p-2 gap-5 items-center justify-center border-none">
-            <Link href='/api/auth/register/google?intent=signup' className="flex flex-row gap-2.5 cursor-pointer hover:bg-yellow-400 hover:shadow-lg bg-yellow-300 dark:text-black border-none items-center px-4 py-2 justify-center border rounded-lg"><img src='/svg/google.svg' width={30} height={30} alt="google-icon" /><span>SignUp with Google</span></Link>
-            <Link href='/api/auth/register/facebook?intent=signup' className="flex flex-row gap-2.5 cursor-pointer hover:bg-yellow-400 hover:shadow-lg bg-yellow-300 dark:text-black border-none items-center px-4 py-2 justify-center border rounded-lg"><img src='/svg/facebook.svg' width={30} height={30} alt="facebook-icon" /><span>SignUp with Facebook</span></Link>
+            <Link href='/api/auth/register/google?intent=signup' className="flex flex-row gap-2.5 cursor-pointer hover:bg-yellow-400 hover:shadow-lg bg-yellow-300 dark:text-black border-none items-center px-4 py-2 justify-center border rounded-lg"><Image src='/svg/google.svg' width={30} height={30} alt="google-icon" /><span>SignUp with Google</span></Link>
+            <Link href='/api/auth/register/facebook?intent=signup' className="flex flex-row gap-2.5 cursor-pointer hover:bg-yellow-400 hover:shadow-lg bg-yellow-300 dark:text-black border-none items-center px-4 py-2 justify-center border rounded-lg"><Image src='/svg/facebook.svg' width={30} height={30} alt="facebook-icon" /><span>SignUp with Facebook</span></Link>
           </div>
             <hr className="w-1/3 border-b rounded-full border-gray-300 dark:border-gray-600 my-2"/>
             <Link href={`/auth/sign-up?latitude=${Location[0]}&longitude=${Location[1]}&text=${text}`} className="flex flex-row gap-2.5 cursor-pointer hover:bg-yellow-400 hover:shadow-lg bg-yellow-300 dark:text-black border-none items-center px-4 py-2 justify-center border rounded-lg"><Image src='/images/email.png' width={30} height={30} alt="facebook-icon" /><span>SignUp with Email</span></Link>
