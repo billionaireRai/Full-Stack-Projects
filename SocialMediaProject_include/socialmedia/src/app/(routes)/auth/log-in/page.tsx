@@ -87,7 +87,7 @@ export default function LogIn() {
             href="/api/auth/register/google?intent=login"
             className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-400 transition-all duration-300 hover:shadow-md bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
           >
-            <Image
+            <img
               src="/svg/google.svg"
               className="dark:invert"
               width={24}
@@ -101,7 +101,7 @@ export default function LogIn() {
             href="/api/auth/register/facebook?intent=login"
             className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-400 transition-all duration-300 hover:shadow-md bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
           >
-            <Image
+            <img
               src="/svg/facebook.svg"
               className="dark:invert"
               width={24}
