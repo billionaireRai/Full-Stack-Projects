@@ -59,7 +59,7 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
         <Link
           key={`hash-${eachHash}`}
           href={`/explore?q=${encodeURIComponent('#'.concat(eachHash))}&utm_source=post-click`}
-          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-1"
         >
           #{eachHash}
         </Link>
@@ -71,7 +71,7 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
         <Link
           key={`mention-${eachMention}`}
           href={`/@${eachMention}`}
-          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-2"
+          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors cursor-pointer mr-1"
         >
           @{eachMention}
         </Link>
@@ -309,7 +309,7 @@ export default function Commentpopcard({updateState,postId,poll ,avatar , name, 
                            key={`mention-${index}`}
                            initial={{ scale: 0.9, opacity: 0 }}
                            animate={{ scale: 1, opacity: 1 }}
-                           className="flex items-center justify-center gap-1 bg-yellow-100 dark:bg-yelltext-yellow-700 dark:text-yellow-400 px-3 py-2.5 rounded-full text-sm font-medium shadow-sm"
+                           className="flex items-center justify-center gap-1 bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400 px-3 py-2.5 rounded-full text-sm font-medium shadow-sm"
                          >
                           <Link href={`/${tag}`} >
                             {tag}
