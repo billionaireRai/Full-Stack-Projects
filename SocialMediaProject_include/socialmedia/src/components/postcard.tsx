@@ -203,7 +203,7 @@ export default function PostCard({
       { icon: <ExternalLink className={'w-5 h-5'} />, label: "Share", }
   ]
 
-  // Function to parse content and make hashtags and mentions clickable...
+// Function to parse content and make hashtags and mentions clickable...
 function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactElement[] {
   let combinedArray: ReactElement[] = [] ;
   // looping through hashtag array...
@@ -218,8 +218,6 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
       </Link>
     )
   });
-  setplanIntent('Pro');
-  console.log(IsFollowing);
   // looping through mentions array...
   mentions.forEach((eachMention) => {
     combinedArray.push(

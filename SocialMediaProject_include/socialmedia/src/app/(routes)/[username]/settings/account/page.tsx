@@ -48,32 +48,12 @@ export default function AccountSettings() {
   const [showDeleteModal, setshowDeleteModal] = useState<boolean>(false) ;
   const [TwoFAEnabled, setTwoFAEnabled] = useState<boolean>(false) ;
   const [TwoFAInfoModal, setTwoFAInfoModal] = useState<boolean>(false) ;
-  const [formData, setFormData] = useState<userInfoType>({
-    name: '',
-    username: '',
-    email: '',
-    bio: '',
-    location: '',
-    website: '',
-    joinDate: '',
-    phone: '',
-    following: '0',
-    followers: '0',
-    Posts: '0',
-    isVerified: false,
-    avatar: 'https://www.bing.com/th/id/OIP.YDyoIafIwW1tILED3HgZRQHaHa?w=195&h=211&c=8&rs=1&qlt=90&o=6&cb=ucfimg1&dpr=1.3&pid=3.1&rm=2&ucfimg=1',
-    coverImage: 'https://www.bing.com/th/id/OIP.1BFjs0_bYPi5Wwl2uFoLEgAAAA?w=435&h=211&c=8&rs=1&qlt=90&o=6&cb=ucfimg1&dpr=1.3&pid=3.1&rm=2&ucfimg=1'
-  });
+  const [formData, setFormData] = useState<userInfoType | null>(null)
   
 
   // function for handling profile update..
   const handleProfileUpdate = () => {
     console.log('Updating profile', formData);
-  };
-
-  // handling each input change...
-  const handleInputChange = (field: keyof userInfoType, value: string) : void => {
-    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   // function handling deactivation logic...
@@ -99,202 +79,8 @@ export default function AccountSettings() {
   
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black py-8 px-4 sm:px-6 lg:px-8">
+    <div className="h-full overflow-y-scroll bg-gray-50 dark:bg-black py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <Settings className="w-10 h-10 text-blue-600 dark:text-blue-400" />
-            Account Settings
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage your account preferences, privacy, and security settings.
-          </p>
-        </div>
-
-        {/* Account Information Section */}
-        <div className="bg-white dark:bg-black rounded-xl dark:border-b-1 dark:border-gray-500 shadow-lg px-6 py-9 mb-6">
-          <div className='flex flex-row items-center justify-between'>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            Account Information
-          </h2>
-          <div className="my-5 flex flex-col sm:flex-row gap-3">
-            {formData.isVerified ? (
-              <div className="inline-flex items-center gap-2 px-3 py-2 bg-yellow-100 dark:bg-gray-900 text-yellow-600 dark:text-blue-600 rounded-full text-sm font-medium shadow-">
-                VERIFIED ACCOUNT
-                <CheckCircle className="w-4 h-4" />
-              </div>
-            ) : (
-              <Button asChild variant="outline" className="inline-flex shadow-sm hover:shadow-md items-center gap-2 border bg-gray-100 dark:bg-black dark:hover:bg-gray-950">
-                <Link href='/subscription?utm_source=account-settings'>
-                  GET VERIFIED
-                  <Shield className="w-4 h-4 fill-black dark:fill-white stroke-1 stroke-black dark:stroke-white" />
-                </Link>
-              </Button>
-            )}
-            <Link href='/@amritansh_coder?utm_source=account-settings'>
-              <Button
-                variant="outline"
-                className="inline-flex shadow-sm hover:text-blue-600 hover:shadow-md items-center gap-2 border bg-blue-50 dark:bg-blue-900/20 text-blue-600 cursor-pointer dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50"
-              >
-                VIEW PROFILE
-                <User/>
-              </Button>
-            </Link>
-            <Button
-              onClick={() => { setshowLogoutModal(true) }}
-              variant="outline"
-              className="inline-flex shadow-sm hover:text-red-600 hover:shadow-md items-center gap-2 border bg-red-50 dark:bg-red-900/20 text-red-600 cursor-pointer dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
-            >
-              LOGOUT
-              <Lock className="w-4 h-4" />
-            </Button>
-          </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                placeholder="Enter full name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Username
-              </label>
-              <input
-                type="text"
-                placeholder="@username"
-                value={formData.username}
-                onChange={(e) => handleInputChange('username', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                Email Address
-              </label>
-              <input
-                type="email"
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                Phone Number (Optional)
-              </label>
-              <input
-                type="tel"
-                placeholder="+1 (555) 123-4567"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Globe className="w-4 h-4" />
-                Website (Optional)
-              </label>
-              <input
-                type="text"
-                placeholder="www.yourwebsite.com"
-                value={formData.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Join Date
-              </label>
-              <input
-                type="date"
-                value={formData.joinDate}
-                onChange={(e) => handleInputChange('joinDate', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Location
-              </label>
-              <input
-                type="text"
-                placeholder="City, Country"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-          </div>
-          <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Bio
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Tell us about yourself..."
-              value={formData.bio}
-              onChange={(e) => handleInputChange('bio', e.target.value)}
-              className="w-full px-4 py-3 border focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-            />
-          </div>
-          <div className="mt-6 grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Following
-              </label>
-              <input
-                type="text"
-                value={formData.following}
-                readOnly
-                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Followers
-              </label>
-              <input
-                type="text"
-                value={formData.followers}
-                readOnly
-                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Posts
-              </label>
-              <input
-                type="text"
-                value={formData.Posts}
-                readOnly
-                className="w-full px-4 py-3 border cursor-default focus:border-yellow-300 dark:focus:border-blue-500 transition-all duration-300 rounded-md bg-background placeholder-muted-foreground focus:outline-none focus:ring-3 dark:focus:ring-blue-900/50 focus:ring-yellow-200/50 focus:placeholder:text-gray-600 dark:focus:placeholder:text-gray-300 resize-none text-sm"
-              />
-            </div>
-          </div>
-          <div className="mt-6 flex justify-end">
-            <Button 
-            onClick={() => { handleProfileUpdate() }}
-            className="cursor-pointer shadow-sm hover:shadow-md bg-yellow-400 hover:bg-yellow-500 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-all">
-              Save Changes
-            </Button>
-          </div>
-        </div>
 
         {/* Privacy Settings Section */}
         <div className="bg-white dark:bg-black rounded-xl shadow-lg dark:border-b-1 dark:border-gray-500 px-6 py-9 mb-6">
@@ -536,7 +322,7 @@ export default function AccountSettings() {
           </p>
         </div>
       </div>
-      {showLogoutModal && 
+      {showLogoutModal && formData && 
       <>
       <LogoutModal closePopUp={() => { setshowLogoutModal(false) }} handle={formData.username}/> 
       </>

@@ -92,8 +92,8 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
    useEffect(() => {
     getAccountSuggestions();
     getFeedPosts() ;
-    setPage(Page + 1);
-   },[Page,getFeedPosts])
+    setPage((prev) => prev + 1);
+   },[])
   
   // fetching posts by pagination...
   useEffect(() => {
@@ -102,13 +102,13 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
      
      const handleScroll = () => {
        const distanceFromBottom = feedsection.scrollHeight - feedsection.scrollTop - feedsection.clientHeight ;
-       if (distanceFromBottom <= autoHeightGap && hasFeed) {
+       if (distanceFromBottom <= autoHeightGap && hasFeed && !loadingPosts) {
          getFeedPosts();
-         setPage(Page + 1);
+         setPage((prev) => prev + 1);
        }
       }
       // calling scroll function...
-      handleScroll() ;
+      // handleScroll() ;
      
       feedsection.addEventListener('scroll', handleScroll, { passive: true })
       return () => {
@@ -134,10 +134,10 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
   
 
     return (
-        <div className='h-screen flex flex-col font-poppins rounded-lg'>
-            <div className='mainbox dark:bg-black w-full h-screen rounded-lg flex flex-col lg:flex-row-reverse gap-5 p-1 max-w-7xl mx-auto font-poppins shadow-lg'>
+        <div className='h-screen w-full flex flex-col font-poppins rounded-lg'>
+            <div className='mainbox dark:bg-black w-full h-screen rounded-lg flex flex-col lg:flex-row-reverse gap-5 p-1 mx-auto font-poppins shadow-lg'>
                 {/* Right Sidebar */}
-                <div className='right w-full overflow-y-scroll lg:w-80 xl:w-96 hidden xl:block space-y-2 m-2'>
+                <div className='right overflow-y-scroll lg:w-80 xl:w-96 hidden xl:block space-y-2 m-2'>
                     {/* card to subscribe... */}
                     <div className='bg-white dark:bg-black rounded-xl flex flex-col gap-2 border p-4 border-gray-200 dark:border-gray-900 shadow-sm'>
                         <div className='flex item-center justify-between gap-3'>
@@ -196,7 +196,7 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
                     </div>
                 </div>
                 {/* Main Feed Area - Left Side */}
-                <div ref={feedSection} className='left relative flex-1 h-full overflow-y-scroll bg-white dark:bg-black rounded-xl'>
+                <div ref={feedSection} className='left relative flex-1 min-w-0 h-full overflow-y-scroll bg-white dark:bg-black rounded-xl'>
                   <div className="flex items-center justify-between sticky top-0 rounded-lg p-2 bg-white/70 dark:bg-black/70 backdrop-blur-md">
                     <div className='flex w-fit items-center font-bold justify-center gap-2 p-2 rounded-lg'>
                       <ImagesIcon size={40} />
@@ -211,10 +211,10 @@ const [followSuggestions, setfollowSuggestions] = useState<userCardProp[]>([]);
                         </button>
                     </div>
                   </div>
-                    <div className='px-1 flex flex-col gap-0'>
-                    {feedPosts.length > 0 && feedPosts.map((p) => (
+                  <div className='px-1 flex flex-col gap-0'>
+                    {feedPosts.length > 0 && feedPosts.map((p,idx) => (
                         <PostCard
-                            key={p.postid}
+                            key={ idx + 1 }
                             postId={p.postid}
                             fromPage={pageCategory}
                             avatar={p.avatar}

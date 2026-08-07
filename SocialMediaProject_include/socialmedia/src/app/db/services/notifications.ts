@@ -203,10 +203,18 @@ export const getNotificationsService = async ( username:string , page:number , p
       .skip(skip)
       .limit(pagesize);
 
-    const notificationData = await Promise.all(Notifications.map(async (notification) => {
+    const notificationData = (await Promise.all(Notifications.map(async (notification) => {
         // fetching some required data...
         const actorAccount = await accounts.findOne({ $and:[{ _id:notification.actorId },{ 'account.status':'ACTIVE' }] });
+
+        // checking actor account existence...
+        if (!actorAccount) {
+          console.log('Actor account not found !!');
+          return null ;
+        }
+
         const postInvolved = notification.postId ? await Post.findById(notification.postId) : null ;
+        const commentText = notification.comment?.trim() || '' ;
 
         const isFollowing = await follows.exists({ $and:[{ followerId: activeAcc._id },{ followingId: actorAccount._id }] })
         const followers = await follows.find({ followingId : actorAccount._id , isDeleted:false })
@@ -214,16 +222,6 @@ export const getNotificationsService = async ( username:string , page:number , p
 
         const posts = await Post.countDocuments({ authorId:actorAccount._id , isDeleted:false }) ;
 
-        // checking actor account existence...
-        if (!actorAccount) {
-          console.log('Actor account not found !!');
-          return null ;
-        }
-        // checking post existence...
-        if (!postInvolved) {
-          console.log('Post involved not found !!');
-          return null ;
-        }
         // returning data in required structure...
         return {
           id: notification._id.toString() ,
@@ -253,20 +251,18 @@ export const getNotificationsService = async ( username:string , page:number , p
           timestamp:new Date(notification.createdAt).toISOString(),
           isread: Boolean(notification.isRead),
           isliked: Boolean(notification.isLiked),
-          iscommented: notification.comment.trim() && notification.comment.length > 0 ,
-          commentText: notification.comment.trim() ? notification.comment : '',
-          post:{
+          comment: commentText || undefined,
+          isReplied: Boolean((notification as any).isReplied),
+          post: postInvolved ? {
               id: postInvolved._id.toString(),
-              thumbnailUrl: { url:postInvolved.mediaUrls[0].url , media_type:postInvolved.mediaUrls[0].media_type },
+              thumbnailUrl: postInvolved.mediaUrls?.[0] ? { url: postInvolved.mediaUrls[0].url , media_type:postInvolved.mediaUrls[0].media_type } : undefined,
               content: postInvolved.content,
-            },
+            } : undefined,
         };
       })
-    );
+    )).filter((n): n is NonNullable<typeof n> => n !== null);
 
-    return {
-        notifications: notificationData,hasMore
-      }
+    return NextResponse.json({ message:'Notifications successfully fetched !!' , notifications:notificationData , hasMore },{ status:200 });
 }
 
 export const markNotificationsReadService = async ( page:number , size:number) => {

@@ -422,8 +422,9 @@ export default function Notifications() {
       const notificationsApi = await axiosInstance.get(`/api/account/notifications?handle=${params?.username}&page=${Page}&pagesize=${pagesize}`);
       if (notificationsApi.status === 200) {
         const data = notificationsApi.data ;
-        setNotificationList((prev) => [...prev,...data.notifications]);
-        sethasMoreNotifications(data.hasMore);
+        const newNotifications = Array.isArray(data?.notifications) ? data.notifications : [];
+        setNotificationList((prev) => [...prev,...newNotifications]);
+        sethasMoreNotifications(typeof data?.hasMore === 'boolean' ? data.hasMore : false);
         setLoading(false);
       }
     } catch (error) {
@@ -507,7 +508,7 @@ export default function Notifications() {
                     <h2 className='text-xl font-bold text-gray-900 dark:text-white'>Suggestions</h2>
                   </div>
                   <div className='p-4'>
-                    {FollowSuggesstions.map(
+                    {Array.isArray(FollowSuggesstions) && FollowSuggesstions.length > 0 && FollowSuggesstions.map(
                       (usercard, index) =>
                         index + 1 <= suggesstionNum && (
                           <div key={index + 1} className='flex items-center justify-between'>

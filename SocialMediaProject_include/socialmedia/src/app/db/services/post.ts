@@ -421,9 +421,9 @@ export const getPostByIdService = async (postId: string) => {
                 reposts: repostsCount,
                 likes: likesCount,
                 views: viewsCount,
-                media: Array(post.mediaUrls).map(urlObj => ({ url:urlObj.url , media_type:urlObj.media_type })) || [],
+media: (post.mediaUrls ?? []).map((urlObj:any) => ({ url: urlObj?.url , media_type: urlObj?.media_type })) || [],
                 hashTags: post.hashTags || [],
-                mentions: Array(post.mentions).map((u:string)=> u.trim()),
+                mentions: Array.isArray(post.mentions) ? post.mentions.map((u:string)=> u.trim()) : [],
                 isPinned: false,
                 username: author.account?.name ,
                 handle: `@${author.username}`,
@@ -869,12 +869,12 @@ export const getBookmarkPostsService = async ({ Page , Size }:{ Page:number ; Si
             username: postOwner.account?.name,
             handle: `@${postOwner.username}`,
             bio: postOwner.account?.bio || '',
-            timestamp: new Date(postMarked.createdAt).toUTCString(),
+            postedAt: new Date(postMarked.createdAt).toUTCString(),
             content: postMarked.content,
-            media: Array(postMarked.mediaUrls).map(urlObj => ({ url:urlObj.url , media_type:urlObj.media_type })) || [],
+            mediaUrls: (postMarked.mediaUrls ?? []).map((urlObj: any) => ({ url: urlObj?.url , media_type: urlObj?.media_type })) || [],
             likes: likesCount,
             reposts: repostsCount,
-            replies: commentsCount,
+            comments: commentsCount,
             views: viewsCount,
             isPinned: !!isPinned,
             isHighlighted: !!isHighlighted,
@@ -888,7 +888,7 @@ export const getBookmarkPostsService = async ({ Page , Size }:{ Page:number ; Si
             followers: fmt(postOwner.followers) || '0',
             following: fmt(postOwner.following) || '0',
             hashTags: postMarked.hashTags || [],
-            mentions: Array(postMarked.mentions).map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()),
+            mentions: Array.isArray(postMarked.mentions) ? postMarked.mentions.map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()) : [],
             isFollowing: !!isFollowing,
             taggedLocation: postMarked.taggedLocation || [],
             poll: poll
@@ -910,13 +910,17 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
     const activeAcc = await accounts.findOne({ userId: user.id, 'account.Active': true, 'account.status': 'ACTIVE' });
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
+    // Normalize the username: strip the leading "@" (e.g. "@amritansh_coder" -> "amritansh_coder")
+    // Post links are built using the handle which includes "@", so the route param arrives with it.
+    const normalizedUsername = String(username).replace(/^@/, '').trim();
+
     // getting the details of main post...
     const pagePost = await Post.findOne({ _id: postId, isDeleted: false });
     if (!pagePost) {
         return NextResponse.json({ success: false, message: 'Post not found' }, { status: 404 });
     }
 
-    const author = await accounts.findOne({ $and:[{ _id:pagePost.authorId },{ username:username }] }); // getting the page specific account
+    const author = await accounts.findOne({ $and:[{ _id:pagePost.authorId },{ username:normalizedUsername }] }); // getting the page specific account
     if (!author) {
         return NextResponse.json({ success: false, message: 'Author not found' }, { status: 404 });
     }
@@ -964,9 +968,9 @@ export const getPostPageEssentialService = async ({ postId, username }: { postId
         reposts: repostsCount,
         likes: likesCount,
         views: viewsCount,
-        mediaUrls: Array(pagePost.mediaUrls).map(urlObj => ({ url:urlObj.url , media_type:urlObj.media_type })) || [],
+        mediaUrls: (pagePost.mediaUrls ?? []).map((urlObj:any) => ({ url: urlObj?.url, media_type: urlObj?.media_type })) || [],
         hashTags: pagePost.hashTags || [],
-        mentions: Array(pagePost.mentions).map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()),
+        mentions: Array.isArray(pagePost.mentions) ? pagePost.mentions.map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()) : [],
         userliked: !!userLiked,
         isPinned: !!isPinned,
         isHighlighted: !!isHighlighted,
@@ -1269,7 +1273,7 @@ export const getExplorePostsService = async ({ hashtag , page , size } : { hasht
             username: postOwner.name,
             handle: `@${postOwner.username}`,
             bio: postOwner.bio ,
-            timestamp: new Date(post.createdAt).toUTCString(),
+            postedAt: new Date(post.createdAt).toUTCString(),
             content: post.content,
             mediaUrls: post.mediaUrls?.map((urlObj:any) => ({ url: urlObj?.url, media_type: urlObj?.media_type })),
             likes: likesCount,

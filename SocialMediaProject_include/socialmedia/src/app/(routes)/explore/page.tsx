@@ -90,13 +90,12 @@ export default function Explore() {
   const autoHeightGap:number = 400 ;
   const hashtopic = searchparam.get('t') ;
   const { Account } = useActiveAccount() ;
-  const [Page, setPage] = useState<number>(1) ;
   const [hasExplore, sethasExplore] = useState<boolean>(true);
   const pageCategory : "feed" | "profile" | "direct" | "explore" = "explore" ;
 
   const [openSettings, setopenSettings] = useState(false);
   const [loadingPosts, setloadingPosts] = useState<boolean>(false);
-  const [loadingsuggestions, setloadingsuggestions] = useState<boolean>(true);
+  const [loadingsuggestions, setloadingsuggestions] = useState<boolean>(false);
   const [loadingTrends, setloadingTrends] = useState<boolean>(false);
   const [LocationSetting, setLocationSetting] = useState(false);
   // const [hpninPopUp, sethpninPopUp] = useState(0);
@@ -104,6 +103,8 @@ export default function Explore() {
   const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
 
   const leftSectionRef = useRef<HTMLDivElement | null>(null);
+  const pageRef = useRef<number>(1); // stable page counter for pagination...
+  const fetchingRef = useRef<boolean>(false); // guard against duplicate/concurrent fetches...
 
   const [suggestionAcc,setsuggestionAcc] =useState<userCardProp[]>([
      {
@@ -188,6 +189,7 @@ export default function Explore() {
       
       // function fetching trendings , follow-suggestions , news...
       async function getOtherExploreInfo() {
+        setloadingsuggestions(true);
         setloadingTrends(true);
         const otherapi = await axiosInstance.post('/api/explore');
         if (otherapi.status === 200) {
@@ -200,33 +202,39 @@ export default function Explore() {
 
       
       // function to get posts...
-     const functionFetchPosts = useCallback( async (hashtag?: string) => {
+     const functionFetchPosts = async (hashtag?: string) => {
+        if (fetchingRef.current) return;
+        fetchingRef.current = true;
+
         try {
           setloadingPosts(true);
-          const postapi = await axiosInstance.get(`/api/explore?hashtag=${encodeURIComponent(hashtag ?? '')}&size=${pagesize}&page=${Page}`);
+          const postapi = await axiosInstance.get(`/api/explore?hashtag=${encodeURIComponent(hashtag ?? '')}&size=${pagesize}&page=${pageRef.current}`);
 
           if (postapi.status === 200) {
             setexplorePosts((prev) => [...prev,...postapi.data.explore]);
             sethasExplore(postapi.data.hasNext);
+            pageRef.current += 1; // increase page for the next pagination request...
           }
         } catch (err) {
           console.error('Failed to fetch explore posts:', err);
         } finally {
           setloadingPosts(false);
+          fetchingRef.current = false;
         }
-      },[Page])
+     }
       
       useEffect(() => {
         getOtherExploreInfo() ;
+        // reset posts & pagination whenever the hashtag query param changes
+        setexplorePosts([]);
+        pageRef.current = 1;
         if (hashtopic) {
           const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
             functionFetchPosts(decodedT); // getting explore posts 
-            setPage(Page + 1);
           } else {
             functionFetchPosts() ;
-            setPage(Page + 1);
         }
-      }, [hashtopic,functionFetchPosts,Page])
+      }, [hashtopic])
 
     // fetching posts by pagination...
     useEffect(() => {
@@ -240,21 +248,19 @@ export default function Explore() {
            if (hashtopic) {
             const decodedT = decodeURIComponent(String(hashtopic)).substring(1); // pattern #something
             functionFetchPosts(decodedT); // getting explore posts 
-            setPage(Page + 1);
           } else {
             functionFetchPosts() ;
-            setPage(Page + 1);
           }
         }
        }
        // calling scroll function...
-       handleScroll() ;
+      //  handleScroll() ;
       
-       exploreSection.addEventListener('scroll', handleScroll, { passive: true })
-       return () => {
+      exploreSection.addEventListener('scroll', handleScroll, { passive: true })
+      return () => {
         exploreSection.removeEventListener('scroll', handleScroll)
       }
-   }, [autoHeightGap,hasExplore,explorePosts.length,Page,hashtopic,functionFetchPosts])
+   }, [autoHeightGap,hasExplore,explorePosts.length,hashtopic,functionFetchPosts])
       
   // function for showing more suggestions...
   const handleSuggesstionShow = () => {
@@ -274,7 +280,7 @@ export default function Explore() {
 
   return (
     <div className='h-fit flex flex-row-reverse font-poppins overflow-y-hidden rounded-lg dark:bg-black'>
-      <div className='mainbox hidden dark:bg-black w-fit max-h-screen rounded-lg xl:flex flex-col lg:flex-row-reverse gap-4 p-4 max-w-7xl mx-auto font-poppins'>
+      <div className='mainbox hidden dark:bg-black w-fit max-h-screen rounded-lg xl:flex flex-col lg:flex-row-reverse p-2 max-w-7xl mx-auto font-poppins'>
         <div
           className={`right w-fit overflow-y-auto no-scrollbar lg:w-80 xl:w-96 space-y-2 overscroll-contain sticky top-0`}
         >

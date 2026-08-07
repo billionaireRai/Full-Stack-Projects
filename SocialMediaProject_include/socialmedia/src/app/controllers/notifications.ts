@@ -14,8 +14,7 @@ export const getNotificationsController = asyncErrorHandler( async (request:Next
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:404 });
     }
     
-    const data = await getNotificationsService(incomingUsername,page,size);
-    return NextResponse.json({ message:'Notifications successfully fetched !!' , notifications:data },{ status:200 }); 
+    return await getNotificationsService(incomingUsername,page,size);
 })
 
 export const markNotificationsReadController = asyncErrorHandler( async (request:NextRequest) => {

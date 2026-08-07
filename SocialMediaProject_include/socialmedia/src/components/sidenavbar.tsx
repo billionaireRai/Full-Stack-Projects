@@ -12,11 +12,13 @@ import useCreatePost from '@/app/states/createpost'
 import useSwitchAccount from '@/app/states/swithaccount'
 import { usePathname } from 'next/navigation'
 import LogoutModal from './logoutmodal';
+import RequireSubscription from './requireSubscription';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useTheme } from 'next-themes'
-import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, MoreVerticalIcon, List, BadgeQuestionMark, PlusCircle, OptionIcon, CalendarClock } from 'lucide-react'
+import { HomeIcon, SearchIcon, BellIcon, MessageCircleIcon, UserPlusIcon, UserIcon, BookmarkIcon, DollarSignIcon, SettingsIcon, LogOutIcon, Sun, Moon, LayoutDashboard, MoreVerticalIcon, List, BadgeQuestionMark, PlusCircle, OptionIcon, CalendarClock, CircleDollarSign } from 'lucide-react'
 import useMessageCount from '@/app/states/unreadmessages';
 import { MdDrafts, MdGroups } from 'react-icons/md';
+import Earningspop from './earningspop';
 
 
 export default function SideNavbar() {
@@ -24,8 +26,10 @@ export default function SideNavbar() {
   const { User } = useUserInfo();
   const { Account } = useActiveAccount();
   const [DotClick, setDotClick] = useState<boolean>(false);
+  const [isPop, setisPop] = useState(false);
   const { setisPopOpen } = useSwitchAccount() ; // initializing the switchaccount state...
   const [isOpen, setIsOpen] = useState<boolean>(true)
+  const [EarningsPop, setEarningsPop] = useState<boolean>(false);
   const [loguOutModal, setloguOutModal] = useState<boolean>(false);
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
@@ -35,6 +39,7 @@ export default function SideNavbar() {
   // More dropdown (top list)
   const [isMoreOpen, setIsMoreOpen] = useState<boolean>(false)
 
+  const earningCrieteria = ['Pro','Creator','Premium'] ;
   const shouldShowSidebar =
     !pathname.startsWith('/auth/') && pathname !== '/' && !pathname.endsWith('/create-account') && !pathname.startsWith('/embed');
 
@@ -75,6 +80,14 @@ export default function SideNavbar() {
     setMounted(true)
   }, [])
 
+  function handleEarningToggle() {
+    if (Account.account?.plan && earningCrieteria.includes(Account.account?.plan)) {
+      setEarningsPop(true);
+    } else {
+      setisPop(true);
+    }
+  }
+
   return (
     <>
       {/* Sidebar */}
@@ -82,6 +95,7 @@ export default function SideNavbar() {
         <aside
           className={`fixed top-0 left-0 h-screen z-40 font-poppins transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:relative lg:top-auto lg:left-auto lg:translate-x-0 lg:shrink-0
           w-72 bg-white/80 dark:bg-black backdrop-blur-md
           border-none outline-none
           rounded-none`}
@@ -89,11 +103,9 @@ export default function SideNavbar() {
           <div className="flex flex-col h-full p-3">
             <div className="flex flex-row items-center justify-between">
               {/* Logo */}
-              <Tooltip>
                 <Link href="/" className="flex w-fit items-center justify-start mb-4">
-                  <TooltipTrigger asChild>
                     <div className="p-1 rounded-full hover:bg-yellow-50 dark:hover:bg-white/5 transition-colors">
-                      <img
+                      <Image
                         className="rounded-full cursor-pointer dark:invert"
                         width={90}
                         height={45}
@@ -101,10 +113,7 @@ export default function SideNavbar() {
                         alt="logo"
                       />
                     </div>
-                  </TooltipTrigger>
                 </Link>
-                <TooltipContent>Briezl.com</TooltipContent>
-              </Tooltip>
 
               {mounted && (
                 <div className="themetoggler border-none flex items-center justify-end">
@@ -324,7 +333,7 @@ export default function SideNavbar() {
               </button>
 
               {/* Profile dropdown trigger */}
-              <div className="dropdown-container flex items-center relative gap-2 my-4 p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-black">
+              <div onClick={() => { setDotClick(true) }} className="dropdown-container flex items-center relative gap-2 my-4 p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-black">
                 <Image
                   src={Account.account?.avatarUrl || '/images/default-profile-pic.png'}
                   height={40}
@@ -332,8 +341,7 @@ export default function SideNavbar() {
                   alt="profile"
                   className="rounded-full w-13 h-13"
                 />
-                <Link
-                  href={`/${Account.decodedHandle}`}
+                <button
                 >
                   <span className="flex items-center font-medium text-gray-900 dark:text-gray-100 gap-1">
                     {Account.name}
@@ -349,7 +357,7 @@ export default function SideNavbar() {
                   <span className="text-gray-700 dark:text-gray-400 text-xs font-semibold">
                     {Account.decodedHandle}
                   </span>
-                </Link>
+                </button>
                 <MoreVerticalIcon
                   onClick={() => { setDotClick(!DotClick) }}
                   className={`ml-auto cursor-pointer rounded-full p-1 w-7 h-7 text-gray-600 dark:text-gray-300 ${
@@ -358,28 +366,36 @@ export default function SideNavbar() {
                 />
               </div>
               
+              
               {/* Dropdown */}
               {DotClick && (
                 <motion.div                         
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}  
-                  className="absolute left-0 bottom-0 sm:left-72 sm:bottom-10 w-fit mt-2 p-1 bg-white dark:bg-[#000000] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-[60] dark:shadow-lg dark:shadow-black/50 backdrop-blur-sm">
-                  <div className="p-1 font-medium">
+                  initial={{ opacity: 0, y: 14, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -14, scale: 0.96 }}
+                  transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+                  className="dropdown-container absolute left-0 bottom-0 m-1 w-72 p-2 bg-white/95 dark:bg-black/95 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/60 z-[55] backdrop-blur-xl overflow-hidden">
                     <Link  
                      href={`/${Account.decodedHandle}/create-account?userId=${User.userId}`}
-                     className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">
+                     className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-950/80 transition-all duration-200 flex items-center gap-3 group">
                       <UserPlusIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
                       <span className="font-medium">Add new account</span>
                     </Link>
-                    <div className="my-1 border-t border-gray-200 dark:border-gray-800"></div>
                     <button
                     onClick={() => { setDotClick(false); setisPopOpen(true) }}
-                    className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-all duration-200 flex items-center gap-3 group">
+                    className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-950/80 transition-all duration-200 flex items-center gap-3 group">
                       <UserIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
                       <span className="font-medium">Switch another account</span>
                     </button>
-                    <div className="my-1 border-t border-gray-200 dark:border-gray-800"></div>
+                    <button
+                    onClick={() => { handleEarningToggle() }}
+                    className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-950/80 transition-all duration-200 flex items-center justify-between gap-3 group">
+                      <div className='flex items-center justify-center gap-3 w-fit'>
+                        <CircleDollarSign className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
+                        <span className="font-medium">Your earnings</span>
+                      </div>
+                      <Image src='/images/yellow-tick.png' width={18} height={18} alt="verified" className="object-contain" />
+                    </button>
                     <button
                      onClick={() => { setloguOutModal(true)  }}
                      className="w-full rounded-lg cursor-pointer text-left px-4 py-3 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-200 flex items-center gap-3">
@@ -388,8 +404,7 @@ export default function SideNavbar() {
                         <span className="font-medium">Logout</span><span className="text-red-500 font-semibold dark:text-red-500 truncate max-w-full">{Account.decodedHandle}</span>
                       </div>
                     </button>
-                  </div>
-                </motion.div>
+                 </motion.div>
               )}
             </div>
           </div>
@@ -416,6 +431,13 @@ export default function SideNavbar() {
         </TooltipTrigger>
         <TooltipContent>Open side bar</TooltipContent>
       </Tooltip>
+      
+      {/* Earning stats pop modal */}
+      {EarningsPop && (
+        <Earningspop onClose={() => { setEarningsPop(false) }} />
+      )}
+
+      { isPop && <RequireSubscription isOpen={isPop} onClose={() => { setisPop(false) }} planname='Pro'  />}
 
       {/* popping logout modal for verification */}
       {loguOutModal && (

@@ -1008,15 +1008,21 @@ export const getBookmarkSuggestionsService = async () => {
     }));
     const filteredMutualFriendAccounts = mutualFriendAccounts.filter(acc => acc.id && !blockedIds.includes(acc.id) && !acc.IsFollowing );
 
-    // Combine and deduplicate suggestions
-    const allSuggestions = [new Set([...filteredSuggestedFromMarked, ...filteredMutualFriendAccounts])];
+    // Combine and deduplicate suggestions (deduplicated by account id)...
+    const combinedSuggestions = [...filteredSuggestedFromMarked, ...filteredMutualFriendAccounts];
+    const suggestionMap = new Map<string, any>();
+    combinedSuggestions.forEach((acc: any) => {
+        if (acc && acc.id && !suggestionMap.has(acc.id)) {
+            suggestionMap.set(acc.id, acc);
+        }
+    });
+    const allSuggestions = Array.from(suggestionMap.values());
 
     // sorting the array based on subscription level...
     const planOrder: Record<Plan, number> = { "Free": 0, "Pro": 1, "Creator": 2, "Premium": 3 };
 
-    const accountsWithSubs = Array.from(allSuggestions).map((acc: any) => {
-        // const account = accounts.findOne({ username: acc.decodedHandle, 'account.status': 'ACTIVE' });
-        const plan: Plan = (acc.account.plan as Plan) || 'Free';
+    const accountsWithSubs = allSuggestions.map((acc: any) => {
+        const plan: Plan = (acc.account?.plan as Plan) || 'Free';
         return { acc, plan, isVerified: acc.account?.isVerified || false };
     });
 

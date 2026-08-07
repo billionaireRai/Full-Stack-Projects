@@ -2,7 +2,7 @@ import { NextRequest , NextResponse } from "next/server";
 import asyncErrorHandler from "@/app/middleware/errorMiddleware";
 import { userFollowService , userReportService , newAccountCreationService , fetchingAccountsService , switchAccountService } from "../db/services/follow";
 import { accountFetchingService ,profileSpecificDataService , profileUpdateService , profileDeletionService, blockingAccountService, getBookmarkSuggestionsService } from "@/app/db/services/user";
-import { gettingAccountService } from "../db/services/account";
+import { getAnAccountService, gettingAccountService } from "../db/services/account";
 import axios from "axios";
 
 export interface reportInfoType {
@@ -34,6 +34,17 @@ export const getUserAccountController = asyncErrorHandler(async (request:NextReq
     if (data instanceof NextResponse) return data;
 
     return NextResponse.json({ message:'profile fetch successfull !!',accountData:data.formatedOne , blocked:data.isBlocked },{ status:200 });
+})
+
+export const getAnAccountController = asyncErrorHandler(async (request:NextRequest) => {
+    const { handle } = await request.json() ; // extracting handle...
+
+    if (!handle) {
+        console.log("Target account handle missing !!");
+        return NextResponse.json({ message:'@username missing !!' },{ status:400 });
+    }
+     
+    return await getAnAccountService(handle);
 })
 
 export const getProfileSpecificDataController = asyncErrorHandler(async (request: NextRequest) => { 

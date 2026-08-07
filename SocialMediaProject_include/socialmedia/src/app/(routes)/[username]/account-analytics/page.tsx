@@ -157,131 +157,15 @@ export default function UserAnalytics() {
   const joinedDate = new Date('01-05-2020') ;  // will pass argument as 'Account.account?.joinDate'
   const router = useRouter() ; // initializing router hook...
 
-  const [viewersSeries, setviewersSeries] = useState<VisitorSeriesItem[]>([
-    { name: "Jan", viewers: 22000 },
-    { name: "Feb", viewers: 25000 },
-    { name: "Mar", viewers: 32000 },
-    { name: "Apr", viewers: 54000 },
-    { name: "May", viewers: 60000 },
-    { name: "Jun", viewers: 30000 },
-    { name: "Jul", viewers: 6000 },
-    { name: "Aug", viewers: 29000 },
-    { name: "Sep", viewers: 70000 },
-    { name: "Oct", viewers: 100000 },
-    { name: "Nov", viewers: 80000 },
-    { name: "Dec", viewers: 55000 },
-  ]);
-  const [deviceBreakdown, setDeviceBreakdown] = useState<BreakdownItem[]>([
-    { name: "Desktop", value: 23 },
-    { name: "Mobile", value: 44 },
-    { name: "Tablet", value: 33 },
-  ]);
-  const [genderBreakdown, setGenderBreakdown] = useState<BreakdownItem[]>([
-    { name: "Male", value: 52 },
-    { name: "Female", value: 44 },
-    { name: "Other", value: 4 },
-  ]);
-  const [recentUploads, setRecentUploads] = useState<RecentUploadItem[]>(
-    [
-        {
-          num: 1,
-          id:"IBFI(@$HFE@_#(",
-          title: "This incredible natural attraction is one of the must-visits",
-          date: "22-02-2023",
-          views: 837748,
-          likes: 24467,
-          comments: 2578,
-        },
-        {
-          num: 2,
-          id:"@(*RH@EF)_E)F",
-          title: "The Skywalk, a glass leading out over the valley",
-          date: "24-02-2023",
-          views: 384753,
-          likes: 87765,
-          comments: 4766,
-        },
-        {
-          num: 3,
-          id:"NFD_@DEMIF$@",
-          title: "Summer is the most popular time to visit these beaches",
-          date: "26-02-2023",
-          views: 296087,
-          likes: 86298,
-          comments: 3498,
-        },
-        {
-          num: 4,
-          id:"NFBU@EIF)#femi2",
-          title: "The White House is the official residence for the President",
-          date: "28-02-2023",
-          views: 876753,
-          likes: 98365,
-          comments: 7876,
-        },
-      ]
-  );
-  const [topCountries, setTopCountries] = useState<TopCountryItem[]>(
-     [
-        { country: "United States", percent: 34 },
-        { country: "India", percent: 21 },
-        { country: "Brazil", percent: 12 },
-        { country: "UK", percent: 8 },
-        { country: "Germany", percent: 5 },
-      ]
-  );
-  const [topPosts, setTopPosts] = useState<TopPostItem[]>(
-    [
-       {
-          num:1,
-          id: "p1",
-          title: "Epic Sunrise Timelapse",
-          views: 1200000,
-          likes: 900000,
-          comments: 9.2,
-        },
-        {
-          num:2,
-          id: "p2",
-          title: "Street Food Tour",
-          views: 840000,
-          likes: 600000,
-          comments: 7.1,
-        },
-        {
-          num:3,
-          id: "p3",
-          title: "DIY Home Gym Setup",
-          views: 610000,
-          likes: 480000,
-          comments: 6.5,
-        },  
-    ]
-  );
-  const [growthSeries, setGrowthSeries] = useState<GrowthSeriesItem[]>( 
-    [
-      { name: "Day 1", value: 120 },
-      { name: "Day 2", value: 140 },
-      { name: "Day 3", value: 180 },
-      { name: "Day 4", value: 210 },
-      { name: "Day 5", value: 150 },
-      { name: "Day 6", value: 600 },
-      { name: "Day 7", value: 300 }
-    ]);
-  const [interactionTypes, setInteractionTypes] = useState<InteractionTypeItem[]>(
-    [ 
-      { name: "Likes", value: 62 },
-      { name: "Comments", value: 50 },
-      { name: "Saves", value: 5 },
-      { name: "Shares", value: 20 }
-    ]
-  );
-  const [contentPerformance, setContentPerformance] = useState<BreakdownItem[]>([
-    { name: "Videos", value:122 },
-    { name: "Images",  value:233 },
-    { name: "Raws", value:10 },
-    { name: "Autos", value:2 }
-  ]);
+  const [viewersSeries, setviewersSeries] = useState<VisitorSeriesItem[]>([]);
+  const [deviceBreakdown, setDeviceBreakdown] = useState<BreakdownItem[]>([]);
+  const [genderBreakdown, setGenderBreakdown] = useState<BreakdownItem[]>([]);
+  const [recentUploads, setRecentUploads] = useState<RecentUploadItem[]>([]);
+  const [topCountries, setTopCountries] = useState<TopCountryItem[]>([]);
+  const [topPosts, setTopPosts] = useState<TopPostItem[]>([]);
+  const [growthSeries, setGrowthSeries] = useState<GrowthSeriesItem[]>( []);
+  const [interactionTypes, setInteractionTypes] = useState<InteractionTypeItem[]>([]);
+  const [contentPerformance, setContentPerformance] = useState<BreakdownItem[]>([]);
   const timeArray = [{value:"7d",label:'7 days', priority:"1"},{value:"30d",label:'30 days', priority:"2"},{value:"90d",label:'90 days', priority:"3"},{value:"1y",label:'1 year', priority:"4"},{value:"2y",label:'2 years', priority:"5"}]
   
 
@@ -333,8 +217,9 @@ export default function UserAnalytics() {
     return String(n); // number is in hundreds...
   };
 
-  // function to get analytics data...
+// function to get analytics data...
   const functionToGetAnalytics = useCallback(async() => {
+     if (!Account?.decodedHandle) return;
      const analyticsApi = await axiosInstance.post('/api/dashboard',{ handle:Account.decodedHandle , pastTime:timeRange.value , year:Year });
      if (analyticsApi.status === 200) {
       setOverview(analyticsApi.data.analytics.overview);
@@ -349,11 +234,13 @@ export default function UserAnalytics() {
       setContentPerformance(analyticsApi.data.analytics.contentperformance);
       
      }
-    },[Account.decodedHandle,timeRange,Year])
+    },[Account?.decodedHandle,timeRange,Year])
 
   // useffect for loading data from backend logic...
   useEffect(() => {
     async function fetchData() {
+      // Only fetch once the account handle is available (hydration completed).
+      if (!Account?.decodedHandle) return;
       setLoading(true);
       try {
         await functionToGetAnalytics();
@@ -362,7 +249,7 @@ export default function UserAnalytics() {
       }
     }
     fetchData();
-  }, [timeRange,Year,functionToGetAnalytics]);
+  }, [timeRange,Year,functionToGetAnalytics,Account?.decodedHandle]);
 
   // logic for advance analytics...
   const kpis = useMemo(() => {
@@ -475,7 +362,7 @@ export default function UserAnalytics() {
 
   return (
   <div className='h-full flex flex-col font-poppins'>
-    <div className="h-fit p-4 bg-white dark:bg-black text-gray-900 dark:text-white font-poppins rounded-lg shadow-md">
+    <div className="h-full overflow-y-auto p-4 bg-white dark:bg-black text-gray-900 dark:text-white font-poppins rounded-lg shadow-md">
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-4">

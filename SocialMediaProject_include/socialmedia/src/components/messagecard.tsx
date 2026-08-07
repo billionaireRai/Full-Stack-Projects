@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { EncryptedMessage, messageDecryptionTopLevel ,importRespectiveKey } from '@/lib/encryption'
 import useActiveAccount from '@/app/states/useraccounts'
 import { useTheme } from 'next-themes'
-import useMessageSocket from '@/app/hooks/useMessageSocket'
+// import useMessageSocket from '@/app/hooks/useMessageSocket'
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react'
 import { AtSign, CheckCircle, Eraser, Flag, Folder, Images, Lock, LockOpenIcon, Mic, MicOff, Music, Paperclip, PinIcon, PinOff, SearchIcon, SendIcon, Smile, Trash, Video, Bell, BellOff, X, Ban, User, MessageCirclePlus, CameraIcon, LockKeyholeIcon, MessageCircleMore, MessageCircleOff, LucideArrowBigDown } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -79,16 +79,21 @@ interface MessageCardProps {
 export default function MessageCard({ chatCardDetails, openBlockPop, openReportPop, handleAddChat, updateCardDetail, openDeletePop , muteToggleAction , pinToggleAction }: MessageCardProps) {
   const { resolvedTheme } = useTheme() ;
   const { Account } = useActiveAccount();
-  const privatekey = localStorage.getItem('privatekey') ;
-  const { messages, addMessages } = useActiveChatMessages() ;
-  const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
+  // const privatekey = localStorage.getItem('privatekey') ;
+  const privatekey = 'xyz' ;
+  const { messages, addMessages, clearMessages } = useActiveChatMessages() ;
+  // const { connectionStatus , sendMessage } = useMessageSocket(chatCardDetails)
 
   const heightGap = 200 ;
   const messageSize = 15 ;
-  const [backPage, setbackPage] = useState<number>(1);
   const [hasMoreMessages, sethasMoreMessages] = useState<boolean>(true);
   const [loadingMsgs, setloadingMsgs] = useState<boolean>(false);
   const msgsection = useRef<HTMLDivElement | null>(null)
+  // paginations variables...
+  const pageRef = useRef<number>(1)
+  const loadingRef = useRef<boolean>(false)
+  const updateCardDetailRef = useRef(updateCardDetail)
+  updateCardDetailRef.current = updateCardDetail
 
   const imageRef = useRef<HTMLInputElement | null>(null)
   const videoRef = useRef<HTMLInputElement | null>(null)
@@ -161,9 +166,9 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     if (!messages.length) return ;
     
     handleMsgBottomScroll();
-    updateCardDetail(messages[messages.length - 1].text, messages[messages.length - 1].timestamp)
+    updateCardDetailRef.current(messages[messages.length - 1].text, messages[messages.length - 1].timestamp)
     
-  }, [lastMessageKey,updateCardDetail,messages])
+  }, [lastMessageKey,messages])
 
   // function for decrypting a page message...
   async function convertPlainMsgs(encryptedMsgs: messageReturnedType[],privateKey:CryptoKey): 
@@ -207,29 +212,39 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   // function for fetching messages...
   const fetchMessagesForPage = useCallback( async() => {
     if (!privatekey) return ;
+    if (loadingRef.current) return ; // guard against concurrent requests
+    if (!hasMoreMessages) return ;
+
+    loadingRef.current = true ;
     setloadingMsgs(true);
     try {
-      const messageApi = await axiosInstance.post('/api/chat/messages',{ page:backPage , size:messageSize , convid:chatCardDetails?.id });
+      const messageApi = await axiosInstance.post('/api/chat/messages',{ page:pageRef.current , size:messageSize , convid:chatCardDetails?.id });
       const privKey = await importRespectiveKey(privatekey,'private') ;
       if (messageApi.data.success && messageApi.status === 200) {
         const plainMsgs = await convertPlainMsgs(messageApi.data.messages,privKey);
         const structuredMessages = getMessageInStructure(plainMsgs);
         addMessages(structuredMessages);
         sethasMoreMessages(messageApi.data.hasMore);
-        setloadingMsgs(false);
+        pageRef.current = pageRef.current + 1 ;
       }
     } catch (error) {
       console.log("An Error Occured : ",error);
-      setloadingMsgs(false);
     } finally {
+      loadingRef.current = false ;
       setloadingMsgs(false);
     }
-  },[chatCardDetails?.id,backPage,addMessages,getMessageInStructure,privatekey])
+  },[chatCardDetails?.id,hasMoreMessages,addMessages,getMessageInStructure,privatekey])
 
+  // load the first page only when the active chat changes...
   useEffect(() => {
-    fetchMessagesForPage();
-    setbackPage(backPage + 1);
-  }, [backPage,fetchMessagesForPage])
+    // reset pagination & messages for the newly opened chat...
+    pageRef.current = 1 ;
+    sethasMoreMessages(true);
+    clearMessages();
+    if (chatCardDetails?.id) {
+      fetchMessagesForPage();
+    }
+  }, [chatCardDetails?.id, fetchMessagesForPage, clearMessages])
   
   
   // for fetching older messages...
@@ -241,7 +256,6 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
       // scrolled near the top...
       if (section.scrollTop <= heightGap && hasMoreMessages) {
         fetchMessagesForPage()
-        setbackPage(backPage + 1);
       }
     }
 
@@ -252,7 +266,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     return () => {
       section.removeEventListener('scroll', handleScroll);
     }
-  }, [heightGap,hasMoreMessages,messages.length,fetchMessagesForPage,backPage])
+  }, [heightGap,hasMoreMessages,messages.length,fetchMessagesForPage])
 
 
 
@@ -276,7 +290,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
   }
 
   const handleSendMessage = async (_msg: string) => {
-    if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
+    // if (!_msg.trim() || !(connectionStatus === 'connected')) return ;
 
     const trimmedmsg = _msg.trim() ;
     // instant message push UI
@@ -294,7 +308,7 @@ export default function MessageCard({ chatCardDetails, openBlockPop, openReportP
     setmessageText('')
 
     try {
-      await sendMessage({ message: trimmedmsg , mentions:mentions , mediaFiles:MediaFiles });
+      // await sendMessage({ message: trimmedmsg , mentions:mentions , mediaFiles:MediaFiles });
       // clearing local states after sending message...
       setmentions([])
       setMediaFiles([])

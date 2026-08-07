@@ -9,9 +9,19 @@ import AccountSearch from "./accountsearch";
 import usePoll, { pollInfoType } from "@/app/states/poll";
 import AccountPoll from "./accountpoll";
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import useActiveAccount from "@/app/states/useraccounts";
-import { MoreHorizontalIcon, UserPlusIcon, LucideGlobe, X, LocateFixed, Edit3Icon } from 'lucide-react';
+import {
+  MoreHorizontalIcon,
+  UserPlusIcon,
+  Globe,
+  X,
+  Smile,
+  MapPin,
+  Loader2,
+  ChevronDown,
+  MessagesSquareIcon
+} from 'lucide-react';
 import { TooltipContent, TooltipTrigger, Tooltip } from "./ui/tooltip";
 import CreatePoll from "./createpoll";
 import LocationSearch from "./locationsearch";
@@ -27,7 +37,7 @@ interface EditPostPopProps {
   initialMedia: mediaType[];
   initialMentions: string[];
   initialLocations: { text: string; coordinates: number[] }[];
-  initialPoll?: pollInfoType ; 
+  initialPoll?: pollInfoType;
   onClose: () => void;
 }
 
@@ -43,7 +53,8 @@ export default function EditPostPop({
   const maxPostLength = 100;
   const [post, setPost] = useState(initialContent);
   const [DisablePostButton, setDisablePostButton] = useState<boolean>(false);
-  const { poll , resetPoll } = usePoll() ;
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const { poll, resetPoll } = usePoll();
   const { Account } = useActiveAccount();
   const { resolvedTheme } = useTheme();
   const [showEmojiPicker, setshowEmojiPicker] = useState<boolean>(false);
@@ -56,6 +67,7 @@ export default function EditPostPop({
   const imageRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const gifRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [InitialMedia, setInitialMedia] = useState<mediaType[]>(initialMedia.filter(url => url.url && url.url.trim() !== ''));
   const [imageArr, setimageArr] = useState<string[]>([]);
   const [videoArr, setvideoArr] = useState<string[]>([]);
@@ -66,93 +78,49 @@ export default function EditPostPop({
   const [MentionedTo, setMentionedTo] = useState<string[]>(initialMentions);
   const [AddLocation, setAddLocation] = useState<{ text: string; coordinates: number[] }[]>(initialLocations);
 
-  // Close reply options when clicking outside...
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [post]);
+
+  // Close modals when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (openReplyOptions && !(event.target as Element).closest('.reply-dropdown-container')) {
-        setopenReplyOptions(false)
+      if (openOptions && !(event.target as Element).closest('.dropdown-container')) {
+        setopenOptions(false);
       }
-    }
-
-    if (openReplyOptions) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [openReplyOptions])
-
-  // Close mobile emoji picker when clicking outside...
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (showEmojiPicker && !(event.target as Element).closest('.emoji-picker')) {
+      if (openReplyOptions && !(event.target as Element).closest('.reply-dropdown-container')) {
+        setopenReplyOptions(false);
+      }
+      if (showEmojiPicker && !(event.target as Element).closest('.emoji-picker-container')) {
         setshowEmojiPicker(false);
       }
-    };
-
-    if (showEmojiPicker) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showEmojiPicker]);
-
-  // Close tag someone modal when clicking outside...
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
       if (showTagSomeone && !(event.target as Element).closest('.tag-search-modal')) {
         setshowTagSomeone(false);
       }
-    };
-
-    if (showTagSomeone) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showTagSomeone]);
-
-  // Close createpoll modal when clicking outside...
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
       if (showPollModal && !(event.target as Element).closest('.create-poll')) {
         setshowPollModal(false);
       }
-    };
-
-    if (showPollModal) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showPollModal]);
-
-  // Close location search modal when clicking outside...
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
       if (showLocationSearchModal && !(event.target as Element).closest('.location-search')) {
         setshowLocationSearchModal(false);
       }
     };
 
-    if (showLocationSearchModal) {
+    if (openOptions || openReplyOptions || showEmojiPicker || showTagSomeone || showPollModal || showLocationSearchModal) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showLocationSearchModal]);
+  }, [openOptions, openReplyOptions, showEmojiPicker, showTagSomeone, showPollModal, showLocationSearchModal]);
 
   // post update logic here...
   const handlePostUpdate = async () => {
+    if (!post.trim()) return;
+    setIsUpdating(true);
     const loadingToast = toast.loading('updating your post...');
     try {
       const formData = new FormData();
@@ -176,24 +144,16 @@ export default function EditPostPop({
 
       if (postUpdateApi.status === 200) {
         toast.dismiss(loadingToast);
-        // onClose();
         toast.success('Post updated successfully!');
-        // Reset states if needed
-        // setimageArr([]);
-        // setImageFiles([]);
-        // setvideoArr([]);
-        // setVideoFiles([]);
-        // setMentionedTo([]);
-        // setgifArr([]);
-        // setGifFiles([]);
-        // setAddLocation([]);
-        // setPost('');
-        // resetPoll();
+        onClose();
+        resetPoll();
       }
     } catch (error) {
       toast.dismiss(loadingToast);
       console.log('An Error Occurred: ', error);
       toast.error('Failed to update post. Please try again.');
+    } finally {
+      setIsUpdating(false);
     }
   }
 
@@ -227,563 +187,655 @@ export default function EditPostPop({
         setGifFiles(prev => [...prev, file]);
       }
     }
+    e.target.value = '';
   }
 
+  const charPercentage = (post.length / maxPostLength) * 100;
+  const getCharCountColor = () => {
+    if (charPercentage > 100) return 'text-red-500';
+    if (charPercentage > 90) return 'text-red-400';
+    if (charPercentage > 75) return 'text-yellow-500';
+    return 'text-gray-500 dark:text-gray-400';
+  };
+
+  const getReplyOptionIcon = (option: string) => {
+    switch (option) {
+      case 'everyone':
+        return <Globe className="w-4 h-4" />;
+      case 'following':
+        return <UserPlusIcon className="w-4 h-4" />;
+      case 'mentioned':
+        return <Image src="/images/atsign.png" width={20} height={20} alt="mention" className="dark:invert" />;
+      case 'verified':
+        return <Image src="/images/yellow-tick.png" width={16} height={16} alt="verified" />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className='fixed flex flex-col lg:flex-row overflow-y-scroll py-4 inset-0 bg-black/10 backdrop-blur-xs z-50 md:items-center md:justify-start lg:justify-center lg:items-start animate-in fade-in-0 zoom-in-95 duration-300'>
-      <div className="bg-white dark:bg-black rounded-3xl shadow-2xl max-h-fit max-w-2xl p-0 mx-4 my-6 relative border border-gray-100 dark:border-gray-800">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 m-2 rounded-lg border-b border-gray-200 dark:border-gray-800">
-          <div className="flex items-center gap-3">
-            <Edit3Icon size={40} />
-            <div className="flex flex-col">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Edit your post...
-              </h2>
-              <Link href={`/${Account.decodedHandle}`}>
-                <span className="text-gray-600 py-1 px-3 cursor-pointer hover:bg-gray-100 rounded-full dark:text-gray-400 text-xs font-medium truncate">
-                  {Account.decodedHandle}
-                </span>
-              </Link>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      id="editpost-scroll"
+      className='fixed inset-0 bg-black/10 backdrop-blur-xs z-50 flex items-center overflow-y-scroll justify-center p-4'
+    >
+      <div className="flex flex-col lg:flex-row gap-4 items-center justify-center w-full h-full">
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="bg-white dark:bg-black w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-900 max-h-[90vh] flex flex-col flex-shrink-0"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-zinc-950 bg-white dark:bg-black rounded-2xl">
+            <div className="flex items-center gap-2">
+              <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-yellow-400/30 ring-offset-2 ring-offset-white dark:ring-offset-zinc-900">
+                <img
+                  className="w-full h-full object-cover"
+                  src={Account.account?.avatarUrl || '/default-avatar.png'}
+                  alt="profile-pic"
+                />
+              </div>
+              <div className="flex flex-col items-start">
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                  {Account.name}
+                </h4>
+                <Link href={`/${Account.decodedHandle}`} className="hover:opacity-80 transition-opacity">
+                  <span className="text-xs text-gray-500 dark:text-zinc-400 rounded-full px-2 hover:text-yellow-500 hover:bg-yellow-100 dark:hover:text-yellow-400 dark:hover:bg-gray-950 transition-colors">
+                    {Account.decodedHandle}
+                  </span>
+                </Link>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="cursor-pointer p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-950 transition-all duration-200 group"
+            >
+              <X className="w-5 h-5 text-gray-500 group-hover:text-gray-700 dark:text-zinc-400 dark:group-hover:text-zinc-200" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex gap-4">
+              <div className="flex-1 min-w-0">
+                <textarea
+                  ref={textareaRef}
+                  value={post}
+                  onChange={(e) => setPost(e.target.value)}
+                  placeholder="what's happening guys ??"
+                  rows={1}
+                  className="w-full resize-none border-none outline-none text-sm text-gray-900 dark:text-white bg-transparent placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 min-h-[100px] max-h-[300px]"
+                />
+
+                {/* Media Preview Section */}
+                <AnimatePresence>
+                  {(InitialMedia.length > 0 || imageArr.length > 0 || videoArr.length > 0 || gifArr.length > 0 || MentionedTo.length > 0 || AddLocation.length > 0) && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="mt-4 space-y-3"
+                    >
+                      {/* Existing Media */}
+                      {InitialMedia.length > 0 && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
+                          {InitialMedia.map((media, index) => (
+                            <motion.div
+                              key={`existing-${index}`}
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="relative group rounded-xl overflow-hidden aspect-square shadow-md"
+                            >
+                              {media.media_type === 'video' ? (
+                                <video src={media.url} className="w-full h-full object-cover" />
+                              ) : (
+                                <img src={media.url} alt={media.media_type} className="w-full h-full object-cover" />
+                              )}
+                              <button
+                                onClick={() => removeArrayElement([setInitialMedia], index)}
+                                className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 backdrop-blur-sm cursor-pointer"
+                              >
+                                <X size={14} className="text-white" />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Images */}
+                      {imageArr.length > 0 && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
+                          {imageArr.map((url, index) => (
+                            <motion.div
+                              key={`img-${index}`}
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="relative group rounded-xl overflow-hidden aspect-square shadow-md"
+                            >
+                              <img src={url} alt="image" className="w-full h-full object-cover" />
+                              <button
+                                onClick={() => removeArrayElement([setimageArr, setImageFiles], index)}
+                                className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 backdrop-blur-sm cursor-pointer"
+                              >
+                                <X size={14} className="text-white" />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Videos */}
+                      {videoArr.length > 0 && (
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                          {videoArr.map((url, index) => (
+                            <motion.div
+                              key={`video-${index}`}
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="relative group rounded-xl overflow-hidden bg-black shadow-md"
+                            >
+                              <video src={url} className="w-full h-full object-cover" />
+                              <button
+                                onClick={() => removeArrayElement([setvideoArr, setVideoFiles], index)}
+                                className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 backdrop-blur-sm cursor-pointer"
+                              >
+                                <X size={14} className="text-white" />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* GIFs */}
+                      {gifArr.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2 mb-2">
+                          {gifArr.map((url, index) => (
+                            <motion.div
+                              key={`gif-${index}`}
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="relative group rounded-xl overflow-hidden shadow-md"
+                            >
+                              <img src={url} alt="gif" className="w-full h-60 object-cover" />
+                              <button
+                                onClick={() => removeArrayElement([setgifArr, setGifFiles], index)}
+                                className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 backdrop-blur-sm cursor-pointer"
+                              >
+                                <X size={14} className="text-white" />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Mentions */}
+                      {MentionedTo.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {MentionedTo.map((tag, index) => (
+                            <motion.div
+                              key={`mention-${index}`}
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="flex items-center justify-center gap-1 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 px-3 py-2.5 rounded-full text-sm font-medium shadow-sm"
+                            >
+                              <Link href={`/${tag}`}>
+                                {tag}
+                              </Link>
+                              <button
+                                onClick={() => removeArrayElement([setMentionedTo], index)}
+                                className="ml-1 hover:text-yellow-900 dark:hover:text-yellow-300 cursor-pointer"
+                              >
+                                <X size={14} />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Locations */}
+                      {AddLocation.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {AddLocation.map((location, index) => (
+                            <motion.div
+                              key={`location-${index}`}
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="flex items-center gap-1 bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm"
+                            >
+                              <Link
+                                href={`https://www.google.com/maps?q=${location.coordinates[0]},${location.coordinates[1]}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1"
+                              >
+                                <MapPin size={14} />
+                                <span>{location.text}</span>
+                              </Link>
+                              <button
+                                onClick={() => removeArrayElement([setAddLocation], index)}
+                                className="ml-1 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+                              >
+                                <X size={14} />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Poll Preview */}
+                {poll && (
+                  <div className="mt-2">
+                    <PollInPost poll={poll} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="cursor-pointer p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-950 transition-all duration-200 hover:scale-105"
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-500 dark:text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t rounded-2xl border-gray-100 dark:border-zinc-950 bg-gray-50/50 dark:bg-black">
+            <div className="flex items-center justify-between">
+              {/* Media Upload Options */}
+              <div className="flex items-center gap-1">
+                {/* Desktop Toolbar */}
+                <div className="hidden md:flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => imageRef.current?.click()}
+                        className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group"
+                        disabled={isUpdating}
+                      >
+                        <Image src="/images/insert-picture-icon.png" width={20} height={20} alt="image" className="dark:brightness-0 dark:invert opacity-75 group-hover:opacity-100" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Add Image</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => videoRef.current?.click()}
+                        className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group"
+                        disabled={isUpdating}
+                      >
+                        <Image src="/images/video-camera.png" width={20} height={20} alt="video" className="dark:brightness-0 dark:invert opacity-75 group-hover:opacity-100" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Add Video</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setshowEmojiPicker(!showEmojiPicker)}
+                        className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group emoji-picker-container"
+                        disabled={isUpdating}
+                      >
+                        <Smile size={20} className="opacity-75 group-hover:opacity-100" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Add Emoji</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setshowTagSomeone(!showTagSomeone)}
+                        className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group tag-search-modal"
+                        disabled={isUpdating}
+                      >
+                        <Image src="/images/atsign.png" width={20} height={20} alt="mention" className="dark:brightness-0 dark:invert opacity-75 group-hover:opacity-100" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Mention Someone</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => gifRef.current?.click()}
+                        className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group"
+                        disabled={isUpdating}
+                      >
+                        <span className="text-sm font-bold text-gray-600 dark:text-gray-400 group-hover:text-yellow-500 dark:group-hover:text-yellow-400">GIF</span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Add GIF</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setshowPollModal(!showPollModal)}
+                        className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group create-poll"
+                        disabled={isUpdating}
+                      >
+                        <Image src="/images/poll.png" width={20} height={20} alt="poll" className="dark:brightness-0 dark:invert opacity-75 group-hover:opacity-100" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Create Poll</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setshowLocationSearchModal(!showLocationSearchModal)}
+                        className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors group"
+                        disabled={isUpdating}
+                      >
+                        <Image src="/images/location.png" width={20} height={20} alt="tag-location" className="dark:brightness-0 dark:invert opacity-75 group-hover:opacity-100" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Add Location</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                {/* Mobile Dropdown */}
+                <div className="dropdown-container relative md:hidden">
+                  <button
+                    onClick={() => setopenOptions(!openOptions)}
+                    className="cursor-pointer p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950/50 transition-colors"
+                    disabled={isUpdating}
+                  >
+                    <MoreHorizontalIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  </button>
+                  <AnimatePresence>
+                    {openOptions && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute bottom-12 left-0 bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-gray-200 dark:border-zinc-700 p-2 z-50 min-w-[200px]"
+                      >
+                        <button
+                          onClick={() => { imageRef.current?.click(); setopenOptions(false); }}
+                          className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
+                        >
+                          <Image src="/images/insert-picture-icon.png" width={20} height={20} alt="image" className="dark:invert" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Image</span>
+                        </button>
+                        <button
+                          onClick={() => { videoRef.current?.click(); setopenOptions(false); }}
+                          className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
+                        >
+                          <Image src="/images/video-camera.png" width={20} height={20} alt="video" className="dark:invert" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Video</span>
+                        </button>
+                        <button
+                          onClick={() => { setshowEmojiPicker(true); setopenOptions(false); }}
+                          className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
+                        >
+                          <Smile size={20} className="text-gray-600 dark:text-gray-400" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Emoji</span>
+                        </button>
+                        <button
+                          onClick={() => { setshowTagSomeone(true); setopenOptions(false); }}
+                          className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
+                        >
+                          <Image src="/images/atsign.png" width={20} height={20} alt="mention" className="dark:invert" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Mention</span>
+                        </button>
+                        <button
+                          onClick={() => { gifRef.current?.click(); setopenOptions(false); }}
+                          className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
+                        >
+                          <span className="text-sm font-bold text-gray-600 dark:text-gray-400">GIF</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Add GIF</span>
+                        </button>
+                        <button
+                          onClick={() => { setshowPollModal(true); setopenOptions(false); }}
+                          className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
+                        >
+                          <Image src="/images/poll.png" width={20} height={20} alt="poll" className="dark:invert" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Poll</span>
+                        </button>
+                        <button
+                          onClick={() => { setshowLocationSearchModal(true); setopenOptions(false); }}
+                          className="flex cursor-pointer items-center gap-3 w-full p-3 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors"
+                        >
+                          <Image src="/images/location.png" width={20} height={20} alt="location" className="dark:invert" />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Location</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Right side actions */}
+              <div className="flex items-center gap-3">
+                {/* Reply Options */}
+                <div className="reply-dropdown-container relative">
+                  <button
+                    onClick={() => setopenReplyOptions(!openReplyOptions)}
+                    className="flex cursor-pointer items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
+                    disabled={isUpdating}
+                  >
+                    {getReplyOptionIcon(whoCanReply)}
+                    <span className="hidden sm:inline capitalize">
+                      {whoCanReply === 'everyone' ? 'Everyone' : whoCanReply === 'following' ? 'Following' : whoCanReply === 'mentioned' ? 'Mentioned' : 'Verified'}
+                    </span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+
+                  <AnimatePresence>
+                    {openReplyOptions && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute bottom-10 right-0 mt-2 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-700 p-4 z-50"
+                      >
+                        <div className="mb-4">
+                          <h3 className="font-semibold flex items-center gap-1 text-gray-900 dark:text-white text-lg"><MessagesSquareIcon /><span>Who can reply ?</span></h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Choose who can reply to this post</p>
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { value: 'everyone', label: 'Everyone', description: 'Anyone can reply', icon: <Globe className="w-5 h-5" /> },
+                            { value: 'following', label: 'People you follow', description: 'Only followers can reply', icon: <UserPlusIcon className="w-5 h-5" /> },
+                            { value: 'mentioned', label: 'Only mentioned', description: 'Only tagged people can reply', icon: <Image src="/images/atsign.png" width={20} height={20} alt="mention" className="dark:invert" /> },
+                            { value: 'verified', label: 'Verified only', description: 'Only verified accounts', icon: <Image src="/images/yellow-tick.png" width={20} height={20} alt="verified" /> }
+                          ].map((option) => (
+                            <button
+                              key={option.value}
+                              onClick={() => {
+                                setWhoCanReply(option.value as any);
+                                setopenReplyOptions(false);
+                              }}
+                              className={`flex items-center gap-3 w-full p-3 cursor-pointer rounded-xl transition-colors ${whoCanReply === option.value
+                                ? 'bg-yellow-50 dark:bg-yellow-950/30 ring-1 ring-yellow-400'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-950'
+                              }`}
+                            >
+                              <div className={`p-2 rounded-full ${whoCanReply === option.value ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-gray-100 dark:bg-gray-950'}`}>
+                                {option.icon}
+                              </div>
+                              <div className="flex-1 text-left">
+                                <p className="font-medium text-gray-900 dark:text-white text-sm">{option.label}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{option.description}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Character Count */}
+                <div className="flex items-center gap-3">
+                  <div className="relative w-10 h-10">
+                    <svg className="w-10 h-10 transform -rotate-90">
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        fill="none"
+                        className="text-gray-200 dark:text-zinc-700"
+                      />
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        fill="none"
+                        strokeDasharray={`${2 * Math.PI * 16}`}
+                        strokeDashoffset={`${2 * Math.PI * 16 * (1 - Math.min(charPercentage, 100) / 100)}`}
+                        className={`${charPercentage > 100 ? 'text-red-500' : charPercentage > 90 ? 'text-red-400' : charPercentage > 75 ? 'text-yellow-500' : 'text-yellow-400'} transition-all duration-300`}
+                      />
+                    </svg>
+                    <span className={`absolute inset-0 flex items-center justify-center text-xs font-medium ${getCharCountColor()}`}>
+                      {post.length}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <button
+                  disabled={DisablePostButton || isUpdating}
+                  onClick={handlePostUpdate}
+                  className={`px-6 py-2.5 text-base font-semibold rounded-full transition-all duration-200 flex items-center gap-2 ${post.trim() && !isUpdating
+                    ? "bg-yellow-400 cursor-pointer text-white hover:bg-yellow-500 transform hover:scale-105"
+                    : "bg-gray-200 cursor-not-allowed text-gray-400 dark:bg-zinc-800 dark:text-gray-600"
+                  }`}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </TooltipTrigger>
-              <TooltipContent>
-                Cancel Edit
-              </TooltipContent>
-            </Tooltip>
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-6">
-          <textarea
-            value={post}
-            maxLength={maxPostLength}
-            onChange={(e) => setPost(e.target.value)}
-            placeholder="What's happening?"
-            rows={4}
-            className="w-full resize-none border-none outline-none text-sm text-gray-900 dark:text-gray-100 bg-transparent placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 focus:outline-none"
-          />
-
-          {poll && (
-            <div className="mt-2">
-               <PollInPost poll={poll} />
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    'Save'
+                  )}
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* Hidden file inputs */}
+          <input
+            type="file"
+            accept="image/*"
+            ref={imageRef}
+            onChange={(e) => handleMediaInclude(e, 'image')}
+            className="hidden"
+            multiple
+          />
+          <input
+            type="file"
+            accept="video/*"
+            ref={videoRef}
+            onChange={(e) => handleMediaInclude(e, 'video')}
+            className="hidden"
+          />
+          <input
+            type="file"
+            accept="image/gif"
+            ref={gifRef}
+            onChange={(e) => handleMediaInclude(e, 'gif')}
+            className="hidden"
+          />
+        </motion.div>
+
+        {/* Modals */}
+        <AnimatePresence>
+          {showEmojiPicker && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[60] emoji-picker-container"
+            >
+              <EmojiPicker
+                onEmojiClick={(emojiData: EmojiClickData, e) => {
+                  e.stopPropagation();
+                  onEmojiClick(emojiData);
+                  setshowEmojiPicker(false);
+                }}
+                theme={resolvedTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                autoFocusSearch={false}
+              />
+            </motion.div>
           )}
 
+          {showTagSomeone && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[60] w-full max-w-md tag-search-modal"
+            >
+              <AccountSearch
+                handle={String(Account?.decodedHandle)}
+                onSelect={(handle) => {
+                  setMentionedTo((prev) => [...prev, handle]);
+                  setshowTagSomeone(false);
+                }}
+                placeholder="@ Search someone to tag"
+              />
+            </motion.div>
+          )}
+
+          {showPollModal && Account.account && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[60] w-full max-w-lg create-poll"
+            >
+              <CreatePoll plan={Account.account?.plan} questionLen={maxPostLength} />
+            </motion.div>
+          )}
+
+          {showLocationSearchModal && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[60] w-full max-w-md location-search"
+            >
+              <LocationSearch
+                placeholder="Search a location to add..."
+                onClose={() => setshowLocationSearchModal(false)}
+                visible={showLocationSearchModal}
+                onSelect={(location) => {
+                  setAddLocation((prev) => [...prev, { text: location.text, coordinates: location.coordinates }]);
+                  setshowLocationSearchModal(false);
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Poll Display */}
+        {(initialPoll || poll) && (
           <motion.div
-            className="section-for-extra-info flex flex-col gap-1 rounded-lg p-2"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="w-2/5"
           >
-            <div className="existing-media">
-              {InitialMedia.length > 0 && (
-                <motion.div
-                  className="flex flex-col"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1, duration: 0.3 }}
-                >
-                  <span className="font-bold p-2 rounded-lg">Media</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 rounded-lg mt-2">
-                    {InitialMedia.map((media, index) => (
-                      <motion.div
-                        key={index}
-                        className="relative group"
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.05, duration: 0.2 }}
-                      >
-                        <X size={20} className="absolute opacity-0 hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement([setInitialMedia], index)} />
-                        {media.media_type === 'video' ? (
-                          <video src={media.url} className="w-28 h-28 object-cover rounded-lg" />
-                        ) : (
-                          <img src={media.url} alt={media.media_type} className="w-28 h-28 object-cover rounded-lg" />
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-            <div className="img">
-              {imageArr.length > 0 && (
-                <motion.div
-                  className="flex flex-col"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.3 }}
-                >
-                  <span className="font-bold p-2 rounded-lg">Images</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 rounded-lg mt-2">
-                    {imageArr.map((url, index) => (
-                      <motion.div
-                        key={index}
-                        className="relative group"
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.05, duration: 0.2 }}
-                      >
-                        <X size={20} className="absolute opacity-0 hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement([setimageArr, setImageFiles], index)} />
-                        <img src={url} alt="image" className="w-28 h-28 object-cover rounded-lg" />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-            <div className="video">
-              {videoArr.length > 0 && (
-                <motion.div
-                  className="flex flex-col"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.3 }}
-                >
-                  <span className="font-bold p-2 rounded-lg">Videos</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 rounded-lg mt-2">
-                    {videoArr.map((url, index) => (
-                      <motion.div
-                        key={index}
-                        className="relative group rounded-lg"
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.05, duration: 0.2 }}
-                      >
-                        <X size={20} className="absolute hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement([setvideoArr, setVideoFiles], index)} />
-                        <video src={url} className="w-28 h-28 object-cover rounded-lg" />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-            <div className="tags">
-              {MentionedTo.length > 0 && (
-                <motion.div
-                  className="flex flex-col"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.3 }}
-                >
-                  <span className="font-bold p-2 rounded-lg">Mentions</span>
-                  <div className="flex flex-wrap gap-2 rounded-lg mt-2">
-                    {MentionedTo.map((tag, index) => (
-                      <motion.div
-                        key={index}
-                        className="flex group items-center gap-2 bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400 p-1 rounded-lg"
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.05, duration: 0.2 }}
-                      >
-                        <Link href={`/@${tag}`} className="p-1 px-3 rounded-lg">@{tag}</Link>
-                        <X size={13} className="hidden group-hover:block hover:scale-105 transition-all duration-300 cursor-pointer text-yellow-500 dark:text-yellow-300" onClick={() => removeArrayElement([setMentionedTo], index)} />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-            <div className="gifs">
-              {gifArr.length > 0 && (
-                <motion.div
-                  className="flex flex-col"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5, duration: 0.3 }}
-                >
-                  <span className="font-bold p-2 rounded-lg">GIFs</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 rounded-lg mt-2">
-                    {gifArr.map((url, index) => (
-                      <motion.div
-                        key={index}
-                        className="relative group"
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.05, duration: 0.2 }}
-                      >
-                        <img src={url} alt="gif" className="w-24 h-24 object-cover rounded-lg" />
-                        <X size={20} className="absolute hover:scale-110 rounded-full hover:bg-yellow-200 p-1 top-0 right-0 cursor-pointer text-yellow-500 dark:text-yellow-300 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={() => removeArrayElement([setgifArr, setGifFiles], index)} />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-            <div className="locations">
-              {AddLocation.length > 0 && (
-                <motion.div
-                  className="flex flex-col"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5, duration: 0.3 }}
-                >
-                  <span className="font-bold p-2 rounded-lg">Locations</span>
-                  <div className="flex flex-wrap gap-2 rounded-lg mt-2 p-2">
-                    {AddLocation.map((location, index) => (
-                      <motion.div
-                        key={index}
-                        className="relative group flex flex-row gap-1 items-center bg-yellow-100 py-1 px-3 text-yellow-600 rounded-lg"
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.05, duration: 0.2 }}
-                      >
-                        <Link className="flex items-center" href={`https://www.google.com/maps/@${location?.coordinates[0]},${location?.coordinates[1]},15z`}>
-                          <LocateFixed size={18} />
-                          <span className="p-1 rounded-lg">{location.text}</span>
-                        </Link>
-                        <X size={20} className="absolute -top-2 -right-2 cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 bg-yellow-100 dark:bg-yellow-900 rounded-full p-1 text-yellow-500 dark:text-red-300" onClick={() => removeArrayElement([setAddLocation], index)} />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
+            <AccountPoll isOpen={true} onClose={() => resetPoll()} poll={initialPoll || poll} />
           </motion.div>
-
-          {/* Media Upload Options */}
-          <div className="flex items-center justify-between mt-6">
-            <div className="flex items-center gap-1">
-              {/* Mobile dropdown */}
-              <div className="dropdown-container relative top-0 md:hidden">
-                <button
-                  onClick={() => setopenOptions(!openOptions)}
-                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  <MoreHorizontalIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </button>
-                {openOptions && (
-                  <div className="absolute top-1/5 left-10 mb-2 bg-white dark:bg-black rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-2 z-50 min-w-[280px]">
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => { imageRef.current?.click() }}
-                        className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
-                        <Image className="dark:invert" src='/images/insert-picture-icon.png' width={24} height={24} alt='insert-pic' unoptimized />
-                        <span className="text-xs font-medium">Image</span>
-                      </button>
-                      <button
-                        onClick={() => { videoRef.current?.click() }}
-                        className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
-                        <Image className="dark:invert" src='/images/video-camera.png' width={24} height={24} alt='insert-video' unoptimized />
-                        <span className="text-xs font-medium">Video</span>
-                      </button>
-                      <button
-                        onClick={() => { setshowEmojiPicker(!showEmojiPicker); setopenOptions(false); }}
-                        className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
-                        <Image src='/images/smile.png' width={24} height={24} alt='add-emoji' />
-                        <span className="text-xs font-medium">Emoji</span>
-                      </button>
-                      <button
-                        onClick={() => { setshowTagSomeone(!showTagSomeone); setopenOptions(false); }}
-                        className="screen-tag flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
-                        <Image className="dark:invert" src='/images/atsign.png' width={24} height={24} alt='tag-user' unoptimized />
-                        <span className="text-xs font-medium">Tag</span>
-                      </button>
-                      <button
-                        onClick={() => { gifRef.current?.click() }}
-                        className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
-                        <Image className="dark:invert" src='/images/insert-picture-icon.png' width={24} height={24} alt='add-gif' unoptimized />
-                        <span className="text-xs font-medium">GIF</span>
-                      </button>
-                      <button
-                        onClick={() => { setshowPollModal(true); setopenOptions(false); }}
-                        className="create-poll flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
-                        <Image className="dark:invert" src='/images/poll.png' width={24} height={24} alt='create-poll' unoptimized />
-                        <span className="text-xs font-medium">Poll</span>
-                      </button>
-                      <button
-                        onClick={() => { setshowLocationSearchModal(!showLocationSearchModal); setopenOptions(false); }}
-                        className="flex flex-col items-center cursor-pointer gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
-                        <Image className="dark:invert" src='/images/location.png' width={24} height={24} alt='add-location' />
-                        <span className="text-xs font-medium">Location</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Desktop buttons */}
-              <div className="hidden md:flex items-center gap-1 relative">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => { imageRef.current?.click() }}
-                      className="p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
-                      <Image className="dark:invert group-hover:text-blue-500" src='/images/insert-picture-icon.png' width={20} height={20} alt='insert-pic' />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Add Image</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => { videoRef.current?.click() }}
-                      className="p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
-                      <Image className="dark:invert group-hover:text-blue-500" src='/images/video-camera.png' width={20} height={20} alt='insert-video' />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Add Video</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => { setshowEmojiPicker(!showEmojiPicker) }}
-                      className="emoji-picker p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
-                      <Image src='/images/smile.png' width={20} height={20} alt='add-emoji' className="group-hover:text-blue-500" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Add Emoji</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => { setshowTagSomeone(!showTagSomeone) }}
-                      className="screen-tag p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
-                      <Image className="dark:invert group-hover:text-blue-500" src='/images/atsign.png' width={20} height={20} alt='tag-user' />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Mention someone</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => { gifRef.current?.click() }}
-                      className="p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
-                      <Image className="dark:invert group-hover:text-blue-500" src='/images/insert-picture-icon.png' width={20} height={20} alt='add-gif' />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Add GIF</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setshowPollModal(!showPollModal)}
-                      className="create-poll p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
-                      <Image className="dark:invert group-hover:text-blue-500" src='/images/poll.png' width={20} height={20} alt='create-poll' />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Create Poll</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => { setshowLocationSearchModal(!showLocationSearchModal) }}
-                      className="p-2 cursor-pointer rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-950 transition-colors group">
-                      <Image className="dark:invert group-hover:text-blue-500" src='/images/location.png' width={20} height={20} alt='add-location' />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Add Location</TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-
-            {/* responsive modals... */}
-            {showEmojiPicker && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
-                className='emoji-picker absolute z-60 top-0 left-0 transform md:lg:-left-5'>
-                <EmojiPicker onEmojiClick={(emoji) => { onEmojiClick(emoji); setshowEmojiPicker(false); }} theme={resolvedTheme === 'dark' ? Theme.DARK : resolvedTheme === 'light' ? Theme.LIGHT : Theme.AUTO} />
-              </motion.div>
-            )}
-
-            {showTagSomeone && (
-              <motion.div
-                initial={{ opacity: 0, y: 0, x: 0, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
-                className='tag-search-modal absolute z-60 top-0 left-0 transform md:lg:-left-5'>
-                <AccountSearch handle={String(Account?.decodedHandle)} onSelect={(handle) => { setMentionedTo((prev) => [...prev, handle]); setshowTagSomeone(false); }} placeholder="@ Search someone to tag" />
-              </motion.div>
-            )}
-
-            {showPollModal && Account.account && (
-              <motion.div
-                initial={{ opacity: 0, y: 500, x: -250, scale: 0.8 }}
-                animate={{ opacity: 1, y: 400, x: -250, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
-                className='create-poll absolute z-60 -right-70 -top-30 sm:left-[35%] w-screen sm:w-lg'>
-                <CreatePoll plan={Account.account?.plan} questionLen={maxPostLength} />
-              </motion.div>
-            )}
-
-            {showLocationSearchModal && (
-              <motion.div
-                initial={{ opacity: 0, y: 500, x: -250, scale: 0.8 }}
-                animate={{ opacity: 1, y: 400, x: -250, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
-                className='location-search absolute z-60 w-md -right-65 -top-30 sm:w-lg'>
-                <LocationSearch placeholder="search a location to add..." onClose={() => { setshowLocationSearchModal(false) }} visible={showLocationSearchModal} onSelect={(location) => { setAddLocation((prev) => [...prev, {text: location.text, coordinates: location.coordinates}]) }} />
-              </motion.div>
-            )}
-
-            <div className="flex items-center gap-3">
-              <div className="reply-dropdown-container relative">
-                <button
-                  onClick={() => setopenReplyOptions(!openReplyOptions)}
-                  className="flex items-center cursor-pointer gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-black hover:bg-gray-200 dark:hover:bg-gray-950 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  <span className="hidden sm:inline">
-                    {whoCanReply === 'everyone' ? 'Everyone' : whoCanReply === 'following' ? 'Following' : whoCanReply === 'mentioned' ? 'Mentioned' : 'Verified'}
-                  </span>
-                  <span className="sm:hidden">
-                    {whoCanReply === 'everyone' ? 'All' : whoCanReply === 'following' ? 'Follow' : whoCanReply === 'mentioned' ? 'Mention' : 'Verify'}
-                  </span>
-                </button>
-                {openReplyOptions && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 500, x: -250, scale: 0.8 }}
-                    animate={{ opacity: 1, y: 400, x: -250, scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 100, damping: 10, duration: 0.2 }}
-                    className="absolute bottom-14 z-60 left-45 sm:-left-10 md:-left-30 mt-3 w-90 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4">
-                    <div className="mb-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-2">Who can reply?</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Choose who can reply to this post</p>
-                    </div>
-                    <div className="space-y-1">
-                      <label
-                        onClick={() => { setWhoCanReply('everyone'); setopenReplyOptions(false); }}
-                        className="flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-gray-950 rounded-xl transition-colors cursor-pointer"
-                      >
-                        <input
-                          type="radio"
-                          name="whoCanReply"
-                          checked={whoCanReply === 'everyone'}
-                          onChange={() => setWhoCanReply('everyone')}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                        <div className="flex-1">
-                          <span className="text-gray-900 dark:text-white font-medium text-sm">Everyone</span>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Anyone can reply</p>
-                        </div>
-                        <LucideGlobe className="w-5 h-5 text-gray-400 dark:text-white" />
-                      </label>
-
-                      <label
-                        onClick={() => { setWhoCanReply('following'); setopenReplyOptions(false); }}
-                        className="flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-gray-950 rounded-xl transition-colors cursor-pointer"
-                      >
-                        <input
-                          type="radio"
-                          name="whoCanReply"
-                          checked={whoCanReply === 'following'}
-                          onChange={() => setWhoCanReply('following')}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                        <div className="flex-1">
-                          <span className="text-gray-900 dark:text-white font-medium text-sm">People you follow</span>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Only followers can reply</p>
-                        </div>
-                        <UserPlusIcon className="w-5 h-5 text-gray-400 dark:text-white" />
-                      </label>
-
-                      <label
-                        onClick={() => { setWhoCanReply('mentioned'); setopenReplyOptions(false); }}
-                        className="flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-gray-950 rounded-xl transition-colors cursor-pointer"
-                      >
-                        <input
-                          type="radio"
-                          name="whoCanReply"
-                          checked={whoCanReply === 'mentioned'}
-                          onChange={() => setWhoCanReply('mentioned')}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                        <div className="flex-1">
-                          <span className="text-gray-900 dark:text-white font-medium text-sm">Only mentioned</span>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Only tagged people can reply</p>
-                        </div>
-                        <Image src='/images/atsign.png' width={20} height={20} alt="mentioned" className="text-gray-400 dark:invert" />
-                      </label>
-
-                      <label
-                        onClick={() => { setWhoCanReply('verified'); setopenReplyOptions(false); }}
-                        className="flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-gray-950 rounded-xl transition-colors cursor-pointer"
-                      >
-                        <input
-                          type="radio"
-                          name="whoCanReply"
-                          checked={whoCanReply === 'verified'}
-                          onChange={() => setWhoCanReply('verified')}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                        <div className="flex-1">
-                          <span className="text-gray-900 dark:text-white font-medium text-sm">Verified only</span>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Only verified accounts</p>
-                        </div>
-                        <Image src='/images/yellow-tick.png' width={20} height={20} alt="verified" className="text-blue-500" />
-                      </label>
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <span className={`text-sm bg-blue-50 dark:bg-gray-950 dark:text-white py-2 px-4 rounded-full font-medium ${maxPostLength - post.length < 20 ? 'text-red-500 bg-red-50 dark:bg-red-950' : 'text-blue-500 dark:text-gray-700'}`}>
-                  {post.length} / {maxPostLength}
-                </span>
-              </div>
-              <button
-                disabled={DisablePostButton}
-                onClick={handlePostUpdate}
-                className={`px-8 py-2.5 text-base font-semibold rounded-full transition-all duration-200 ${
-                  post.trim()
-                    ? "bg-yellow-500 cursor-pointer text-white hover:bg-yellow-600 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    : "bg-gray-200 cursor-not-allowed text-gray-400 dark:bg-gray-700 dark:text-gray-500"
-                }`}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <input
-          type="file"
-          accept="image/*"
-          ref={imageRef}
-          onChange={(e) => { handleMediaInclude(e, 'image') }}
-          className="hidden"
-        />
-        <input
-          type="file"
-          accept="video/*"
-          ref={videoRef}
-          onChange={(e) => { handleMediaInclude(e, 'video') }}
-          className="hidden"
-          />
-        <input
-          type="file"
-          accept="image/gif"
-          ref={gifRef}
-          onChange={(e) => { handleMediaInclude(e, 'gif') }}
-          className="hidden"
-          />
+        )}
       </div>
-          {/* Poll Display */}
-          {( initialPoll || poll ) && (
-            <div className="m-6 md:w-lg">
-              <AccountPoll isOpen={true} onClose={() => { resetPoll() }} poll={initialPoll || poll} />
-            </div>
-          )}
-    </div>
+    </motion.div>
   );
 }

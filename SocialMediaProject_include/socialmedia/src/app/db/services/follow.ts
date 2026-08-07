@@ -13,6 +13,7 @@ import { newAccType } from "@/app/controllers/user";
 import { generateReportEmailHTML } from "@/components/report";
 import { sendFollowNotification } from "./notifications";
 import conversation from "../models/conversation";
+import Block from "../models/blocked";
 
 export async function userFollowService(handle: string, follow: boolean) {
     await connectWithMongoDB(); // establishing DB connection...
@@ -280,4 +281,339 @@ export const getAllTheFollowingService = async (handle:string) => {
      }))
 
     return NextResponse.json({ message: 'Following accounts fetched successfully', followings: accountToSend }, { status: 200 });
+}
+
+export const getAccountFollowersService = async (handle:string,page:number,size:number) => {
+    await connectWithMongoDB() ; // connecting to database...
+
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+
+    const activeAcc = await accounts.findOne({ username:handle , userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
+        const paticularAcc = await accounts.findById(accountId) ;
+        // getting count of followers and followings...
+        const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
+        const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
+        const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
+        const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+    
+        return {
+            id: paticularAcc._id.toString(),
+            decodedHandle:`@${paticularAcc.username}`,
+            name:paticularAcc.name,
+            content:paticularAcc.bio,
+            account:{
+                name:paticularAcc.name ,
+                handle:`@${paticularAcc.username}` ,
+                bio:paticularAcc.bio ,
+                location:{
+                  text:paticularAcc.location.text,
+                  coordinates:paticularAcc.location.coordinates // lat,long
+                },
+                website:paticularAcc.website,
+                joinDate:new Date(paticularAcc.createdAt).toDateString(),
+                following:fmt(following.length),
+                followers:fmt(followers.length),
+                Posts:fmt(posts.length),
+                isCompleted:paticularAcc.account.completed,
+                isVerified:paticularAcc.isVerified.value,
+                plan:paticularAcc.isVerified?.level || 'Free',
+                bannerUrl:paticularAcc.banner.url,
+                avatarUrl:paticularAcc.avatar.url
+            },
+            IsFollowing: isfollowing ? true : false
+        }
+    
+    }
+
+    // getting the followers of activeAcc (accounts that follow the active account)...
+    const followerAccountsId = (await follows.find({ $and:[{ followingId:activeAcc._id },{ isDeleted:false }]})).map( obj => obj.followerId );
+
+    // structuring all the follower accounts into userCardProp...
+    const followerAccounts = await Promise.all(followerAccountsId.map((accid) => {
+        return returnAccountDataInStructure(accid)
+    }));
+
+    // sorting the follower accounts in decreasing order of subscription level...
+    const planOrder: Record<string, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
+
+    const sortedAccounts = followerAccounts.sort((a, b) => {
+        const aPlan = (a.account?.plan || 'Free') as string;
+        const bPlan = (b.account?.plan || 'Free') as string;
+        const aLevel = planOrder[aPlan] ?? 0;
+        const bLevel = planOrder[bPlan] ?? 0;
+
+        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
+
+        // tie-breaker : verified accounts first...
+        const aVerified = a.account?.isVerified ?? false;
+        const bVerified = b.account?.isVerified ?? false;
+        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+
+        return 0;
+    });
+
+    // applying pagination...
+    const startIndex = (page - 1) * size;
+    const paginatedFollowers = sortedAccounts.slice(startIndex, startIndex + size);
+
+    return NextResponse.json({ message: 'Followers fetched successfully', followers: paginatedFollowers }, { status: 200 });
+}
+
+export const getFollowerSuggestionsService = async (handle:string) => {
+    await connectWithMongoDB() ; // connecting to database...
+
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+
+    const activeAcc = await accounts.findOne({ username:handle , userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
+        const paticularAcc = await accounts.findById(accountId) ;
+        // getting count of followers and followings...
+        const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
+        const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
+        const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
+        const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+    
+        return {
+            id: paticularAcc._id.toString(),
+            decodedHandle:`@${paticularAcc.username}`,
+            name:paticularAcc.name,
+            content:paticularAcc.bio,
+            account:{
+                name:paticularAcc.name ,
+                handle:`@${paticularAcc.username}` ,
+                bio:paticularAcc.bio ,
+                location:{
+                  text:paticularAcc.location.text,
+                  coordinates:paticularAcc.location.coordinates // lat,long
+                },
+                website:paticularAcc.website,
+                joinDate:new Date(paticularAcc.createdAt).toDateString(),
+                following:fmt(following.length),
+                followers:fmt(followers.length),
+                Posts:fmt(posts.length),
+                isCompleted:paticularAcc.account.completed,
+                isVerified:paticularAcc.isVerified.value,
+                plan:paticularAcc.isVerified?.level || 'Free',
+                bannerUrl:paticularAcc.banner.url,
+                avatarUrl:paticularAcc.avatar.url
+            },
+            IsFollowing: isfollowing ? true : false
+        }
+    
+    }
+
+    // getting the followers of activeAcc
+    const followerAccountsId = (await follows.find({ $and:[{ followingId:activeAcc._id },{ isDeleted:false }]})).map( obj => obj.followerId );
+
+    // structuring the follower accounts into userCardProp...
+    const followerAccounts = await Promise.all(followerAccountsId.map((accid) => {
+        return returnAccountDataInStructure(accid)
+    }));
+
+    // sorting the follower accounts in decreasing order of subscription level...
+    const planOrder: Record<string, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
+
+    const sortedAccounts = followerAccounts.sort((a, b) => {
+        const aPlan = (a.account?.plan || 'Free') as string;
+        const bPlan = (b.account?.plan || 'Free') as string;
+        const aLevel = planOrder[aPlan] ?? 0;
+        const bLevel = planOrder[bPlan] ?? 0;
+
+        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
+
+        // tie-breaker : verified accounts first...
+        const aVerified = a.account?.isVerified ?? false;
+        const bVerified = b.account?.isVerified ?? false;
+        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+
+        return 0;
+    });
+
+    // returning the top 4 accounts as suggestions...
+    const top4Suggestions = sortedAccounts.slice(0, 4);
+
+    return NextResponse.json({ message: 'Follower suggestions fetched successfully', suggestions: top4Suggestions }, { status: 200 });
+}
+
+export const getFollowingsSuggestionsService = async (handle:string) => {
+    await connectWithMongoDB() ; // connecting to database...
+
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+
+    const normalizedHandle = handle.startsWith('@') ? handle.substring(1) : handle;
+
+    const activeAcc = await accounts.findOne({ username:normalizedHandle , userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
+        const paticularAcc = await accounts.findById(accountId) ;
+        // getting count of followers and followings...
+        const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
+        const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
+        const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
+        const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+    
+        return {
+            id: paticularAcc._id.toString(),
+            decodedHandle:`@${paticularAcc.username}`,
+            name:paticularAcc.name,
+            content:paticularAcc.bio,
+            account:{
+                name:paticularAcc.name ,
+                handle:`@${paticularAcc.username}` ,
+                bio:paticularAcc.bio ,
+                location:{
+                  text:paticularAcc.location.text,
+                  coordinates:paticularAcc.location.coordinates // lat,long
+                },
+                website:paticularAcc.website,
+                joinDate:new Date(paticularAcc.createdAt).toDateString(),
+                following:fmt(following.length),
+                followers:fmt(followers.length),
+                Posts:fmt(posts.length),
+                isCompleted:paticularAcc.account.completed,
+                isVerified:paticularAcc.isVerified.value,
+                plan:paticularAcc.isVerified?.level || 'Free',
+                bannerUrl:paticularAcc.banner.url,
+                avatarUrl:paticularAcc.avatar.url
+            },
+            IsFollowing: isfollowing ? true : false
+        }
+    
+    }
+
+    // Fetch blocked account IDs (accounts that activeAcc has blocked or has been blocked by)...
+    const blockedDocs = await Block.find({ $or:[{ blockedByAcc:activeAcc._id },{ blockedAcc:activeAcc._id }] , isActive:true });
+    const blockedIds = blockedDocs.map(doc => doc.blockedByAcc.equals(activeAcc._id) ? doc.blockedAcc.toString() : doc.blockedByAcc.toString());
+
+    // Reasonable suggestion pool : all ACTIVE accounts except self and blocked ones...
+    const suggestionPool = await accounts.find({
+        $and:[
+            { _id: { $ne: activeAcc._id } },
+            { _id: { $nin: blockedIds } },
+            { 'account.status':'ACTIVE' }
+        ]
+    });
+
+    // Structuring the pool accounts into userCardProp...
+    const structuredPool = await Promise.all(suggestionPool.map((acc) => {
+        return returnAccountDataInStructure(acc._id) ;
+    }));
+
+    // Filter out the accounts the active user already follows...
+    const notFollowed = structuredPool.filter(acc => !acc.IsFollowing);
+
+    // sorting the accounts in decreasing order of subscription level...
+    const planOrder: Record<string, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
+
+    const sortedAccounts = notFollowed.sort((a, b) => {
+        const aPlan = (a.account?.plan || 'Free') as string;
+        const bPlan = (b.account?.plan || 'Free') as string;
+        const aLevel = planOrder[aPlan] ?? 0;
+        const bLevel = planOrder[bPlan] ?? 0;
+
+        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
+
+        // tie-breaker : verified accounts first...
+        const aVerified = a.account?.isVerified ?? false;
+        const bVerified = b.account?.isVerified ?? false;
+        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+
+        return 0;
+    });
+
+    // returning the top 4 accounts as suggestions...
+    const top4Suggestions = sortedAccounts.slice(0, 4);
+
+    return NextResponse.json({ message: 'Followings suggestions fetched successfully', suggestions: top4Suggestions }, { status: 200 });
+}
+
+export const getAccountFollowingsService = async (handle:string,page:number,size:number) => {
+    await connectWithMongoDB() ; // connecting to database...
+
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+
+    const normalizedHandle = handle.startsWith('@') ? handle.substring(1) : handle;
+
+    const activeAcc = await accounts.findOne({ username:normalizedHandle , userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
+    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
+        const paticularAcc = await accounts.findById(accountId) ;
+        // getting count of followers and followings...
+        const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
+        const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
+        const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
+        const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+    
+        return {
+            id: paticularAcc._id.toString(),
+            decodedHandle:`@${paticularAcc.username}`,
+            name:paticularAcc.name,
+            content:paticularAcc.bio,
+            account:{
+                name:paticularAcc.name ,
+                handle:`@${paticularAcc.username}` ,
+                bio:paticularAcc.bio ,
+                location:{
+                  text:paticularAcc.location.text,
+                  coordinates:paticularAcc.location.coordinates // lat,long
+                },
+                website:paticularAcc.website,
+                joinDate:new Date(paticularAcc.createdAt).toDateString(),
+                following:fmt(following.length),
+                followers:fmt(followers.length),
+                Posts:fmt(posts.length),
+                isCompleted:paticularAcc.account.completed,
+                isVerified:paticularAcc.isVerified.value,
+                plan:paticularAcc.isVerified?.level || 'Free',
+                bannerUrl:paticularAcc.banner.url,
+                avatarUrl:paticularAcc.avatar.url
+            },
+            IsFollowing: isfollowing ? true : false
+        }
+    
+    }
+
+    // getting the followings of activeAcc (accounts activeAcc follows)...
+    const followingAccountsId = (await follows.find({ $and:[{ followerId:activeAcc._id },{ isDeleted:false }]})).map( obj => obj.followingId );
+
+    // structuring all the following accounts into userCardProp...
+    const followingAccounts = await Promise.all(followingAccountsId.map((accid) => {
+        return returnAccountDataInStructure(accid)
+    }));
+
+    // sorting the following accounts in decreasing order of subscription level...
+    const planOrder: Record<string, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
+
+    const sortedAccounts = followingAccounts.sort((a, b) => {
+        const aPlan = (a.account?.plan || 'Free') as string;
+        const bPlan = (b.account?.plan || 'Free') as string;
+        const aLevel = planOrder[aPlan] ?? 0;
+        const bLevel = planOrder[bPlan] ?? 0;
+
+        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
+
+        // tie-breaker : verified accounts first...
+        const aVerified = a.account?.isVerified ?? false;
+        const bVerified = b.account?.isVerified ?? false;
+        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+
+        return 0;
+    });
+
+    // applying pagination...
+    const startIndex = (page - 1) * size;
+    const paginatedFollowings = sortedAccounts.slice(startIndex, startIndex + size);
+
+    return NextResponse.json({ message: 'Followings fetched successfully', followings: paginatedFollowings }, { status: 200 });
 }

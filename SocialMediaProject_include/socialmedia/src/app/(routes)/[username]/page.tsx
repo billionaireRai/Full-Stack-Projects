@@ -161,7 +161,6 @@ interface tabsTypes {
 };
 
 export default function UserProfilePage() {
-  const isTab = (id: string) => activeTab.id === id ;
 
   const { User } = useUserInfo() ;
   const { Account,setAccount } = useActiveAccount() ; // active account hook...
@@ -225,6 +224,8 @@ export default function UserProfilePage() {
   ];
 
   const [activeTab, setActiveTab] = useState<tabsTypes>({id:'posts',label:'Posts'}); // current active tab state...
+
+  const isTab = (id: string) => activeTab.id === id ;
 
   // random follow suggestions data
   const [FollowSuggesstions, setFollowSuggesstions] = useState<userCardProp[]>([
@@ -678,7 +679,7 @@ export default function UserProfilePage() {
     }
 
     // running only when username exists...
-    if (username) functionToGetData();
+    // if (username) functionToGetData();
   }, [username])
   
   // toggleing follow logic...
@@ -779,13 +780,13 @@ export default function UserProfilePage() {
 
   // funtion to handle summarize pop...
   function handleSummarizePop() : void {
-    if (showUpgradePop) {
-      setplanIntent('Premium');
-      setisPop(true);
-    } else {
+    // if (showUpgradePop) {
+    //   setplanIntent('Premium');
+    //   setisPop(true);
+    // } else {
       // main logic comes here...
       setShowSummarize(true);
-    }
+    // }
   }
 
   // funtion to copy email..
@@ -797,33 +798,33 @@ export default function UserProfilePage() {
   }
 
   // useffect for handling 'utm_source' & 'accid' search param...
-  useEffect(() => {
-    const handlingSocketAndKeyLogic = async (accountid:string) => {
-      if (intent === 'register') {
-        generateKeyPairAndStoreBoth(accountid); // for public-private key generation...
-        useWebSocket(accountid,intent) // registering web-socket id... 
-      }
-      if (intent === 'login' && key?.trim()) {
-        const output = await checkForPrivateKeyIDB(accountid);
-        if (isKeyObjType(output)) { 
-          localStorage.setItem('privatekey',output.value);
-          // setpublickey(key);
-        }
-        else generateKeyPairAndStoreBoth(accountid);
-        useWebSocket(accountid,intent) // updating presence state web-socket id...
-      }    
-    }
-    if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
-  }, [utmsource,accid,intent,key])
+  // useEffect(() => {
+  //   const handlingSocketAndKeyLogic = async (accountid:string) => {
+  //     if (intent === 'register') {
+  //       generateKeyPairAndStoreBoth(accountid); // for public-private key generation...
+  //       useWebSocket(accountid,intent) // registering web-socket id... 
+  //     }
+  //     if (intent === 'login' && key?.trim()) {
+  //       const output = await checkForPrivateKeyIDB(accountid);
+  //       if (isKeyObjType(output)) { 
+  //         localStorage.setItem('privatekey',output.value);
+  //         // setpublickey(key);
+  //       }
+  //       else generateKeyPairAndStoreBoth(accountid);
+  //       useWebSocket(accountid,intent) // updating presence state web-socket id...
+  //     }    
+  //   }
+  //   if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
+  // }, [utmsource,accid,intent,key])
 
   return (
 
     <>
-      <div className={`h-screen flex flex-col font-poppins rounded-md p-2 dark:bg-black`}>
-        <div className='flex gap-2'>
+    <div className={`flex flex-col h-full overflow-hidden p-2 font-poppins rounded-md dark:bg-black`}>
+        <div className='flex gap-2 h-full rounded-md'>
           {/* Main Content - Profile */}
-          <div className='flex-2 h-screen overflow-y-auto'>
-          <div className={`flex-2 bg-white dark:bg-black text-gray-900 overflow-x-hidden dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
+          <div className='flex-2 h-full rounded-md'>
+          <div className={`flex-1 h-full rounded-b-md bg-white dark:bg-black text-gray-900 overflow-x-hidden dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
               {/* Header */}
               <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
                 <div className="px-4 py-3">
@@ -1099,7 +1100,7 @@ export default function UserProfilePage() {
                        </Link>
                        ) : (
                         <Link href='/subscription?utm_source=profile-page' className='border border-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-950 dark:border-yellow-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full'>
-                          <Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' /><span className='text-gray-700 dark:text-gray-400'>get verified</span>
+                          <Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' /><span className='text-gray-700 dark:text-gray-400'>verification</span>
                         </Link>
                       )}
                       <Link href={`/${AccountInfo.handle}/favourites`} className='border border-black-500 text-white bg-black hover:opacity-85 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full transition-colors'>
@@ -1556,9 +1557,8 @@ export default function UserProfilePage() {
               </div>
             </div>
           </div>
-
           {/* some other widgets... */}
-          <div className={`hidden z-20 lg:block flex-1 h-screen overflow-y-scroll ${IsBlocked ? 'blur-md pointer-events-none cursor-not-allowed' : ''}`}>
+          <div className={`hidden z-20 lg:block w-96 h-full overflow-y-scroll ${IsBlocked ? 'blur-md pointer-events-none cursor-not-allowed' : ''}`}>
             <div className='space-y-4'>
               {/* Who to Follow */}
                 {/* account suggestions according to this USER profile respective...*/}

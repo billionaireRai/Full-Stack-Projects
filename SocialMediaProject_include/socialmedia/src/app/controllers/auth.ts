@@ -117,11 +117,11 @@ export const logginUserController = asyncErrorHandler( async (request:NextReques
     Cookies.set('refreshToken', serviceRes.refreshToken);
 
     // sending a email alert of login...
-    await sendEmailFunction({
-       to: serviceRes?.email,
-       subject: "Successfull login to you account",
-       html:loginemail({ email:email , handle:serviceRes.accountInfo.decodedHandle , name:serviceRes.accountInfo.name })
-    });
+    // await sendEmailFunction({
+    //    to: serviceRes?.email,
+    //    subject: "Successfull login to you account",
+    //    html:loginemail({ email:email , handle:serviceRes.accountInfo.decodedHandle , name:serviceRes.accountInfo.name })
+    // });
 
     const info : returnDataType = {
         email:email,

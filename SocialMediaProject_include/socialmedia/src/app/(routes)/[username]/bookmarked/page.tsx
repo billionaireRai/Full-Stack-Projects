@@ -73,10 +73,13 @@ export default function Bookmarkedpage(){
   const autoHeightGap:number = 400 ;
   const postsSection = useRef<HTMLDivElement | null>(null);
   const pageHandle = decodeURIComponent(String(params.username)) ;
-  const [Page, setPage] = useState<number>(1);
-  const [hasPosts, sethasPosts] = useState<boolean>(true);
   const [bookmarkOptionsOpen, setBookmarkOptionsOpen] = useState<boolean>(false);
   const [selectedSort, setSelectedSort] = useState<string>('newest');
+
+  // pagination variables...
+  const PageRef = useRef<number>(1);
+  const hasMorePostsRef = useRef<boolean>(true);
+  const isFetchingPostsRef = useRef<boolean>(false);
   const [loadingSugg, setloadingSugg] = useState<boolean>(false);
   const [loadingPosts, setloadingPosts] = useState<boolean>(false);
   const [ShowLess, setShowLess] = useState<boolean>(false);
@@ -500,75 +503,77 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
     }
   ])
 
+  // pure sort helper - never triggers state updates, just returns a sorted copy...
+  const applySortToPosts = useCallback((posts: PostType[], sort: string): PostType[] => {
+    const sortedPosts = [...posts];
+    switch (sort) {
+      case 'newest':
+        return sortedPosts.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
+      case 'oldest':
+        return sortedPosts.sort((a, b) => new Date(a.postedAt).getTime() - new Date(b.postedAt).getTime());
+      case 'likes':
+        return sortedPosts.sort((a, b) => b.likes - a.likes);
+      case 'comments':
+        return sortedPosts.sort((a, b) => b.comments - a.comments);
+      case 'reposts':
+        return sortedPosts.sort((a, b) => b.reposts - a.reposts);
+      case 'views':
+        return sortedPosts.sort((a, b) => b.views - a.views);
+      default:
+        return sortedPosts;
+    }
+  }, []);
+
+  // ref mirroring selectedSort so the stable fetch callback can always sort correctly...
+  const selectedSortRef = useRef<string>('newest');
+
   // function handling reversing post order...
   function handleReversePostOrder() {
-    const reversedOrder = [...PostDetails].reverse(); 
-    setPostDetails(reversedOrder);
+    setPostDetails((prevPosts) => [...prevPosts].reverse());
   }
 
   // function handling shuffling posts...
   function handleShufflePosts() {
-    const shuffledPosts = [...PostDetails].sort(() => Math.random() - 0.5);
-    setPostDetails(shuffledPosts);
+    setPostDetails((prevPosts) => [...prevPosts].sort(() => Math.random() - 0.5));
   }
 
-    // useeffect for sorting...
-  useEffect(() => {
-    switch (selectedSort) {
-      case 'newest':
-        const newestPost = [...PostDetails].sort(( a , b ) =>  new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime() );
-        setPostDetails(newestPost);
-        break;
-      
-      case 'oldest':
-        const oldestPost = [...PostDetails].sort(( a , b ) =>  new Date(a.postedAt).getTime() - new Date(b.postedAt).getTime() );
-        setPostDetails(oldestPost);
-        break;
-
-      case 'likes':
-        const mostLikedPost = [...PostDetails].sort(( a , b ) => b.likes - a.likes); 
-        setPostDetails(mostLikedPost);
-        break;
-
-      case 'comments':
-        const mostCommented = [...PostDetails].sort(( a , b ) => b.comments - a.comments); 
-        setPostDetails(mostCommented);
-        break;
-
-      case 'reposts':
-        const mostReposts = [...PostDetails].sort(( a , b ) => b.reposts - a.reposts); 
-        setPostDetails(mostReposts);
-        break;
-
-      case 'views':
-        const mostViewed = [...PostDetails].sort(( a , b ) => b.views - a.views); 
-        setPostDetails(mostViewed);
-        break;
-
-      default:
-        break;
-    }
-  
-    
-  }, [selectedSort,bookmarkOptionsOpen,PostDetails])
+  // user-triggered sort change (no useEffect involved, so no infinite loop)...
+  function handleSortChange(sort: string) {
+    selectedSortRef.current = sort;
+    setSelectedSort(sort);
+    setBookmarkOptionsOpen(false);
+    setPostDetails((prevPosts) => applySortToPosts(prevPosts, sort));
+  }
 
   // function for api triggering...
   const getBookmarkPosts = useCallback(async() => {
+    if (isFetchingPostsRef.current || !hasMorePostsRef.current) return;
+    isFetchingPostsRef.current = true;
     setloadingPosts(true);
+    
     try {
-      const bookmarkApi = await axiosInstance.post('/api/bookmark',{ Page , Size });
+      const bookmarkApi = await axiosInstance.post('/api/bookmark',{ Page: PageRef.current , Size });
       if (bookmarkApi.data.success || bookmarkApi.status === 200) {
-        setPostDetails(bookmarkApi.data.posts);
-        sethasPosts(bookmarkApi.data.hasMore);
-        setloadingPosts(false);
+        // backend already returns posts in the PostType shape expected by this page...
+        const fetchedPosts : PostType[] = bookmarkApi.data.posts ;
+        hasMorePostsRef.current = bookmarkApi.data.hasMore ;
+        setPostDetails((prevPosts) => {
+          const merged = [...prevPosts];
+          for (const post of fetchedPosts) {
+            if (!merged.some((p) => p.id === post.id)) {
+              merged.push(post);
+            }
+          }
+          return applySortToPosts(merged, selectedSortRef.current);
+        });
       }
     } catch (error) { 
       console.log("An Error Occured :",error);
-      setloadingPosts(false);
     } finally {
+      isFetchingPostsRef.current = false;
       setloadingPosts(false);
     }
-  },[Page])
+  },[applySortToPosts])
 
   // function to get suggestions...
   async function getAccountSuggestions() {
@@ -594,26 +599,26 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
   }, [getBookmarkPosts])
 
 
-  // fetching posts by pagination...
+  // fetching posts by pagination (scroll listener registered once via useRef-managed handler)...
   useEffect(() => {
      const section = postsSection.current ;
      if (!section) return ;
      
      const handleScroll = () => {
        const distanceFromBottom = section.scrollHeight - section.scrollTop - section.clientHeight ;
-       if (distanceFromBottom <= autoHeightGap && hasPosts) {
+       if (distanceFromBottom <= autoHeightGap && hasMorePostsRef.current && !isFetchingPostsRef.current) {
          getBookmarkPosts();
-         setPage(Page + 1);
+         PageRef.current = PageRef.current + 1;
        }
       }
-      // calling scroll function...
+      // calling scroll function to pre-fill if content is shorter than the viewport...
       handleScroll() ;
        
       section.addEventListener('scroll', handleScroll, { passive: true })
       return () => {
       section.removeEventListener('scroll', handleScroll)
      }
-  }, [autoHeightGap,hasPosts,PostDetails.length,getBookmarkPosts,Page])
+  }, [autoHeightGap,getBookmarkPosts])
   
    // useeffect for more popup closing...
     useEffect(() => {
@@ -699,7 +704,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                           style={{ transformOrigin: 'top right', willChange: 'transform, opacity' }}
                           className="option-pop absolute right-0 top-0 w-56 bg-white dark:bg-black rounded-lg shadow-lg dark:shadow-gray-800 border border-gray-200 dark:border-gray-900 z-50 p-1">
                           <button
-                            onClick={() => { setSelectedSort('newest'); setBookmarkOptionsOpen(false); }}
+                            onClick={() => handleSortChange('newest')}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'newest' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
                             <ArrowDown size={20}  />
@@ -707,7 +712,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             {selectedSort === 'newest' && <Check size={16} className="ml-auto stroke-2" />}
                           </button>
                           <button
-                            onClick={() => { setSelectedSort('oldest'); setBookmarkOptionsOpen(false); }}
+                            onClick={() => handleSortChange('oldest')}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'oldest' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
                             <ArrowUp size={20} />
@@ -715,7 +720,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             {selectedSort === 'oldest' && <Check size={16} className="ml-auto" />}
                           </button>
                           <button
-                            onClick={() => { setSelectedSort('likes'); setBookmarkOptionsOpen(false); }}
+                            onClick={() => handleSortChange('likes')}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'likes' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
                             <Heart size={20} />
@@ -723,7 +728,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             {selectedSort === 'likes' && <Check size={16} className="ml-auto" />}
                           </button>
                           <button
-                            onClick={() => { setSelectedSort('comments'); setBookmarkOptionsOpen(false); }}
+                            onClick={() => handleSortChange('comments')}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'comments' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
                             <MessageCircle size={20} />
@@ -731,7 +736,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             {selectedSort === 'comments' && <Check size={16} className="ml-auto" />}
                           </button>
                           <button
-                            onClick={() => { setSelectedSort('reposts'); setBookmarkOptionsOpen(false); }}
+                            onClick={() => handleSortChange('reposts')}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'reposts' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
                             <Repeat size={20} />
@@ -739,7 +744,7 @@ const [PostDetails, setPostDetails] = useState<PostType[]>([
                             {selectedSort === 'reposts' && <Check size={16} className="ml-auto" />}
                           </button>
                           <button
-                            onClick={() => { setSelectedSort('views'); setBookmarkOptionsOpen(false); }}
+                            onClick={() => handleSortChange('views')}
                             className={`w-full flex items-center gap-3 px-4 py-2 text-sm rounded-lg cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-950 ${selectedSort === 'views' ? 'bg-gray-50 dark:bg-gray-950' : ''}`}
                           >
                             <Eye size={20} />

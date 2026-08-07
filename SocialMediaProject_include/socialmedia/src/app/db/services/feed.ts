@@ -134,7 +134,7 @@ export const getFeedPostService = async ({ Page, size }: { Page: number; size: n
       username: postOwner.name,
       handle: `@${postOwner.username}`,
       bio: postOwner.bio,
-      timestamp: new Date(post.createdAt).toUTCString(),
+      postedAt: new Date(post.createdAt).toUTCString(),
       content: post.content,
       mediaUrls: post.mediaUrls?.map((urlObj: any) => ({ url: urlObj?.url,media_type: urlObj?.media_type })),
       likes: likesCount,

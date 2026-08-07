@@ -11,7 +11,7 @@ export default function Loader({ loadingtext }: { loadingtext?:string }) {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="w-8 h-8 border-4 border-yellow-200 dark:border-yellow-300 border-t-yellow-500 dark:border-t-yellow-400 rounded-full animate-spin"
+              className="w-8 h-8 border-4 border-yellow-200 dark:border-yellow-300 border-t-yellow-500 dark:border-t-yellow-600 rounded-full animate-spin"
               animate={{ rotate: 360 }}
               transition={{ duration: 1 , repeat: Infinity , ease: "linear" }}
             />

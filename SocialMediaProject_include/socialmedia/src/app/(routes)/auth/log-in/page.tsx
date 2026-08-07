@@ -62,21 +62,21 @@ export default function LogIn() {
   }
 
   return (
-    <div className="lg:-ml-72 w-screen h-screen flex items-center justify-center font-poppins bg-gradient-to-r from-white to-gray-100 dark:from-gray-950 dark:to-black dark:bg-none">
-      <div className="border border-gray-200 w-full max-w-lg rounded-xl shadow-lg bg-white dark:bg-black dark:border-gray-600 flex flex-col items-center p-5 gap-2">
+    <div className="w-screen h-screen flex flex-col lg:flex-row items-center justify-center overflow-hidden font-poppins bg-white dark:bg-black">
+      <div className="border border-gray-200 w-full max-w-md rounded-xl shadow-lg bg-white dark:bg-black dark:border-gray-800 flex flex-col items-center p-5 gap-2">
         <div>
           <Image
             src="/images/letter-B.png"
             height={80}
             width={80}
             alt="letter-B"
-            className="rounded-full"
+            className="rounded-full dark:invert"
           />
         </div>
 
         {/* Intro Text */}
-        <h1 className="text-2xl font-bold text-gray-800 mt-4 dark:text-white">Welcome Back</h1>
-        <p className="text-md text-gray-600 text-center max-w-md px-4 dark:text-gray-400">
+        <h1 className="text-2xl font-bold text-gray-800 mt-4 dark:text-white">Welcome Back Guys !!</h1>
+        <p className="text-sm text-gray-600 text-center max-w-md px-4 dark:text-gray-400">
           Sign in to stay connected with the people you care about and enjoy a
           seamless social experience.
         </p>
@@ -85,7 +85,7 @@ export default function LogIn() {
         <div className="flex flex-row w-full px-6 gap-4 items-center justify-center mt-4">
           <Link
             href="/api/auth/register/google?intent=login"
-            className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-400 transition-all duration-300 hover:shadow-md bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
+            className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-500 transition-all duration-300 hover:shadow-md bg-yellow-400  dark:hover:bg-yellow-500 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
           >
             <img
               src="/svg/google.svg"
@@ -99,7 +99,7 @@ export default function LogIn() {
 
           <Link
             href="/api/auth/register/facebook?intent=login"
-            className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-400 transition-all duration-300 hover:shadow-md bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
+            className="flex flex-row gap-2 cursor-pointer hover:bg-yellow-500 transition-all duration-300 hover:shadow-md bg-yellow-400 dark:hover:bg-yellow-500 border-none items-center px-8 py-2 justify-center rounded-lg font-medium"
           >
             <img
               src="/svg/facebook.svg"
@@ -124,8 +124,8 @@ export default function LogIn() {
           {/* Email */}
           <div className="mb-4">
             <label className="block text-sm text-gray-700 mb-1">Email</label>
-            <div className="flex items-center border border-gray-300 rounded-md pl-3 group transition-all duration-300 focus-within:border-yellow-500 focus-within:ring-3 focus-within:ring-yellow-200 dark:focus-within:border-blue-500 dark:focus-within:ring-4 dark:focus-within:ring-blue-600/50 dark:border-gray-600">
-              <Mail className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-yellow-500 dark:group-focus-within:stroke-blue-400" />
+            <div className="flex items-center border border-gray-300 rounded-md pl-3 group transition-all duration-300 focus-within:border-yellow-500 focus-within:ring-3 focus-within:ring-yellow-200 dark:focus-within:border-yellow-500 dark:focus-within:ring-4 dark:focus-within:ring-yellow-600/50 dark:border-gray-600">
+              <Mail className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-yellow-500 dark:group-focus-within:stroke-yellow-400" />
               <input
                 type="email"
                 {...register('email')}
@@ -139,8 +139,8 @@ export default function LogIn() {
           {/* Password */}
           <div className="mb-6">
             <label className="block text-sm text-gray-700 mb-1">Password</label>
-            <div className="flex items-center border border-gray-300 rounded-md group pl-3 transition-all duration-300 focus-within:border-yellow-500 focus-within:ring-3 focus-within:ring-yellow-200 dark:focus-within:border-blue-500 dark:focus-within:ring-4 dark:focus-within:ring-blue-600/50 dark:border-gray-600">
-              <Lock className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-yellow-500 dark:group-focus-within:stroke-blue-400" />
+            <div className="flex items-center border border-gray-300 rounded-md group pl-3 transition-all duration-300 focus-within:border-yellow-500 focus-within:ring-3 focus-within:ring-yellow-200 dark:focus-within:border-yellow-500 dark:focus-within:ring-4 dark:focus-within:ring-yellow-600/50 dark:border-gray-600">
+              <Lock className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-yellow-500 dark:group-focus-within:stroke-yellow-400" />
               <input
                 type="password"
                 {...register('password')}
@@ -155,7 +155,7 @@ export default function LogIn() {
           <button
             type='submit'
             disabled={isSubmitting}
-            className="w-full cursor-pointer py-3 rounded-lg bg-yellow-300 hover:bg-yellow-400 active:bg-yellow-300 dark:bg-blue-700 dark:hover:bg-blue-800 dark:active:bg-blue-700 dark:text-white transition-all duration-300 font-semibold text-gray-900 hover:shadow-md"
+            className="w-full cursor-pointer py-3 rounded-lg bg-yellow-400 dark:hover:bg-yellow-500 dark:text-white transition-all duration-300 font-semibold text-gray-900 hover:shadow-md"
           >
             Log In
           </button>
@@ -166,12 +166,15 @@ export default function LogIn() {
           <span>New here?</span>
           <Link
             href="/auth/sign-up"
-            className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors dark:text-blue-400"
+            className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors dark:text-yellows-400"
           >
             Create an account
           </Link>
         </p>
       </div>
+       <div className="flex flex-col md:flex-row-reverse w-auto h-screen justify-center items-center bg-contain bg-white dark:bg-black dark:bg-none">
+          <Image src='/images/login-hero.jpg' width={600}  height={600} alt="banner" className="dark:invert border-none outline-none rounded-full" />
+        </div>
     </div>
   );
 }

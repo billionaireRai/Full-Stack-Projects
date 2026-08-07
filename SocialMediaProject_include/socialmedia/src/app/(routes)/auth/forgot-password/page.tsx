@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { Mail } from "lucide-react";
 
 interface ForgotPasswordFormData {
   email: string;
@@ -86,15 +87,15 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-white dark:bg-black">
+    <div className="h-screen w-screen overflow-hidden flex flex-col gap-3 items-center justify-center rounded-lg md:flex-row bg-white dark:bg-black">
       {/* Left Section */}
-      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-10 dark:bg-black">
+      <div className="flex flex-col items-center justify-center w-auto rounded-lg p-10 dark:bg-black">
         <Image
           src="/images/forgot-password.jpg"
           alt="Forgot Password"
           width={350}
           height={350}
-          className="object-contain mb-8 rounded-2xl shadow-lg"
+          className="object-contain mb-8 rounded-2xl dark:invert"
         />
 
         <h1 className="text-3xl font-semibold text-gray-800 dark:text-white text-center mb-4">
@@ -108,23 +109,23 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center justify-center w-full md:w-1/2 bg-white dark:bg-black p-8">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl w-full max-w-md p-10">
+      <div className="flex items-center justify-center w-auto rounded-lg bg-white dark:bg-black p-8">
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-900 rounded-2xl shadow-lg w-full max-w-md p-10">
           <div className="flex flex-col items-center mb-8">
             <Image
               src="/images/letter-B.png"
               width={60}
               height={60}
               alt="logo"
-              className="mb-3 rounded-full"
+              className="mb-3 rounded-full dark:invert"
             />
 
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
-              Reset Password
+            <h2 className="text-2xl text-center sm:text-3xl font-bold text-gray-800 dark:text-white">
+              Get link to reset password
             </h2>
 
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Provide your account email to receive instructions.
+            <p className="text-sm text-gray-500 text-center dark:text-gray-400 mt-2">
+              Enter the email address associated with your account, and we'll send you a secure password reset link for further instructions on how to reset your password.
             </p>
           </div>
 
@@ -134,39 +135,22 @@ export default function ForgotPasswordPage() {
             noValidate
           >
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email Address
-              </label>
-
-              <input
-                type="email"
-                placeholder="Enter registered email..."
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Invalid email format",
-                  },
-                })}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 dark:focus:ring-blue-500 transition"
-              />
-
-              {errors.email && (
-                <p className="flex items-center gap-2 text-red-500 text-xs mt-2">
-                  <Image
-                    src="/images/warning.png"
-                    alt="warning"
-                    width={18}
-                    height={18}
-                  />
-                  {errors.email.message}
-                </p>
-              )}
+              <label className="block text-sm text-gray-700 dark:text-gray-500 font-semibold mb-1">Email address</label>
+              <div className="flex items-center border border-gray-300 rounded-md pl-3 group transition-all duration-300 focus-within:border-yellow-500 focus-within:ring-3 focus-within:ring-yellow-200 dark:focus-within:border-yellow-500 dark:focus-within:ring-4 dark:focus-within:ring-yellow-600/50 dark:border-gray-600">
+              <Mail className="text-gray-500 mr-2 w-5 h-5 group-focus-within:stroke-yellow-500 dark:group-focus-within:stroke-yellow-400" />
+                <input
+                  type="email"
+                  {...register('email')}
+                  placeholder="Enter your email"
+                  className="w-full py-2 px-1 outline-none bg-transparent rounded-lg"
+                />
+              </div>
+              {errors.email && <p className="text-red-500 text-xs p-1 flex items-center"><Image src='/images/warning.png' width={20} height={20} alt="warning"/><span className="ml-2">{errors.email.message}</span></p>}
             </div>
 
             <button
               type="submit"
-              className="w-full cursor-pointer py-3 bg-yellow-500 hover:bg-yellow-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:active:bg-blue-500 text-white font-semibold rounded-lg shadow-md transition"
+              className="w-full cursor-pointer py-3 bg-yellow-400 hover:bg-yellow-500 dark:bg-yellow-500 dark:hover:bg-yellow-600 dark:active:bg-blue-500 text-white font-semibold rounded-lg hover:shadow-md transition"
             >
               Send Reset Link
             </button>
@@ -177,11 +161,11 @@ export default function ForgotPasswordPage() {
 
             <Link
               href="/auth/log-in"
-              className="text-blue-600 dark:text-blue-400 font-semibold relative group"
+              className="text-yellow-600 dark:text-yellow-400 font-semibold relative group"
             >
               <span className="relative z-10">Login here</span>
 
-              <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-blue-600 dark:bg-blue-400 transition-all duration-300 group-hover:w-full" />
+              <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-yellow-600 dark:bg-yellow-400 transition-all duration-300 group-hover:w-full" />
             </Link>
           </p>
         </div>

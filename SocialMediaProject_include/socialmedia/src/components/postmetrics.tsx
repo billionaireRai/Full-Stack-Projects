@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Eye, Heart, MessageCircle, Repeat, Bookmark, TrendingUp, Users, MapPin, Smartphone, Monitor, Clock, BarChart3, Activity, LaptopIcon } from 'lucide-react'
 import axiosInstance from '@/lib/interceptor'
 import { fmt } from '@/lib/utils'
+import Loader from './loader'
 
 interface PostMetrics {
   views: number
@@ -35,73 +36,31 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
   
   const [TimeRange, setTimeRange] = useState<timeObj>({value:'7d',label:'7 days'}); // selected time interval for analytics...
 
-  const [metrics, setMetrics] = useState<PostMetrics>({
-        views: 12543,
-        likes: 892,
-        comments: 234,
-        shares: 156,
-        bookmarks: 78,
-        reach: 9876,
-        impressions: 14567,
-        engagementRate: 7.2,
-        demographics: {
-          age: [
-            { range: '18-24', percentage: 35 },
-            { range: '25-34', percentage: 42 },
-            { range: '35-44', percentage: 18 },
-            { range: '45+', percentage: 5 }
-          ],
-          gender: [
-            { type: 'Male', percentage: 55 },
-            { type: 'Female', percentage: 40 },
-            { type: 'Other', percentage: 5 }
-          ],
-          locations: [
-            { country: 'United States', percentage: 28 },
-            { country: 'India', percentage: 22 },
-            { country: 'Europe', percentage: 15 },
-            { country: 'Canada', percentage: 12 },
-            { country: 'China' , percentage:2 },
-            { country: 'Russia' , percentage: 11 },
-            { country: 'Africa' , percentage: 11 },
-            { country: 'Australia', percentage: 8 },
-            { country: 'Others', percentage: 15 }
-          ]
-        },
-        deviceBreakdown: [
-          { device: 'Mobile', percentage: 11 },
-          { device: 'Desktop', percentage: 35 },
-          { device: 'Laptop', percentage: 40 },
-          { device: 'Tablet', percentage: 14 }
-        ],
-        hourlyEngagement: [
-          { hour: 9, engagement: 45 },
-          { hour: 12, engagement: 78 },
-          { hour: 15, engagement: 92 },
-          { hour: 18, engagement: 85 },
-          { hour: 21, engagement: 67 }
-        ],
-        topPerformingDays: [
-          { day: 'Monday', engagement: 85 },
-          { day: 'Tuesday', engagement: 92 },
-          { day: 'Wednesday', engagement: 78 },
-          { day: 'Thursday', engagement: 88 },
-          { day: 'Friday', engagement: 95 },
-          { day: 'Saturday', engagement: 72 },
-          { day: 'Sunday', engagement: 68 }
-        ]
-  })
+  const [Loading, setLoading] = useState<boolean>(true);
+  const [metrics, setMetrics] = useState<PostMetrics>();
 
   useEffect(() => {
     // function fetching the data...
     const fetchMetrics = async () => { 
-      const metricApi = await axiosInstance.get(`/api/post/essentials?postid=${postId}&timeInterval=${TimeRange.value}`)
-      if (metricApi.status == 200) setMetrics(metricApi.data.metric) ;
+      setLoading(true);
+      try {
+        const metricApi = await axiosInstance.get(`/api/post/essentials?postid=${postId}&timeInterval=${TimeRange.value}`)
+        if (metricApi.status == 200) {
+          setMetrics(metricApi.data.metric) ;
+          setLoading(false);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.log("An Error occured :",error);
+        setLoading(false);
+      }
     }
 
     fetchMetrics() ;
   }, [postId,TimeRange,timeArray])
 
+  if (Loading) return <Loader loadingtext='loading post metrics...'/> ;
 
   if (!metrics) {
     return (

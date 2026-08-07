@@ -24,7 +24,7 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="border-none lg:-ml-72 fixed top-0 p-0 dark:bg-black border-black w-screen h-screen flex flex-col overflow-y-auto">
+      <div className="border-none fixed top-0 p-0 dark:bg-black border-black w-screen h-screen flex flex-col overflow-y-auto">
         {/* themetoggler section */}
           <div className="themetoggler border-none flex items-center justify-end">
             <div
@@ -34,7 +34,7 @@ export default function HomePage() {
               <Tooltip>
                 <TooltipTrigger>
                   <div className="p-3 m-2 cursor-pointer rounded-full bg-white shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 ease-in-out ring-2 ring-transparent hover:ring-gray-500 dark:hover:ring-gray-400">
-                    <div className={`transition-transform duration-500 ${isDark ? 'rotate-180' : 'rotate-0'}`}>
+                    <div>
                       {isDark ? <Sun size={25} className="text-black" /> : <Moon size={25} className="text-black" />}
                     </div>
                   </div>

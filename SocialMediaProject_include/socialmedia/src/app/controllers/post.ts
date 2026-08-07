@@ -184,8 +184,7 @@ export const getBookmarkPostController = asyncErrorHandler( async (request:NextR
         return NextResponse.json({ message:'Important parameter missing !!' },{ status:200 });
     }
 
-    await getBookmarkPostsService({ Page , Size }) ; // calling the function...
-    return NextResponse.json({ message:'fetched successfully !!'},{ status:200 });
+    return await getBookmarkPostsService({ Page , Size }) ; // calling the function & returning the response...
 })
 
 export const postPageEssentialController = asyncErrorHandler( async (request:NextRequest) => {
@@ -196,8 +195,7 @@ export const postPageEssentialController = asyncErrorHandler( async (request:Nex
         return NextResponse.json({ message:'Recheck the credentials...' },{ status:400 });
     }
 
-    await getPostPageEssentialService({ postId , username }) ;
-    return NextResponse.json({ message:'Essentials fetched successfully !!'},{ status:200 });
+    return await getPostPageEssentialService({ postId , username }) ;
 })
 
 export const getAccountsBookmarkedAPostController = asyncErrorHandler( async (request:NextRequest) => {

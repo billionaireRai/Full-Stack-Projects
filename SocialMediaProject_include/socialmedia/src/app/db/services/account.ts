@@ -76,6 +76,54 @@ export const gettingAccountService = async (text:string) => {
      return NextResponse.json({ message:'Matching accounts fethced...' , searchedAcc:dataToReturn },{ status:200 });
 }
 
+export const getAnAccountService = async (handle:string) => {
+    await connectWithMongoDB() ; // establishing DB connection...
+    // getting cookies data...
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    
+    const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' });
+    if (!activeAcc) return NextResponse.json({ message: 'Current active account not found' }, { status: 404 });
+
+    const targetAcc = await accounts.findOne({ username:handle.substring(1) , 'account.status':'ACTIVE' })
+    if (!targetAcc) return NextResponse.json({ message: 'Target account missing' }, { status: 404 });
+
+    // getting count of followers and followings...
+    const followers = await follows.find({ followingId : targetAcc._id , isDeleted:false })
+    const following = await follows.find({ followerId : targetAcc._id , isDeleted:false })
+    const posts = await Post.find({ authorId: targetAcc._id , isDeleted:false }) ;
+    const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:targetAcc._id },{ isDeleted:false }]}) ;
+    
+    const targetacc : userCardProp = {
+        id: targetAcc._id.toString(),
+        decodedHandle:`@${targetAcc.username}`,
+        name:targetAcc.name,
+        content:targetAcc.bio,
+        IsFollowing: isfollowing ? true : false,
+        account:{
+            name:targetAcc.name ,
+            handle:`@${targetAcc.username}` ,
+            bio:targetAcc.bio ,
+            location:{
+                text:targetAcc.location.text,
+                coordinates:targetAcc.location.coordinates // lat,long
+            },
+            website:targetAcc.website,
+            joinDate:new Date(targetAcc.createdAt).toDateString(),
+            following:fmt(following.length),
+            followers:fmt(followers.length),
+            Posts:fmt(posts.length),
+            isCompleted:targetAcc.account.completed,
+            isVerified:targetAcc.isVerified.value,
+            plan:targetAcc.isVerified?.level || 'Free',
+            bannerUrl:targetAcc.banner.url,
+            avatarUrl:targetAcc.avatar.url
+        }
+    }
+
+    return NextResponse.json({ message: 'Target account fetched...' , targetacc },{ status:200 });
+}
+
 
 export const exploreDetailsForAccountService = async () => {
     await connectWithMongoDB() ; // establishing DB connection...
@@ -251,4 +299,3 @@ export const exploreDetailsForAccountService = async () => {
 
     return NextResponse.json({ message: 'Explore details fetched', suggestions: suggesstionsArr, trendingHashtags: top5Tags }, { status: 200 });
 }
-

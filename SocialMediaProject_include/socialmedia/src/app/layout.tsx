@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Providers from "@/app/provider";
 import Sidenavbar from "@/components/sidenavbar";
-import UnAuthorize from "@/components/unAuthorize-wrapper";
+// import UnAuthorize from "@/components/unAuthorize-wrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import React from "react";
 import "./globals.css";
+import Resetwrapper from "@/components/reset-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,21 +32,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({children }: {children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning={true} >
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
       >
-        <div className="flex h-screen">
+        <div className="flex h-screen w-screen rounded-md overflow-hidden">
           <ThemeProvider>
             <Providers>
-              <UnAuthorize>
-              <Sidenavbar />
-                <div id="main-scrollable" className="w-full lg:ml-72 lg:flex-1 overflow-auto h-full">
-                  {children}
+              {/* <UnAuthorize> */}
+              <Resetwrapper>
+                <div className="flex h-screen w-screen">
+                  <Sidenavbar />
+                  <div id="main-scrollable" className="w-full lg:flex-1 rounded-md h-full">
+                    {children}
+                  </div>
                 </div>
-              </UnAuthorize>
+              </Resetwrapper>
+              {/* </UnAuthorize> */}
             </Providers>
           </ThemeProvider>
         </div>

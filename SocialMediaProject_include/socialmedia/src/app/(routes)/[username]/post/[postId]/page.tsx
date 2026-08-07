@@ -5,11 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useParams } from 'next/navigation'
-import { FilterIcon, Target, Heart, Clock, Archive, Users, Check, TrendingUp, Eye, MessageSquare, Bookmark, ChevronDown, ArrowDownUp , Shuffle , UserCheck, CommandIcon } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Target, Heart, Clock, Archive, Users, Check, TrendingUp, Eye, MessageSquare, Bookmark, ChevronDown, ArrowDownUp , Shuffle , MessagesSquareIcon, UsersRound } from 'lucide-react'
 import PostCard from '@/components/postcard'
+import Activebeep from '@/components/activebeep'
 import Commentpopcard from '@/components/Commentpopcard'
-import TrendingCard from '@/components/trendingcard'
 import Usercard from '@/components/usercard'
 import PostMetricsPage from '@/components/postmetrics'
 import { userCardProp } from '@/components/usercard'
@@ -172,120 +171,9 @@ export default function PostPage() {
   ], []);
 
   // for storing the post details...
-  const [POST, setPOST] = useState<PostType | null>({
-      id: "1",
-      content: "Just launched my new portfolio website! Built with Next.js and Tailwind CSS. The developer experience is amazing! 🚀",
-      postedAt: "2h ago",
-      comments: 12,
-      reposts: 45,
-      likes: 128,
-      views: 1000,
-      mediaUrls: [],
-      hashTags: ["NextJS", "TailwindCSS", "WebDev"],
-      mentions: ["vercel", "reactjs"],
-      userliked:true,
-      isPinned:true,
-      isHighlighted:false,
-      usereposted:true,
-      usercommented:false,
-      userbookmarked:false,
-      username: "Amritansh Rai",
-      handle: "@amritansh_coder",
-      avatar: "https://picsum.photos/seed/avatar1/200/200",
-      cover: "https://picsum.photos/seed/cover1/1500/500",
-      bio: "Full-stack developer | React enthusiast | Building the future one commit at a time.",
-      isVerified: true,
-      plan:'Pro',
-      followers: "327k",
-      following: "177",
-      isFollowing: false,
-      taggedLocation: [{ text: "San Francisco, CA", coordinates: [37.7749, -122.4194] }],
-      poll: {
-        question: "What's your favorite JavaScript framework?",
-        options: [
-          { text: "React", votes: 150 },
-          { text: "Vue", votes: 80 },
-          { text: "Angular", votes: 45 },
-          { text: "Svelte", votes: 60 }
-        ],
-        duration: 24
-      }
-    }) ; // for storing post details...
+  const [POST, setPOST] = useState<PostType | null>() ; // for storing post details...
 
-    const [whoToFollow, setWhoToFollow] = useState<userCardProp[]>([
-      {
-        decodedHandle: '@alice_dev',
-        name: 'Alice Developer',
-        IsFollowing: true,
-        account: {
-          name: 'Alice Developer',
-          handle: '@alice_dev',
-          bio: 'Full-stack developer | React enthusiast | Building the future one commit at a time.',
-          location: {
-            text: 'New York, NY',
-            coordinates: [40.7128, -74.0060]
-          },
-          website: 'https://alice-dev.com',
-          joinDate: '2020-05-15',
-          following: '234',
-          followers: '1.2k',
-          Posts: '456',
-          isCompleted: true,
-          isVerified: true,
-          plan:'Pro',
-          bannerUrl: '/images/default-banner.jpg',
-          avatarUrl: '/images/default-profile-pic.png'
-        }
-      },
-      {
-        decodedHandle: '@bob_designer',
-        name: 'Bob Designer',
-        IsFollowing: false,
-        account: {
-          name: 'Bob Designer',
-          handle: '@bob_designer',
-          bio: 'Creative designer | Minimalist | Coffee addict | Turning ideas into beautiful interfaces.',
-          location: {
-            text: 'Los Angeles, CA',
-            coordinates: [34.0522, -118.2437]
-          },
-          website: 'https://bob-designs.com',
-          joinDate: '2019-08-22',
-          following: '567',
-          followers: '3.4k',
-          Posts: '789',
-          isCompleted: true,
-          isVerified: true,
-          plan:'Pro',
-          bannerUrl: '/images/default-banner.jpg',
-          avatarUrl: '/images/default-profile-pic.png'
-        }
-      },
-      {
-        decodedHandle: '@charlie_writer',
-        name: 'Charlie Writer',
-        IsFollowing: false,
-        account: {
-          name: 'Charlie Writer',
-          handle: '@charlie_writer',
-          bio: 'Tech writer | Blogger | Sharing insights on the latest in technology and development.',
-          location: {
-            text: 'Austin, TX',
-            coordinates: [30.2672, -97.7431]
-          },
-          website: 'https://charlie-writes.com',
-          joinDate: '2018-11-10',
-          following: '123',
-          followers: '5.6k',
-          Posts: '1,234',
-          isCompleted: true,
-          isVerified: false,
-          plan:'Free',
-          bannerUrl: '/images/default-banner.jpg',
-          avatarUrl: '/images/default-profile-pic.png'
-        }
-      }
-    ])
+    const [whoToFollow, setWhoToFollow] = useState<userCardProp[]>([])
   
     const handleSuggesstionShow = () => {
       if (ShowLess) {
@@ -304,241 +192,14 @@ export default function PostPage() {
       }
     }
 
-const [Comments, setComments] = useState<PostType[]>([
-    {
-      id: 'cmt-456',
-      content: 'This looks stunning! Great capture @sarah_nature #photography #sunsetvibes',
-      postedAt: 'Oct 3, 2023 2:15 PM',
-      comments: 3,
-      reposts: 12,
-      likes: 67,
-      views: 1450,
-      mediaUrls: [{ url: 'https://picsum.photos/seed/comment3/450/300', media_type: 'image' }],
-      hashTags: ['photography', 'sunsetvibes', 'naturelove'],
-      mentions: ['sarah_nature'],
-      userliked: true,
-      usereposted: false,
-      usercommented: false,
-      userbookmarked: false,
-      username: 'Mike Photographer',
-      handle: '@mike_photo',
-      avatar: 'https://picsum.photos/seed/avatar3/200/200',
-      cover: 'https://picsum.photos/seed/cover3/1500/500',
-      bio: 'Professional photographer capturing moments in nature 🌅',
-      isVerified: true,
-      plan:'Pro',
-      followers: '25.8k',
-      following: '1.2k',
-      isFollowing:true ,
-      isPinned:false ,
-      userBookmarked:true,
-      isHighlighted:false,
-      poll:undefined,
-      taggedLocation:undefined
-    },
-    {
-      id: 'cmt-789',
-      content: 'Love the colors! Where was this taken?',
-      postedAt: 'Oct 3, 2023 4:30 PM',
-      comments: 1,
-      reposts: 3,
-      likes: 45,
-      views: 890,
-      mediaUrls: [],
-      hashTags: ['sunset'],
-      mentions: [],
-      userliked: false,
-      usereposted: false,
-      usercommented: true,
-      userbookmarked: true,
-      username: 'Travel Lover',
-      handle: '@travelwithjane',
-      avatar: 'https://picsum.photos/seed/avatar4/200/200',
-      cover: 'https://picsum.photos/seed/cover4/1500/500',
-      bio: 'Exploring the world one sunset at a time ✈️🌍',
-      isVerified: false,
-      plan:'Free',
-      followers: '8.7k',
-      following: '456',
-      isFollowing:false ,
-      isPinned:true ,
-      userBookmarked:false,
-      isHighlighted:false,
-      poll:undefined,
-      taggedLocation:undefined
-    }
-  ])
-
-  const [RepliedPosts, setRepliedPosts] = useState<RepliedPostsType[]>([
-  {
-      id: "4",
-      postId: '4224',
-      postAuthorInfo: {
-        name: "Sarah Tech",
-        username: "@sarah_dev",
-        followers:'120k',
-        following:'89',
-        bio:'Full-stack developer | Open source contributor',
-        isVerified: false,
-        plan:'Free',
-        isFollowing: false,
-        isPinned: false,
-        isHighlighted: false,
-        likes: 123,
-        reposts: 45,
-        replies: 12,
-        views: 1000,
-        shares: 23,
-        userliked: false,
-        usereposted: false,
-        usercommented: true,
-        userbookmarked: false,
-        avatar: "/images/default-profile-pic.png",
-        banner:'https://picsum.photos/seed/cover-sarah/1500/500',
-        media: [{url: 'https://picsum.photos/seed/tutorial/450/300', media_type: 'image'}],
-        mentions:['techcommunity'],
-        hashTags:['Coding','JavaScript','React'],
-        content: "Check out my latest tutorial on building scalable React applications! 🚀 #NextJS #Development",
-        postedAt: "5d ago",
-        taggedLocation: [],
-        poll: undefined
-      },
-      commentedText: "Great tutorial! Really helped me understand the concepts better. 👍 Thanks @sarah_dev #React #Tutorial",
-      name: "James Clear",
-      username: "@jamesclear__",
-      followers:'10k',
-      following:'89',
-      bio:'A CEO, founder of multiple tech companies... Building the future of tech.',
-      isVerified: true,
-      plan:'Pro',
-      avatar: "https://picsum.photos/seed/james/200/200",
-      banner:'https://picsum.photos/seed/banner-james/1500/500',
-      media: [{url: 'https://picsum.photos/seed/comment/450/300', media_type: 'image'}],
-      mentions:['sarah_dev'],
-      hashTags:['React','Tutorial','Development'],
-      repliedAt: "4d ago",
-      comments: 56,
-      reposts: 89,
-      likes: 456,
-      isPinned:false,
-      isHighlighted:false,
-      views: 1200,
-      userliked:false,
-      usereposted:true,
-      usercommented:false,
-      userbookmarked:true
-    }
-  ])
-
-  const [bookmarkAccs,setbookmarkAccs] = useState<userCardProp[]>([
-    {
-      decodedHandle: '@johndoe',
-      name: 'John Doe',
-      IsFollowing: false,
-      account: {
-        name: 'John Doe',
-        handle: '@johndoe',
-        bio: 'Software Engineer passionate about coding',
-        location: {
-          text: 'New York',
-          coordinates: [40.7128, -74.0060]
-        },
-        website: 'https://johndoe.com',
-        joinDate: 'January 2020',
-        following: '150',
-        followers: '200',
-        Posts: '50',
-        isVerified: true,
-        plan:'Pro',
-        isCompleted: true,
-        bannerUrl: '/images/signup-banner.png',
-        avatarUrl: '/images/myProfile.jpg'
-      }
-    }
-  ]);
-
-  const [viewedAccs,setviewedAccs] = useState<userCardProp[]>([
-    {
-      decodedHandle: '@alicej',
-      name: 'Alice Johnson',
-      IsFollowing: true,
-      account: {
-        name: 'Alice Johnson',
-        handle: '@alicej',
-        bio: 'Tech enthusiast and blogger',
-        location: {
-          text: 'San Francisco',
-          coordinates: [37.7749, -122.4194]
-        },
-        website: 'https://alicej.com',
-        joinDate: 'February 2021',
-        following: '200',
-        followers: '300',
-        Posts: '75',
-        isVerified: false,
-        plan:'Free',
-        isCompleted: true,
-        bannerUrl: '/images/signup-banner.png',
-        avatarUrl: '/images/myProfile.jpg'
-      }
-    }
-  ]);
-
-  const [likedAccs,setlikedAccs] = useState<userCardProp[]>([
-    {
-      decodedHandle: '@charlieb',
-      name: 'Charlie Brown',
-      IsFollowing: false,
-      account: {
-        name: 'Charlie Brown',
-        handle: '@charlieb',
-        bio: 'Musician and songwriter',
-        location: {
-          text: 'Austin',
-          coordinates: [30.2672, -97.7431]
-        },
-        website: 'https://charlieb.com',
-        joinDate: 'June 2017',
-        following: '220',
-        followers: '400',
-        Posts: '90',
-        isVerified: true,
-        plan:'Pro',
-        isCompleted: true,
-        bannerUrl: '/images/signup-banner.png',
-        avatarUrl: '/images/myProfile.jpg'
-      }
-    }
-  ]);
+  const [Comments, setComments] = useState<PostType[]>([])
+  const [RepliedPosts, setRepliedPosts] = useState<RepliedPostsType[]>([])
+  const [bookmarkAccs,setbookmarkAccs] = useState<userCardProp[]>([]);
+  const [viewedAccs,setviewedAccs] = useState<userCardProp[]>([]);
+  const [likedAccs,setlikedAccs] = useState<userCardProp[]>([]);
 
   // account information of this page...
-  const [AccInfo, setAccInfo] = useState<userCardProp>(
-    {
-      id:'2BVFT^YVU*(0',
-      decodedHandle: '@jhondoe',
-      name: 'Jhon Doe',
-      IsFollowing: true,
-      account: {
-        name: 'Jhon Doe',
-        handle: '@jhondoe',
-        bio: 'Tech enthusiast and blogger',
-        location: {
-          text: 'San Francisco',
-          coordinates: [37.7749, -122.4194]
-        },
-        website: 'https://jhondoe.dev',
-        joinDate: 'February 2021',
-        following: '200',
-        followers: '300',
-        Posts: '75',
-        isVerified: true,
-        plan: 'Pro',
-        isCompleted: true,
-        bannerUrl: '/images/signup-banner.png',
-        avatarUrl: '/images/myProfile.jpg'
-      }
-    }
-  );
+  const [AccInfo, setAccInfo] = useState<userCardProp>();
   
   const { username , postId } = useParams() ;
   const searchparam = useSearchParams() ;
@@ -558,11 +219,11 @@ const [Comments, setComments] = useState<PostType[]>([
     if (category !== currentFilter) setcurrentFilter(category) ;
    } 
    
-
    // useffect for getting page essential data...
    useEffect(() => {
     async function fetchPostData() {
-      const response = await axiosInstance.post('/api/post/essentials', { postId: String(postId),username: String(username) });
+      const handle = decodeURIComponent(String(username)).substring(1);
+      const response = await axiosInstance.post('/api/post/essentials', { postId: String(postId),username: handle });
       if (response.status == 200) {
         setPOST(response.data.mainPost);
         setAccInfo(response.data.releventAcc);
@@ -653,11 +314,27 @@ const [Comments, setComments] = useState<PostType[]>([
     stateUpdater(shuffledPosts);
   }
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+       if (openFilter && !(event.target as Element).closest('.filters')) {
+         setopenFilter(false)
+       }
+    }
+        
+    if (openFilter) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+        
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [openFilter])
+
   
   return (
     <>
-    <div className='h-fit flex flex-col-reverse md:flex-row gap-1 font-poppins rounded-md p-2 dark:bg-black'>
-      <div className='mainSection h-full flex-2 rounded-md'>
+    <div className='h-screen flex flex-col-reverse md:flex-row gap-1 font-poppins rounded-md p-2 dark:bg-black'>
+      <div className='mainSection h-full overflow-y-auto flex-2 rounded-md'>
         <div>
           <header className="w-full z-10 backdrop-blur-md border-b rounded-lg mb-2 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
             <div className="flex flex-row items-center justify-between p-4">
@@ -675,70 +352,6 @@ const [Comments, setComments] = useState<PostType[]>([
                       {decodedHandle}
                      </Link>
                   </div>
-              </div>
-              <div className='flex flex-row items-center gap-2'>
-               <div className='flex items-center gap-1 border border-gray-600 dark:border-gray-500 rounded-full p-2 font-semibold cursor-pointer'>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="hover:bg-yellow-100 dark:hover:bg-gray-950 rounded-full transition-colors cursor-pointer p-2">
-                      <UserCheck className="w-4 h-4" />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Verified accounts
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link href={`/${AccInfo.decodedHandle}/mutual-accounts`} className="p-2 hover:bg-yellow-100 dark:hover:bg-gray-950 rounded-full transition-colors">
-                      <CommandIcon className="w-4 h-4" />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    See mutual accounts
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                   <span 
-                    onClick={() => { setCommentCardProp(true) }}
-                    className="p-2 hover:bg-yellow-100 dark:hover:bg-gray-950 rounded-full transition-colors">
-                      <MessageSquare className="w-4 h-4" />
-                   </span>    
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Comment on post
-                  </TooltipContent>
-                </Tooltip>
-               </div>
-                <button 
-                 onClick={() => { setopenFilter(!openFilter)}}
-                 className='p-2 relative rounded-full cursor-pointer dark:hover:bg-gray-950 hover:bg-yellow-100 transition-all duration-300'>
-                  <FilterIcon size={16} />
-                  { openFilter && (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }} 
-                      className='absolute w-45 h-fit -top-5 right-10 border border-gray-300 dark:border-gray-900 rounded-lg bg-white dark:bg-black shadow-xl dark:shadow-gray-950 overflow-y-auto'>
-
-                      <ul className='p-2 space-y-1'>
-                        {filterArr.map((filter) => (
-                          <li
-                            key={filter.value}
-                            onClick={() => handleChangeFilterState(filter.value)}
-                            className='px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-950 rounded-md cursor-pointer text-sm flex items-center gap-2'
-                          >
-                            <filter.icon className="w-4 h-4 mr-2" />
-                            <span>{filter.label}</span>
-                            <Check className={`w-4 h-4 ${currentFilter === filter.value ? 'opacity-100 stroke-2 text-green-500' : 'opacity-0'}`} />
-                          </li>
-                        ))}
-                      </ul>
-
-                    </motion.div>
-                  )}
-                </button>
               </div>
             </div>
           </header>
@@ -798,8 +411,8 @@ const [Comments, setComments] = useState<PostType[]>([
         <div className='renderingSec my-1 rounded-lg h-full'>
           {(activeNav.value === 'Metric') && (
             <>
-            <div className='rounded-lg flex items-center gap-3 px-4 py-3 text-xl font-semibold shadow-md bg-yellow-50 dark:bg-blue-950/10 border-l-4 border-yellow-400 dark:border-blue-500 text-gray-900 dark:text-white'>
-              <TrendingUp className="w-6 h-6 text-yellow-500 dark:text-blue-400" />
+            <div className='rounded-lg flex items-center gap-3 px-4 py-3 text-xl font-semibold shadow-md bg-yellow-50 dark:bg-yellow-950/10 border-l-4 border-yellow-400 dark:border-yellow-500 text-gray-900 dark:text-white'>
+              <TrendingUp className="w-6 h-6 text-yellow-500 dark:text-yellow-400" />
               Post Analytics
             </div>
             <div>
@@ -857,7 +470,7 @@ const [Comments, setComments] = useState<PostType[]>([
 
             <div className='rounded-lg flex items-center justify-between gap-3 px-4 py-3 my-5 text-xl font-semibold shadow-md bg-yellow-50 dark:bg-blue-950/10 border-l-4 border-yellow-400 text-gray-900 dark:text-white'>
               <div className='flex items-center gap-2'>
-                <MessageSquare className="w-6 h-6 text-yellow-500" />
+                <MessagesSquareIcon className="w-6 h-6 text-yellow-500" />
                 <span>Commented By</span>
               </div>
               <div className='flex items-center gap-1'>
@@ -933,8 +546,36 @@ const [Comments, setComments] = useState<PostType[]>([
             <div className='space-y-4'>
               {(activeNav.value === 'Replies') && (
                 <>
-                    <div className='space-y-6'>
-                      {RepliedPosts.map((post: RepliedPostsType) => (
+                  <div className='space-y-6'>
+                    <div className='rounded-lg flex items-center justify-between gap-3 px-4 py-3 my-5 text-xl font-semibold shadow-md bg-yellow-50 dark:bg-blue-950/10 border-l-4 border-yellow-400 text-gray-900 dark:text-white'>
+                       <div className='flex items-center gap-2'>
+                         <MessageSquare className="w-6 h-6 text-yellow-500" />
+                         <span>Replied To</span>
+                       </div>
+                       <div className='flex items-center gap-1'>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <button 
+                             onClick={() => { handleReversePostOrder(RepliedPosts,setRepliedPosts) }}
+                             type="button" className='cursor-pointer p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-gray-950'>
+                               <ArrowDownUp/>
+                             </button>
+                           </TooltipTrigger>
+                           <TooltipContent>Reverse post order</TooltipContent>
+                         </Tooltip>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <button 
+                             onClick={() => { handleShufflePosts(RepliedPosts,setRepliedPosts) }}
+                             type="button" className='cursor-pointer p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-gray-950'>
+                              <Shuffle/>
+                            </button>
+                           </TooltipTrigger>
+                           <TooltipContent>Shuffle posts</TooltipContent>
+                         </Tooltip>
+                       </div>
+                     </div>
+                      {RepliedPosts?.map((post: RepliedPostsType) => (
                         <div key={post.id} className="dark:bg-black rounded-xl p-4 border border-gray-200 dark:border-gray-900 transition-shadow">
                           <div className="flex space-x-3">
                             <img
@@ -1036,7 +677,6 @@ const [Comments, setComments] = useState<PostType[]>([
             </div>
           {(activeNav.value === 'Views') && (
             <>
-
             <div className='rounded-lg flex items-center justify-between gap-3 px-4 py-3 my-5 text-xl font-semibold shadow-md bg-yellow-50 dark:bg-blue-950/10 border-l-4 border-yellow-400 text-gray-900 dark:text-white'>
               <div className='flex items-center gap-2'>
                 <Eye className="w-6 h-6 text-yellow-500" />
@@ -1081,7 +721,6 @@ const [Comments, setComments] = useState<PostType[]>([
           )}
           {(activeNav.value === 'Likes') && (
             <>
-
             <div className='rounded-lg flex items-center justify-between gap-3 px-4 py-3 my-5 text-xl font-semibold shadow-md bg-yellow-50 dark:bg-blue-950/10 border-l-4 border-yellow-400 text-gray-900 dark:text-white'>
               <div className='flex items-center gap-2'>
                 <Heart className="w-6 h-6 text-yellow-500" />
@@ -1126,80 +765,56 @@ const [Comments, setComments] = useState<PostType[]>([
           )}
         </div>
       </div>
-      <div className='rightContainer h-full flex-1 flex flex-col gap-2 bg-white dark:bg-black rounded-lg p-2'>
-         <Usercard decodedHandle={AccInfo.decodedHandle} account={AccInfo.account} IsFollowing={AccInfo.IsFollowing} name={AccInfo.name} content={null} heading={<h2 className="text-lg font-semibold">Relevant people</h2>}/>
-           <div className='bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm'>
-                <div className='p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center'>
-                     <h2 className='text-xl font-bold text-gray-900 dark:text-white'>What's happening</h2>
-                    <svg className='h-5 w-5 text-gray-500 dark:text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
-                            </svg>
-                </div>
-                <div className='p-3 space-y-2'>
-                            <TrendingCard
-                               id={1}
-                               trendName="#TechInnovation"
-                               postCount="45.2K"
-                               category="Technology"
-                               iconType="trending"
-                               gradientFrom="from-blue-500"
-                               gradientTo="to-cyan-500"
-                             />
-                             <TrendingCard
-                               id={2}
-                               trendName="#ClimateAction"
-                               postCount="28.7K"
-                               category="Trending"
-                               iconType="flame"
-                               gradientFrom="from-orange-500"
-                               gradientTo="to-red-500"
-                             />
-                             <TrendingCard
-                               id={3}
-                               trendName="#Gaming"
-                               postCount="156K"
-                               category="Gaming"
-                               iconType="gamepad"
-                               gradientFrom="from-purple-500"
-                               gradientTo="to-pink-500"
-                             />
-                             <TrendingCard
-                               id={4}
-                               trendName="#Business"
-                               postCount="89.3K"
-                               category="Business"
-                               iconType="briefcase"
-                               gradientFrom="from-green-500"
-                               gradientTo="to-emerald-500"
-                             />
-                        </div>
-                        <div className='p-3 border-t flex items-center justify-between border-gray-200 dark:border-gray-700'>
-                  <Link href={`/explore?q=${encodeURIComponent('trend-nowdays')}&utm_source=show-more`} className='cursor-pointer text-blue-500 rounded-full hover:bg-blue-100 p-2 hover:text-blue-600 text-sm font-medium transition-colors'>
-                    Show more
-                  </Link>
-                </div>
-                    </div>
-                  <div className='relative bg-white dark:bg-black rounded-xl shadow-lg'>
-                     <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center borderdark:border-gray-700'>
-                      <Users size={20} /><h2 className='text-xl font-bold text-gray-900 dark:text-white'>Suggestions</h2>
-                    </div>
-                     <div className='p-4'>
-                      {whoToFollow.map((user, index) =>
-                         index < suggesstionNum && (
-                          <div key={index} className='flex items-center justify-between mb-2'>
-                            <Usercard {...user} content={null} />
-                          </div>
-                         )
-                      )}
-                     </div>
-                    <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
-                      <button 
-                        onClick={() => { handleSuggesstionShow() }}
-                        className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'>
-                        { ShowLess ? 'Show less' : 'Show more' }
-                      </button>
-                     </div>
+      <div className='rightContainer overflow-y-auto h-full flex-1 flex flex-col gap-2 bg-white dark:bg-black rounded-lg p-2'>
+         <Usercard decodedHandle={AccInfo?.decodedHandle} account={AccInfo?.account} IsFollowing={AccInfo?.IsFollowing} name={AccInfo?.name} content={AccInfo?.content} 
+         heading={
+          <div className='flex items-center justify-start gap-3 p-2'>
+            <UsersRound size={20} />
+            <h2 className="text-lg font-semibold">Relevant people</h2>
+          </div>
+          }
+          />
+          <div className='relative bg-white dark:bg-black rounded-xl'>
+             <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center border dark:border-gray-700'>
+              <Users size={20} /><h2 className='text-xl font-bold text-gray-900 dark:text-white'>Suggestions</h2>
+            </div>
+             <div className='p-4'>
+              {whoToFollow?.map((user, index) =>
+                 index < suggesstionNum && (
+                  <div key={index} className='flex items-center justify-between mb-2'>
+                    <Usercard {...user} content={null} />
                   </div>
+                 )
+              )}
+             </div>
+            <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-900'>
+              <button 
+                onClick={() => { handleSuggesstionShow() }}
+                className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
+                { ShowLess ? 'Show less' : 'Show more' }
+              </button>
+             </div>
+          </div>
+          <div className='bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-gray-900'>
+             {/* card to subscribe... */}
+              <div className='bg-white dark:bg-black rounded-xl flex flex-col gap-2 border p-4 border-gray-200 dark:border-gray-900'>
+                  <div className='flex item-center justify-between gap-3'>
+                     <div className='flex items-center justify-start gap-2'>
+                       <span className='text-xl font-semibold'>Upgrade subscription</span>
+                       <span className='flex items-center justify-center bg-yellow-100 dark:bg-gray-950 p-1 rounded-full'>
+                           <Image src='/images/yellow-tick.png' width={18} height={18} alt='subscribed-account'/>
+                       </span>
+                     </div>
+                     <Activebeep />
+                  </div>
+                  <p className='text-xs text-gray-400'>
+                      Upgrading your subscription plan allows you to unlock new features and if eligible , recieve a share of revenue...
+                  </p>
+                  <Link href='/subscription?plan=Pro&term=Monthly&utm_source=feed-page' className='w-fit rounded-lg'>
+                    <button className='cursor-pointer w-fit py-2 px-4 mt-1 font-semibold hover:shadow-md shadow-sm shadow-yellow-100 dark:shadow-yellow-900 dark:bg-yellow-500 bg-yellow-400 transition-shadow duration-300 rounded-lg'>Subscribe</button>
+                   </Link>
+              </div>
+          </div>
       </div>
     </div>
     { CommentCardProp && ( <Commentpopcard postId={String(POST?.id)} avatar={POST?.avatar} name={POST?.username} handle={POST?.handle}  timestamp={POST?.postedAt} content={POST?.content} media={POST?.mediaUrls} handleClose={() => { setCommentCardProp(false) }}/> )}

@@ -278,11 +278,12 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
   if (handle.substring(1) !== activeAcc.username)  return NextResponse.json({ message:'Account handle mismatch !!' },{ status:200 }) ;
   
   // fetching respective data from DB...
-  const pastTimeMS = new Date(pastTime) ;
+  // so convert it to an actual Date based on the current time.
+  const pastTimeMS = new Date(Date.now() - parseDesiredInterval(pastTime)) ;
 
-  // followers stats...
-  const followers = (await follows.find({ followingId:activeAcc._id  })).length ;
-  const followersAfterTime = (await follows.find({ $and:[{ followingId:activeAcc._id },{ createdAt:{ $gte:pastTimeMS } }] })).length ;
+// followers stats... (filter out soft-deleted follows for consistency)
+  const followers = await follows.countDocuments({ followingId:activeAcc._id , isDeleted:false }) ;
+  const followersAfterTime = await follows.countDocuments({ $and:[{ followingId:activeAcc._id },{ createdAt:{ $gte:pastTimeMS } },{ isDeleted:false }] }) ;
   const followersRate = followers > followersAfterTime ? Math.ceil( followersAfterTime / ( followers - followersAfterTime ) ) * 100 : 0 ; // getting percentage change...
 
   // followings stats...
@@ -357,13 +358,16 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
     }
   ];
 
-  const uniqueUAs = await Views.aggregate(devicePipeline);
+const uniqueUAs = await Views.aggregate(devicePipeline);
   for (const ua of uniqueUAs) {
-    const devicetype = capitalizeString(getDeviceType(ua)) ; 
-    deviceCounts[devicetype] += ua.count;
+    // getDeviceType returns lowercase keys matching deviceCounts object
+    const devicetype = getDeviceType(ua._id || '') as keyof typeof deviceCounts;
+    if (deviceCounts[devicetype] !== undefined) {
+      deviceCounts[devicetype] += ua.count;
+    }
   }
   const totalDeviceCount = Object.values(deviceCounts).reduce((acc,count) => acc + count , 0) ;
-  const deviceStats = deviceTypes.map(name => ({ name , value: (Math.ceil((deviceCounts[name] || 0 )/totalDeviceCount) * 100 ) }));
+  const deviceStats = deviceTypes.map(name => ({ name , value: totalDeviceCount > 0 ? (Math.ceil((deviceCounts[name] || 0 )/totalDeviceCount) * 100 ) : 0 }));
 
   // gender demographics stats...
   const genderDemoPipeline = [
@@ -492,14 +496,14 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
            }
         }
      ];
-     const locationWiseViewData = await Views.aggregate(areaWiseViewPipeline) ;
+const locationWiseViewData = await Views.aggregate(areaWiseViewPipeline) ;
      const locationSorted = locationWiseViewData.sort((loc_1,loc_2) => loc_2.count - loc_1.count ).slice(0,4) ;
 
      let locationCount : number = 0 ;
      locationSorted.forEach((loc) => locationCount += loc.count ) ;
      
      const finalLocationDemo = locationSorted.map((loc) => {
-      const percentage = Math.ceil(loc.count/locationCount)  * 100 ;
+      const percentage = locationCount > 0 ? Math.ceil(loc.count/locationCount) * 100 : 0 ;
 
       return {
         country: loc._id ,
@@ -507,12 +511,20 @@ export const getProfileDashboardAnalyticsService = async (handle:string , pastTi
       }
      }) ;
 
-     // media content posted...
+// media content posted...
     const mediaCounts : Record<string,number> = { videos:0 , images:0 , raw:0 , auto:0 } ;
-    const totalMediasArr = accountPost.map(post => post.mediaUrls) ;
+    // post.mediaUrls is an array of {url, public_id, media_type} objects
+    accountPost.forEach(post => {
+      (post.mediaUrls || []).forEach((media : any) => {
+        const type = media?.media_type || 'auto';
+        if (mediaCounts[`${type}s`] !== undefined) {
+          mediaCounts[`${type}s`] += 1;
+        } else if (mediaCounts[type] !== undefined) {
+          mediaCounts[type] += 1;
+        }
+      });
+    });
 
-    totalMediasArr.forEach(media => mediaCounts[media.media_type] += 1) ;
-    
     const finalMediaArr = Object.keys(mediaCounts).map(key => {
       return { name:capitalizeString(key) , value:mediaCounts[key] } ;
     })
