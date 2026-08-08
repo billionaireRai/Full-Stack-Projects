@@ -4,13 +4,6 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 mongoose.set("debug", NODE_ENV === 'development'); // logging all queries running on cloud...
 
-function passNodeEnvironment(env:string) {
-  if (env === 'development') {
-    return env.substring(0,3);
-  }
-  return env.substring(0,4); 
-}
-
 let connected:boolean = false ;
 
 export const connectWithMongoDB = async () => {
@@ -22,7 +15,7 @@ export const connectWithMongoDB = async () => {
     const MONGODB_DB = process.env.MONGODB_DB_NAME;
     if (!MONGODB_URI || !MONGODB_DB) throw new Error("Any MONGODB credentials are missing...");
 
-    const fullUri = `${MONGODB_URI.replace(/\/+$/, "")}/${MONGODB_DB.replace(/^\/+/, "")}_${passNodeEnvironment(NODE_ENV)}`;
+    const fullUri = `${MONGODB_URI.replace(/\/+$/, "")}/${MONGODB_DB.replace(/^\/+/, "")}_dev`;
 
     if (!connected) {
       await mongoose.connect(fullUri, { bufferCommands: true, autoCreate: false, autoIndex: false, maxPoolSize: 10, serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000,
