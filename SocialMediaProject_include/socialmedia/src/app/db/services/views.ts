@@ -32,7 +32,7 @@ export const trackingPostViewService = async ( postid: string, fromPage: string,
   // only authenticated accounts can view...
   if (activeAcc._id && ipHash) {
     duplicateQuery.viewerId = activeAcc._id;
-    duplicateQuery.ipHash = ipHash;
+    duplicateQuery.ip = ipHash;
   }
 
   // Only check for duplicates if we have identifying information
@@ -49,8 +49,8 @@ export const trackingPostViewService = async ( postid: string, fromPage: string,
     await Views.create({
       postId: postid,
       viewerId: activeAcc._id ,
-      ipHash: ipHash || "anonymous",
-      userAgentHash: userAgentHash || "anonymous",
+      ip: ipHash || "anonymous",
+      userAgent: userAgentHash || "anonymous",
       source: fromPage ,
       isQualified: !activeAcc._id ? false : true, // Only qualified if loggedin , in architecture always... 
     });

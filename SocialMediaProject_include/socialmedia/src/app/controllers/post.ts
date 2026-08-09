@@ -126,10 +126,10 @@ export const postNotInterestedController = asyncErrorHandler(async (request:Next
 
 export const postRepostController = asyncErrorHandler(async (request:NextRequest) => {
     const requrl =  new URL(request.nextUrl) ;
-
+    
     // getting the query search params...
     const postid = String(requrl.searchParams.get('postId'));
-    const repostState = Boolean(requrl.searchParams.get('state')) ;
+    const repostState = requrl.searchParams.get('state') === 'true' ;
 
     if (!postid) {
         console.log("Any of credential missing...");
@@ -210,8 +210,7 @@ export const getAccountsBookmarkedAPostController = asyncErrorHandler( async (re
         return NextResponse.json({ message:'Check incoming credentials...' },{ status:400 });
     }
 
-    await getAccountsBookmarkedAPostService({ postid , page , size });
-    return NextResponse.json({ message:'Essentials fetched successfully !!'},{ status:200 });
+return await getAccountsBookmarkedAPostService({ postid , page , size });
 })
 
 

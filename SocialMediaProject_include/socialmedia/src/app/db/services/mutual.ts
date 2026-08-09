@@ -13,6 +13,7 @@ import { pollOptionType } from "./post";
 import { connectWithMongoDB } from "../dbConnection";
 import { getDecodedDataFromCookie } from "@/lib/cookiehandler";
 import { findDuplicates } from "@/lib/arrayduplicates";
+import { mediaType } from "@/components/mediapopmodal";
 
 type Plan = "Free" | "Pro" | "Creator" | "Enterprise";
 
@@ -109,8 +110,8 @@ export const getMutualCredentialsService = async ( target:string , from:string )
     const bothLiked = await likes.find({ $and:[{ accountId:{ $in:[activeAcc._id,targetAcc._id] } },{ targetType:{ $in:['post','repost'] }}] }) ;
     const postids = bothLiked.map(likeObj => likeObj.targetEntity) ;
 
-    const mutualLikesPostids = findDuplicates(postids).flat() ;
-    const mutualLikePosts = await Promise.all(mutualLikesPostids.map(async (id) => { 
+const mutualLikesPostids = findDuplicates(postids) ;
+    const mutualLikePosts = await Promise.all(mutualLikesPostids.map(async (id) => {
          const postMarked = await Post.findById(id);
         if (!postMarked || postMarked.isDeleted) return null;
         
@@ -159,7 +160,7 @@ export const getMutualCredentialsService = async ( target:string , from:string )
             bio: postOwner.account?.bio || '',
             timestamp: new Date(postMarked.createdAt).toUTCString(),
             content: postMarked.content,
-            media: Array(postMarked.mediaUrls).map(urlObj => ({ url:urlObj.url , media_type:urlObj.media_type })) || [],
+            media: (postMarked.mediaUrls ?? []).map((urlObj:mediaType) => ({ url:urlObj.url , media_type:urlObj.media_type })),
             likes: likesCount,
             reposts: repostsCount,
             replies: commentsCount,
@@ -176,15 +177,16 @@ export const getMutualCredentialsService = async ( target:string , from:string )
             followers: fmt(postOwner.followers) || '0',
             following: fmt(postOwner.following) || '0',
             hashTags: postMarked.hashTags || [],
-            mentions: Array(postMarked.mentions).map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()),
+            mentions: (postMarked.mentions ?? []).map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()),
             isFollowing: !!isFollowing,
             taggedLocation: postMarked.taggedLocation || [],
             poll: poll
         };
     }));
-    
 
-    return NextResponse.json({ message:"Mutual likes , accounts and suggesstions fetched !!" , suggesstions:sortedAccSuggesstions , mutuals:mutualAccounts , likes:mutualLikePosts  },{ status:200 });
+    const filteredMutualLikePosts = mutualLikePosts.filter(post => post !== null);
+
+    return NextResponse.json({ message:"Mutual likes , accounts and suggesstions fetched !!" , suggesstions:sortedAccSuggesstions , mutuals:mutualAccounts , likes:filteredMutualLikePosts  },{ status:200 });
 }
 
 export const getMutualInterestPostsService = async (target:string,from:string,page:number,size:number) => {
@@ -213,9 +215,9 @@ export const getMutualInterestPostsService = async (target:string,from:string,pa
     const skipPosts = (page - 1 ) * size ;
     const hasMore = (skipPosts + size) < totalPosts.length ; 
 
-    const Posts = await Post.find({ $and:[{ authorId:{ $in:accIds } },{ postType:{ $nin:['comment'] } },{ isDeleted:false }] }).skip(skipPosts).limit(size).lean() ;
+const Posts = await Post.find({ $and:[{ authorId:{ $in:accIds } },{ postType:{ $nin:['comment'] } },{ isDeleted:false }] }).skip(skipPosts).limit(size).lean() as any[] ;
 
-    const finalPosts = Posts.map(async (post) => {
+    const finalPosts = await Promise.all(Posts.map(async (post) => {
         const postOwner = await accounts.findById(post.authorId);
         
         // Get counts
@@ -251,8 +253,8 @@ export const getMutualInterestPostsService = async (target:string,from:string,pa
           }
 
           return {
-              id: post._id,
-              postId: post._id,
+              id: post._id.toString(),
+              postId: post._id.toString(),
               avatar: postOwner.account?.avatar || '/images/default-profile-pic.png',
               cover: postOwner.account?.bannerUrl || '/images/default-banner.jpg',
               username: postOwner.account?.name,
@@ -260,7 +262,7 @@ export const getMutualInterestPostsService = async (target:string,from:string,pa
               bio: postOwner.account?.bio || '',
               timestamp: new Date(post.createdAt).toUTCString(),
               content: post.content,
-              media: Array(post.mediaUrls).map(urlObj => ({ url:urlObj.url , media_type:urlObj.media_type })) || [],
+              media: (post.mediaUrls ?? []).map((urlObj:mediaType) => ({ url:urlObj.url , media_type:urlObj.media_type })),
              likes: likesCount,reposts: repostsCount,
              replies: commentsCount,
              views: viewsCount,
@@ -276,12 +278,12 @@ export const getMutualInterestPostsService = async (target:string,from:string,pa
              followers: fmt(postOwner.followers) || '0',
              following: fmt(postOwner.following) || '0',
               hashTags: post.hashTags || [],
-             mentions: Array(post.mentions).map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()),
+             mentions: (post.mentions ?? []).map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()),
              isFollowing: !!isFollowing,
              taggedLocation: post.taggedLocation || [],
              poll: poll
          };
-    });
+    }));
     
     return NextResponse.json({ message:'mutual interest posts fetched...' , interestedPost:finalPosts , hasMore:hasMore },{ status:200 });
 }

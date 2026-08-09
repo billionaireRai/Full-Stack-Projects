@@ -24,7 +24,7 @@ export default function AccountSearch({ onSelect, placeholder = "Search accounts
   const apiForAllFollowings = useCallback( async () => {
     setloadingSearch(true);
     try {
-      const followingapi = await axiosInstance.get(`/api/follows?handle=${handle}`) ;
+      const followingapi = await axiosInstance.get(`/api/account/followings?handle=${handle}`) ;
       if (followingapi.status === 200) {
         setsearchedAccounts(followingapi.data.followings);
         setOriginalFollowings(followingapi.data.followings);

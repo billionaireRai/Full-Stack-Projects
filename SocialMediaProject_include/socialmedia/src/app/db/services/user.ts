@@ -908,9 +908,11 @@ export const getBookmarkSuggestionsService = async () => {
     const bookmarkPostIds = bookmarks.map(mark => mark.entityId);
 
     //  getting account suggestions from bookmarked posts...
-    const suggestedAccountsPromises = bookmarkPostIds.map(async ( postid:string ) => {
+const suggestedAccountsPromises = bookmarkPostIds.map(async ( postid:string ) => {
         const requiredPost = await Post.findById(postid);
-        const account = await accounts.findOne({ username: requiredPost?.handle, 'account.status': 'ACTIVE' });
+        if (!requiredPost || requiredPost.isDeleted) return null;
+        // The post author is the account to suggest (Post has authorId, not handle)...
+        const account = await accounts.findOne({ _id: requiredPost.authorId, 'account.status': 'ACTIVE' });
         if (!account) return null;
         const posts = await Post.find({ authorId: account._id, isDeleted: false });
         const isFoll = await follows.exists({ followerId: activeAcc._id, followingId: account._id, isDeleted: false });

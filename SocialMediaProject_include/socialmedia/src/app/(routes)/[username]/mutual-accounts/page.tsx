@@ -3,78 +3,16 @@
 import React,{ useState , useEffect, useCallback } from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
+import Activebeep from '@/components/activebeep';
 import { handleScrollToTop } from '@/lib/windowtopscroll'
-import { ArrowBigUpIcon , CommandIcon, MoreVertical, ThumbsUp, Users } from 'lucide-react';
+import { ArrowBigUpIcon , CommandIcon, MoreVertical, ThumbsUp, Users, MessagesSquare, Filter } from 'lucide-react';
 import { useRouter , useParams } from 'next/navigation';
 import Usercard, { userCardProp } from '@/components/usercard'
 import useActiveAccount from '@/app/states/useraccounts';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PostCardProps } from '@/components/postcard';
 import PostCard from '@/components/postcard';
 import axiosInstance from '@/lib/interceptor';
-
-// Helper function to format numbers
-// const fmt = (num: number): string => {
-//   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-//   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-//   return num.toString();
-// };
-
-// Type for postAuthorInfo nested object
-// interface PostAuthorInfoType {
-//   postId: string;
-//   username: string;
-//   handle: string;
-//   cover: string;
-//   bio: string;
-//   isVerified: boolean;
-//   plan: string;
-//   followers: string;
-//   following: string;
-//   timestamp: string;
-//   avatar: string;
-//   content: string;
-//   media: { url: string; media_type: string }[];
-//   mentions: string[];
-//   hashTags: string[];
-//   taggedLocation: { text: string; coordinates: [number, number] }[];
-//   poll?: {
-//     question: string;
-//     options: { text: string; votes: number }[];
-//     duration: number;
-//   };
-//   likes: string;
-//   reposts: string;
-//   replies: string;
-//   shares: string;
-//   views: string;
-//   userliked: boolean;
-//   usereposted: boolean;
-//   usercommented: boolean;
-//   userbookmarked: boolean;
-//   isPinned: boolean;
-//   isHighlighted: boolean;
-//   isFollowing: boolean;
-// }
-
-// Type for mutual comment data
-// interface MutualCommentType {
-//   id: string;
-//   postId: string;
-//   postAuthorInfo: PostAuthorInfoType;
-//   commentedText: string;
-//   mediaUrls: { url: string; media_type: string }[];
-//   mentions: string[];
-//   hashTags: string[];
-//   repliedAt: string;
-//   comments: string;
-//   reposts: string;
-//   likes: string;
-//   views: string;
-//   userliked: boolean;
-//   usereposted: boolean;
-//   usercommented: boolean;
-//   userbookmarked: boolean;
-// }
 
 export default function MutualAccounts () {
     const router = useRouter() ;
@@ -85,7 +23,19 @@ export default function MutualAccounts () {
     const [Page, setPage] = useState<number>(1) ;
     const [HasMore, setHasMore] = useState<boolean>(true);
     const [ShowLess, setShowLess] = useState<boolean>(false);
-    const [suggesstionNum, setsuggesstionNum] = useState<number>(4);
+    const [suggesstionNum, setsuggesstionNum] = useState<number>(3);
+    // state for the filter popup...
+    const [showFilters, setShowFilters] = useState<boolean>(false);
+    type FilterCategory = 'all' | 'mutualaccounts' | 'mutuallikes' | 'commoninterests' | 'commonreplies';
+    const [ActiveFilter, setActiveFilter] = useState<FilterCategory>('all');
+
+    const FilterOptions: { value: FilterCategory; label: string; icon: typeof Users }[] = [
+      { value: 'all', label: 'All content', icon: Users },
+      { value: 'mutualaccounts', label: 'Mutual accounts', icon: Users },
+      { value: 'mutuallikes', label: 'Mutual likes', icon: ThumbsUp },
+      { value: 'commoninterests', label: 'Common interests', icon: CommandIcon },
+      { value: 'commonreplies', label: 'Common replies', icon: MessagesSquare },
+    ];
     const [FollowSuggesstions, setFollowSuggesstions] = useState<userCardProp[]>([
         {
           decodedHandle: '@alice_dev',
@@ -329,9 +279,9 @@ export default function MutualAccounts () {
             avatarUrl: '/images/default-profile-pic.png'
           }
         }
-])
-      
-const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
+      ])
+    
+      const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
         {
           postId: 'post_001_mutual',
           avatar: '/images/default-profile-pic.png',
@@ -605,12 +555,215 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
           fromPage: 'feed'
         }
       ])
-      
+
+      const [commonReplyPost, setCommonReplyPost] = useState<PostCardProps[]>([
+        {
+          postId: 'post_001_reply',
+          avatar: '/images/default-profile-pic.png',
+          cover: '/images/default-banner.jpg',
+          username: 'Nina React',
+          handle: '@nina_react',
+          bio: 'React developer | Frontend enthusiast | Sharing tips & tricks',
+          userliked: true,
+          usereposted: false,
+          usercommented: true,
+          userbookmarked: false,
+          isPinned: false,
+          isVerified: true,
+          plan: 'Pro',
+          followers: '3.9k',
+          following: '312',
+          timestamp: 'Jan 16, 2025',
+          content: 'Great discussion! I totally agree — using hooks properly changed the way I structure my React components. #react #development',
+          media: [
+            { url: '/images/broken-laptop.jpg', media_type: 'image' }
+          ],
+          likes: 342,
+          reposts: 54,
+          replies: 89,
+          shares: 21,
+          views: 2345,
+          taggedLocation: [
+            { text: 'New York, NY', coordinates: [40.7128, -74.0060] }
+          ],
+          poll: undefined,
+          hashTags: ['react', 'development'],
+          mentions: ['john_dev'],
+          showActions: true,
+          isHighlighted: false,
+          isFollowing: true,
+          readOnly: false,
+          fromPage: 'feed'
+        },
+        {
+          postId: 'post_002_reply',
+          avatar: '/images/default-profile-pic.png',
+          cover: '/images/default-banner.jpg',
+          username: 'Omar Backend',
+          handle: '@omar_backend',
+          bio: 'Backend engineer | Node.js | REST & GraphQL APIs',
+          userliked: false,
+          usereposted: true,
+          usercommented: true,
+          userbookmarked: true,
+          isPinned: false,
+          isVerified: false,
+          plan: 'Free',
+          followers: '2.4k',
+          following: '456',
+          timestamp: 'Jan 15, 2025',
+          content: 'Completely agree with the points raised here. A well-designed API is half the battle won. #backend #api',
+          media: [],
+          likes: 278,
+          reposts: 67,
+          replies: 54,
+          shares: 15,
+          views: 1890,
+          taggedLocation: [
+            { text: 'Austin, TX', coordinates: [30.2672, -97.7431] }
+          ],
+          poll: undefined,
+          hashTags: ['backend', 'api'],
+          mentions: ['emma_writer'],
+          showActions: true,
+          isHighlighted: true,
+          isFollowing: true,
+          readOnly: false,
+          fromPage: 'feed'
+        },
+        {
+          postId: 'post_003_reply',
+          avatar: '/images/default-profile-pic.png',
+          cover: '/images/default-banner.jpg',
+          username: 'Priya Design',
+          handle: '@priya_design',
+          bio: 'Product designer | UX researcher | Design systems',
+          userliked: true,
+          usereposted: false,
+          usercommented: true,
+          userbookmarked: false,
+          isPinned: true,
+          isVerified: true,
+          plan: 'Pro',
+          followers: '6.1k',
+          following: '234',
+          timestamp: 'Jan 14, 2025',
+          content: 'This is such a thoughtful take! Good UX truly begins with understanding the user, not just the interface. #ux #design',
+          media: [
+            { url: '/images/broken-laptop.jpg', media_type: 'image' }
+          ],
+          likes: 512,
+          reposts: 98,
+          replies: 134,
+          shares: 42,
+          views: 3678,
+          taggedLocation: [
+            { text: 'Los Angeles, CA', coordinates: [34.0522, -118.2437] }
+          ],
+          poll: undefined,
+          hashTags: ['ux', 'design'],
+          mentions: ['lisa_design'],
+          showActions: true,
+          isHighlighted: true,
+          isFollowing: false,
+          readOnly: false,
+          fromPage: 'feed'
+        },
+        {
+          postId: 'post_004_reply',
+          avatar: '/images/default-profile-pic.png',
+          cover: '/images/default-banner.jpg',
+          username: 'Dev Cloud',
+          handle: '@dev_cloud',
+          bio: 'Cloud engineer | DevOps | Automation advocate',
+          userliked: false,
+          usereposted: true,
+          usercommented: true,
+          userbookmarked: true,
+          isPinned: false,
+          isVerified: true,
+          plan: 'Pro',
+          followers: '4.8k',
+          following: '345',
+          timestamp: 'Jan 13, 2025',
+          content: 'Could not have said it better myself. Automating these workflows is exactly what our team needed. #devops #automation',
+          media: [],
+          likes: 387,
+          reposts: 112,
+          replies: 76,
+          shares: 28,
+          views: 2987,
+          taggedLocation: [
+            { text: 'Seattle, WA', coordinates: [47.6062, -122.3321] }
+          ],
+          poll: undefined,
+          hashTags: ['devops', 'automation'],
+          mentions: ['mike_tech','cris_cloud'],
+          showActions: true,
+          isHighlighted: false,
+          isFollowing: true,
+          readOnly: false,
+          fromPage: 'feed'
+        },
+        {
+          postId: 'post_005_reply',
+          avatar: '/images/default-profile-pic.png',
+          cover: '/images/default-banner.jpg',
+          username: 'Sofia Test',
+          handle: '@sofia_test',
+          bio: 'QA engineer | Testing advocate | Quality first',
+          userliked: true,
+          usereposted: false,
+          usercommented: true,
+          userbookmarked: false,
+          isPinned: false,
+          isVerified: false,
+          plan: 'Free',
+          followers: '1.9k',
+          following: '289',
+          timestamp: 'Jan 12, 2025',
+          content: 'Great points! Testing early in the pipeline really reduces issues later. Quality is everyone-s responsibility. #testing #qa',
+          media: [
+            { url: '/images/broken-laptop.jpg', media_type: 'image' }
+          ],
+          likes: 196,
+          reposts: 23,
+          replies: 41,
+          shares: 9,
+          views: 1245,
+          taggedLocation: [
+            { text: 'Chicago, IL', coordinates: [41.8781, -87.6298] }
+          ],
+          poll: undefined,
+          hashTags: ['testing', 'qa'],
+          mentions: [],
+          showActions: true,
+          isHighlighted: false,
+          isFollowing: true,
+          readOnly: false,
+          fromPage: 'feed'
+        }
+      ])
+
+  // close the filter popup when clicking outside...
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showFilters && !(event.target as Element).closest('.filter-popup-container')) {
+        setShowFilters(false)
+      }
+    }
+    if (showFilters) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showFilters])
 
   // function for showing more suggestions...
   const handleSuggesstionShow = () => {
      if (ShowLess) {
-      setsuggesstionNum(4);
+      setsuggesstionNum(3);
       setShowLess(false);
     } else {
       if ( ( FollowSuggesstions.length - suggesstionNum ) >= 3 ) {
@@ -662,10 +815,10 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
   
 
   return (
-  <div id='accounts' className='min-h-screen overflow-y-scroll flex flex-col gap-2 md:flex-row font-poppins rounded-md p-2 dark:bg-black'>
+  <div id='accounts' className='h-full overflow-y-scroll flex flex-col gap-2 md:flex-row font-poppins rounded-md p-2 dark:bg-black'>
       {/* main section of content... */}
-      <div className='flex-1 flex-col gap-4 items-center rounded-md'>
-        <div className="flex items-center justify-between p-2 gap-1 border-b border-gray-300 backdrop:blur-md rounded-md">
+      <div className='flex-1 flex-col gap-4 overflow-y-auto items-center rounded-md'>
+        <div className="flex items-center justify-between p-4 gap-1 border-b border-gray-300 backdrop:blur-md rounded-md">
         <div className='flex items-center gap-1'>
          <button 
             onClick={() => { router.back() }}
@@ -679,12 +832,59 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
              </p>
          </div>
         </div>
-        {/* will add some controller buttons... */}
-        <div className='border border-gray-300 flex flec-row gap-1.5 p-1 rounded-full cursor-pointer'>
-          <MoreVertical size={15} />
+        {/* Filter controllers */}
+        <div className='relative border border-gray-300 flex flec-row gap-1.5 rounded-full cursor-pointer'>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className='rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors cursor-pointer'
+            aria-label="Filter content"
+          >
+            <MoreVertical size={15} />
+          </button>
+          <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: -8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className='filter-popup-container absolute -top-1 -right-1 z-50 w-60 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl dark:shadow-gray-950 p-2'
+            >
+              <div className='px-2 py-1 flex flex-row gap-3 items-center border-b border-gray-100 dark:border-gray-800'>
+                <Filter size={25} />
+                <div>
+                 <p className='text-sm font-semibold text-gray-900 dark:text-white'>Filter content</p>
+                 <p className='text-xs text-gray-500 dark:text-gray-400'>Choose a category to display</p>
+                </div>
+              </div>
+              <div className='flex flex-col gap-0.5 py-1'>
+                {FilterOptions.map((option) => {
+                  const Icon = option.icon;
+                  const isActive = ActiveFilter === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => { setActiveFilter(option.value); setShowFilters(false); }}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-left text-sm transition-colors cursor-pointer ${
+                        isActive
+                          ? 'bg-yellow-100 dark:bg-gray-800 text-yellow-600 dark:text-blue-300 font-medium'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <Icon size={16} />
+                      <span className='flex-1'>{option.label}</span>
+                      { isActive && ( <Activebeep /> ) }
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+          </AnimatePresence>
         </div>
         </div>
         <div className='p-1 flex flex-col gap-2 rounded-md'>
+          {(ActiveFilter === 'all' || ActiveFilter === 'mutualaccounts') && (
           <div className='p-4'>
             {mutualAccs.length > 0 ? mutualAccs.map((usercard,index) => (index+1) <= suggesstionNum && (
               <div key={index + 1} className='flex items-center justify-between'>
@@ -697,10 +897,12 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
                 <p className='text-gray-500 dark:text-gray-400 text-sm'>No mutual accounts found</p>
                 <p className='text-gray-400 dark:text-gray-500 text-xs'>{Account.decodedHandle} and {decodeURIComponent(String(username))} don&apos;t follow any of the same accounts yet.</p>
               </div>
-             )
+)
             }
           </div>
-          {Array.isArray(MutualLikedPosts) && MutualLikedPosts.length > 0 ? ( 
+          )}
+          {(ActiveFilter === 'all' || ActiveFilter === 'mutuallikes') && (
+          Array.isArray(MutualLikedPosts) && MutualLikedPosts.length > 0 ? (
           <div>
             <div className='flex flex-row items-center p-4 rounded-md gap-3'>
               <div className='flex items-center justify-center'><CommandIcon /><ThumbsUp size={10}/></div>
@@ -721,7 +923,9 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
               <p className='text-gray-500 dark:text-gray-400 text-sm'>No mutual likes yet</p>
               <p className='text-gray-400 dark:text-gray-500 text-xs'>{Account.decodedHandle} and {decodeURIComponent(String(username))} haven&apos;t liked any of the same posts yet.</p>
             </div>
-          )}
+          ))}
+          {(ActiveFilter === 'all' || ActiveFilter === 'commoninterests') && (
+          <>
           {Array.isArray(commonInterestPost) && commonInterestPost.length > 0 ? (
           <div>
             <div className='flex flex-row items-center p-4 rounded-md gap-3'>
@@ -744,10 +948,38 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
               <p className='text-gray-400 dark:text-gray-500 text-xs'>Check back later for posts you both might like.</p>
             </div>
           )}
+          </>
+          )}
+          {(ActiveFilter === 'all' || ActiveFilter === 'commonreplies') && (
+          <>
+          {Array.isArray(commonReplyPost) && commonReplyPost.length > 0 ? (
+          <div>
+            <div className='flex flex-row items-center p-4 rounded-md gap-3'>
+              <div className='flex items-center justify-center'><CommandIcon /><MessagesSquare size={10}/></div>
+              <div className='flex flex-col gap-1 rounded-md'>
+                <span className='font-semibold'>Common Replies</span>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Posts you both have replied on.</p>
+              </div>
+            </div>
+            <div className='flex flex-col gap-2'>
+              {commonReplyPost.map((post, index) => (
+                <PostCard key={index} {...post} />
+              ))}
+            </div>
+          </div>
+          ) : (
+            <div className='flex flex-col items-center justify-center p-8 text-center gap-2 mt-4'>
+              <MessagesSquare size={40} className='text-gray-300 dark:text-gray-600' />
+              <p className='text-gray-500 dark:text-gray-400 text-sm'>No common replies yet</p>
+              <p className='text-gray-400 dark:text-gray-500 text-xs'>Check back later for posts you both have replied on.</p>
+            </div>
+          )}
+          </>
+          )}
         </div>
       </div>
       {/* suggesstions card on right... */}
-      <div className='space-y-1 rounded-md'>
+      <div className='space-y-1 overflow-y-auto h-full rounded-md'>
          {/* Who to Follow */}
         <div className='relative bg-white dark:bg-black rounded-md'>
           <div className='p-4 m-2 border-b rounded-md flex gap-2 items-center border-gray-200 dark:border-gray-700'>
@@ -771,7 +1003,7 @@ const [MutualLikedPosts, setMutualLikedPosts] = useState<PostCardProps[]>([
          <div className='p-2 m-2 rounded-md border-t border-gray-200 dark:border-gray-700'>
           <button 
                onClick={() => { handleSuggesstionShow() }}
-               className='cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-950 p-2 rounded-full text-blue-500 hover:text-blue-600 text-sm font-medium'>
+               className='cursor-pointer hover:bg-yellow-100 dark:hover:bg-gray-950 p-2 rounded-full text-yellow-500 hover:text-yellow-600 text-sm font-medium'>
                { ShowLess ? 'Show less' : 'Show more' }
           </button>
          </div>

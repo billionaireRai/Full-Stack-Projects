@@ -33,15 +33,19 @@ export function base64ToArrayBuffer(base64: string): ArrayBuffer {
 
 export type RsaKeyKind = "private" | "public";
 
-// function base64ToBytes(base64: string): Uint8Array {
-//     const binary = atob(base64);
-//     const bytes = new Uint8Array(binary.length);
-//     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-//     return bytes;
-// }
+// Extracts the base64 body out of a PEM string if present, otherwise returns the string unchanged.
+function stripPemIfPresent(key: string): string {
+  const pemMatch = key.match(/-----BEGIN [^-]+-----([\s\S]*?)-----END [^-]+-----/);
+  if (pemMatch && pemMatch[1]) {
+    return pemMatch[1].replace(/\r?\n/g, "").replace(/\s/g, "");
+  }
+  // Already base64 (possibly whitespace-wrapped)
+  return key.replace(/\s/g, "");
+}
 
-export async function importRespectiveKey(keyBase64:string,keyKind: RsaKeyKind) : Promise<CryptoKey> {
-    const keyBytes = base64ToArrayBuffer(keyBase64);
+export async function importRespectiveKey(key: string, keyKind: RsaKeyKind): Promise<CryptoKey> {
+    const base64Body = stripPemIfPresent(key);
+    const keyBytes = base64ToArrayBuffer(base64Body);
 
     // private key
     if (keyKind === "private") {

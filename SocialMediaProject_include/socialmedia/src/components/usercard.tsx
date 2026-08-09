@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link';
 import Image from 'next/image';
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom';
 import AccountDetailPop from './accountdetailpop';
 import { usernameRegex } from '@/app/controllers/regex';
@@ -90,6 +90,12 @@ export default function UserCard({ decodedHandle = 'jhondoe',name='Jhon Doe' ,Is
   const [Loading, setLoading] = useState(false) ; // for UI simulation...
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const avatarRef = useRef<HTMLImageElement>(null);
+
+  // Keep the follow state in sync with the prop when it changes
+  // (e.g. when follow suggestions finish loading asynchronously).
+  useEffect(() => {
+    setisFollowing(IsFollowing);
+  }, [IsFollowing]);
 
   // functions handling acccount details pop...
   const handleAvatarHover = () => {

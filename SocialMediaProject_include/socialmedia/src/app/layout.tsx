@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Providers from "@/app/provider";
 import Sidenavbar from "@/components/sidenavbar";
-// import UnAuthorize from "@/components/unAuthorize-wrapper";
+import UnAuthorize from "@/components/unAuthorize-wrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import React from "react";
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex h-screen w-screen rounded-md overflow-hidden">
           <ThemeProvider>
             <Providers>
-              {/* <UnAuthorize> */}
+              <UnAuthorize>
               <Resetwrapper>
                 <div className="flex h-screen w-screen">
                   <Sidenavbar />
@@ -50,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </div>
                 </div>
               </Resetwrapper>
-              {/* </UnAuthorize> */}
+              </UnAuthorize>
             </Providers>
           </ThemeProvider>
         </div>

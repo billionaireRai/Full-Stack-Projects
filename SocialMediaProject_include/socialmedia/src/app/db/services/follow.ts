@@ -18,7 +18,10 @@ import Block from "../models/blocked";
 export async function userFollowService(handle: string, follow: boolean) {
     await connectWithMongoDB(); // establishing DB connection...
 
-    const targetAcc = await accounts.findOne({ username: handle });
+    // Normalizing the handle in case it carries the '@' prefix...
+    const normalizedHandle = handle.startsWith('@') ? handle.substring(1) : handle;
+
+    const targetAcc = await accounts.findOne({ username: normalizedHandle });
     if (!targetAcc) return NextResponse.json({ message: 'Target user not found' }, { status: 404 });
 
     const user = await getDecodedDataFromCookie("accessToken");
@@ -30,6 +33,20 @@ export async function userFollowService(handle: string, follow: boolean) {
     // Preventing self-following
     if (myAccount._id.equals(targetAcc._id)) return NextResponse.json({ message: 'Cannot follow yourself' }, { status: 400 });
 
+    const followObject = await follows.findOne({ followerId: myAccount._id, followingId: targetAcc._id , isDeleted:false });
+
+    // UNFOLLOW flow : user wants to remove the follow...
+    if (!follow) {
+        if (!followObject) return NextResponse.json({ message: 'Not following this account' }, { status: 200 });
+
+        console.log('Deleting a follow obj...');
+        await follows.findByIdAndDelete(followObject._id);
+        return NextResponse.json({ message: 'Following removed' }, { status: 200 });
+    }
+
+    // FOLLOW flow : user wants to follow the target account...
+    if (followObject) return NextResponse.json({ message: 'Already following' }, { status: 200 });
+
     // No more than 20 follows for unsubscribed accounts...
     const accountsFollowedTillNow = await follows.find({ followerId: myAccount._id , isDeleted:false }) ;
     if (!myAccount.isVerified.value && accountsFollowedTillNow.length === 20) {
@@ -37,27 +54,21 @@ export async function userFollowService(handle: string, follow: boolean) {
         return NextResponse.json({ message: 'Follow restricted , get verified !!' }, { status: 400 });
     }
 
-    const followObject = await follows.findOne({ followerId: myAccount._id, followingId: targetAcc._id , isDeleted:false });
+    const newFollow = new follows({ followerId: myAccount._id, followingId: targetAcc._id });
+    await newFollow.save();
 
-    if (followObject && follow) {
-        console.log('Deleting a follow obj...');
-        await follows.findByIdAndDelete(followObject._id);
-        return NextResponse.json({ message: 'Following removed' }, { status: 200 });
-    }
-
-    if (!followObject && !follow) {
-        const newFollow = new follows({ followerId: myAccount._id, followingId: targetAcc._id });
-        await newFollow.save();
-
-        // sending follow notification...
-        sendFollowNotification(targetAcc._id,myAccount._id); 
-        return NextResponse.json({ message: 'New following created' }, { status: 200 });
-    }
-
-    // Handle remaining edge cases...
-    if (!followObject && follow) return NextResponse.json({ message: 'Already following' }, { status: 200 });
-
-    if (followObject && !follow) return NextResponse.json({ message: 'Logic failed...' }, { status: 200 });
+    // sending follow notification...
+    sendFollowNotification(
+        targetAcc._id.toString(),
+        {
+            id: myAccount._id.toString(),
+            name: myAccount.name,
+            username: myAccount.username,
+            isVerified: !!myAccount.isVerified?.value,
+            avatarUrl: myAccount.avatar?.url
+        }
+    );
+    return NextResponse.json({ message: 'New following created' }, { status: 200 });
 }
 
 export async function userReportService(report: reportInfoType) {
@@ -229,13 +240,15 @@ export const switchAccountService =  async (toAccount:userCardProp) => {
     return NextResponse.json({ message:'Account successfully switched...' },{ status:200 });
 }
 
-export const getAllTheFollowingService = async (handle:string) => {
+export const getAllTheFollowingService = async (handle:string,page:number,size:number) => {
     await connectWithMongoDB() ;
 
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
 
-    const activeAcc = await accounts.findOne({ username:handle , userId: user.id , 'account.Active':true });
+    const normalizedHandle = handle.startsWith('@') ? handle.substring(1) : handle;
+
+    const activeAcc = await accounts.findOne({ username:normalizedHandle , userId: user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
@@ -280,7 +293,30 @@ export const getAllTheFollowingService = async (handle:string) => {
         return returnAccountDataInStructure(accid)
      }))
 
-    return NextResponse.json({ message: 'Following accounts fetched successfully', followings: accountToSend }, { status: 200 });
+    // sorting the following accounts in decreasing order of subscription level...
+    const planOrder: Record<string, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
+
+    const sortedAccounts = accountToSend.sort((a, b) => {
+        const aPlan = (a.account?.plan || 'Free') as string;
+        const bPlan = (b.account?.plan || 'Free') as string;
+        const aLevel = planOrder[aPlan] ?? 0;
+        const bLevel = planOrder[bPlan] ?? 0;
+
+        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
+
+        // tie-breaker : verified accounts first...
+        const aVerified = a.account?.isVerified ?? false;
+        const bVerified = b.account?.isVerified ?? false;
+        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+
+        return 0;
+    });
+
+    // applying pagination...
+    const startIndex = (page - 1) * size;
+    const paginatedFollowings = sortedAccounts.slice(startIndex, startIndex + size);
+
+    return NextResponse.json({ message: 'Following accounts fetched successfully', followings: paginatedFollowings }, { status: 200 });
 }
 
 export const getAccountFollowersService = async (handle:string,page:number,size:number) => {
@@ -289,8 +325,15 @@ export const getAccountFollowersService = async (handle:string,page:number,size:
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
 
-    const activeAcc = await accounts.findOne({ username:handle , userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
-    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+    const normalizedHandle = handle.startsWith('@') ? handle.substring(1) : handle;
+
+    // The authenticated viewer's account (used only for the IsFollowing state)...
+    const viewerAcc = await accounts.findOne({ userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
+    if (!viewerAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    // The account whose followers are being viewed (may be any account, not just your own)...
+    const activeAcc = await accounts.findOne({ username:normalizedHandle , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
+    if (!activeAcc) return NextResponse.json({ message: 'Account not found' }, { status: 404 });
 
     async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
         const paticularAcc = await accounts.findById(accountId) ;
@@ -298,7 +341,7 @@ export const getAccountFollowersService = async (handle:string,page:number,size:
         const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
         const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
         const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
-        const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+        const isfollowing = await follows.exists({$and:[{ followerId:viewerAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
     
         return {
             id: paticularAcc._id.toString(),
@@ -356,29 +399,38 @@ export const getAccountFollowersService = async (handle:string,page:number,size:
         return 0;
     });
 
-    // applying pagination...
+// applying pagination...
     const startIndex = (page - 1) * size;
     const paginatedFollowers = sortedAccounts.slice(startIndex, startIndex + size);
 
-    return NextResponse.json({ message: 'Followers fetched successfully', followers: paginatedFollowers }, { status: 200 });
+    // determining whether more followers are available for the next page...
+    const hasMore = startIndex + size < sortedAccounts.length;
+
+    return NextResponse.json({ message: 'Followers fetched successfully', followers: paginatedFollowers , hasMore }, { status: 200 });
 }
 
-export const getFollowerSuggestionsService = async (handle:string) => {
-    await connectWithMongoDB() ; // connecting to database...
+async function getRandomAccountSuggestions(viewerAcc:any) : Promise<userCardProp[]> {
+    // 1. Fetch blocked account IDs (accounts the viewer has blocked or has been blocked by)...
+    const blockedDocs = await Block.find({ $or:[{ blockedByAcc:viewerAcc._id },{ blockedAcc:viewerAcc._id }] , isActive:true });
+    const blockedIds = blockedDocs.map(doc => doc.blockedByAcc.equals(viewerAcc._id) ? doc.blockedAcc.toString() : doc.blockedByAcc.toString());
 
-    const user = await getDecodedDataFromCookie("accessToken");
-    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+    // 2. Suggestion pool : all ACTIVE accounts except the viewer and blocked ones...
+    const suggestionPool = await accounts.find({
+        $and:[
+            { _id: { $ne: viewerAcc._id } },
+            { _id: { $nin: blockedIds } },
+            { 'account.status':'ACTIVE' }
+        ]
+    });
 
-    const activeAcc = await accounts.findOne({ username:handle , userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
-    if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
-
+    // 3. Structure each account into the userCardProp shape...
     async function returnAccountDataInStructure(accountId:string) : Promise<userCardProp> {
         const paticularAcc = await accounts.findById(accountId) ;
         // getting count of followers and followings...
         const followers = await follows.find({ followingId : paticularAcc._id , isDeleted:false })
         const following = await follows.find({ followerId : paticularAcc._id , isDeleted:false })
         const posts = await Post.find({ authorId:paticularAcc._id , isDeleted:false }) ;
-        const isfollowing = await follows.exists({$and:[{ followerId:activeAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
+        const isfollowing = await follows.exists({$and:[{ followerId:viewerAcc._id },{ followingId:paticularAcc._id },{ isDeleted:false }]}) ;
     
         return {
             id: paticularAcc._id.toString(),
@@ -409,40 +461,54 @@ export const getFollowerSuggestionsService = async (handle:string) => {
     
     }
 
-    // getting the followers of activeAcc
-    const followerAccountsId = (await follows.find({ $and:[{ followingId:activeAcc._id },{ isDeleted:false }]})).map( obj => obj.followerId );
+    // Structure the pool and drop accounts the viewer already follows...
+    const structuredPool = (await Promise.all(
+        suggestionPool.map((acc) => returnAccountDataInStructure(acc._id))
+    )).filter(acc => !acc.IsFollowing);
 
-    // structuring the follower accounts into userCardProp...
-    const followerAccounts = await Promise.all(followerAccountsId.map((accid) => {
-        return returnAccountDataInStructure(accid)
-    }));
+    // Fisher-Yates shuffle for a truly random order...
+    for (let i = structuredPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [structuredPool[i], structuredPool[j]] = [structuredPool[j], structuredPool[i]];
+    }
 
-    // sorting the follower accounts in decreasing order of subscription level...
-    const planOrder: Record<string, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
+    // Return the top 4 random accounts as suggestions...
+    return structuredPool.slice(0, 4);
+}
 
-    const sortedAccounts = followerAccounts.sort((a, b) => {
-        const aPlan = (a.account?.plan || 'Free') as string;
-        const bPlan = (b.account?.plan || 'Free') as string;
-        const aLevel = planOrder[aPlan] ?? 0;
-        const bLevel = planOrder[bPlan] ?? 0;
+export const getFollowerSuggestionsService = async (handle:string) => {
+    await connectWithMongoDB() ; // connecting to database...
 
-        if (aLevel !== bLevel) return bLevel - aLevel; // higher subscription first...
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
 
-        // tie-breaker : verified accounts first...
-        const aVerified = a.account?.isVerified ?? false;
-        const bVerified = b.account?.isVerified ?? false;
-        if (aVerified !== bVerified) return aVerified ? -1 : 1;
+    // The authenticated viewer's account (self is excluded from suggestions)...
+    const viewerAcc = await accounts.findOne({ userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
+    if (!viewerAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
-        return 0;
-    });
-
-    // returning the top 4 accounts as suggestions...
-    const top4Suggestions = sortedAccounts.slice(0, 4);
+    // Random, non-self, non-blocked & not-yet-followed suggestions for the initial phase...
+    const top4Suggestions = await getRandomAccountSuggestions(viewerAcc);
 
     return NextResponse.json({ message: 'Follower suggestions fetched successfully', suggestions: top4Suggestions }, { status: 200 });
 }
 
 export const getFollowingsSuggestionsService = async (handle:string) => {
+    await connectWithMongoDB() ; // connecting to database...
+
+    const user = await getDecodedDataFromCookie("accessToken");
+    if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
+
+    // The authenticated viewer's account (self is excluded from suggestions)...
+    const viewerAcc = await accounts.findOne({ userId:user.id , 'account.Active':true , 'account.status':{ $in:['ACTIVE','DEACTIVATED'] } });
+    if (!viewerAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
+
+    // Random, non-self, non-blocked & not-yet-followed suggestions for the initial phase...
+    const top4Suggestions = await getRandomAccountSuggestions(viewerAcc);
+
+    return NextResponse.json({ message: 'Followings suggestions fetched successfully', suggestions: top4Suggestions }, { status: 200 });
+}
+
+export const getFollowingsForAccountService = async (handle:string) => {
     await connectWithMongoDB() ; // connecting to database...
 
     const user = await getDecodedDataFromCookie("accessToken");
@@ -490,31 +556,18 @@ export const getFollowingsSuggestionsService = async (handle:string) => {
     
     }
 
-    // Fetch blocked account IDs (accounts that activeAcc has blocked or has been blocked by)...
-    const blockedDocs = await Block.find({ $or:[{ blockedByAcc:activeAcc._id },{ blockedAcc:activeAcc._id }] , isActive:true });
-    const blockedIds = blockedDocs.map(doc => doc.blockedByAcc.equals(activeAcc._id) ? doc.blockedAcc.toString() : doc.blockedByAcc.toString());
+    // getting ALL the followings of activeAcc (accounts activeAcc follows) - NO pagination...
+    const followingAccountsId = (await follows.find({ $and:[{ followerId:activeAcc._id },{ isDeleted:false }]})).map( obj => obj.followingId );
 
-    // Reasonable suggestion pool : all ACTIVE accounts except self and blocked ones...
-    const suggestionPool = await accounts.find({
-        $and:[
-            { _id: { $ne: activeAcc._id } },
-            { _id: { $nin: blockedIds } },
-            { 'account.status':'ACTIVE' }
-        ]
-    });
-
-    // Structuring the pool accounts into userCardProp...
-    const structuredPool = await Promise.all(suggestionPool.map((acc) => {
-        return returnAccountDataInStructure(acc._id) ;
+    // structuring all the following accounts into userCardProp...
+    const followingAccounts = await Promise.all(followingAccountsId.map((accid) => {
+        return returnAccountDataInStructure(accid)
     }));
 
-    // Filter out the accounts the active user already follows...
-    const notFollowed = structuredPool.filter(acc => !acc.IsFollowing);
-
-    // sorting the accounts in decreasing order of subscription level...
+    // sorting the following accounts in decreasing order of subscription level...
     const planOrder: Record<string, number> = { Free: 0, Pro: 1, Creator: 2, Premium: 3 };
 
-    const sortedAccounts = notFollowed.sort((a, b) => {
+    const sortedAccounts = followingAccounts.sort((a, b) => {
         const aPlan = (a.account?.plan || 'Free') as string;
         const bPlan = (b.account?.plan || 'Free') as string;
         const aLevel = planOrder[aPlan] ?? 0;
@@ -530,10 +583,8 @@ export const getFollowingsSuggestionsService = async (handle:string) => {
         return 0;
     });
 
-    // returning the top 4 accounts as suggestions...
-    const top4Suggestions = sortedAccounts.slice(0, 4);
-
-    return NextResponse.json({ message: 'Followings suggestions fetched successfully', suggestions: top4Suggestions }, { status: 200 });
+    // returning ALL the followings at once (no pagination)...
+    return NextResponse.json({ message: 'Followings fetched successfully' , followings: sortedAccounts }, { status: 200 });
 }
 
 export const getAccountFollowingsService = async (handle:string,page:number,size:number) => {
@@ -611,9 +662,12 @@ export const getAccountFollowingsService = async (handle:string,page:number,size
         return 0;
     });
 
-    // applying pagination...
+// applying pagination...
     const startIndex = (page - 1) * size;
     const paginatedFollowings = sortedAccounts.slice(startIndex, startIndex + size);
 
-    return NextResponse.json({ message: 'Followings fetched successfully', followings: paginatedFollowings }, { status: 200 });
+    // determining whether more followings are available for the next page...
+    const hasMore = startIndex + size < sortedAccounts.length;
+
+    return NextResponse.json({ message: 'Followings fetched successfully', followings: paginatedFollowings , hasMore }, { status: 200 });
 }

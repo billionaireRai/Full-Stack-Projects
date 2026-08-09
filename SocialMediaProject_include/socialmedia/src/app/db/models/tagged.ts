@@ -10,7 +10,7 @@ const taggedSchema = new mongoose.Schema(
     },
     taggedAs:{
       type:String,
-      enum:['bookmarked','highlighted','pinned','favourite'],
+      enum:['bookmarked','highlighted','pinned','favourite','not_interested'],
       default:'bookmarked',
       required:true
     },
@@ -23,8 +23,8 @@ const taggedSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-// Compound index to ensure unique bookmarks per account...
-taggedSchema.index({ accountId: 1, postId: 1 }, { unique: true });
+// Compound index to ensure unique tags per account, entity & tag type...
+taggedSchema.index({ accountId: 1, entityId: 1, taggedAs: 1 }, { unique: true });
 
 // Index for efficient queries by account..
 taggedSchema.index({ accountId: 1, createdAt: -1 });

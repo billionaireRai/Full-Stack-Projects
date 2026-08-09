@@ -65,7 +65,7 @@ export const createAndSendNotification = async (params: CreateNotificationParams
   }
 
   // Creating notification in database...
-  const notification = await notifications.create({ forAccId, actor, type, post, comment }); 
+  const notification = await notifications.create({ forAccId, actorId: actor.id, postId: post?.id, actor, type, post, comment }); 
   const presense = await Presence.findOne({ accountId:forAccId }) ; // getting presense state of for acc...
 
   // Send notification via socket server...
@@ -181,12 +181,13 @@ export const getNotificationsService = async ( username:string , page:number , p
     const user = await getDecodedDataFromCookie("accessToken");
     if (user instanceof Error) return NextResponse.json({ message: user.message }, { status: 401, statusText: 'UNAUTHORIZED REQUEST...' });
       
-    // getting the current active account...
+// getting the current active account...
     const activeAcc = await accounts.findOne({ userId: user.id , 'account.Active':true , 'account.status':'ACTIVE' });
 
-    // security check for account...
-    if (activeAcc.username !== username.substring(1)) {
-      console.log(`Account handle mismatch coming: ${username} expected: ${activeAcc.usename}`);
+    // security check for account... (normalize incoming username by stripping any '@' prefix)
+    const normalizedUsername = username.startsWith('@') ? username.substring(1) : username;
+    if (!activeAcc || activeAcc.username !== normalizedUsername) {
+      console.log(`Account handle mismatch coming: ${username} expected: ${activeAcc?.username}`);
       return NextResponse.json({ message:'Account handle mismatch !!' },{ status:404 });
     }
 

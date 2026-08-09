@@ -5,7 +5,6 @@ import Presense from '@/app/db/models/presense';
 import { messageFinalStatusUpdation } from '@/app/db/services/chat';
 import { notificationPayloadType } from '@/app/db/services/notifications';
 import { messageCreationService } from '@/app/db/services/chat';
-import { NextResponse } from 'next/server';
 
 const app = express();
 const port = 5000 ;
@@ -18,17 +17,24 @@ const io = new Server(server, { cors: { origin: "*" }});
 
 io.on("connection", (socket) => {
 
-  // for registering account as socket
+  // for registering account as socket...
   socket.on("register_account", async (accountId) => {
-  // creating Presense state in DB...
-  await Presense.create({ accountId:accountId , onlineStatus:'online' , socketId:socket.id })
+  await Presense.findOneAndUpdate(
+    { accountId: accountId },
+    { accountId: accountId, onlineStatus: 'online', socketId: socket.id },
+    { upsert: true, new: true }
+  );
   socket.join(accountId);
   });
   
-  // for login
+  // for login...
   socket.on("login_account", async (accountId) => { 
-    await Presense.findOneAndUpdate({ accountId:accountId },{ onlineStatus:'online' }) ;
-    socket.join(accountId);
+  await Presense.findOneAndUpdate(
+    { accountId: accountId },
+    { onlineStatus: 'online', socketId: socket.id },
+    { new: true }
+  ) ;
+  socket.join(accountId);
   })
 
   // getting the real-time message coming...
@@ -74,5 +80,5 @@ app.post("/emit-notification", (req: Request, res: Response) => {
 
 
 server.listen(port, () => {
-  console.log("Realtime server running on port 4000");
+  console.log(`Realtime server running on port ${port}`);
 });

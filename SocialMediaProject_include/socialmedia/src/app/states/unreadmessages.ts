@@ -9,7 +9,7 @@ interface MessageCountType {
 }
 
 const useMessageCount = create<MessageCountType>()( persist( (set) => ({
-      messageCount: 14,
+      messageCount: 0,
       setmessageCount: (value: number) => set({ messageCount: value }),
     }),
     {

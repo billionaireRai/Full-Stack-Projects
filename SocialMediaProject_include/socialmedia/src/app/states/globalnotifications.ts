@@ -9,7 +9,7 @@ interface globalNotificationsType {
 }
 
 const useNotificationValue = create<globalNotificationsType>()( persist( (set) => ({
-      notificationCount: 3,
+      notificationCount: 0,
       setnotificationCount: (value: number) => set({ notificationCount: value }),
     }),
     {

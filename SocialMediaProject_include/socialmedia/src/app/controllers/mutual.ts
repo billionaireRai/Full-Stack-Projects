@@ -10,8 +10,7 @@ export const getMutualCredentialsController = asyncErrorHandler( async (request:
         return NextResponse.json({ message:'Neccessary credential missing...'},{ status:404 });
     }
 
-    await getMutualCredentialsService(targetHandle,fromHandle);
-    return NextResponse.json({ message:'Mutual data fetched successfully !!' },{ status:200 });
+return await getMutualCredentialsService(targetHandle,fromHandle);
  })
 
 export const getMutualInterestPostsController = asyncErrorHandler(async (request:NextRequest) => {
@@ -26,6 +25,5 @@ export const getMutualInterestPostsController = asyncErrorHandler(async (request
         return NextResponse.json({ message:"Check variables coming..." },{ status:404 });
     }
     
-    await getMutualInterestPostsService(target,from,parseInt(page),parseInt(size));
-    return NextResponse.json({ message:'Mutual interest posts fetched...' },{ status:200 });
+return await getMutualInterestPostsService(target,from,parseInt(page),parseInt(size));
 })

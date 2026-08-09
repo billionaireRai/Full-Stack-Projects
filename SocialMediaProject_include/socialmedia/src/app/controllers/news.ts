@@ -3,7 +3,14 @@ import asyncErrorHandler from "../middleware/errorMiddleware";
 import { NextRequest, NextResponse } from "next/server";
 
 export const getNewsDataController = asyncErrorHandler(async (request: NextRequest) => {
-  const { title = "technology" , category = "politics" , page } = await request.json();
+  let body: { title?: string; category?: string; page?: string } = {};
+  try {
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+
+  const { title = "technology" , category = "politics" , page = "" } = body;
 
   const apiKey = process.env.NEWSDATAIO_API_KEY;
   if (!apiKey) throw new Error("NEWS_API_KEY environment variable is missing...");

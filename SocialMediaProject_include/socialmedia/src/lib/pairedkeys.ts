@@ -70,7 +70,7 @@ const handleIndexedDBStorage = async (privatekey: string,accountid:string) : Pro
       // storing only private key here...
       const keyobj:keyObjType = { accId:accountid , value: privatekey , createdAt:currentDate.toUTCString() } ;
 
-      if (!store.get(accountid))  store.put(keyobj) ; // handling edge cases...
+      store.put(keyobj) ;
 
       tx.oncomplete = () => resolve(keyobj);
       tx.onerror = () => reject(tx.error);
@@ -111,7 +111,6 @@ export const generateKeyPairAndStoreBoth = async (accountid:string) => {
   };;
 
   const { privateKey , publicKey } = await subtle.generateKey(algo, true, ["encrypt", "decrypt"]);
-  const { setpublickey } = usePublicKey() ; 
 
   // Export as SPKI (public) and PKCS8 (private) DER.
   const spkiDer = await subtle.exportKey("spki",publicKey);
@@ -125,12 +124,13 @@ export const generateKeyPairAndStoreBoth = async (accountid:string) => {
   const storeobj:keyObjType = await handleIndexedDBStorage(privatePem,accountid);
   localStorage.setItem('privatekey',storeobj.value);
   const pulick = await importRespectiveKey(publicPem,'public');
-  setpublickey(pulick);
+  // Use the zustand store's imperative API (avoid calling the hook outside a component).
+  usePublicKey.setState({ publickey: pulick });
   
 };
 
 // function to check private key storage in IDB...
-export const checkForPrivateKeyIDB = async (accountid: string) : Promise<string | null> => {
+export const checkForPrivateKeyIDB = async (accountid: string) : Promise<keyObjType | null> => {
   return await new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION); // opening request to IDB...
 

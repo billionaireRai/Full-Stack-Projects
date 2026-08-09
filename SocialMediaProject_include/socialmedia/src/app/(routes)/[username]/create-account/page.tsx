@@ -14,12 +14,6 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { generateKeyPairAndStoreBoth } from "@/lib/pairedkeys";
 import useWebSocket from "@/app/hooks/useWebSocket";
 
-// interface Option {
-//   value:string,
-//   label:string,
-//   icon:JSX.Element
-// }
-
 // applying ZOD validation on form feilds...
 const newAccCreation = z.object({
   Name:z.string().nonempty("Name is required"),
@@ -44,7 +38,7 @@ export default function CreateNewAccount() {
         toast.dismiss(loadingToast);
         toast.success('Account created successfully !!');
         router.push(`/${decodeURIComponent(String(params.username))}?switch-account-pop=true`) ;
-        generateKeyPairAndStoreBoth(apires.data.newAccId); // for public-private key generation...
+        await generateKeyPairAndStoreBoth(apires.data.newAccId); // for public-private key generation...
         useWebSocket(apires.data.newAccId,'register'); // registering web-socket id...
       } else {
         toast.dismiss(loadingToast);

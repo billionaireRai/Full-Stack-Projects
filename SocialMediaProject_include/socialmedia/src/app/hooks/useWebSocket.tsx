@@ -1,43 +1,32 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
 
 type AccountConnectionFn = (accountId: string) => void;
 
-export default function useWebSocket(accountId: string, type: string) {
-  const socketRef = useRef<Socket>(null);
+export default function useWebSocket(accountId: string, type: string): Socket {
+  const socket = io("http://localhost:5000", { autoConnect: true, transports: ["websocket"] });
 
-  useEffect(() => {
-    if (!accountId) return; // Avoid connecting without an account id...
+  const register: AccountConnectionFn = (accountid) => {
+    socket.emit("register_account", accountid);
+  };
 
-    const socket = io("http://localhost:5000", { autoConnect: true, transports: ["websocket"] });
+  const login: AccountConnectionFn = (accountid) => {
+    socket.emit("login_account", accountid);
+  };
 
-    socketRef.current = socket;
+  const handleConnect = () => {
+    if (type === "register") register(accountId);
+    else login(accountId);
+  };
 
-    const register: AccountConnectionFn = (accountid) => {
-      socket.emit("register_account", accountid);
-    };
+  socket.on("connect", handleConnect);
 
-    const login: AccountConnectionFn = (accountid) => {
-      socket.emit("login_account", accountid);
-    };
+  // If already connected, emit immediately.
+  if (socket.connected) handleConnect();
 
-    const handleConnect = () => {
-      if (type === "register") register(accountId);
-      else login(accountId);
-    };
-
-    handleConnect(); // emit for establishing connection...
-
-    return () => {
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [accountId, type]);
-
-  return socketRef;
+  return socket;
 }
 
 

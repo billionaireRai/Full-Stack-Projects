@@ -31,12 +31,15 @@ export default function useMessageSocket(chat?: infoForChatCard) {
   const { publickey } = usePublicKey() ; // getting public key from zustand...
   const { updateMessageStatus } = useActiveChatMessages() ;
 
+  const messagesLengthRef = useRef(messages.length);
+  messagesLengthRef.current = messages.length;
+
   // getting the private key from local storage...
   const privatekeyBase64 = localStorage.getItem("privatekey");
 
   if (!privatekeyBase64)  console.error("Missing private key !!");
 
-  const [connectionStatus, setConnectionStatus] = useState<connStatusType>("disconnected"); // storing connection status...
+  const [connectionStatus, setConnectionStatus] = useState<connStatusType>("disconnected"); // storing connection state...
   
   const [privateKey, setPrivateKey] = useState<CryptoKey | null>(null);
   
@@ -76,7 +79,7 @@ export default function useMessageSocket(chat?: infoForChatCard) {
         const decryptedText = await messageDecryptionTopLevel(encryptedMsg, privateKey, false);
         // Push msg into zustand state...
         const catchedMsg: Message = {
-          id:String(messages.length) ,
+          id:String(messagesLengthRef.current) ,
           sendername:chat.name,
           senderhandle:chat.handle,
           text: decryptedText,
@@ -119,7 +122,9 @@ export default function useMessageSocket(chat?: infoForChatCard) {
       socketRef.current = null;
       setConnectionStatus("disconnected");
     };
-  }, [chat, publickey, privateKey,addMessages,messages.length,play,updateMessageStatus]);
+  // NOTE: messagesLengthRef is used instead of messages.length here on purpose,
+  // so incoming messages do not tear down & reconnect the socket for every message.
+  }, [chat, publickey, privateKey, addMessages, play, updateMessageStatus]);
 
   const sendMessage = useCallback( async (payload: SendMessageInput) => {
       if (!chat) throw new Error("Chat is not selected");

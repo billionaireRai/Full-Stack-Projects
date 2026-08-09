@@ -354,11 +354,13 @@ export const togglePostFavouriteService = async (postid: string) => {
     const post = await Post.findOne({ _id: postid, isDeleted: false });
     if (!post) return NextResponse.json({ message: 'Post not found' }, { status: 404 });
 
-    // Check if already favourited (bookmarked)...
-    const existingFavourite = await tagged.findOne({ accountId: activeAcc._id, taggedAs: 'bookmarked', entityId: postid });
+    // Check if already favourited...
+    const existingFavourite = await tagged.findOne({ accountId: activeAcc._id, taggedAs: 'favourite', entityId: postid });
 
     if (existingFavourite) {
-        return NextResponse.json({ message: 'Post already in favourites !!' }, { status: 200 });
+        // Unfavourite by deleting the tag record...
+        await tagged.findOneAndDelete({ _id: existingFavourite._id });
+        return NextResponse.json({ message: 'Post removed from favourites !!' }, { status: 200 });
     } else {
         // Add to favourites
         const newFavouriteTag = new tagged({
@@ -486,7 +488,7 @@ export const commentingOnAPostService = async ( data:commentDataType ) => {
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     // checking if already commented...
-    const commentExists = await Post.find({ authorId:activeAcc._id , replyToPostId:postId , postType:'comment' , isDeleted:false }) ; 
+    const commentExists = await Post.findOne({ authorId:activeAcc._id , replyToPostId:postId , postType:'comment' , isDeleted:false }) ; 
 
     if (commentExists) {
         console.log('Duplicacy in comments not allowed !!');
@@ -519,9 +521,10 @@ export const commentingOnAPostService = async ( data:commentDataType ) => {
 
     if (!commentExists && commentingAllowed) {
         const commentPost = new Post({  
+           authorId:activeAcc._id,
            content:replyText,
            replyAllowedBy:'everyone',
-           repliedToPostId:postId,
+           replyToPostId:postId,
            postType:'comment',
            mentions:mentionIds,
            taggedLocation:AddLocation
@@ -633,7 +636,21 @@ export const postRepostService = async (data:{ postid:string , repostState:boole
     await newRepost.save();
 
     // sending repost notification to Target acc....
-    await sendRepostNotification(originalPost.authorId,activeAcc._id,originalPost._id) ;
+    await sendRepostNotification(
+        originalPost.authorId.toString(),
+        {
+            id: activeAcc._id.toString(),
+            name: activeAcc.name,
+            username: activeAcc.username,
+            isVerified: !!activeAcc.isVerified?.value,
+            avatarUrl: activeAcc.avatar?.url
+        },
+        {
+            id: originalPost._id.toString(),
+            content: originalPost.content,
+            thumbnailUrl: originalPost.mediaUrls?.[0] ? originalPost.mediaUrls[0].url : ''
+        }
+    );
 
     return NextResponse.json({ message: 'Post reposted successfully !!' }, { status: 200 });
 
@@ -652,7 +669,7 @@ export const postLikedService = async ( data:{ postId:string , isLiked:boolean }
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     // checking if already liked...
-    const alreadyLiked = await likes.find({ $and:[{ accountId:activeAcc._id },{ targetType:'post' },{ targetEntity:postId }] });
+    const alreadyLiked = await likes.findOne({ $and:[{ accountId:activeAcc._id },{ targetType:'post' },{ targetEntity:postId }] });
     
     // like already exists...
     if (alreadyLiked && isLiked)  {
@@ -688,10 +705,24 @@ export const postLikedService = async ( data:{ postId:string , isLiked:boolean }
     await newLike.save() ; // saving the doc in collection...
 
     // sending like notification...
-    sendLikeNotification(postToLike.authorId,activeAcc._id,postToLike._id);
+    await sendLikeNotification(
+        postToLike.authorId.toString(),
+        {
+            id: activeAcc._id.toString(),
+            name: activeAcc.name,
+            username: activeAcc.username,
+            isVerified: !!activeAcc.isVerified?.value,
+            avatarUrl: activeAcc.avatar?.url
+        },
+        {
+            id: postToLike._id.toString(),
+            content: postToLike.content,
+            thumbnailUrl: postToLike.mediaUrls?.[0] ? postToLike.mediaUrls[0].url : ''
+        }
+    );
 
     return NextResponse.json({ message:'Post Liked successfully !!'},{ status:200 });
-} 
+}
 
 export const postBookmarkingService = async (data:{ postId:string , isBookmarked:boolean }) => {
     const { postId , isBookmarked } = data ; 
@@ -706,7 +737,7 @@ export const postBookmarkingService = async (data:{ postId:string , isBookmarked
     if (!activeAcc) return NextResponse.json({ message: 'Current account not found' }, { status: 404 });
 
     // checking if already bookmarked...
-    const alreadyMarked = await tagged.find({ $and:[{ accountId:activeAcc._id },{ taggedAs:'bookmarked' },{ entityid:postId }] });
+    const alreadyMarked = await tagged.findOne({ $and:[{ accountId:activeAcc._id },{ taggedAs:'bookmarked' },{ entityId:postId }] });
     
     // bookmarked already exists...
     if (alreadyMarked && isBookmarked)  {
@@ -727,14 +758,14 @@ export const postBookmarkingService = async (data:{ postId:string , isBookmarked
     }
 
     // creating a new like doc...
-    const postToLike = await Post.find({ _id:postId , isDeleted:false}) ;
+    const postToLike = await Post.findOne({ _id:postId , isDeleted:false}) ;
     if (!postToLike) {
         console.log('Unable to find post...')
         return NextResponse.json({ message: 'post not found or has been deleted !!' }, { status: 404 });
     }
 
     // creating a ne bookmark...
-    const bookmarkTag = new tagged({ accountId:activeAcc._id , entityId:postId }) ; // new bookmark created...
+    const bookmarkTag = new tagged({ accountId:activeAcc._id , taggedAs:'bookmarked' , entityId:postId }) ; // new bookmark created...
 
     await bookmarkTag.save() ; 
     return NextResponse.json({ message:'Post successfully bookmarked !!' },{ status:200 });
@@ -849,6 +880,9 @@ export const getBookmarkPostsService = async ({ Page , Size }:{ Page:number ; Si
 
         // Check if following the post owner
         const isFollowing = await follows.findOne({ followerId: activeAcc._id, followingId: postOwner._id, isDeleted: false });
+        // Get followers and following counts
+        const followersCount = await follows.countDocuments({ followingId: postOwner._id, isDeleted: false });
+        const followingCount = await follows.countDocuments({ followerId: postOwner._id, isDeleted: false });
 
         // Get poll data if exists
         const pollData = await Poll.findOne({ authorPost: postMarked._id, isActive: true, expiry: { $gt: new Date() } });
@@ -864,11 +898,11 @@ export const getBookmarkPostsService = async ({ Page , Size }:{ Page:number ; Si
         return {
             id: postMarked._id.toString(),
             postId: postMarked._id.toString(),
-            avatar: postOwner.account?.avatar || '/images/default-profile-pic.png',
-            cover: postOwner.account?.bannerUrl || '/images/default-banner.jpg',
-            username: postOwner.account?.name,
+            avatar: postOwner.avatar?.url || '/images/default-profile-pic.png',
+            cover: postOwner.banner?.url || '/images/default-banner.jpg',
+            username: postOwner.name,
             handle: `@${postOwner.username}`,
-            bio: postOwner.account?.bio || '',
+            bio: postOwner.bio || '',
             postedAt: new Date(postMarked.createdAt).toUTCString(),
             content: postMarked.content,
             mediaUrls: (postMarked.mediaUrls ?? []).map((urlObj: any) => ({ url: urlObj?.url , media_type: urlObj?.media_type })) || [],
@@ -885,8 +919,8 @@ export const getBookmarkPostsService = async ({ Page , Size }:{ Page:number ; Si
             isCompleted: postOwner.account?.completed ?? false ,
             isVerified: postOwner.isVerified?.value || false,
             plan: postOwner.isVerified?.level || 'Free',
-            followers: fmt(postOwner.followers) || '0',
-            following: fmt(postOwner.following) || '0',
+            followers: fmt(followersCount),
+            following: fmt(followingCount),
             hashTags: postMarked.hashTags || [],
             mentions: Array.isArray(postMarked.mentions) ? postMarked.mentions.map((u: string) => typeof u === 'string' ? u.trim() : String(u).trim()) : [],
             isFollowing: !!isFollowing,
@@ -1136,7 +1170,7 @@ export const getAccountsBookmarkedAPostService = async ({ postid , page , size }
      if (!postExists) return NextResponse.json({ message:'Post not found !!' },{ status:404 }) ;
 
      const totalResult = await tagged.aggregate([
-          { $match: { entityId: new mongoose.Types.ObjectId(postid), taggedAs: 'Bookmarked' } },
+          { $match: { entityId: new mongoose.Types.ObjectId(postid), taggedAs: 'bookmarked' } },
           { $group: { _id: '$accountId' } },
           { $count: 'total' }
         ]);

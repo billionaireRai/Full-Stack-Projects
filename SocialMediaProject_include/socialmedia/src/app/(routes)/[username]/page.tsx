@@ -15,6 +15,7 @@ import ProfileEditor from '@/components/profileeditor';
 import useWebSocket from '@/app/hooks/useWebSocket';
 import { handleScrollToTop } from '@/lib/windowtopscroll'; 
 import { useSearchParams } from 'next/navigation';
+import usePublicKey from '@/app/states/accountpublickey';
 import { useRouter } from 'next/navigation';
 import { getlatestprofileInfo } from '@/lib/getlatestaccountInfo';
 import useActiveAccount, { accountType, userCardProp } from '@/app/states/useraccounts';
@@ -33,6 +34,7 @@ import { checkForPrivateKeyIDB, generateKeyPairAndStoreBoth, isKeyObjType } from
 import { MdAttachEmail } from 'react-icons/md';
 import useUserInfo from '@/app/states/userinfo';
 import AISummary from '@/components/aisummary';
+import { importRespectiveKey } from '@/lib/encryption';
 
 interface mediaType {
   url: string;
@@ -171,6 +173,7 @@ export default function UserProfilePage() {
   const intent = searchParams.get('intent');
   const key = searchParams.get('key');
 
+  const { setpublickey } = usePublicKey();
   const { isPop , setisPop } = useUpgradePop() ;
   const { isMediaPop , mediaDetail , setDetails, setMediaPop } = useMediaPop() ;
   const { username } = useParams() ; // taking the username from URL..
@@ -780,13 +783,13 @@ export default function UserProfilePage() {
 
   // funtion to handle summarize pop...
   function handleSummarizePop() : void {
-    // if (showUpgradePop) {
-    //   setplanIntent('Premium');
-    //   setisPop(true);
-    // } else {
+    if (showUpgradePop) {
+      setplanIntent('Premium');
+      setisPop(true);
+    } else {
       // main logic comes here...
       setShowSummarize(true);
-    // }
+    }
   }
 
   // funtion to copy email..
@@ -798,24 +801,27 @@ export default function UserProfilePage() {
   }
 
   // useffect for handling 'utm_source' & 'accid' search param...
-  // useEffect(() => {
-  //   const handlingSocketAndKeyLogic = async (accountid:string) => {
-  //     if (intent === 'register') {
-  //       generateKeyPairAndStoreBoth(accountid); // for public-private key generation...
-  //       useWebSocket(accountid,intent) // registering web-socket id... 
-  //     }
-  //     if (intent === 'login' && key?.trim()) {
-  //       const output = await checkForPrivateKeyIDB(accountid);
-  //       if (isKeyObjType(output)) { 
-  //         localStorage.setItem('privatekey',output.value);
-  //         // setpublickey(key);
-  //       }
-  //       else generateKeyPairAndStoreBoth(accountid);
-  //       useWebSocket(accountid,intent) // updating presence state web-socket id...
-  //     }    
-  //   }
-  //   if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
-  // }, [utmsource,accid,intent,key])
+  useEffect(() => {
+    const handlingSocketAndKeyLogic = async (accountid:string) => {
+      if (intent === 'register') {
+        await generateKeyPairAndStoreBoth(accountid); // for public-private key generation...
+        useWebSocket(accountid,intent) // registering web-socket id... 
+      }
+      if (intent === 'login' && key?.trim()) {
+        const output = await checkForPrivateKeyIDB(accountid);
+        if (isKeyObjType(output)) { 
+          localStorage.setItem('privatekey',output.value);
+          // `key` is the user's public key provided by the auth server.
+          // Import it as a public CryptoKey for message encryption.
+          const publicCryptoKey = await importRespectiveKey(key,'public');
+          setpublickey(publicCryptoKey);
+        }
+        else await generateKeyPairAndStoreBoth(accountid);
+        useWebSocket(accountid,intent) // updating presence state web-socket id...
+      }
+    }
+    if (utmsource?.trim() && accid?.trim() && intent?.trim())  handlingSocketAndKeyLogic(accid) ;
+  }, [utmsource,accid,intent,key])
 
   return (
 
@@ -824,7 +830,7 @@ export default function UserProfilePage() {
         <div className='flex gap-2 h-full rounded-md'>
           {/* Main Content - Profile */}
           <div className='flex-2 h-full rounded-md'>
-          <div className={`flex-1 h-full rounded-b-md bg-white dark:bg-black text-gray-900 overflow-x-hidden dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
+          <div id='main-scrollable' className={`flex-1 h-full overflow-y-auto rounded-b-md bg-white dark:bg-black text-gray-900 overflow-x-hidden dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
               {/* Header */}
               <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
                 <div className="px-4 py-3">
@@ -1029,15 +1035,6 @@ export default function UserProfilePage() {
                                onClick={() => {  }}
                                className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
                                 <div className='flex items-center justify-center gap-3'>
-                                  <Star size={15}/>
-                                  <span>Add to favourite</span>
-                                </div>
-                                 <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
-                               </li>
-                               <li
-                               onClick={() => {  }}
-                               className='flex flex-row items-center justify-between rounded-md w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 transition-colors'>
-                                <div className='flex items-center justify-center gap-3'>
                                   <VolumeX size={15}/>
                                   <span>Mute Account</span>
                                 </div>
@@ -1103,10 +1100,6 @@ export default function UserProfilePage() {
                           <Image src='/images/yellow-tick.png' width={18} height={18} alt='yellow-tick' /><span className='text-gray-700 dark:text-gray-400'>verification</span>
                         </Link>
                       )}
-                      <Link href={`/${AccountInfo.handle}/favourites`} className='border border-black-500 text-white bg-black hover:opacity-85 dark:border-gray-700 cursor-pointer flex flex-row items-center justify-center gap-1 px-3 py-1 rounded-full transition-colors'>
-                        <span>favourites</span>
-                        <Star className='w-4 h-4 text-white'/>
-                      </Link>
                     </div>
                   </div>
 

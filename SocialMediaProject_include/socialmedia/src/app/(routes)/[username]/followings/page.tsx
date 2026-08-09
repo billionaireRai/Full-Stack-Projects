@@ -25,12 +25,15 @@ export default function FollowingsPage () {
 
   const { username } = params ; // username from url parameter...
 
-  const size:number = 15 ;
+const size:number = 15 ;
   const page = useRef<number>(1);
   const handle = decodeURIComponent(String(username));
+  const feedSection = useRef<HTMLDivElement>(null); // scrollable feed container for auto pagination...
+  const autoHeightGap = 400; // threshold gap (in px) from bottom to trigger loading next page...
   const [loadingAcc, setloadingAcc] = useState<boolean>(false);
   const [loadingfollowings, setloadingfollowings] = useState<boolean>(false);
   const [loadingSugg, setloadingSugg] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true); // whether more followings exist on the server...
   const [targetAcc, settargetAcc] = useState<userCardProp>({}); // target account...
   // array for account card details...
   const [AccountDetails, setAccountDetails] = useState<userCardProp[]>([]); // will update its value...
@@ -81,14 +84,15 @@ export default function FollowingsPage () {
     { navtext: 'Newest', icon: <Clock size={18} />, handler:handleNewest }
   ]);
 
-  // function get followings..
+// function get followings..
   const getFollowingsOfAccount = useCallback( async () : Promise<void> => {
     setloadingfollowings(true)
     try {
       const followingsApi = await axiosInstance.post('/api/follow/followings',{ handle , page:page.current , size });
       if (followingsApi.status === 200) {
         const newFollowings = followingsApi.data.followings;
-        setAccountDetails((prev) => [prev,...newFollowings]);
+        setHasMore(!!followingsApi.data.hasMore); // capturing whether more followings exist...
+        setAccountDetails((prev) => [...prev, ...newFollowings]);
         baseFollowings.current = [...baseFollowings.current, ...newFollowings];
         page.current += 1 ;
         setloadingfollowings(false);
@@ -149,6 +153,25 @@ export default function FollowingsPage () {
     getFollowingsOfAccount();
   }, [])
 
+// auto pagination on scroll...
+    useEffect(() => {
+       const feedsection = feedSection.current ;
+       if (!feedsection) return ;
+       
+       const handleScroll = () => {
+         const distanceFromBottom = feedsection.scrollHeight - feedsection.scrollTop - feedsection.clientHeight ;
+         if (distanceFromBottom <= autoHeightGap && hasMore && !loadingfollowings) {
+           getFollowingsOfAccount();
+         }
+        }
+        // calling scroll function...
+        // handleScroll() ;
+       
+        feedsection.addEventListener('scroll', handleScroll, { passive: true })
+        return () => {
+         feedsection.removeEventListener('scroll', handleScroll)
+       }
+    }, [autoHeightGap,hasMore,loadingfollowings,AccountDetails.length,getFollowingsOfAccount])
 
   // current nav targeted...
 const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'All', icon: <Users size={18} /> ,handler:handleShowAll });
@@ -162,7 +185,7 @@ const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'A
   return (
     <>
      <div className='dark:bg-black rounded-md h-screen flex flex-col lg:flex-row font-poppins'>
-      <div className="main relative flex-2 rounded-md overflow-auto">
+      <div ref={feedSection} className="main relative flex-2 rounded-md overflow-auto">
         {/* Profile header */}
         <div className="relative flex items-center gap-5 border border-gray-200 dark:border-gray-900 dark:bg-black rounded-2xl p-4 shadow-md overflow-hidden">
           {/* Back button */}
@@ -246,11 +269,11 @@ const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'A
     <div className='m-2'>
      {loadingfollowings && ( <Loader loadingtext={`followings of ${handle}`}/> )}
      {!loadingfollowings && AccountDetails.length > 0 && (
-        AccountDetails.map((account,index) => (
-          <Usercard key={index} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} content={account.content} heading={account.heading} />
+      AccountDetails.map((account,index) => (
+          <Usercard key={index} account={account.account} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} content={account.content} heading={account.heading} />
         ))
       )}
-       { !loadingfollowings && AccountDetails.length === 0 && (
+      { !loadingfollowings && AccountDetails.length === 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -267,6 +290,12 @@ const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'A
               We couldn&apos;t find any accounts in your followings at the moment. Check back later for new recommendations!
             </p>
           </motion.div>
+         )}
+         {/* bottom loader while auto-loading next page... */}
+         {loadingfollowings && AccountDetails.length > 0 && (
+           <div className="flex items-center justify-center py-4">
+             <Loader loadingtext="loading more followings..." />
+           </div>
          )}
     </div>
    </div>
@@ -292,8 +321,8 @@ const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'A
         <div>
          {loadingSugg && ( <Loader loadingtext='suggestions' /> )}
          { !loadingSugg && AccSugg.length > 0 && (
-            AccSugg.map((account,index) => (
-             <Usercard key={index} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} content={account.content} heading={account.heading} />
+          AccSugg.map((account,index) => (
+             <Usercard key={index} account={account.account} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} heading={account.heading} />
             ))
          )}
          { !loadingSugg && AccSugg.length === 0 && (

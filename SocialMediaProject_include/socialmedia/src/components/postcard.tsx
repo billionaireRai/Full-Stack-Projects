@@ -116,7 +116,7 @@ export default function PostCard({
   isHighlighted = false,
   isFollowing=false,
   readOnly=false,
-  // fromPage='feed'
+  fromPage='feed'
 }: PostCardProps) {
   const displayMedia = media || [];
 
@@ -345,13 +345,6 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
     }
    }
 
-   // favourite add handle...
-   const handleAddFavourite = async () => {
-    if (!Account.account?.isVerified) setisPop(true) ;
-    else {
-      setFavouritePop(true);
-    }
-   }
 
   // function for handling commenting state...
   const handleCommentStateUpdate = () => {
@@ -360,27 +353,32 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
   }
 
   // function for hitting view api...
-  // const trackView = async ({ postId, fromPage }: { postId: string; fromPage: string }) => { 
-  //   await axiosInstance.post('/api/post/view', { postId, fromPage });
-  //  }
+  const trackView = async ({ postId, fromPage }: { postId: string; fromPage: string }) => { 
+    await axiosInstance.post('/api/post/view', { postId, fromPage });
+   }
 
   // useffect for view handling...
-  //    useEffect(() => {
-  //    const observer = new IntersectionObserver(
-  //      (entries) => {
-  //        entries.forEach(entry => {
-  //         if (entry.isIntersecting) {
-  //           trackView({ postId , fromPage });
-  //         }
-  //        });
-  //      },
-  //      { threshold: 0.6 }
-  //    );
+     useEffect(() => {
+     // guard to track a view only once per post mount...
+     let viewTracked = false ;
+     const observer = new IntersectionObserver(
+       (entries) => {
+         entries.forEach(entry => {
+          if (entry.isIntersecting && !viewTracked && postId) {
+            viewTracked = true ;
+            trackView({ postId , fromPage }).catch((err) => console.error('Error tracking view:', err));
+            observer.disconnect(); // stop observing once view is tracked...
+          }
+         });
+       },
+       { threshold: 0.9 } // atleast 90% of the post visible...
+     );
 
-  //    if (postref.current) observer.observe(postref.current);
+     if (postref.current) observer.observe(postref.current);
 
-  //    return () => observer.disconnect();
-  //  }, []);
+     return () => observer.disconnect();
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, []);
     // toggleing follow logic...
     async function handleFollowToggleLogic() {
       const newFollowing = !isFollowing ; // determine the new state...
@@ -588,16 +586,6 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
                    Export as blog
                  </button>
                 <button
-                  onClick={() => { handleAddFavourite() }} 
-                  className={`w-full flex items-center justify-between px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
-                >
-                 <div className='flex items-center gap-3 mr-3'>
-                  <List className="w-4 h-4" />
-                  <span>Add to favourite</span>
-                 </div>
-                 <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
-                </button>
-                <button
                   onClick={() => {  }}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
@@ -646,14 +634,6 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
                >
                  <UserPlus className="h-4 w-4" />
                  {isFollowing ? 'Unfollow' : 'Follow'} <span className='font-semibold'>{handle}</span>
-               </button>
-               <button
-                  onClick={() => { handleAddFavourite() }} 
-                  className={`w-full  flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
-               >
-                 <ListPlus className="h-4 w-4" />
-                 <span>Add to Favourite</span>
-                 <Image src='/images/yellow-tick.png'  width={20} height={20} alt='verified'/>
                </button>
               {/* exporting as blog */}
                <button
@@ -780,7 +760,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
               </Tooltip>
             ))}
           </div>
-          {/* { Account.decodedHandle === handle && ( Account.account?.plan === 'Creator' || Account.account?.plan === 'Enterprise') && ( */}
+          { Account.decodedHandle === handle && ( Account.account?.plan === 'Creator' || Account.account?.plan === 'Enterprise') && (
           <div className='p-2 rounded-md flex items-center justify-end'>
             <div 
             onClick={() => { setArrowPop(!ArrowPop) }} 
@@ -838,7 +818,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
            )}
             </div>
           </div>
-          {/* )} */}
+          )}
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect , useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, User, ExternalLink, Newspaper, AlertCircle, ArrowDown } from 'lucide-react'
@@ -44,37 +44,48 @@ export default function Newspage() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('n') || '';
   const category = searchParams.get('cat') || '';
-  const [loading, setloading] = useState<boolean>(false);
+const [loading, setloading] = useState<boolean>(false);
   
   const [nextPageToken, setNextPageToken] = useState<string>(''); 
   const [currentArticlesPage, setCurrentArticlesPage] = useState(1); 
   const [articles, setArticles] = useState<NewsArticle[]>([]);
-  
+  const fetchingRef = useRef<boolean>(false); // guard against duplicate/concurrent fetches...
+
+  // clean the search query...
+  const cleanQuery = (raw: string) => {
+    const decoded = decodeURIComponent(raw);
+    return decoded.split('&')[0].trim();
+  };
+
   // function for getting news data...
-  async function getNewsDataFromApi() {
+  async function getNewsDataFromApi(reset = false) {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
     try {
       setloading(true);
-      const newsApi = await axiosInstance.post('/api/news',{ title:searchQuery , page:nextPageToken || '' , category },{ timeout:5000 });
+      const newsApi = await axiosInstance.post('/api/news',{ title: cleanQuery(searchQuery) , page:nextPageToken || '' , category },{ timeout:5000 });
       if (newsApi.status === 200) {
         const apidata : NewsResponse =  newsApi.data;
-        if (newsApi.status === 200) {
-          setArticles(prev => [...prev, ...apidata.results]);
-          setNextPageToken(apidata.nextPage || '');
-          setCurrentArticlesPage(prev => prev + 1);
-          setloading(false)
-        }
-      } else {
-        setloading(false);
+        setArticles(prev => reset ? apidata.results : [...prev, ...apidata.results]);
+        setNextPageToken(apidata.nextPage || '');
+        setCurrentArticlesPage(prev => reset ? 1 : prev + 1);
       }
     } catch (error) {
       console.log(error);
-      setloading(false);
       toast.error('Error occured in fetching news...')
+    } finally {
+      setloading(false);
+      fetchingRef.current = false;
     }
   }
 
   useEffect(() => {
-    // getNewsDataFromApi();
+    setArticles([]);
+    setNextPageToken('');
+    setCurrentArticlesPage(1);
+    getNewsDataFromApi(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, category]);
   
   // for converting date in common pattern...
@@ -161,7 +172,7 @@ const getSentimentColor = (sentiment?: string) => {
                   <p className="text-lg">No articles found. Try a different News title.</p>
                 </div>
                 <span 
-                onClick={getNewsDataFromApi}
+                onClick={() => getNewsDataFromApi(true)}
                 className='border border-black w-1/5 p-2 rounded-lg bg-black dark:invert hover:scale-105 text-white cursor-pointer'>
                   Try Again
                 </span>

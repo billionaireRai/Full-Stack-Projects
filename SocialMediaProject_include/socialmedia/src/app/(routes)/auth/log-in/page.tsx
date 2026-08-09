@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import axiosInstance from "@/lib/interceptor";
 import { generateKeyPairAndStoreBoth, isKeyObjType } from "@/lib/pairedkeys";
+import { importRespectiveKey } from "@/lib/encryption";
 import usePublicKey from "@/app/states/accountpublickey";
 import toast from "react-hot-toast"; 
 import useUserInfo from "@/app/states/userinfo";
@@ -50,9 +51,10 @@ export default function LogIn() {
       router.push(`/${loginRes.data.handle}`);
       if (isKeyObjType(output)) { 
         localStorage.setItem('privatekey', output.value);
-        setpublickey(loginRes.data.userCred.key);
+        const publicCryptoKey = await importRespectiveKey(loginRes.data.userCred.key, 'public');
+        setpublickey(publicCryptoKey);
       }
-      else generateKeyPairAndStoreBoth(loginRes.data.userCred.accountId);
+      else await generateKeyPairAndStoreBoth(loginRes.data.userCred.accountId);
       useWebSocket(loginRes.data.userCred.accountId,'login'); // generating websocket connection client => server...
       return 'success';
   }

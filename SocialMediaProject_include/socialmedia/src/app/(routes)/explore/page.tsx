@@ -145,7 +145,7 @@ export default function Explore() {
           title: `Major Breaking News from ${Account.account?.location.text ?? 'world'}...`,
           timeAgo: "about 12hr",
           location: "Politics",
-          href: `/news?n=${encodeURIComponent(`Major-Breaking-News-from-politics&cat=politics&utm_source=news-click`)}`
+          href: `/news?n=${encodeURIComponent('Major-Breaking-News-from-politics')}&cat=politics&utm_source=news-click`
         },
         {
           source: "BBC",

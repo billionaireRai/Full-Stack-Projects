@@ -204,12 +204,14 @@ export default function NotificationCard({ notification , onRemove }: Notificati
       };
     }, []);
 
-    function getTailoredURL(notificationtype: NotificationType): string {
+function getTailoredURL(notificationtype: NotificationType): string {
       if (notificationtype === 'follow') return `/${actor.decodedHandle}`;
 
       if (notificationtype === 'post' || notificationtype === 'mention') return `/${actor.decodedHandle}/post/${post?.id}`;
 
-      return `/${Account.decodedHandle}/post/${post?.id}`;
+      // fall back to the actor handle if the active account handle is unavailable
+      const viewerHandle = Account?.decodedHandle || actor?.decodedHandle;
+      return `/${viewerHandle}/post/${post?.id}`;
     }
 
   // functions handling acccount details pop...
@@ -335,10 +337,12 @@ export default function NotificationCard({ notification , onRemove }: Notificati
           </div>
           { openDD && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }} 
-              className="absolute flex flex-col gap-1 right-0 mt-2 w-55 p-2 dark:shadow-gray-900 bg-white dark:bg-black border border-gray-200 dark:border-gray-900 rounded-md shadow-lg z-10">
+              initial={{ opacity: 0, scale: 0.9, y: 0 }}
+              animate={{ opacity: 1, scale: 1, y: -8 }}
+              exit={{ opacity: 0, scale: 0.95, y: -4 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              style={{ transformOrigin: 'top right', willChange: 'transform, opacity' }}
+              className="absolute flex flex-col gap-1 top-0z right-0 w-55 p-2 dark:shadow-gray-900 bg-white dark:bg-black border border-gray-200 dark:border-gray-900 rounded-md shadow-lg z-10">
               { !type.startsWith('notification') && (
                 <>
                 <button

@@ -247,7 +247,7 @@ export const exploreDetailsForAccountService = async () => {
     //     return 0;
     // });
 
-    const initialSuggstions = await accounts.find({ $and:[{ _id: { $ne: activeAcc._id }},{'account.status': 'ACTIVE' }] }) ;
+const initialSuggstions = await accounts.find({ $and:[{ _id: { $ne: activeAcc._id }},{'account.status': 'ACTIVE' }] }).limit(10) ;
     const suggesstionsArr = await Promise.all(initialSuggstions.map( async (account) => {
       return returnAccountDataInStructure(account._id) ;
     }))

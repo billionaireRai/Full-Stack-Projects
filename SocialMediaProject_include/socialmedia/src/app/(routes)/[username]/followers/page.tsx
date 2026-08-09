@@ -28,9 +28,12 @@ export default function FollowersPage () {
   const size:number = 15 ;
   const page = useRef<number>(1);
   const handle = decodeURIComponent(String(username));
+  const feedSection = useRef<HTMLDivElement>(null); // scrollable feed container for auto pagination...
+  const autoHeightGap = 400; // threshold gap (in px) from bottom to trigger loading next page...
   const [loadingAcc, setloadingAcc] = useState<boolean>(false);
   const [loadingfollowers, setloadingfollowers] = useState<boolean>(false);
   const [loadingSugg, setloadingSugg] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true); // whether more followers exist on the server...
   const [targetAcc, settargetAcc] = useState<userCardProp>({}); // target account...
   // array for account card details...
 const [AccountDetails, setAccountDetails] = useState<userCardProp[]>([]); // will update its value...
@@ -89,7 +92,8 @@ const [AccountDetails, setAccountDetails] = useState<userCardProp[]>([]); // wil
       const followerApi = await axiosInstance.post('/api/follow/followers',{ handle , page:page.current , size });
       if (followerApi.status === 200) {
         const newFollowers = followerApi.data.followers;
-        setAccountDetails((prev) => [prev,...newFollowers]);
+        setHasMore(!!followerApi.data.hasMore); // capturing whether more followers exist...
+        setAccountDetails((prev) => [...prev, ...newFollowers]);
         baseFollowers.current = [...baseFollowers.current, ...newFollowers];
         page.current += 1 ;
         setloadingfollowers(false);
@@ -128,7 +132,7 @@ const [AccountDetails, setAccountDetails] = useState<userCardProp[]>([]); // wil
   const getSuggestions = useCallback( async () : Promise<void> => {
     setloadingSugg(true);
     try {
-      const suggApi = await axiosInstance.get(`/api/follow/suggestions?handle=${handle}`);
+const suggApi = await axiosInstance.post(`/api/follow/suggestions?handle=${handle}`);
       if (suggApi.status === 200) {
         setAccSugg(suggApi.data.suggestions)
         setloadingSugg(false);
@@ -143,12 +147,32 @@ const [AccountDetails, setAccountDetails] = useState<userCardProp[]>([]); // wil
     }
   },[username])
   
-  // useeffect for fetching data...
+// useeffect for fetching data...
   useEffect(() => {
     getTargetAccountInfo();
     getSuggestions();
     getFollowersOfAccount();
   }, [])
+
+  // auto pagination on scroll...
+  useEffect(() => {
+    const feedsection = feedSection.current ;
+    if (!feedsection) return ;
+    
+    const handleScroll = () => {
+      const distanceFromBottom = feedsection.scrollHeight - feedsection.scrollTop - feedsection.clientHeight ;
+      if (distanceFromBottom <= autoHeightGap && hasMore && !loadingfollowers) {
+        getFollowersOfAccount();
+      }
+     }
+     // calling scroll function...
+     // handleScroll() ;
+    
+     feedsection.addEventListener('scroll', handleScroll, { passive: true })
+     return () => {
+      feedsection.removeEventListener('scroll', handleScroll)
+    }
+  }, [autoHeightGap,hasMore,loadingfollowers,AccountDetails.length,getFollowersOfAccount])
 
 
   // current nav targeted...
@@ -163,7 +187,7 @@ const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'A
   return (
     <>
      <div className='dark:bg-black rounded-md h-screen flex flex-col lg:flex-row font-poppins'>
-      <div className="main relative flex-2 rounded-md overflow-auto">
+<div ref={feedSection} className="main relative flex-2 rounded-md overflow-auto">
         {/* Profile header */}
         <div className="relative flex items-center gap-5 border border-gray-200 dark:border-gray-900 dark:bg-black rounded-2xl p-4 shadow-md overflow-hidden">
           {/* Back button */}
@@ -247,8 +271,8 @@ const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'A
 <div className='m-2'>
      {loadingfollowers && ( <Loader loadingtext={`followers of ${handle}`}/> )}
      {!loadingfollowers && AccountDetails.length > 0 && (
-        AccountDetails.map((account,index) => (
-          <Usercard key={index} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} content={account.content} heading={account.heading} />
+AccountDetails.map((account,index) => (
+          <Usercard key={index} account={account.account} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} content={account.content} heading={account.heading} />
         ))
       )}
        { !loadingfollowers && AccountDetails.length === 0 && (
@@ -261,13 +285,19 @@ const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'A
             <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-sm">
               <Users size={28} className="text-yellow-400 dark:text-yellow-500" />
             </div>
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">
+<h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">
               No Followers Found
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs leading-relaxed">
               We couldn&apos;t find any accounts in your followers at the moment. Check back later for new recommendations!
             </p>
           </motion.div>
+         )}
+         {/* bottom loader while auto-loading next page... */}
+         {loadingfollowers && AccountDetails.length > 0 && (
+           <div className="flex items-center justify-center py-4">
+             <Loader loadingtext="loading more followers..." />
+           </div>
          )}
     </div>
    </div>
@@ -290,11 +320,11 @@ const [ActiveNavState, setActiveNavState] = useState<navItemsType>({ navtext: 'A
           <ThumbsUp size={25} className='fill-black dark:fill-white' />
           <span>Might be interested in !!</span>
         </div>
-<div>
+        <div>
          {loadingSugg && ( <Loader loadingtext='suggestions' /> )}
          { !loadingSugg && AccSugg.length > 0 && (
-            AccSugg.map((account,index) => (
-             <Usercard key={index} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} content={account.content} heading={account.heading} />
+          AccSugg.map((account,index) => (
+             <Usercard key={index} account={account.account} IsFollowing={true} decodedHandle={account.decodedHandle} name={account.name} heading={account.heading} />
             ))
          )}
          { !loadingSugg && AccSugg.length === 0 && (

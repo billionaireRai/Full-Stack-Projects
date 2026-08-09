@@ -1,18 +1,19 @@
 import asyncErrorHandler from "../middleware/errorMiddleware";
-import { getAccountFollowersService, getAllTheFollowingService, getFollowerSuggestionsService , getFollowingsSuggestionsService , getAccountFollowingsService } from "../db/services/follow";
+import { getAccountFollowersService, getAllTheFollowingService, getFollowerSuggestionsService , getFollowingsSuggestionsService , getAccountFollowingsService , getFollowingsForAccountService } from "../db/services/follow";
 import { NextRequest , NextResponse } from "next/server";
 
 export const getAllTheFollowingsController = asyncErrorHandler( async (request:NextRequest) => { 
     const url = new URL(request.nextUrl) ;
     const handle = url.searchParams.get('handle') ; // getting the handle...
+    const page = Number(url.searchParams.get('page')) ; // page sent from client
+    const size = Number(url.searchParams.get('size')) ; // page size sent from client
 
-    if (!handle) {
-        console.log('Handle is required for followings...');
-        return NextResponse.json({ message:'Handle missing !!'},{ status:400 }) ;
+    if (!handle || !page || !size) {
+        console.log('Pagination data missing !!');
+        return NextResponse.json({ message:'Check pagination data !!'},{ status:400 }) ;
     }
 
-    getAllTheFollowingService(handle) ;
-    return NextResponse.json({ message:'followings fetched...' },{ status:200 });
+    return await getAllTheFollowingService(handle,page,size);
 })
 
 export const getAccountFollowersController = asyncErrorHandler(async (request:NextRequest) => {
@@ -23,7 +24,7 @@ export const getAccountFollowersController = asyncErrorHandler(async (request:Ne
         return NextResponse.json({ message:'Check pagination data !!'},{ status:400 }) ;
     }
 
-    return await getAccountFollowersService(handle,size,page);
+    return await getAccountFollowersService(handle,page,size);
 })
 
 export const getFollowersSuggestionsController = asyncErrorHandler(async (request:NextRequest) => {
@@ -58,5 +59,18 @@ export const getAccountFollowingsController = asyncErrorHandler(async (request:N
         return NextResponse.json({ message:'Check pagination data !!'},{ status:400 }) ;
     }
 
-    return await getAccountFollowingsService(handle,size,page);
+    return await getAccountFollowingsService(handle,page,size);
 })
+
+export const getAccountFollowingsUnpaginatedController = asyncErrorHandler(async (request:NextRequest) => {
+    const url = new URL(request.nextUrl) ; // formating url structure...
+    const handle = url.searchParams.get('handle') ; // getting the handle from the query params...
+
+    if (!handle) {
+        console.log('Handle is required for fetching all the followings !!');
+        return NextResponse.json({ message:'Handle missing !!'},{ status:400 }) ;
+    }
+
+    return await getFollowingsForAccountService(handle);
+})
+
