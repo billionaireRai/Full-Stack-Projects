@@ -1,7 +1,6 @@
 import { NextRequest , NextResponse , userAgent } from "next/server";
 import { cookies } from "next/headers";
 import pubkeys from "../db/models/pubkeys";
-import { getDevicePublicIP } from "@/lib/pairedkeys";
 import asyncErrorHandler from "@/app/middleware/errorMiddleware";
 import { userRegistrationService, userCardProp , logginUserService, creatingUserAfterOauth } from '@/app/db/services/user';
 import sendEmailFunction from "@/lib/email";
@@ -181,12 +180,12 @@ export const o_authGoogleController = asyncErrorHandler(async (request:NextReque
         const requestUrl = new URL(request.nextUrl) ;
         const intent = (requestUrl.searchParams.get("intent") || ' ') as ' ' | 'signup' | 'login' ;
     
-        if (!googleClientId || !googleRedirect) {
-            return NextResponse.json(
-                { error: "Google OAuth not configured , check ENV file..." },
-                { status: 500 }
-            );
-        }
+if (!googleClientId || !googleRedirect || !clientSecret) {
+        return NextResponse.json(
+            { error: "Google OAuth not configured , check ENV file..." },
+            { status: 500 }
+        );
+    }
         const state = generateRandomString(32) ; // generating a random string...
         // generating PKEC ...
         const { codeVerifier, codeChallenge, codeChallengeMethod } = generatePKCE();
@@ -213,12 +212,16 @@ export const o_authGoogleCallbackController = asyncErrorHandler(async (request:N
         return NextResponse.json({ message:'Important credentials missing...' });
     }
 
-    const oAuthState = await validateAndConsumeState(String(state)) ;
+// fetch the saved state first (needed for PKCE verification)...
     const STATE = await findOAuthState(state);
-    if (!oAuthState) {
+    if (!STATE) {
         console.log("o-auth state did'nt exists !!");
         return NextResponse.json({message:'o-auth state unavailable...'},{ status:402 });
     }
+
+    // validate + consume (single-use) the state...
+    const oAuthState = await validateAndConsumeState(String(state)) ;
+    if (!oAuthState) return NextResponse.json({message:'o-auth state unavailable...'},{ status:402 });
 
     // exchanging the code by tokens...
     const tokenUrl = 'https://oauth2.googleapis.com/token';
@@ -293,23 +296,22 @@ export const o_authGoogleCallbackController = asyncErrorHandler(async (request:N
     Cookies.set('accessToken', userData.accessToken);
     Cookies.set('refreshToken', userData.refreshToken);
 
-    // Send welcome email
+// Send welcome email
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
     await sendEmailFunction({
         to: userData.email,
         subject: "Welcome to (Briezl) you social media platform",
-        html: generateWelcomeEmailHTML({ name: name, email: email, handle: `@${userData.accountInfo.decodedHandle}`, baseUrl: baseUrl }),
+        html: generateWelcomeEmailHTML({ name: name, email: email, handle: String(userData.accountInfo.decodedHandle), baseUrl: baseUrl }),
     });
 
-    
     var publickeySen = '' ;
-    if (STATE?.intent === 'login') {   
-        const deviceip = await getDevicePublicIP() ;
+    if (STATE?.intent === 'login') {
+        const deviceip = getClientIP(request) ;
         const publickey = await pubkeys.findOne({ accountId:userData.accountId , deviceIP:deviceip , status:'active' });
-        publickeySen = publickey.publickey ;
+        if (publickey) publickeySen = publickey.publickey ;
     }
     // Redirect to profile page
-    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userData.accountInfo.decodedHandle}?utm_source=google&accid=${userData.accountId}&intent=${STATE?.intent}&key=${publickeySen}`;
+    const profileUrl = `${baseUrl}/${userData.accountInfo.decodedHandle}?utm_source=google&accid=${userData.accountId}&intent=${STATE?.intent}&key=${publickeySen}`;
 
     return NextResponse.redirect(profileUrl);
 
@@ -324,8 +326,8 @@ export const o_authFacebookController = asyncErrorHandler(async (request:NextReq
         return NextResponse.json({ error: "facebook OAuth not configured , check ENV file..." },{ status: 500 });
     }
     const state = generateRandomString(32) ; // generating a random string..
-    // generating PKEC ...
-    const { codeVerifier } = generatePKCE(); // extracting the code verifier...
+    // generating a random code verifier to satisfy the oauth state schema (Facebook doesn't use PKCE for token exchange)...
+    const { codeVerifier } = generatePKCE();
 
     const ip = getClientIP(request) ; // getting the client IP...
     const ua = userAgent(request) ; // getting the user device...
@@ -348,13 +350,16 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
         return NextResponse.json({message:'Important credentials missing...'});
     }
 
-    // verifying the state from DB...
-    const oAuthState = await validateAndConsumeState(String(state)) ; // validation the o-auth request...
+// fetch the saved state first...
     const STATE = await findOAuthState(state);
-    if (!oAuthState) {
+    if (!STATE) {
         console.log("o-auth state did'nt exists !!");
         return NextResponse.json({message:'o-auth state unavailable...'},{ status:402 });
     }
+
+    // validate + consume (single-use) the state...
+    const oAuthState = await validateAndConsumeState(String(state)) ;
+    if (!oAuthState) return NextResponse.json({message:'o-auth state unavailable...'},{ status:402 });
 
     // making request for tokens...
     const tokenUrl = `https://graph.facebook.com/v18.0/oauth/access_token?client_id=${facebookClientId}&client_secret=${facebookClientSecret}&redirect_uri=${encodeURIComponent(facebookRedirect as string)}&code=${code}`;
@@ -395,18 +400,18 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
     await sendEmailFunction({
         to: userinfo.email,
         subject: "Welcome to (Briezl) you social media platform",
-        html: generateWelcomeEmailHTML({ name: name, email: email, handle: `@${userinfo.accountInfo.decodedHandle}`, baseUrl: baseUrl }),
+        html: generateWelcomeEmailHTML({ name: name, email: email, handle: String(userinfo.accountInfo.decodedHandle), baseUrl: baseUrl }),
     });
 
     var publickeySen = '' ;
-    if (STATE?.intent === 'login') {   
-        const deviceip = await getDevicePublicIP() ;
+    if (STATE?.intent === 'login') {
+        const deviceip = getClientIP(request) ;
         const publickey = await pubkeys.findOne({ accountId:userinfo.accountId , deviceIP:deviceip , status:'active' });
-        publickeySen = publickey.publickey ;
+        if (publickey) publickeySen = publickey.publickey ;
     }
 
     // Redirect to profile page
-    const profileUrl = `${process.env.NODE_ENV === 'development' && process.env.NEXTAUTH_URL}/${userinfo.accountInfo.decodedHandle}?utm_source=facebook&accid=${userinfo.accountId}&intent=${STATE?.intent}&key=${publickeySen}`;
+    const profileUrl = `${baseUrl}/${userinfo.accountInfo.decodedHandle}?utm_source=facebook&accid=${userinfo.accountId}&intent=${STATE?.intent}&key=${publickeySen}`;
     return NextResponse.redirect(profileUrl);
 })
     

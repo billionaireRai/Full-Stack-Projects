@@ -7,7 +7,10 @@ import type { StringValue } from "ms";
 export interface IUser extends Document {
   email: string;
   password: string;
-  o_auth:string;
+  o_auth:{
+    authProvider: 'facebook' | 'google' | 'not-used';
+    isUsed: boolean;
+  };
   location?: {
     type: string;
     coordinates: [number, number];
