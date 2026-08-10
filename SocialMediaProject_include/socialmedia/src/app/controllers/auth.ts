@@ -297,7 +297,7 @@ export const o_authGoogleCallbackController = asyncErrorHandler(async (request:N
     Cookies.set('refreshToken', userData.refreshToken);
 
 // Send welcome email
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://www.briezl.com';
     await sendEmailFunction({
         to: userData.email,
         subject: "Welcome to (Briezl) you social media platform",
@@ -396,7 +396,7 @@ export const o_authFacebookCallbackController = asyncErrorHandler(async (request
     Cookies.set('refreshToken', userinfo.refreshToken);
 
     // Send welcome email
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://www.briezl.com';
     await sendEmailFunction({
         to: userinfo.email,
         subject: "Welcome to (Briezl) you social media platform",
