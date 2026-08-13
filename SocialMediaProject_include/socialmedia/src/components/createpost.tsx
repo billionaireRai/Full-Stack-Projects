@@ -40,7 +40,7 @@ type poststatustype = "draft" | "scheduled" | "published" ;
 
 export default function CreatePost() {
   const [post, setPost] = useState('');
-  const [DisablePostButton, setDisablePostButton] = useState<boolean>(true);
+  const [DisablePostButton, setDisablePostButton] = useState<boolean>(false);
   const [isPosting, setIsPosting] = useState<boolean>(false);
   const { Account } = useActiveAccount();
   const { poll } = usePoll();
@@ -136,10 +136,24 @@ export default function CreatePost() {
     resetPoll();
   },[resetPoll]);
   
-  const handlePostSubmission = useCallback(async () => {
+  const handlePostSubmission = async () => {
     if (!post.trim()) return;
 
-    const scheduledAt = new Date(`${scheduleTime?.Date}T${scheduleTime?.Time}`);
+    let scheduledAt:Date | null = null ;
+    if (status === "scheduled") {
+       if (!scheduleTime?.Date || !scheduleTime?.Time) {
+        toast.error("Please select a date and time for scheduling....");
+        return;
+      }
+
+      scheduledAt = new Date(`${scheduleTime.Date}T${scheduleTime.Time}`);
+
+      if (Number.isNaN(scheduledAt.getTime())) {
+        toast.error("Invalid scheduled date or time.");
+        return;
+      }
+    }
+
     setIsPosting(true);
     try {
       const formData = new FormData(); // initializing formData instance...
@@ -149,7 +163,7 @@ export default function CreatePost() {
       formData.append('canBeRepliedBy', whoCanReply);
       formData.append('poll', JSON.stringify(poll));
       formData.append('status',status);
-      formData.append('scheduleTime',scheduledAt.toISOString());
+      if (scheduledAt) formData.append('scheduleTime',scheduledAt.toISOString());
 
       imageFiles.forEach(file => formData.append('imgUrls', file));
       videoFiles.forEach(file => formData.append('videoUrls', file));
@@ -171,7 +185,7 @@ export default function CreatePost() {
     } finally {
       setIsPosting(false);
     }
-  },[AddLocation,MentionedTo,gifFiles,imageFiles,resetForm,poll,post,scheduleTime,setCreatePop,status,videoFiles,whoCanReply]);
+  }
 
   // Handle keyboard shortcuts
   useEffect(() => {

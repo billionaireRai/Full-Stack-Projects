@@ -830,7 +830,7 @@ export default function UserProfilePage() {
         <div className='flex gap-2 h-full rounded-md'>
           {/* Main Content - Profile */}
           <div className='flex-2 h-full rounded-md'>
-          <div id='main-scrollable' className={`flex-1 h-full overflow-y-auto rounded-b-md bg-white dark:bg-black text-gray-900 overflow-x-hidden dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
+          <div id='mainscrollable' className={`flex-1 h-full overflow-y-scroll rounded-b-md bg-white dark:bg-black text-gray-900 overflow-x-hidden dark:text-white ${IsBlocked ? 'blur-sm pointer-events-none cursor-not-allowed' : ''}`}>
               {/* Header */}
               <header className="sticky w-full top-0 z-10 backdrop-blur-md border-b rounded-lg mb-5 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-black/80">
                 <div className="px-4 py-3">
@@ -1577,7 +1577,7 @@ export default function UserProfilePage() {
                   </button>
                 </div>
                 <button
-                  onClick={() => { handleScrollToTop('main-scrollable') }}
+                  onClick={() => { handleScrollToTop('mainscrollable') }}
                   className='fixed right-5 bottom-10 rounded-full p-1 hover:bg-yellow-100 dark:hover:bg-gray-950 cursor-pointer z-50'
                 >
                   <ArrowBigUpIcon width={40} height={40} stroke='5' className='fill-yellow-400'/>

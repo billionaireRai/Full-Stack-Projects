@@ -39,26 +39,25 @@ export default function PostMetricsPage({ postId }:{ postId:string }) {
   const [Loading, setLoading] = useState<boolean>(true);
   const [metrics, setMetrics] = useState<PostMetrics>();
 
-  useEffect(() => {
-    // function fetching the data...
-    const fetchMetrics = async () => { 
-      setLoading(true);
-      try {
-        const metricApi = await axiosInstance.get(`/api/post/essentials?postid=${postId}&timeInterval=${TimeRange.value}`)
-        if (metricApi.status == 200) {
-          setMetrics(metricApi.data.metric) ;
-          setLoading(false);
-        } else {
-          setLoading(false);
-        }
-      } catch (error) {
-        console.log("An Error occured :",error);
+  // function fetching the data...
+  const fetchMetrics = async () => { 
+    setLoading(true);
+    try {
+      const metricApi = await axiosInstance.get(`/api/post/essentials?postid=${postId}&timeInterval=${TimeRange.value}`)
+      if (metricApi.status == 200) {
+        setMetrics(metricApi.data.metric) ;
+        setLoading(false);
+      } else {
         setLoading(false);
       }
+    } catch (error) {
+      console.log("An Error occured :",error);
+      setLoading(false);
     }
-
+  }
+  useEffect(() => {
     fetchMetrics() ;
-  }, [postId,TimeRange,timeArray])
+  }, [postId,TimeRange])
 
   if (Loading) return <Loader loadingtext='loading post metrics...'/> ;
 
