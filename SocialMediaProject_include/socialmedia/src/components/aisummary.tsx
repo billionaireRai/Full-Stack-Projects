@@ -6,69 +6,54 @@ import Image from 'next/image'
 import { X, SparklesIcon, Check, RefreshCw, CopyIcon, Share2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Loader from './loader'
+import axiosInstance from '@/lib/interceptor'
 
-// typescript types...
-export interface PostSummaryMeta {
-  name:string
-  handle:string
-  content: string
-  hashtags?: string[]
-  mentions?: string[]
-  mediaCount?: number
-  likes?: number
-  reposts?: number
-  comments?: number
-  views?: number
-  bookmarks?: number
-  postedAt?: string
-  taggedLocation?: { text: string; coordinates: number[] }[]
-  poll?: { question: string; options: { text: string; votes: number }[] }
-  sentiment?: 'positive' | 'neutral' | 'negative'
-  category?: string
-  keywords?: string[]
-}
-
-export interface ProfileSummaryMeta {
-  name: string
-  handle: string
-  bio: string
-  followers?: string
-  following?: string
-  posts?: string
-  joinDate?: string
-  location?: string
-  website?: string
-  isVerified?: boolean
-  plan?: string
-  interests?: string[]
-  contentCategories?: string[]
-  avgEngagement?: string
+interface ExplainResult {
+  sentiment: "positive" | "neutral" | "negative";
+  explanation: string;
 }
 
 interface AISummaryProps {
-  type: 'post' | 'account'
-  meta: PostSummaryMeta | ProfileSummaryMeta
-  onClose: () => void
+  type: 'post' | 'account' ;
+  handle:string ;
+  postid?:string ;
+  onClose: () => void ;
 }
 
 
 
-export default function AISummary({ type , meta , onClose }: AISummaryProps) {
-  const isPost = type === 'post' ;
+export default function AISummary({ type , onClose , handle , postid }: AISummaryProps) {
+  const isPost = (type === 'post' && postid) ;
+  const isAccount = (type === 'account' && !postid) ;
   const specificType = isPost ? 'Post' : 'Account' ;
-  const [LoadingOutput, setLoadingOutput] = useState<boolean>(false);
+
   const [copied, setCopied] = useState<boolean>(false);
-  const [aiExplanation, setAiExplanation] = useState<string>(''); // state holding AI explanation...
+  const [apiData,setapiData] = useState<ExplainResult | null>(); // state holding AI data...
+  const [LoadingOutput, setLoadingOutput] = useState<boolean>(false); // loading state...
 
   const metaRef = useRef<HTMLDivElement>(null);
 
-  // Narrow the type for safe access...
-  // const profileMeta = !isPost ? (meta as ProfileSummaryMeta) : null;
-  // const postMeta = isPost ? (meta as PostSummaryMeta) : null;
+  // function generating AI explanation API...
+  const handleRegenerate = async () => {
+    setLoadingOutput(true);
+    try {
+      const apiRes = await axiosInstance.post('/api/ai/explain',{ handle , postid , type });
+      if (apiRes.status === 200) {
+        setapiData(apiRes.data.Explain);
+        setLoadingOutput(false);
+      } else {
+        setLoadingOutput(false);
+        console.log("Not expected response !!");
+      }
+    } catch (error) {
+      console.log("An error occured : ",error);
+      setLoadingOutput(false);
+    } 
+  };
 
   // Generate AI explanation from meta data on mount
   useEffect(() => {
-    setAiExplanation('')
+    handleRegenerate() ;
   }, []);
 
   const handleCopy = async () => {
@@ -84,52 +69,36 @@ export default function AISummary({ type , meta , onClose }: AISummaryProps) {
     }
   };
 
-  const handleRegenerate = () => {
-    setLoadingOutput(true);
-    toast.success('Regenerating summary...');
-    setTimeout(() => {
-      setLoadingOutput(false);
-      toast.success('Summary regenerated!');
-    }, 2000);
-  };
 
   const handleShare = async () => {
-    const text = metaRef.current?.innerText || aiExplanation;
+    const text = metaRef.current?.innerText || apiData?.explanation || handle ;
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `AI ${specificType} Analysis for ${meta.handle}`,
-          text: text,
+          title: `AI Analysis for ${specificType} of username ${handle}` ,
+          text: text ,
         });
-        toast.success('Shared successfully!');
       } catch {
-        toast.error('Failed to share');
+        toast.error('Failed to share...');
       }
     } else {
       try {
         await navigator.clipboard.writeText(text);
-        toast.success('Analysis copied to clipboard — you can share it now!');
+        toast.success('Analysis copied to clipboard — you can share it now !!!');
       } catch {
         toast.error('Failed to copy for sharing');
       }
     }
   };
 
-  // Format numbers
-  // const formatNum = (num?: number): string => {
-  //   if (num === undefined) return '\u2014';
-  //   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
-  //   if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K';
-  //   return num.toString();
-  // };
-
-  // const sentimentColor = (sentiment?: string) => {
-  //   switch (sentiment) {
-  //     case 'positive': return 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400';
-  //     case 'negative': return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
-  //     default: return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400';
-  //   }
-  // };
+  // sentiment color function...
+  const sentimentColor = (sentiment?: string) => {
+    switch (sentiment) {
+      case 'positive': return 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400';
+      case 'negative': return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
+      default: return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400';
+    }
+  };
 
   return (
     <>
@@ -154,8 +123,8 @@ export default function AISummary({ type , meta , onClose }: AISummaryProps) {
                   <span className='text-xs text-gray-500 dark:text-gray-400'>
                     Comprehensive AI-powered analysis with detailed insights and breakdown of
                   </span>
-                  <Link href={`/${meta.handle}`} className="text-[11px] text-yellow-600 dark:text-yellow-400 cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors duration-200 font-semibold py-0.5 px-2 rounded-full inline-flex items-center gap-1">
-                    {meta.handle}
+                  <Link href={`/${handle}`} className="text-[11px] text-yellow-600 dark:text-yellow-400 cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors duration-200 font-semibold py-0.5 px-2 rounded-full inline-flex items-center gap-1">
+                    {handle}
                   </Link>
                 </div>
               </div>
@@ -188,15 +157,15 @@ export default function AISummary({ type , meta , onClose }: AISummaryProps) {
                   </button>
                 </div>
                 <div ref={metaRef} className='border border-gray-200 dark:border-gray-800 h-full rounded-lg overflow-y-auto bg-gradient-to-b from-yellow-50/30 to-white dark:from-yellow-950/5 dark:to-neutral-950 p-4'>
-                  {aiExplanation ? (
-                    <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-line font-mono">
-                      
+                  {apiData ? (
+                    <div className={`text-sm ${isPost && sentimentColor(apiData.sentiment)} text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-line font-mono`}>
+                      {apiData.explanation}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-600">
                       <div className="flex flex-col items-center gap-2">
                         <SparklesIcon size={24} className="text-yellow-400" />
-                        <span className="text-sm">AI analysis will appear here</span>
+                        <span className="text-sm">AI analysis expected to be here</span>
                       </div>
                     </div>
                   )}

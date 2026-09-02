@@ -783,13 +783,13 @@ export default function UserProfilePage() {
 
   // funtion to handle summarize pop...
   function handleSummarizePop() : void {
-    if (showUpgradePop) {
-      setplanIntent('Premium');
-      setisPop(true);
-    } else {
+    // if (showUpgradePop) {
+    //   setplanIntent('Premium');
+    //   setisPop(true);
+    // } else {
       // main logic comes here...
       setShowSummarize(true);
-    }
+    // }
   }
 
   // funtion to copy email..
@@ -1619,7 +1619,7 @@ export default function UserProfilePage() {
         )}
         {/* testing phase.. */}
         {ShowSummarize && (
-          <AISummary type='account' onClose={() => setShowSummarize(false)} meta={{ name:AccountInfo.name , bio:AccountInfo.bio , handle:AccountInfo.handle , content:AccountInfo.bio }} />
+          <AISummary type='account' onClose={() => setShowSummarize(false)} handle={AccountInfo.handle} />
         )}
       </>
   </>

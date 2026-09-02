@@ -34,6 +34,7 @@ import SharePopup from './sharePopUp';
 import useMediaPop from '@/app/states/mediapop';
 import Videoplayer from './videoplayer';
 import { MdImportExport } from 'react-icons/md';
+import AISummary from './aisummary';
 
 interface locationTaggedType {
   text: string,
@@ -127,9 +128,10 @@ export default function PostCard({
   const [postOptions, setPostOptions] = useState<boolean>(false);
   const [showAccountPopup, setShowAccountPopup] = useState<boolean>(false);
   const [viewPop, setviewPop] = useState<boolean>(false) ;
-  const [ToPinPop, setToPinPop] = useState(false);
+  const [ToPinPop, setToPinPop] = useState<boolean>(false);
   const [planIntent, setplanIntent] = useState<string>('Pro');
-  const [ArrowPop, setArrowPop] = useState(false);
+  const [ArrowPop, setArrowPop] = useState<boolean>(false);
+  const [ShowSummary, setShowSummary] = useState<boolean>(false);
   const [showBlockPop, setshowBlockPop] = useState<boolean>(false);
   const [isBlocked, setisBlocked] = useState<boolean>(false);
   const [IsFollowing, setIsFollowing] = useState<boolean>(isFollowing);
@@ -151,6 +153,7 @@ export default function PostCard({
   const postref = useRef<HTMLDivElement>(null) ;
   const avatarRef = useRef<HTMLImageElement>(null);
   const shareRef = useRef<HTMLButtonElement>(null);
+  const showUpgradePop : boolean = Account.account?.plan !== 'Premium' ? true : false ;
 
 
   // Reusable click-outside handler
@@ -404,6 +407,17 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
     setDetails(media);
   }
 
+  // function handling AI summry pop...
+  function handleOpenAiSummry() : void {
+    // if (showUpgradePop) {
+    //   setplanIntent('Premium');
+    //   setisPop(true);
+    // } else {
+      // main logic comes here...
+      setShowSummary(true);
+    // }
+  }
+
   if (BlurPost) {
     return (
       <div className="bg-white dark:bg-black shadow-sm dark:shadow-gray-900/50 dark:border-0 dark:border-b dark:border-gray-800 rounded-xl border border-gray-100 my-1 sm:p-4">
@@ -586,7 +600,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
                    Export as blog
                  </button>
                 <button
-                  onClick={() => {  }}
+                  onClick={() => { handleOpenAiSummry()  }}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                 >
                  <SparklesIcon className="h-4 w-4" />
@@ -615,7 +629,7 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
                   view full post
                 </Link>
                <button
-                onClick={() => {  }}
+                onClick={() => { handleOpenAiSummry()  }}
                 className={`w-full flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950`}
                >
                  <SparklesIcon className="h-4 w-4" />
@@ -952,6 +966,10 @@ function parseHashAndMentions (hashTags: string[], mentions: string[]) : ReactEl
      )}
      {isMediaPop && mediaDetail && (
       <Mediapopmodal closepop={() => { setMediaPop(false) }} media={mediaDetail} />
+     )}
+
+     {ShowSummary && (
+      <AISummary handle={handle} onClose={() => { setShowSummary(false) }} type='post' postid={postId} />
      )}
     </div>
   );
