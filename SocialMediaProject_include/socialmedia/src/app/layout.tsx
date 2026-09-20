@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex h-screen w-screen rounded-md overflow-hidden">
           <ThemeProvider>
             <Providers>
-              {/* <UnAuthorize> */}
+              <UnAuthorize>
               <Resetwrapper>
                 <div className="flex h-screen w-screen">
                   <Sidenavbar />
@@ -50,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </div>
                 </div>
               </Resetwrapper>
-              {/* </UnAuthorize> */}
+              </UnAuthorize>
             </Providers>
           </ThemeProvider>
         </div>
